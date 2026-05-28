@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,235 +8,248 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-```
-html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; }
 
-body {
-  background-color: #0b1f3a;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-weight: 400;
-  line-height: 1.8;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+    body {
+      background-color: #0b1f3a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-weight: 400;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(175deg, #0d2040 0%, #0b1f3a 50%, #091830 100%);
-  pointer-events: none;
-  z-index: 0;
-}
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(175deg, #0d2040 0%, #0b1f3a 50%, #091830 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
-.wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 660px;
-  margin: 0 auto;
-  padding: 0 28px 80px;
-}
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 0 28px 80px;
+    }
 
-nav {
-  position: relative;
-  z-index: 2;
-  padding: 28px 28px;
-  max-width: 660px;
-  margin: 0 auto;
-}
+    nav {
+      position: relative;
+      z-index: 2;
+      padding: 28px 28px;
+      max-width: 660px;
+      margin: 0 auto;
+    }
 
-.nav-logo {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #ffffff;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
+    .nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-.nav-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  background-color: #f0436a;
-  border-radius: 50%;
-}
+    .nav-logo-img {
+      height: 36px;
+      width: auto;
+    }
 
-.doc-header {
-  padding: 40px 0 48px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  margin-bottom: 48px;
-}
+    .nav-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background-color: #f0436a;
+      border-radius: 50%;
+    }
 
-.doc-eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--pink);
-  margin-bottom: 16px;
-}
+    .doc-header {
+      padding: 40px 0 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 48px;
+    }
 
-.doc-title {
-  font-size: clamp(28px, 6vw, 40px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: #ffffff;
-  margin-bottom: 16px;
-}
+    .doc-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #f0436a;
+      margin-bottom: 16px;
+    }
 
-.doc-meta {
-  font-size: 14px;
-  color: rgba(255,255,255,0.4);
-}
+    .doc-title {
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
 
-h2 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 40px 0 14px;
-  letter-spacing: -0.01em;
-}
+    .doc-meta {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+    }
 
-p {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.78);
-  margin-bottom: 16px;
-}
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 40px 0 14px;
+      letter-spacing: -0.01em;
+    }
 
-ul { margin: 0 0 16px 20px; }
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.78);
+      margin-bottom: 16px;
+    }
 
-li {
-  font-size: 16px;
-  color: rgba(255,255,255,0.78);
-  line-height: 1.75;
-  margin-bottom: 8px;
-}
+    ul { margin: 0 0 16px 20px; }
 
-a { color: #f0436a; text-decoration: none; }
-a:hover { text-decoration: underline; }
-strong { color: #ffffff; font-weight: 600; }
+    li {
+      font-size: 16px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.75;
+      margin-bottom: 8px;
+    }
 
-.highlight-box {
-  background-color: rgba(240,67,106,0.08);
-  border: 1px solid rgba(240,67,106,0.25);
-  border-radius: 14px;
-  padding: 24px 26px;
-  margin: 32px 0;
-}
+    a { color: #f0436a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: #ffffff; font-weight: 600; }
 
-.highlight-box p { margin-bottom: 0; font-size: 17px; color: rgba(255,255,255,0.88); }
+    .highlight-box {
+      background-color: rgba(240,67,106,0.08);
+      border: 1px solid rgba(240,67,106,0.25);
+      border-radius: 14px;
+      padding: 24px 26px;
+      margin: 32px 0;
+    }
 
-footer {
-  margin-top: 64px;
-  padding-top: 32px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
+    .highlight-box p { margin-bottom: 0; font-size: 17px; color: rgba(255,255,255,0.88); }
 
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 16px;
-}
+    footer {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
 
-.footer-links a { font-size: 13px; color: rgba(255,255,255,0.55); }
-.footer-copy { font-size: 12px; color: rgba(255,255,255,0.28); }
-```
+    .footer-home {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.18s;
+    }
 
+    .footer-home:hover { color: #ffffff; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 16px;
+      align-items: baseline;
+    }
+
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.55); }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.28); }
   </style>
 </head>
 <body>
 
   <nav>
     <a class="nav-logo" href="index.html">
+      <img class="nav-logo-img" src="data:image/png;base64,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" alt="Lily Studio logo" />
       Lily Studio <span class="nav-dot"></span>
     </a>
   </nav>
 
   <div class="wrapper">
 
-```
-<div class="doc-header">
-  <p class="doc-eyebrow">Legal</p>
-  <h1 class="doc-title">Terms of Use</h1>
-  <p class="doc-meta">Calming Water: Baby &amp; Toddler &nbsp;·&nbsp; Effective: April 2026 &nbsp;·&nbsp; Last updated: April 11, 2026</p>
-</div>
+    <div class="doc-header">
+      <p class="doc-eyebrow">Legal</p>
+      <h1 class="doc-title">Terms of Use</h1>
+      <p class="doc-meta">Calming Water: Baby &amp; Toddler &nbsp;&middot;&nbsp; Effective: April 2026 &nbsp;&middot;&nbsp; Last updated: April 11, 2026</p>
+    </div>
 
-<div class="highlight-box">
-  <p><strong>Plain language summary:</strong> Download the app, use it, enjoy it. Don't reverse engineer it or do anything illegal with it. Subscriptions are managed through Apple. Contact us if anything is wrong.</p>
-</div>
+    <div class="highlight-box">
+      <p><strong>Plain language summary:</strong> Download the app, use it, enjoy it. Don&rsquo;t reverse engineer it or do anything illegal with it. Subscriptions are managed through Apple. Contact us if anything is wrong.</p>
+    </div>
 
-<h2>1. Acceptance of Terms</h2>
-<p>By downloading, installing, or using Calming Water: Baby &amp; Toddler ("the App"), you agree to be bound by these Terms of Use. If you do not agree, please do not use the App. These terms apply to all users of the App.</p>
+    <h2>1. Acceptance of Terms</h2>
+    <p>By downloading, installing, or using Calming Water: Baby &amp; Toddler (&ldquo;the App&rdquo;), you agree to be bound by these Terms of Use. If you do not agree, please do not use the App. These terms apply to all users of the App.</p>
 
-<h2>2. About the App</h2>
-<p>Calming Water: Baby &amp; Toddler is an iOS application developed and published by Lily Studio, a solo independent studio founded by Jessica Taylor Levine. The App provides gentle, interactive water scenes and soothing sounds designed for use with babies and toddlers.</p>
+    <h2>2. About the App</h2>
+    <p>Calming Water: Baby &amp; Toddler is an iOS application developed and published by Lily Studio, a solo independent studio founded by Jessica Taylor Levine. The App provides gentle, interactive water scenes and soothing sounds designed for use with babies and toddlers.</p>
 
-<h2>3. License</h2>
-<p>Lily Studio grants you a limited, non-exclusive, non-transferable, revocable license to use the App on Apple devices you own or control, subject to these Terms and Apple's App Store Terms of Service.</p>
-<p>You may not:</p>
-<ul>
-  <li>Copy, modify, or distribute the App or any part of it</li>
-  <li>Reverse engineer, decompile, or disassemble the App</li>
-  <li>Remove or alter any proprietary notices or labels on the App</li>
-  <li>Use the App for any unlawful purpose</li>
-  <li>Attempt to gain unauthorized access to any part of the App or its infrastructure</li>
-</ul>
+    <h2>3. License</h2>
+    <p>Lily Studio grants you a limited, non-exclusive, non-transferable, revocable license to use the App on Apple devices you own or control, subject to these Terms and Apple&rsquo;s App Store Terms of Service.</p>
+    <p>You may not:</p>
+    <ul>
+      <li>Copy, modify, or distribute the App or any part of it</li>
+      <li>Reverse engineer, decompile, or disassemble the App</li>
+      <li>Remove or alter any proprietary notices or labels on the App</li>
+      <li>Use the App for any unlawful purpose</li>
+      <li>Attempt to gain unauthorized access to any part of the App or its infrastructure</li>
+    </ul>
 
-<h2>4. Subscriptions and Purchases</h2>
-<p>The App offers optional paid subscriptions that unlock premium features:</p>
-<ul>
-  <li><strong>Monthly subscription</strong> — billed monthly</li>
-  <li><strong>Annual subscription</strong> — billed annually</li>
-  <li><strong>Lifetime access</strong> — one-time purchase</li>
-</ul>
-<p>A 7-day free trial is available for new subscribers. All purchases and subscriptions are processed by Apple through the App Store. Billing, refunds, and subscription management are subject to Apple's policies. You can manage or cancel your subscription at any time through your Apple ID settings.</p>
-<p>Lily Studio does not have access to your payment information and cannot process refunds directly. For refund requests, please contact Apple Support.</p>
+    <h2>4. Subscriptions and Purchases</h2>
+    <p>The App offers optional paid subscriptions that unlock premium features:</p>
+    <ul>
+      <li><strong>Monthly subscription</strong> &mdash; billed monthly</li>
+      <li><strong>Annual subscription</strong> &mdash; billed annually</li>
+      <li><strong>Lifetime access</strong> &mdash; one-time purchase</li>
+    </ul>
+    <p>A 7-day free trial is available for new subscribers. All purchases and subscriptions are processed by Apple through the App Store. Billing, refunds, and subscription management are subject to Apple&rsquo;s policies. You can manage or cancel your subscription at any time through your Apple ID settings.</p>
+    <p>Lily Studio does not have access to your payment information and cannot process refunds directly. For refund requests, please contact Apple Support.</p>
 
-<h2>5. Free Features</h2>
-<p>Certain features of the App are available without a subscription. Lily Studio reserves the right to modify which features are available at the free tier at any time.</p>
+    <h2>5. Free Features</h2>
+    <p>Certain features of the App are available without a subscription. Lily Studio reserves the right to modify which features are available at the free tier at any time.</p>
 
-<h2>6. Intellectual Property</h2>
-<p>All content in the App — including but not limited to video, audio, graphics, text, and code — is owned by Lily Studio or used under license, and is protected by applicable intellectual property laws.</p>
-<p>Audio sounds used in the App include sounds from <a href="https://www.zapsplat.com" target="_blank" rel="noopener">www.zapsplat.com</a>.</p>
+    <h2>6. Intellectual Property</h2>
+    <p>All content in the App &mdash; including but not limited to video, audio, graphics, text, and code &mdash; is owned by Lily Studio or used under license, and is protected by applicable intellectual property laws.</p>
+    <p>Audio sounds used in the App include sounds from <a href="https://www.zapsplat.com" target="_blank" rel="noopener">www.zapsplat.com</a>.</p>
 
-<h2>7. Disclaimers</h2>
-<p>The App is provided "as is" and "as available" without warranties of any kind, express or implied. Lily Studio does not warrant that the App will be uninterrupted, error-free, or free of harmful components.</p>
-<p>The App is designed as a calming tool and is not a substitute for medical advice, parenting guidance, or professional consultation of any kind.</p>
+    <h2>7. Disclaimers</h2>
+    <p>The App is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, express or implied. Lily Studio does not warrant that the App will be uninterrupted, error-free, or free of harmful components.</p>
+    <p>The App is designed as a calming tool and is not a substitute for medical advice, parenting guidance, or professional consultation of any kind.</p>
 
-<h2>8. Limitation of Liability</h2>
-<p>To the maximum extent permitted by applicable law, Lily Studio shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the App.</p>
+    <h2>8. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by applicable law, Lily Studio shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the App.</p>
 
-<h2>9. Changes to the App and Terms</h2>
-<p>Lily Studio reserves the right to modify, suspend, or discontinue the App or any part of it at any time. We may also update these Terms from time to time. We will update the "Last updated" date when we do. Your continued use of the App after any changes constitutes your acceptance of the updated Terms.</p>
+    <h2>9. Changes to the App and Terms</h2>
+    <p>Lily Studio reserves the right to modify, suspend, or discontinue the App or any part of it at any time. We may also update these Terms from time to time. We will update the &ldquo;Last updated&rdquo; date when we do. Your continued use of the App after any changes constitutes your acceptance of the updated Terms.</p>
 
-<h2>10. Governing Law</h2>
-<p>These Terms are governed by the laws of the United States, without regard to conflict of law principles. Any disputes arising from these Terms or your use of the App shall be resolved in the appropriate courts.</p>
+    <h2>10. Governing Law</h2>
+    <p>These Terms are governed by the laws of the United States, without regard to conflict of law principles. Any disputes arising from these Terms or your use of the App shall be resolved in the appropriate courts.</p>
 
-<h2>11. Apple</h2>
-<p>These Terms are between you and Lily Studio only, not Apple. Apple has no obligation to provide maintenance or support for the App. In the event of any third-party claim that the App infringes intellectual property rights, Lily Studio, not Apple, is responsible for addressing that claim. Apple and its subsidiaries are third-party beneficiaries of these Terms.</p>
+    <h2>11. Apple</h2>
+    <p>These Terms are between you and Lily Studio only, not Apple. Apple has no obligation to provide maintenance or support for the App. In the event of any third-party claim that the App infringes intellectual property rights, Lily Studio, not Apple, is responsible for addressing that claim. Apple and its subsidiaries are third-party beneficiaries of these Terms.</p>
 
-<h2>12. Contact</h2>
-<p>If you have questions about these Terms, please contact us at:</p>
-<p><a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a></p>
+    <h2>12. Contact</h2>
+    <p>If you have questions about these Terms, please contact us at:</p>
+    <p><a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a></p>
 
-<footer>
-  <div class="footer-links">
-    <a href="index.html">Lily Studio</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a>
-  </div>
-  <p class="footer-copy">© 2026 Lily Studio. All rights reserved.</p>
-</footer>
-```
+    <footer>
+      <div class="footer-links">
+        <a class="footer-home" href="index.html">Lily Studio Home</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Lily Studio. All rights reserved.</p>
+    </footer>
 
   </div>
 </body>
