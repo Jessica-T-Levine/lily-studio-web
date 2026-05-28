@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Skills for Claude — Lily Studio</title>
+    <meta name="description" content="72 professional AI skills for Claude — tested, documented, and ready to use. Marketing, education, freelancing, real estate, and more. Buy individually or save with bundles.">
+    <style>
+        :root {
+            --navy: #0D1B2A;
+            --navy-light: #1B2D45;
+            --white: #FFFFFF;
+            --off-white: #F7F8FA;
+            --gray-100: #F1F3F5;
+            --gray-200: #E2E6EA;
+            --gray-400: #8B95A1;
+            --gray-600: #4A5568;
+            --gray-800: #2D3748;
+            --pink: #E83E8C;
+            --green: #28A745;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--gray-800); background: var(--white); line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .nav { background: var(--navy); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo img { height: 32px; width: auto; }
+        .nav-logo span { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--white); }
+        .nav-links a.active { color: var(--pink); }
+        .hero { background: var(--navy); padding: 48px 24px 56px; text-align: center; }
+        .hero-badge { display: inline-block; background: rgba(232,62,140,0.15); color: var(--pink); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 6px 16px; border-radius: 20px; margin-bottom: 20px; }
+        .hero h1 { color: var(--white); font-size: clamp(28px,5vw,44px); font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; max-width: 700px; margin: 0 auto 16px; }
+        .hero p { color: rgba(255,255,255,0.7); font-size: clamp(15px,2.5vw,18px); max-width: 560px; margin: 0 auto 28px; line-height: 1.5; }
+        .hero-stats { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
+        .hero-stat-number { color: var(--white); font-size: 28px; font-weight: 800; }
+        .hero-stat-label { color: rgba(255,255,255,0.5); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .how-it-works { background: var(--off-white); padding: 48px 24px; border-bottom: 1px solid var(--gray-200); }
+        .how-it-works h2 { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 32px; color: var(--navy); }
+        .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; margin: 0 auto; }
+        .step { text-align: center; padding: 24px 16px; }
+        .step-number { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--navy); color: var(--white); font-weight: 800; font-size: 16px; border-radius: 50%; margin-bottom: 12px; }
+        .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--navy); }
+        .step p { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+        .section-header { text-align: center; margin-bottom: 32px; }
+        .section-header h2 { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+        .section-header p { color: var(--gray-600); font-size: 15px; }
+        .bundles-section { padding: 48px 24px; background: var(--white); }
+        .bundles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1120px; margin: 0 auto; }
+        .bundle-card { background: var(--white); border: 2px solid var(--navy); border-radius: 12px; padding: 24px; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+        .bundle-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,27,42,0.12); }
+        .bundle-save-badge { position: absolute; top: -10px; right: 16px; background: var(--green); color: var(--white); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bundle-card h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 6px; padding-right: 60px; }
+        .bundle-desc { font-size: 13px; color: var(--gray-600); margin-bottom: 14px; line-height: 1.5; }
+        .bundle-skills-list { list-style: none; margin-bottom: 16px; }
+        .bundle-skills-list li { font-size: 13px; color: var(--gray-800); padding: 3px 0; }
+        .bundle-skills-list li a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--gray-400); transition: border-color 0.2s; }
+        .bundle-skills-list li a:hover { border-color: var(--pink); color: var(--pink); }
+        .bundle-skills-list li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+        .bundle-pricing { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+        .bundle-price { font-size: 26px; font-weight: 800; color: var(--navy); }
+        .bundle-original { font-size: 14px; color: var(--gray-400); text-decoration: line-through; }
+        .btn-buy { display: block; width: 100%; padding: 12px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; transition: background 0.2s; }
+        .btn-buy:hover { background: var(--navy-light); }
+        .filter-bar { padding: 32px 24px 0; max-width: 1120px; margin: 0 auto; }
+        .search-box { position: relative; margin-bottom: 20px; }
+        .search-box input { width: 100%; padding: 14px 16px 14px 44px; border: 2px solid var(--gray-200); border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s; background: var(--white); }
+        .search-box input:focus { border-color: var(--navy); }
+        .search-box input::placeholder { color: var(--gray-400); }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 18px; pointer-events: none; }
+        .search-count { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 13px; font-weight: 600; }
+        .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+        .cat-tab { padding: 6px 14px; border: 1.5px solid var(--gray-200); border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--gray-600); background: var(--white); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .cat-tab:hover { border-color: var(--navy); color: var(--navy); }
+        .cat-tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+        .skills-section { padding: 24px 24px 64px; max-width: 1120px; margin: 0 auto; }
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .skill-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; }
+        .skill-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,27,42,0.08); border-color: var(--gray-400); }
+        .skill-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .skill-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--pink); }
+        .skill-price-tag { font-size: 18px; font-weight: 800; color: var(--navy); white-space: nowrap; }
+        .skill-card h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px; line-height: 1.3; }
+        .skill-desc { font-size: 13px; color: var(--gray-600); margin-bottom: 12px; line-height: 1.5; flex-grow: 1; }
+        .skill-bundle-link { font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 12px; }
+        .skill-bundle-link a { color: var(--green); text-decoration: none; border-bottom: 1px dotted var(--green); }
+        .skill-bundle-link a:hover { color: var(--pink); border-color: var(--pink); }
+        .btn-buy-sm { display: block; width: 100%; padding: 10px; background: var(--navy); color: var(--white); border: none; border-radius: 7px; font-size: 13px; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; transition: background 0.2s; }
+        .btn-buy-sm:hover { background: var(--navy-light); }
+        .no-results { text-align: center; padding: 48px 24px; color: var(--gray-400); font-size: 16px; display: none; }
+        .footer { background: var(--navy); padding: 32px 24px; text-align: center; }
+        .footer-brand { color: var(--white); font-size: 20px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 8px; }
+        .footer p { color: rgba(255,255,255,0.4); font-size: 13px; }
+        .footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+        .footer a:hover { color: var(--white); }
+        .footer-links { margin-top: 12px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .footer-links a { font-size: 13px; }
+        .hidden { display: none !important; }
+        
+        .featured-section { padding: 48px 24px; background: var(--white); border-bottom: 1px solid var(--gray-200); }
+        .featured-grid { max-width: 600px; margin: 0 auto; }
+        .featured-card { background: var(--white); border: 2px solid var(--pink); border-radius: 12px; padding: 28px; position: relative; }
+        .featured-badge { position: absolute; top: -10px; left: 20px; background: var(--pink); color: var(--white); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .featured-content { }
+        .featured-card h3 { font-size: 20px; font-weight: 800; color: var(--navy); margin: 6px 0 10px; }
+        .featured-desc { font-size: 14px; color: var(--gray-600); line-height: 1.6; margin-bottom: 16px; }
+        .featured-price { font-size: 28px; font-weight: 800; color: var(--navy); margin-bottom: 14px; }
+        .btn-buy-pink { background: var(--pink) !important; }
+        .btn-buy-pink:hover { background: #d63384 !important; }
+        .btn-disabled { background: var(--gray-400) !important; cursor: default; pointer-events: none; opacity: 0.7; }
+        html { scroll-behavior: smooth; }
+        @media (max-width: 640px) {
+            .nav { padding: 12px 16px; }
+            .nav-links { gap: 16px; }
+            .nav-links a { font-size: 13px; }
+            .hero { padding: 36px 16px 44px; }
+            .hero-stats { gap: 20px; }
+            .bundles-grid { grid-template-columns: 1fr; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .category-tabs { gap: 6px; }
+            .cat-tab { padding: 5px 10px; font-size: 12px; }
+            .steps { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<nav class="nav">
+    <a href="/" class="nav-logo">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwQAADsEBuJFr7QAAAAd0SU1FB+kEFAETNDCAqFUAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAEq0lEQVRo3u2ZX2hbZRTAf+cm6b9Vu62bOhURRBEfRMQ3UXARFEEUffJBcOKD6EAQxKfpg4iCIIjgHwQfBEVEBV+mOPDPdFNxum5lXduliUmatmmTNLn3HA9Nsu9Lbpqm7dJmHAjkfvee7/x+53zn3O8G/idRnQUIAYC6rqkafHLPswD6AjAFwJN3/iT1j39VkkWk1Gve/u1LUqKfAHADLN19m6ym5mRAAsD9TXuG7v7xfX3p1AcAnPLT+25RQwCTiPBMJBIZi8Vi3Y6jB/bvT5BKpZDbb+8FuAjQp5TqEJHN/kBgvadnh39o93Mv9wwM3A7QD9AmIuvOO/ecqC1FIiGAeQ7fDbmTOAkAg729FYsRCgAkALzPPrxNY/EEtm9P3y3gHwG+BnA4EolYjuPE/u/fxkLERY7j2LZt3zs8PLgXgI+BbwduvBm3394HcEk9r9enHhIRG0AflMqDfWjhFJuv3Hf3ixQbJC4tBCIZq8LjIjvp8OAb7ux2HOGp54YBxm36AJhXeqsKfQtcNIyeNf5GjJdEr7TuAcD8xLNP9x3qH3uXzUvkGI9Ztr67PQTb8Vj8VIA8lp2Rif2+/jnMc+ISrOG3m2oPKXq1LPTMh1xvW+JvrcC4D5xFhIPLaU98qx6sL5jKm2Oa9eLymIdkYEk9OdDv16bdiZUE+bwJkERqt9mhpTxvwv1M32VEKXuIoIrKNnddKOcYoGV3yujP2OCQSnf6GowDiJfP7FLXAaJKQbhEx7RxzxPbhQb5YOJWy12aX4nJE5ETSWj2OMzwxcXB45Ph7/1h6N3FvZS4JAtTmA9RaBVfUAokFh9N72e9h/x06NTzD2YFMgMgyXh0JGbnrSWaGSTCaflvkGCxubSZzOjgwuN+f2osDU+K9ZOCB7ZR+4NhJBmLjnbOxhNOoQ2Sds5al1U0EIDoYhTKI4U/M3jEsixLamlJW5YViUQi1sDAgAUgLBZ76623LjqWldRCK6tCVFWyMzLRaL1UOr9yIBMjSX13iCqpJIIkGUAkEw1HCCFZ3eU7U6RdCEAmpKwJ2lUE0S3bMqk11bIlbcQn7v3i5vUzw3eH4VjUCCPi3JLzavIy94JiPjxcCKcxWC7lqRaBmBBkQ5VUIsWOOHgibVUxROQkhMwqpWI0+OUy/6fXg8/jOOvUNO8FUv4sRJhNR4f2p52z1MzuFOOo8DaOY6MrpfxnkEhkVKRi0KScMQ+Y7FImJZEVd1ZK40TiwMDE0MBzI3uxwq/1+7jCGmH/h4dRGNnLUelyiNLfVWI/QzZsJx9V9LDCIGJKSMiJVjV1QglLXM4qrQSI7IY5WI5yyoBVaFg0OB4b3ECMA+IDsU8+N3R8IvqIWOYkFBJLPv8ZhI/r8SCFaMHO1V/uDcU10DqxYb9TkDyeSR4aFDAGI3RoeK4KQAY8TScUdW+FWJ+w6kVlBKfNWoY4+M4IkO0hGk7IkWCLlSTiKgk5aSaxq0YXaonFDjW9UT8jtbhSEtFIkMQS0V2x8l+K/+FzwNyE4kM/5VyIK3BFZJ+BfB7Agg7f3/m/gPvPFLHjYZBKYAAAAASUVORK5CYII=" alt="Lily Studio" />
+        <span>Lily Studio</span>
+    </a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/skills.html" class="active">Skills</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-badge">AI Skills for Claude</div>
+    <h1>Professional tools that work inside Claude.</h1>
+    <p>72 skills built for real work. Marketing, education, freelancing, real estate, and more. Buy one or save with a bundle.</p>
+    <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-number">72</div><div class="hero-stat-label">Skills</div></div>
+        <div class="hero-stat"><div class="hero-stat-number">10</div><div class="hero-stat-label">Bundles</div></div>
+        <div class="hero-stat"><div class="hero-stat-number">16</div><div class="hero-stat-label">Categories</div></div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>How Claude Skills Work</h2>
+    <div class="steps">
+        <div class="step"><div class="step-number">1</div><h3>Buy &amp; Download</h3><p>Purchase on Gumroad. You'll get a ZIP file with your .skill file inside.</p></div>
+        <div class="step"><div class="step-number">2</div><h3>Install in Claude</h3><p>Go to Settings &rarr; Customize &rarr; Skills &rarr; Upload. Drag the file in. Done.</p></div>
+        <div class="step"><div class="step-number">3</div><h3>Start Working</h3><p>Claude automatically uses your skill when relevant. No prompts to memorize.</p></div>
+    </div>
+</section>
+
+<section class="featured-section">
+    <div class="section-header">
+        <h2>Featured Skills</h2>
+        <p>New and noteworthy — available now on Gumroad.</p>
+    </div>
+    <div class="featured-grid">
+        <div class="featured-card">
+            <div class="featured-badge">LIVE NOW</div>
+            <div class="featured-content">
+                <span class="skill-cat">Career</span>
+                <h3>Resume Tailor</h3>
+                <p class="featured-desc">Stop sending the same resume to every job. This skill rewrites your resume for each specific job posting — matching your experience to the exact language, keywords, and requirements that get you past the ATS and in front of a hiring manager.</p>
+                <div class="featured-price">$20</div>
+                <a href="https://thelilystudio.gumroad.com/l/resume-tailor-claude-skill" target="_blank" rel="noopener" class="btn-buy btn-buy-pink">Buy on Gumroad</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bundles-section" id="bundles">
+<div class="section-header"><h2>Save With Bundles</h2><p>Curated skill packs for specific roles — save up to 39% vs buying individually.</p></div>
+<div class="bundles-grid">
+<div class="bundle-card" id="bundle-b1">
+<div class="bundle-save-badge">Save $32</div>
+<h3>Marketing Starter Pack</h3>
+<div class="bundle-desc">Complete marketing toolkit: keywords, content, ads, email, social, calendar &amp; press</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-2">Keyword Research Generator</a></li>
+<li><a href="#skill-3">Content Brief Generator</a></li>
+<li><a href="#skill-4">Ad Copy Generator</a></li>
+<li><a href="#skill-5">Email Sequence Builder</a></li>
+<li><a href="#skill-7">Social Media Content Repurposer</a></li>
+<li><a href="#skill-9">Content Calendar Generator</a></li>
+<li><a href="#skill-26">Press Release Writer</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$59</span><span class="bundle-original">$91 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b2">
+<div class="bundle-save-badge">Save $46</div>
+<h3>Content Creator Pro Pack</h3>
+<div class="bundle-desc">Every content format covered: blog, newsletter, product copy, courses, video, case studies &amp; email</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-20">Blog Post Writer</a></li>
+<li><a href="#skill-21">Newsletter Writer</a></li>
+<li><a href="#skill-22">Product Description Writer</a></li>
+<li><a href="#skill-23">Course &amp; Workshop Outline Generator</a></li>
+<li><a href="#skill-24">YouTube Script Writer</a></li>
+<li><a href="#skill-25">Case Study Generator</a></li>
+<li><a href="#skill-31">E-commerce Email Flow Builder</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$69</span><span class="bundle-original">$115 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b3">
+<div class="bundle-save-badge">Save $31</div>
+<h3>Teacher's Toolkit</h3>
+<div class="bundle-desc">Save hours every week: lesson plans, rubrics, quizzes, feedback, differentiation &amp; cover letters</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-49">Lesson Plan Generator</a></li>
+<li><a href="#skill-50">Rubric Creator</a></li>
+<li><a href="#skill-51">Quiz &amp; Assessment Builder</a></li>
+<li><a href="#skill-52">Student Feedback Writer</a></li>
+<li><a href="#skill-53">Differentiated Instruction Planner</a></li>
+<li><a href="#skill-55">Cover Letter Writer</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$55</span><span class="bundle-original">$86 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b4">
+<div class="bundle-save-badge">Save $30</div>
+<h3>Job Search Accelerator</h3>
+<div class="bundle-desc">Land the job you want: resume, cover letter, LinkedIn, interview prep &amp; salary negotiation</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-54">Resume Tailor</a></li>
+<li><a href="#skill-55">Cover Letter Writer</a></li>
+<li><a href="#skill-56">LinkedIn Profile Optimizer</a></li>
+<li><a href="#skill-57">Interview Prep Coach</a></li>
+<li><a href="#skill-58">Salary Negotiation Script</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$55</span><span class="bundle-original">$85 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b5">
+<div class="bundle-save-badge">Save $22</div>
+<h3>Freelancer Toolkit</h3>
+<div class="bundle-desc">Run a tighter business: proposals, SOPs, meeting notes, offboarding &amp; rate calculator</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-17">Client Proposal Writer</a></li>
+<li><a href="#skill-14">SOP Documentation</a></li>
+<li><a href="#skill-16">Meeting Notes to Action Items</a></li>
+<li><a href="#skill-32">Client Offboarding Document</a></li>
+<li><a href="#skill-34">Freelancer Rate Calculator</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$45</span><span class="bundle-original">$67 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b6">
+<div class="bundle-save-badge">Save $13</div>
+<h3>Coach's Bundle</h3>
+<div class="bundle-desc">Professional client management: discovery calls, onboarding &amp; session recaps</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-46">Discovery Call Summary</a></li>
+<li><a href="#skill-47">Client Onboarding Packet</a></li>
+<li><a href="#skill-48">Coaching Session Recap</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$29</span><span class="bundle-original">$42 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b7">
+<div class="bundle-save-badge">Save $15</div>
+<h3>Podcast Bundle</h3>
+<div class="bundle-desc">Plan, produce &amp; promote every episode</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-66">Podcast Episode Planner</a></li>
+<li><a href="#skill-67">Podcast-to-Content Suite</a></li>
+<li><a href="#skill-68">Podcast Guest Research Brief</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$32</span><span class="bundle-original">$47 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b8">
+<div class="bundle-save-badge">Save $18</div>
+<h3>Airbnb &amp; Hospitality Bundle</h3>
+<div class="bundle-desc">Run your rental like a pro: listings, messages, reviews &amp; expense tracking</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-69">Airbnb Listing Optimizer</a></li>
+<li><a href="#skill-70">Guest Message Template Pack</a></li>
+<li><a href="#skill-71">Guest Review Response Generator</a></li>
+<li><a href="#skill-72">Rental Property Expense Tracker</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$39</span><span class="bundle-original">$57 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b9">
+<div class="bundle-save-badge">Save $17</div>
+<h3>Real Estate Bundle</h3>
+<div class="bundle-desc">Close more deals: property listings, follow-up emails &amp; market reports</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-43">Property Listing Writer</a></li>
+<li><a href="#skill-44">Open House Follow-Up Email</a></li>
+<li><a href="#skill-45">Neighborhood Market Report</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$35</span><span class="bundle-original">$52 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+<div class="bundle-card" id="bundle-b10">
+<div class="bundle-save-badge">Save $51</div>
+<h3>Business Strategy Pack</h3>
+<div class="bundle-desc">Think bigger, move faster: analysis, conversion, planning, personas, positioning, lead magnets &amp; pitching</div>
+<ul class="bundle-skills-list">
+<li><a href="#skill-10">Competitor Analysis</a></li>
+<li><a href="#skill-11">CRO Audit</a></li>
+<li><a href="#skill-12">Business Plan Generator</a></li>
+<li><a href="#skill-13">Customer Persona Builder</a></li>
+<li><a href="#skill-19">Business Positioning Document</a></li>
+<li><a href="#skill-27">Lead Magnet Creator</a></li>
+<li><a href="#skill-28">Pitch Deck Content Generator</a></li>
+</ul>
+<div class="bundle-pricing"><span class="bundle-price">$79</span><span class="bundle-original">$130 individually</span></div>
+<span class="btn-buy btn-disabled">Coming Soon</span>
+</div>
+</div></section>
+<div class="filter-bar" id="skills">
+<div class="section-header"><h2>All 72 Skills</h2><p>Browse individually or search for exactly what you need.</p></div>
+<div class="search-box"><span class="search-icon">&#x1F50D;</span>
+<input type="text" id="searchInput" placeholder="Search skills... (e.g. resume, SEO, Airbnb, teacher)" />
+<span class="search-count" id="searchCount">72 skills</span></div>
+<div class="category-tabs" id="categoryTabs">
+<button class="cat-tab active" data-cat="all">All</button>
+<button class="cat-tab" data-cat="Marketing & SEO">Marketing &amp; SEO</button>
+<button class="cat-tab" data-cat="Content Creation">Content</button>
+<button class="cat-tab" data-cat="Business Strategy">Strategy</button>
+<button class="cat-tab" data-cat="Business & Operations">Operations</button>
+<button class="cat-tab" data-cat="Freelancing">Freelancing</button>
+<button class="cat-tab" data-cat="E-commerce">E-commerce</button>
+<button class="cat-tab" data-cat="Productivity">Productivity</button>
+<button class="cat-tab" data-cat="App Development">App Dev</button>
+<button class="cat-tab" data-cat="Real Estate">Real Estate</button>
+<button class="cat-tab" data-cat="Coaching">Coaching</button>
+<button class="cat-tab" data-cat="Education">Education</button>
+<button class="cat-tab" data-cat="Career">Career</button>
+<button class="cat-tab" data-cat="Nonprofit">Nonprofit</button>
+<button class="cat-tab" data-cat="Personal Finance">Finance</button>
+<button class="cat-tab" data-cat="Podcasting">Podcasting</button>
+<button class="cat-tab" data-cat="Hospitality">Hospitality</button>
+</div></div>
+<section class="skills-section"><div class="skills-grid" id="skillsGrid">
+<div class="skill-card" id="skill-1" data-cat="Marketing & SEO" data-search="seo site audit seo site audit scored report marketing">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>SEO Site Audit</h3>
+<p class="skill-desc">Comprehensive, scored SEO audit with prioritized fix list</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-2" data-cat="Marketing & SEO" data-search="keyword research generator keyword research seo content">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$12</span></div>
+<h3>Keyword Research Generator</h3>
+<p class="skill-desc">Complete keyword research report with intent analysis</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-3" data-cat="Marketing & SEO" data-search="content brief generator content brief seo planning">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$12</span></div>
+<h3>Content Brief Generator</h3>
+<p class="skill-desc">Structured content briefs with SEO requirements</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-4" data-cat="Marketing & SEO" data-search="ad copy generator ad copy google facebook instagram advertising">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$15</span></div>
+<h3>Ad Copy Generator</h3>
+<p class="skill-desc">High-converting ad copy for Google, Facebook, Instagram &amp; LinkedIn</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-5" data-cat="Marketing & SEO" data-search="email sequence builder email sequence welcome nurture sales">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>Email Sequence Builder</h3>
+<p class="skill-desc">Welcome, nurture &amp; sales email sequences that convert</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-6" data-cat="Marketing & SEO" data-search="landing page copywriter landing page copywriting conversion">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>Landing Page Copywriter</h3>
+<p class="skill-desc">Full landing page copy from headline to footer</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-7" data-cat="Content Creation" data-search="social media content repurposer social media repurpose linkedin instagram twitter">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$12</span></div>
+<h3>Social Media Content Repurposer</h3>
+<p class="skill-desc">One piece of content turned into posts for every platform</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-8" data-cat="Marketing & SEO" data-search="brand voice dna extractor brand voice tone identity guide">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>Brand Voice DNA Extractor</h3>
+<p class="skill-desc">Extract your unique voice and tone into a reusable guide</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-9" data-cat="Content Creation" data-search="content calendar generator content calendar 30 day plan scheduling">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$10</span></div>
+<h3>Content Calendar Generator</h3>
+<p class="skill-desc">30-day content plan with topics, formats &amp; scheduling</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-10" data-cat="Business Strategy" data-search="competitor analysis competitor analysis competitive research strategy">
+<div class="skill-card-top"><span class="skill-cat">Business Strategy</span><span class="skill-price-tag">$20</span></div>
+<h3>Competitor Analysis</h3>
+<p class="skill-desc">Side-by-side competitive analysis with strategic recommendations</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-11" data-cat="Marketing & SEO" data-search="cro audit cro audit conversion rate optimization">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>CRO Audit</h3>
+<p class="skill-desc">Conversion rate optimization audit with prioritized fixes</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-12" data-cat="Business Strategy" data-search="business plan generator business plan investor startup funding">
+<div class="skill-card-top"><span class="skill-cat">Business Strategy</span><span class="skill-price-tag">$25</span></div>
+<h3>Business Plan Generator</h3>
+<p class="skill-desc">Investor-ready business plan, built with you</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-13" data-cat="Business Strategy" data-search="customer persona builder customer persona buyer psychology behavior">
+<div class="skill-card-top"><span class="skill-cat">Business Strategy</span><span class="skill-price-tag">$15</span></div>
+<h3>Customer Persona Builder</h3>
+<p class="skill-desc">Detailed buyer personas with psychology and behavior patterns</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-14" data-cat="Business & Operations" data-search="sop documentation sop standard operating procedure process">
+<div class="skill-card-top"><span class="skill-cat">Business &amp; Operations</span><span class="skill-price-tag">$15</span></div>
+<h3>SOP Documentation</h3>
+<p class="skill-desc">Turn any process into a clear, repeatable system</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b5">Freelancer Toolkit</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-15" data-cat="Business & Operations" data-search="contract risk scanner contract risk scanner legal clauses review">
+<div class="skill-card-top"><span class="skill-cat">Business &amp; Operations</span><span class="skill-price-tag">$30</span></div>
+<h3>Contract Risk Scanner</h3>
+<p class="skill-desc">Identify risky clauses and unfair terms in plain English</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-16" data-cat="Business & Operations" data-search="meeting notes to action items meeting notes action items summary">
+<div class="skill-card-top"><span class="skill-cat">Business &amp; Operations</span><span class="skill-price-tag">$10</span></div>
+<h3>Meeting Notes to Action Items</h3>
+<p class="skill-desc">Messy meeting notes → clean summary with action items</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b5">Freelancer Toolkit</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-17" data-cat="Freelancing" data-search="client proposal writer client proposal writer freelance consulting">
+<div class="skill-card-top"><span class="skill-cat">Freelancing</span><span class="skill-price-tag">$20</span></div>
+<h3>Client Proposal Writer</h3>
+<p class="skill-desc">Complete, professional project proposals that win clients</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b5">Freelancer Toolkit</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-18" data-cat="Freelancing" data-search="invoice &amp; receipt generator invoice receipt generator billing freelance">
+<div class="skill-card-top"><span class="skill-cat">Freelancing</span><span class="skill-price-tag">$10</span></div>
+<h3>Invoice &amp; Receipt Generator</h3>
+<p class="skill-desc">Professional invoices and receipts in seconds</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-19" data-cat="Business Strategy" data-search="business positioning document business positioning document market differentiation">
+<div class="skill-card-top"><span class="skill-cat">Business Strategy</span><span class="skill-price-tag">$15</span></div>
+<h3>Business Positioning Document</h3>
+<p class="skill-desc">Define your unique space in the market</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-20" data-cat="Content Creation" data-search="blog post writer blog post writer seo voice content">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$20</span></div>
+<h3>Blog Post Writer</h3>
+<p class="skill-desc">Voice-matched, SEO-ready blog posts every time</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-21" data-cat="Content Creation" data-search="newsletter writer newsletter writer email subscribers">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$15</span></div>
+<h3>Newsletter Writer</h3>
+<p class="skill-desc">Emails your subscribers actually read</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-22" data-cat="E-commerce" data-search="product description writer product description ecommerce copy sales">
+<div class="skill-card-top"><span class="skill-cat">E-commerce</span><span class="skill-price-tag">$12</span></div>
+<h3>Product Description Writer</h3>
+<p class="skill-desc">Descriptions that sell, not just describe</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-23" data-cat="Content Creation" data-search="course &amp; workshop outline generator course workshop outline curriculum teaching">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$20</span></div>
+<h3>Course &amp; Workshop Outline Generator</h3>
+<p class="skill-desc">Structure your knowledge into a sellable course</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-24" data-cat="Content Creation" data-search="youtube script writer youtube script writer video content creator">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$15</span></div>
+<h3>YouTube Script Writer</h3>
+<p class="skill-desc">Scripts that hold attention start to finish</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-25" data-cat="Content Creation" data-search="case study generator case study generator client wins social proof">
+<div class="skill-card-top"><span class="skill-cat">Content Creation</span><span class="skill-price-tag">$15</span></div>
+<h3>Case Study Generator</h3>
+<p class="skill-desc">Turn client wins into compelling sales tools</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-26" data-cat="Marketing & SEO" data-search="press release writer press release writer ap style media coverage">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$12</span></div>
+<h3>Press Release Writer</h3>
+<p class="skill-desc">AP-style press releases editors actually read</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b1">Marketing Starter Pack</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-27" data-cat="Marketing & SEO" data-search="lead magnet creator lead magnet creator email list building">
+<div class="skill-card-top"><span class="skill-cat">Marketing &amp; SEO</span><span class="skill-price-tag">$20</span></div>
+<h3>Lead Magnet Creator</h3>
+<p class="skill-desc">Irresistible freebies that build your email list</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-28" data-cat="Business Strategy" data-search="pitch deck content generator pitch deck content generator investor startup">
+<div class="skill-card-top"><span class="skill-cat">Business Strategy</span><span class="skill-price-tag">$20</span></div>
+<h3>Pitch Deck Content Generator</h3>
+<p class="skill-desc">Slide-by-slide pitch deck content that gets meetings</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b10">Business Strategy Pack</a> — save 39%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-29" data-cat="E-commerce" data-search="etsy listing optimizer etsy listing optimizer seo seller handmade">
+<div class="skill-card-top"><span class="skill-cat">E-commerce</span><span class="skill-price-tag">$20</span></div>
+<h3>Etsy Listing Optimizer</h3>
+<p class="skill-desc">Listings that rank and convert on Etsy</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-30" data-cat="E-commerce" data-search="product photography shot list product photography shot list ecommerce">
+<div class="skill-card-top"><span class="skill-cat">E-commerce</span><span class="skill-price-tag">$10</span></div>
+<h3>Product Photography Shot List</h3>
+<p class="skill-desc">Every shot you need before the camera comes out</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-31" data-cat="E-commerce" data-search="e-commerce email flow builder ecommerce email flow abandoned cart shopify">
+<div class="skill-card-top"><span class="skill-cat">E-commerce</span><span class="skill-price-tag">$20</span></div>
+<h3>E-commerce Email Flow Builder</h3>
+<p class="skill-desc">Automated emails that recover revenue while you sleep</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b2">Content Creator Pro Pack</a> — save 40%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-32" data-cat="Freelancing" data-search="client offboarding document client offboarding document project closeout">
+<div class="skill-card-top"><span class="skill-cat">Freelancing</span><span class="skill-price-tag">$12</span></div>
+<h3>Client Offboarding Document</h3>
+<p class="skill-desc">End every project professionally and get referrals</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b5">Freelancer Toolkit</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-33" data-cat="Freelancing" data-search="portfolio project writer portfolio project writer case study">
+<div class="skill-card-top"><span class="skill-cat">Freelancing</span><span class="skill-price-tag">$12</span></div>
+<h3>Portfolio Project Writer</h3>
+<p class="skill-desc">Case studies that get you hired</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-34" data-cat="Freelancing" data-search="freelancer rate calculator freelancer rate calculator pricing charge">
+<div class="skill-card-top"><span class="skill-cat">Freelancing</span><span class="skill-price-tag">$10</span></div>
+<h3>Freelancer Rate Calculator</h3>
+<p class="skill-desc">Charge what you're worth and prove it</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b5">Freelancer Toolkit</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-35" data-cat="Productivity" data-search="weekly review &amp; planning generator weekly review planning productivity goals">
+<div class="skill-card-top"><span class="skill-cat">Productivity</span><span class="skill-price-tag">$10</span></div>
+<h3>Weekly Review &amp; Planning Generator</h3>
+<p class="skill-desc">End the week clear, start the week ready</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-36" data-cat="Productivity" data-search="decision matrix builder decision matrix builder clarity choices">
+<div class="skill-card-top"><span class="skill-cat">Productivity</span><span class="skill-price-tag">$10</span></div>
+<h3>Decision Matrix Builder</h3>
+<p class="skill-desc">Make hard decisions with clarity, not anxiety</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-37" data-cat="Productivity" data-search="notion workspace architect notion workspace architect system organization">
+<div class="skill-card-top"><span class="skill-cat">Productivity</span><span class="skill-price-tag">$20</span></div>
+<h3>Notion Workspace Architect</h3>
+<p class="skill-desc">Build a Notion system that actually works</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-38" data-cat="Productivity" data-search="goal setting &amp; milestone tracker goal setting milestone tracker planning">
+<div class="skill-card-top"><span class="skill-cat">Productivity</span><span class="skill-price-tag">$10</span></div>
+<h3>Goal Setting &amp; Milestone Tracker</h3>
+<p class="skill-desc">Goals that get done, not just written</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-39" data-cat="App Development" data-search="aso skill aso app store optimization metadata keywords">
+<div class="skill-card-top"><span class="skill-cat">App Development</span><span class="skill-price-tag">$25</span></div>
+<h3>ASO Skill</h3>
+<p class="skill-desc">App Store metadata that gets your app found</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-40" data-cat="App Development" data-search="app privacy policy generator app privacy policy generator legal compliance">
+<div class="skill-card-top"><span class="skill-cat">App Development</span><span class="skill-price-tag">$15</span></div>
+<h3>App Privacy Policy Generator</h3>
+<p class="skill-desc">Compliant privacy policy for any app</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-41" data-cat="App Development" data-search="app screenshot copy generator app screenshot copy generator captions">
+<div class="skill-card-top"><span class="skill-cat">App Development</span><span class="skill-price-tag">$12</span></div>
+<h3>App Screenshot Copy Generator</h3>
+<p class="skill-desc">Captions that convert App Store visitors</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-42" data-cat="App Development" data-search="app release notes writer app release notes writer updates marketing">
+<div class="skill-card-top"><span class="skill-cat">App Development</span><span class="skill-price-tag">$8</span></div>
+<h3>App Release Notes Writer</h3>
+<p class="skill-desc">Updates users actually want to read</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-43" data-cat="Real Estate" data-search="property listing writer property listing writer real estate mls">
+<div class="skill-card-top"><span class="skill-cat">Real Estate</span><span class="skill-price-tag">$20</span></div>
+<h3>Property Listing Writer</h3>
+<p class="skill-desc">Listings that attract serious buyers</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b9">Real Estate Bundle</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-44" data-cat="Real Estate" data-search="open house follow-up email open house follow up email real estate">
+<div class="skill-card-top"><span class="skill-cat">Real Estate</span><span class="skill-price-tag">$12</span></div>
+<h3>Open House Follow-Up Email</h3>
+<p class="skill-desc">Turn open house visitors into offers</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b9">Real Estate Bundle</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-45" data-cat="Real Estate" data-search="neighborhood market report neighborhood market report data real estate">
+<div class="skill-card-top"><span class="skill-cat">Real Estate</span><span class="skill-price-tag">$20</span></div>
+<h3>Neighborhood Market Report</h3>
+<p class="skill-desc">Data-driven reports your clients will share</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b9">Real Estate Bundle</a> — save 33%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-46" data-cat="Coaching" data-search="discovery call summary discovery call summary sales coaching">
+<div class="skill-card-top"><span class="skill-cat">Coaching</span><span class="skill-price-tag">$15</span></div>
+<h3>Discovery Call Summary</h3>
+<p class="skill-desc">Turn every call into a clear next step</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b6">Coach's Bundle</a> — save 31%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-47" data-cat="Coaching" data-search="client onboarding packet client onboarding packet welcome vip coaching">
+<div class="skill-card-top"><span class="skill-cat">Coaching</span><span class="skill-price-tag">$15</span></div>
+<h3>Client Onboarding Packet</h3>
+<p class="skill-desc">Make every new client feel like a VIP</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b6">Coach's Bundle</a> — save 31%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-48" data-cat="Coaching" data-search="coaching session recap coaching session recap notes progress">
+<div class="skill-card-top"><span class="skill-cat">Coaching</span><span class="skill-price-tag">$12</span></div>
+<h3>Coaching Session Recap</h3>
+<p class="skill-desc">Professional recaps that deepen client progress</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b6">Coach's Bundle</a> — save 31%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-49" data-cat="Education" data-search="lesson plan generator lesson plan generator teacher k12 standards">
+<div class="skill-card-top"><span class="skill-cat">Education</span><span class="skill-price-tag">$20</span></div>
+<h3>Lesson Plan Generator</h3>
+<p class="skill-desc">Complete, standards-aligned lessons in minutes</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> — save 36%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-50" data-cat="Education" data-search="rubric creator rubric creator grading assessment teacher">
+<div class="skill-card-top"><span class="skill-cat">Education</span><span class="skill-price-tag">$12</span></div>
+<h3>Rubric Creator</h3>
+<p class="skill-desc">Clear, fair assessment rubrics for any assignment</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> — save 36%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-51" data-cat="Education" data-search="quiz &amp; assessment builder quiz assessment builder test teacher">
+<div class="skill-card-top"><span class="skill-cat">Education</span><span class="skill-price-tag">$12</span></div>
+<h3>Quiz &amp; Assessment Builder</h3>
+<p class="skill-desc">Assessments that actually measure learning</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> — save 36%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-52" data-cat="Education" data-search="student feedback writer student feedback writer teacher comments">
+<div class="skill-card-top"><span class="skill-cat">Education</span><span class="skill-price-tag">$12</span></div>
+<h3>Student Feedback Writer</h3>
+<p class="skill-desc">Meaningful feedback written in minutes</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> — save 36%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-53" data-cat="Education" data-search="differentiated instruction planner differentiated instruction planner inclusive udl">
+<div class="skill-card-top"><span class="skill-cat">Education</span><span class="skill-price-tag">$15</span></div>
+<h3>Differentiated Instruction Planner</h3>
+<p class="skill-desc">One lesson, every learner</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> — save 36%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-54" data-cat="Career" data-search="resume tailor resume tailor job application ats customize">
+<div class="skill-card-top"><span class="skill-cat">Career</span><span class="skill-price-tag">$20</span></div>
+<h3>Resume Tailor</h3>
+<p class="skill-desc">Customize your resume for every application</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b4">Job Search Accelerator</a> — save 35%</div>
+<a href="https://thelilystudio.gumroad.com/l/resume-tailor-claude-skill" target="_blank" rel="noopener" class="btn-buy-sm">Buy on Gumroad</a>
+</div>
+<div class="skill-card" id="skill-55" data-cat="Career" data-search="cover letter writer cover letter writer job application interview">
+<div class="skill-card-top"><span class="skill-cat">Career</span><span class="skill-price-tag">$15</span></div>
+<h3>Cover Letter Writer</h3>
+<p class="skill-desc">Cover letters that get interviews</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b3">Teacher's Toolkit</a> &amp; <a href="#bundle-b4">Job Search Accelerator</a></div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-56" data-cat="Career" data-search="linkedin profile optimizer linkedin profile optimizer networking brand">
+<div class="skill-card-top"><span class="skill-cat">Career</span><span class="skill-price-tag">$20</span></div>
+<h3>LinkedIn Profile Optimizer</h3>
+<p class="skill-desc">A profile that works while you sleep</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b4">Job Search Accelerator</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-57" data-cat="Career" data-search="interview prep coach interview prep coach questions star method">
+<div class="skill-card-top"><span class="skill-cat">Career</span><span class="skill-price-tag">$15</span></div>
+<h3>Interview Prep Coach</h3>
+<p class="skill-desc">Walk in ready for every question</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b4">Job Search Accelerator</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-58" data-cat="Career" data-search="salary negotiation script salary negotiation script raise offer">
+<div class="skill-card-top"><span class="skill-cat">Career</span><span class="skill-price-tag">$15</span></div>
+<h3>Salary Negotiation Script</h3>
+<p class="skill-desc">Ask for more and get it</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b4">Job Search Accelerator</a> — save 35%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-59" data-cat="Nonprofit" data-search="grant proposal writer grant proposal writer nonprofit funding">
+<div class="skill-card-top"><span class="skill-cat">Nonprofit</span><span class="skill-price-tag">$30</span></div>
+<h3>Grant Proposal Writer</h3>
+<p class="skill-desc">Proposals that fund your mission</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-60" data-cat="Nonprofit" data-search="donor thank-you letter donor thank you letter stewardship fundraising">
+<div class="skill-card-top"><span class="skill-cat">Nonprofit</span><span class="skill-price-tag">$10</span></div>
+<h3>Donor Thank-You Letter</h3>
+<p class="skill-desc">Stewardship letters that build donor loyalty</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-61" data-cat="Nonprofit" data-search="impact report generator impact report generator annual donors">
+<div class="skill-card-top"><span class="skill-cat">Nonprofit</span><span class="skill-price-tag">$20</span></div>
+<h3>Impact Report Generator</h3>
+<p class="skill-desc">Show donors what their money actually did</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-62" data-cat="Nonprofit" data-search="fundraising campaign planner fundraising campaign planner crowdfunding">
+<div class="skill-card-top"><span class="skill-cat">Nonprofit</span><span class="skill-price-tag">$20</span></div>
+<h3>Fundraising Campaign Planner</h3>
+<p class="skill-desc">Plan your next campaign start to finish</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-63" data-cat="Personal Finance" data-search="budget planner &amp; tracker budget planner tracker money savings finance">
+<div class="skill-card-top"><span class="skill-cat">Personal Finance</span><span class="skill-price-tag">$15</span></div>
+<h3>Budget Planner &amp; Tracker</h3>
+<p class="skill-desc">A budget that works with your real life</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-64" data-cat="Personal Finance" data-search="debt payoff strategy generator debt payoff strategy snowball avalanche">
+<div class="skill-card-top"><span class="skill-cat">Personal Finance</span><span class="skill-price-tag">$12</span></div>
+<h3>Debt Payoff Strategy Generator</h3>
+<p class="skill-desc">A clear path to debt-free</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-65" data-cat="Personal Finance" data-search="freelancer tax prep organizer freelancer tax prep organizer deductions 1099">
+<div class="skill-card-top"><span class="skill-cat">Personal Finance</span><span class="skill-price-tag">$20</span></div>
+<h3>Freelancer Tax Prep Organizer</h3>
+<p class="skill-desc">Get tax season done right</p>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-66" data-cat="Podcasting" data-search="podcast episode planner podcast episode planner show notes questions">
+<div class="skill-card-top"><span class="skill-cat">Podcasting</span><span class="skill-price-tag">$12</span></div>
+<h3>Podcast Episode Planner</h3>
+<p class="skill-desc">Episodes that are worth listening to</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b7">Podcast Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-67" data-cat="Podcasting" data-search="podcast-to-content suite podcast to content suite repurpose blog social">
+<div class="skill-card-top"><span class="skill-cat">Podcasting</span><span class="skill-price-tag">$25</span></div>
+<h3>Podcast-to-Content Suite</h3>
+<p class="skill-desc">Turn every episode into a week of content</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b7">Podcast Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-68" data-cat="Podcasting" data-search="podcast guest research brief podcast guest research brief interview">
+<div class="skill-card-top"><span class="skill-cat">Podcasting</span><span class="skill-price-tag">$10</span></div>
+<h3>Podcast Guest Research Brief</h3>
+<p class="skill-desc">Know your guest before the interview</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b7">Podcast Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-69" data-cat="Hospitality" data-search="airbnb listing optimizer airbnb listing optimizer booking host rental">
+<div class="skill-card-top"><span class="skill-cat">Hospitality</span><span class="skill-price-tag">$20</span></div>
+<h3>Airbnb Listing Optimizer</h3>
+<p class="skill-desc">More bookings from the guests you want</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b8">Airbnb &amp; Hospitality Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-70" data-cat="Hospitality" data-search="guest message template pack guest message template pack airbnb vrbo">
+<div class="skill-card-top"><span class="skill-cat">Hospitality</span><span class="skill-price-tag">$12</span></div>
+<h3>Guest Message Template Pack</h3>
+<p class="skill-desc">Professional messages for every guest touchpoint</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b8">Airbnb &amp; Hospitality Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-71" data-cat="Hospitality" data-search="guest review response generator guest review response generator reputation airbnb">
+<div class="skill-card-top"><span class="skill-cat">Hospitality</span><span class="skill-price-tag">$10</span></div>
+<h3>Guest Review Response Generator</h3>
+<p class="skill-desc">Responses that build your reputation</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b8">Airbnb &amp; Hospitality Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+<div class="skill-card" id="skill-72" data-cat="Hospitality" data-search="rental property expense tracker rental property expense tracker irs landlord">
+<div class="skill-card-top"><span class="skill-cat">Hospitality</span><span class="skill-price-tag">$15</span></div>
+<h3>Rental Property Expense Tracker</h3>
+<p class="skill-desc">Organized financials for every property</p>
+<div class="skill-bundle-link">&#x1F381; Part of <a href="#bundle-b8">Airbnb &amp; Hospitality Bundle</a> — save 32%</div>
+<span class="btn-buy-sm btn-disabled">Coming Soon</span>
+</div>
+</div>
+<div class="no-results" id="noResults">No skills found. Try a different search term or category.</div>
+</section>
+<footer class="footer">
+<div class="footer-brand">Lily Studio Home</div>
+<p>&copy; 2026 Lily Studio. All rights reserved.</p>
+<div class="footer-links">
+<a href="/">Home</a>
+<a href="/skills.html">Skills</a>
+<a href="/privacy.html">Privacy Policy</a>
+<a href="/terms.html">Terms of Use</a>
+<a href="https://thelilystudio.gumroad.com" target="_blank" rel="noopener">Gumroad Store</a>
+</div>
+</footer>
+<script>
+(function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const skillsGrid = document.getElementById('skillsGrid');
+    const noResults = document.getElementById('noResults');
+    const cards = Array.from(skillsGrid.querySelectorAll('.skill-card'));
+    let activeCat = 'all';
+
+    function filterCards() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visible = 0;
+        cards.forEach(card => {
+            const matchesCat = activeCat === 'all' || card.dataset.cat === activeCat;
+            const searchText = card.dataset.search || '';
+            const matchesSearch = !query || searchText.includes(query);
+            if (matchesCat && matchesSearch) {
+                card.classList.remove('hidden');
+                visible++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        searchCount.textContent = visible + ' skill' + (visible !== 1 ? 's' : '');
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    searchInput.addEventListener('input', filterCards);
+
+    categoryTabs.addEventListener('click', function(e) {
+        const tab = e.target.closest('.cat-tab');
+        if (!tab) return;
+        categoryTabs.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeCat = tab.dataset.cat;
+        filterCards();
+    });
+})();
+</script>
+</body>
+</html>
