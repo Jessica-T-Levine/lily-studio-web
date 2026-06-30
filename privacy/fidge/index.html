@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy &mdash; Fidge</title>
+  <meta name="description" content="Privacy Policy for Fidge by Lily Studio." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: #0D1B2A;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-weight: 400;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(175deg, #112240 0%, #0D1B2A 50%, #0A1628 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 0 28px 80px;
+    }
+
+    .nav {
+      background: #0D1B2A;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo img { height: 32px; width: auto; }
+    .nav-logo span {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #ffffff; }
+    .nav-links a.active { color: #E83E8C; }
+
+    .doc-header {
+      padding: 40px 0 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 48px;
+    }
+
+    .doc-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #E83E8C;
+      margin-bottom: 16px;
+    }
+
+    .doc-title {
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    .doc-meta {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 40px 0 14px;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.78);
+      margin-bottom: 16px;
+    }
+
+    ul { margin: 0 0 16px 20px; }
+
+    li {
+      font-size: 16px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.75;
+      margin-bottom: 8px;
+    }
+
+    a { color: #E83E8C; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: #ffffff; font-weight: 600; }
+
+    .highlight-box {
+      background-color: rgba(232,62,140,0.08);
+      border: 1px solid rgba(232,62,140,0.25);
+      border-radius: 14px;
+      padding: 24px 26px;
+      margin: 32px 0;
+    }
+
+    .highlight-box p {
+      margin-bottom: 0;
+      font-size: 17px;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .footer {
+      background: #0D1B2A;
+      padding: 32px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 64px;
+    }
+    .footer-brand {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+    .footer p { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 0; }
+    .footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    .footer a:hover { color: #ffffff; text-decoration: none; }
+    .footer-links {
+      margin-top: 12px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .footer-links a { font-size: 13px; }
+
+    @media (max-width: 640px) {
+      .nav { padding: 12px 16px; }
+      .nav-links { gap: 16px; }
+      .nav-links a { font-size: 13px; }
+      .wrapper { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="data:image/png;base64,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" alt="Lily Studio logo" />
+    <span>Lily Studio</span>
+  </a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/skills.html">Skills</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <div class="doc-header">
+    <p class="doc-eyebrow">Legal</p>
+    <h1 class="doc-title">Privacy Policy</h1>
+    <p class="doc-meta">Fidge &nbsp;&middot;&nbsp; Effective: June 2026 &nbsp;&middot;&nbsp; Last updated: June 28, 2026</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>The short version:</strong> Fidge has no accounts, no login, and no ads. Most of what Fidge stores stays on your device. The only information that leaves your device is anonymous crash, usage, and performance data &mdash; used to keep Fidge stable and improve it &mdash; and purchase information used to unlock what you&rsquo;ve bought. We never collect your name, email, or location, and we never sell your data.</p>
+  </div>
+
+  <h2>1. Information Stored Only on Your Device</h2>
+  <p>Your settings, your scores, your board layouts, and a flag showing whether you&rsquo;ve unlocked the full app are stored locally on your device. This information is not transmitted to Lily Studio or anyone else. Deleting the app removes it.</p>
+
+  <h2>2. Crash Diagnostics (Firebase Crashlytics)</h2>
+  <p>To find and fix crashes, Fidge uses <strong>Firebase Crashlytics</strong>, a service provided by Google LLC. It collects crash logs, your device model, OS version, app version, and a Firebase installation ID. This information is used solely for app stability diagnostics. It does not include your name, email, location, or any personally identifiable information.</p>
+
+  <h2>3. Usage Analytics (Firebase Analytics)</h2>
+  <p>To understand how Fidge is used in aggregate, Fidge uses <strong>Firebase Analytics</strong>, also provided by Google. It collects session data, screen views, device type, OS version, and app version &mdash; for example, when the app is opened, which fidget is played, when the paywall is viewed, when a purchase completes, and how long a session lasts. This information is used to understand aggregate usage patterns. It is not linked to your identity.</p>
+
+  <h2>4. Performance Monitoring (Firebase Performance Monitoring)</h2>
+  <p>To find and fix slowdowns, Fidge uses <strong>Firebase Performance Monitoring</strong>, also provided by Google. It collects anonymous performance data such as app launch time and screen load times. This helps us identify and improve performance. It does not collect any information that identifies you.</p>
+  <p>None of these Firebase services collect your name, email, location, or personally identifiable information. You can review Google&rsquo;s privacy practices at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a> and Firebase&rsquo;s privacy information at <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</p>
+
+  <h2>5. Purchases (RevenueCat and Apple)</h2>
+  <p>Fidge offers a one-time purchase to unlock the full app. Apple processes the payment &mdash; neither Lily Studio nor RevenueCat ever sees your credit card number. We use <strong>RevenueCat</strong> to manage that purchase. RevenueCat receives transaction information (what was purchased and when) and your device type, under an anonymous identifier, used solely to confirm and manage your purchase. RevenueCat does not use this to track you across apps. See RevenueCat&rsquo;s privacy policy at <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">revenuecat.com/privacy</a>.</p>
+
+  <h2>6. No Tracking, No Ads</h2>
+  <p>Fidge does not track you across other apps or websites, shows no advertisements, and uses no advertising identifier.</p>
+
+  <h2>7. Third-Party Services</h2>
+  <p>Fidge relies on a small number of third parties, each with its own privacy practices: <strong>Apple</strong> (payment processing), <strong>Google Firebase</strong> (crash diagnostics, analytics, and performance monitoring), and <strong>RevenueCat</strong> (purchase management). We do not sell, rent, or trade your information, and we share information with these services only for the technical purposes described above.</p>
+
+  <h2>8. Children&rsquo;s Privacy</h2>
+  <p>Fidge is a general-audience app. It is not directed to children under 13, and we do not knowingly collect personal information from children. The limited data Fidge collects is anonymous and not used to identify anyone.</p>
+
+  <h2>9. Your Rights and Choices</h2>
+  <p>Depending on where you live, you may have rights regarding your personal information. Because Fidge collects only anonymous, aggregate data that is not linked to your identity, there is generally nothing personal to access, correct, or delete. If you have questions or concerns, please contact us and we will respond promptly.</p>
+
+  <h2>10. International Users</h2>
+  <p>Fidge is operated from the United States. If you use Fidge from outside the United States, the limited anonymous information described above may be processed in the United States and in other countries where our service providers operate.</p>
+
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. When we do, we will update the &ldquo;Last updated&rdquo; date at the top of this page. We encourage you to review this policy periodically. Your continued use of the App after any changes constitutes your acceptance of the updated policy.</p>
+
+  <h2>12. Contact Us</h2>
+  <p>If you have questions about this Privacy Policy or our privacy practices, please contact us at:</p>
+  <p><a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a></p>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">Lily Studio Home</div>
+  <p>&copy; 2026 Lily Studio. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/skills.html">Skills</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Use</a>
+    <a href="https://thelilystudio.gumroad.com" target="_blank" rel="noopener">Gumroad Store</a>
+    <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a>
+  </div>
+</footer>
+
+</body>
+</html>
