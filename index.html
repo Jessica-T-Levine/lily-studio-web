@@ -180,16 +180,7 @@
     }
 
     /* Responsive breakpoints */
-    @media (max-width: 900px) {
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-      nav { padding: 18px 28px; }
-    }
-
-    @media (max-width: 600px) {
-      nav { padding: 16px 20px; }
-      .nav-mobile { padding: 28px 20px; }
-    }
+    /* Responsive — see end of stylesheet */
 
     /* ── HERO ── */
     .hero {
@@ -810,6 +801,68 @@
     .hero-sub     { animation: fadeUp 0.6s ease 0.2s both; }
     .hero-actions { animation: fadeUp 0.6s ease 0.3s both; }
     .hero-mark    { animation: fadeUp 0.8s ease 0.2s both; }
+
+    /* ── RESPONSIVE — TABLET ── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      nav { padding: 18px 28px; }
+
+      .hero { padding: 120px 40px 80px; min-height: auto; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .hero-mark { display: none; }
+      .hero h1 { font-size: 42px; }
+
+      section { padding: 80px 40px; }
+
+      .story-inner { grid-template-columns: 1fr; gap: 48px; }
+      .categories-grid { grid-template-columns: 1fr; }
+      .app-feature-inner { grid-template-columns: 1fr; gap: 48px; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .skills-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+
+      footer { flex-direction: column; gap: 24px; text-align: center; }
+      .footer-links { justify-content: center; flex-wrap: wrap; gap: 20px; }
+    }
+
+    /* ── RESPONSIVE — PHONE ── */
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .nav-mobile { padding: 28px 20px; }
+
+      .hero { padding: 100px 20px 60px; }
+      .hero h1 { font-size: 32px; line-height: 1.12; }
+      .hero-sub { font-size: 16px; max-width: 100%; }
+      .hero-actions { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .btn-primary { padding: 14px 28px; font-size: 13px; }
+
+      section { padding: 60px 20px; }
+      .section-title { font-size: 26px; }
+      .section-body { font-size: 15px; }
+
+      .story-quote { font-size: 20px; padding-left: 20px; }
+      .story-text p { font-size: 15px; }
+
+      .cat-card { padding: 36px 24px; }
+      .cat-title { font-size: 20px; }
+
+      .app-name { font-size: 32px; }
+      .app-desc { font-size: 15px; }
+      .app-phone-mock { width: 220px; }
+
+      .skill-card { padding: 28px 24px; }
+      .skill-name { font-size: 16px; }
+
+      .newsletter h2 { font-size: 26px; }
+      .newsletter-sub { font-size: 15px; }
+      .newsletter-form { flex-direction: column; gap: 12px; }
+      .newsletter-form input { border-right: 1px solid rgba(232,224,212,0.15); border-radius: 4px; }
+      .newsletter-form button { border-radius: 4px; }
+
+      footer { padding: 36px 20px; }
+      .footer-links { gap: 16px; }
+      .divider { margin: 0 20px; width: calc(100% - 40px); }
+    }
   </style>
 </head>
 <body>
@@ -1056,4 +1109,4 @@
   </footer>
 
 </body>
-</html> 
+</html>
