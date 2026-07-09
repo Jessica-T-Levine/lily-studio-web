@@ -802,66 +802,59 @@
     .hero-actions { animation: fadeUp 0.6s ease 0.3s both; }
     .hero-mark    { animation: fadeUp 0.8s ease 0.2s both; }
 
-    /* ── RESPONSIVE — TABLET ── */
-    @media (max-width: 900px) {
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-      nav { padding: 18px 28px; }
+    /* ── RESPONSIVE — TABLET & PHONE ── */
+    @media screen and (max-width: 1024px) {
+      .nav-links { display: none !important; }
+      .nav-hamburger { display: flex !important; }
+      nav { padding: 18px 28px !important; }
 
-      .hero { padding: 120px 40px 80px; min-height: auto; }
-      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-      .hero-mark { display: none; }
-      .hero h1 { font-size: 42px; }
+      .hero { padding: 100px 28px 60px !important; min-height: auto !important; }
+      .hero-inner { grid-template-columns: 1fr !important; gap: 32px !important; }
+      .hero-mark { display: none !important; }
+      .hero h1 { font-size: 36px !important; }
+      .hero-sub { font-size: 16px !important; max-width: 100% !important; }
+      .hero-actions { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
 
-      section { padding: 80px 40px; }
+      section { padding: 60px 28px !important; }
+      .section-title { font-size: 28px !important; }
 
-      .story-inner { grid-template-columns: 1fr; gap: 48px; }
-      .categories-grid { grid-template-columns: 1fr; }
-      .app-feature-inner { grid-template-columns: 1fr; gap: 48px; }
-      .skills-grid { grid-template-columns: 1fr; }
-      .skills-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .story-inner { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .story-quote { font-size: 22px !important; padding-left: 20px !important; }
+      .story-text p { font-size: 15px !important; }
 
-      footer { flex-direction: column; gap: 24px; text-align: center; }
-      .footer-links { justify-content: center; flex-wrap: wrap; gap: 20px; }
+      .categories-grid { grid-template-columns: 1fr !important; }
+      .cat-card { padding: 32px 24px !important; }
+
+      .app-feature-inner { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .app-name { font-size: 32px !important; }
+      .app-phone-mock { width: 220px !important; }
+
+      .skills-grid { grid-template-columns: 1fr !important; }
+      .skills-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+      .skill-card { padding: 28px 24px !important; }
+
+      .newsletter h2 { font-size: 28px !important; }
+      .newsletter-form { flex-direction: column !important; gap: 12px !important; }
+      .newsletter-form input { border-right: 1px solid rgba(232,224,212,0.15) !important; border-radius: 4px !important; }
+      .newsletter-form button { border-radius: 4px !important; }
+
+      footer { flex-direction: column !important; gap: 24px !important; text-align: center !important; padding: 36px 28px !important; }
+      .footer-links { justify-content: center !important; flex-wrap: wrap !important; gap: 16px !important; }
+      .divider { margin: 0 28px !important; width: calc(100% - 56px) !important; }
     }
 
-    /* ── RESPONSIVE — PHONE ── */
-    @media (max-width: 600px) {
-      nav { padding: 16px 20px; }
-      .nav-mobile { padding: 28px 20px; }
-
-      .hero { padding: 100px 20px 60px; }
-      .hero h1 { font-size: 32px; line-height: 1.12; }
-      .hero-sub { font-size: 16px; max-width: 100%; }
-      .hero-actions { flex-direction: column; gap: 16px; align-items: flex-start; }
-      .btn-primary { padding: 14px 28px; font-size: 13px; }
-
-      section { padding: 60px 20px; }
-      .section-title { font-size: 26px; }
-      .section-body { font-size: 15px; }
-
-      .story-quote { font-size: 20px; padding-left: 20px; }
-      .story-text p { font-size: 15px; }
-
-      .cat-card { padding: 36px 24px; }
-      .cat-title { font-size: 20px; }
-
-      .app-name { font-size: 32px; }
-      .app-desc { font-size: 15px; }
-      .app-phone-mock { width: 220px; }
-
-      .skill-card { padding: 28px 24px; }
-      .skill-name { font-size: 16px; }
-
-      .newsletter h2 { font-size: 26px; }
-      .newsletter-sub { font-size: 15px; }
-      .newsletter-form { flex-direction: column; gap: 12px; }
-      .newsletter-form input { border-right: 1px solid rgba(232,224,212,0.15); border-radius: 4px; }
-      .newsletter-form button { border-radius: 4px; }
-
-      footer { padding: 36px 20px; }
-      .footer-links { gap: 16px; }
-      .divider { margin: 0 20px; width: calc(100% - 40px); }
+    @media screen and (max-width: 480px) {
+      nav { padding: 14px 16px !important; }
+      .nav-mobile { padding: 24px 16px !important; }
+      .hero { padding: 90px 16px 48px !important; }
+      .hero h1 { font-size: 30px !important; }
+      section { padding: 48px 16px !important; }
+      .section-title { font-size: 24px !important; }
+      .story-quote { font-size: 19px !important; }
+      .app-name { font-size: 28px !important; }
+      .newsletter h2 { font-size: 24px !important; }
+      footer { padding: 32px 16px !important; }
+      .divider { margin: 0 16px !important; width: calc(100% - 32px) !important; }
     }
   </style>
 </head>
