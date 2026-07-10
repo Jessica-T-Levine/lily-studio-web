@@ -3,961 +3,944 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lily Studio — Apps, Skills & Tools for People Who Make Things</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <title>Lily Studio — AI Tools That Actually Work</title>
+  <meta name="description" content="Apps and AI skills for people who want tools that work. Built by a solo developer with Claude.">
+  <meta property="og:title" content="Lily Studio — AI Tools That Actually Work">
+  <meta property="og:description" content="Apps and AI skills for people who want tools that work. Built by a solo developer with Claude.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://thelilystudio.com">
+  <link rel="canonical" href="https://thelilystudio.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ============================================
+       LILY STUDIO HOMEPAGE — DESIGN BIBLE v3
+       Editorial Retrofuture + Collage
+       ============================================ */
 
     :root {
-      --navy:    #0D1B2A;
-      --navy-mid: #112236;
-      --cream:   #E8E0D4;
-      --cream-dim: rgba(232,224,212,0.65);
-      --pink:    #FF3D6E;
-      --green:   #7DAF8A;
-      --white:   #FFFFFF;
+      --navy: #0D1B2A;
+      --navy-deep: #091420;
+      --navy-light: #1B2D45;
+      --white: #FFFFFF;
+      --cream: #F0EDE8;
+      --cream-border: #DDD9D3;
+      --pink: #E83E8C;
+      --pink-glow: rgba(232,62,140,0.4);
+      --pink-soft: rgba(232,62,140,0.1);
+      --green: #96E84A;
+      --green-glow: rgba(150,232,74,0.35);
+      --green-soft: rgba(150,232,74,0.1);
+      --blue: #38BDF8;
+      --blue-glow: rgba(56,189,248,0.3);
+      --blue-soft: rgba(56,189,248,0.08);
+      --gray-light: #94A3B8;
+      --gray-mid: #475569;
+      --gray-warm: #6B6560;
+      --grid-line: rgba(255,255,255,0.05);
+      --font-display: 'Montserrat', sans-serif;
+      --font-serif: 'DM Serif Display', Georgia, serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
     body {
-      background: var(--navy);
-      color: var(--cream);
-      font-family: 'Poppins', sans-serif;
+      font-family: var(--font-display);
       font-size: 16px;
-      line-height: 1.7;
-      overflow-x: hidden;
+      line-height: 1.65;
+      color: var(--gray-light);
+      background: var(--navy-deep);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* Fade-in on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in { opacity: 1; transform: none; transition: none; }
+      .ticker { animation: none !important; }
+      .sticker { animation: none !important; }
+      .glow-sweep { animation: none !important; }
+      .badge-pulse { animation: none !important; }
     }
 
-    /* ── GRAIN OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.028;
-      pointer-events: none;
-      z-index: 1000;
-    }
-
-    /* ── NAV ── */
-    nav {
+    /* ============================================
+       1. NAVIGATION
+       ============================================ */
+    .site-header {
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 100;
+      background: rgba(9,20,32,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 40px;
-      background: rgba(13,27,42,0.92);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(232,224,212,0.07);
+      height: 60px;
     }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-decoration: none;
-      flex-shrink: 0;
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo { width: 28px; height: 28px; object-fit: contain; }
+    .nav-name {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--white);
     }
-
-    .nav-mark {
-      flex-shrink: 0;
+    .nav-badge {
+      font-family: var(--font-mono);
+      font-size: 0.48rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--pink);
+      color: var(--white);
+      padding: 3px 8px;
+      border-radius: 3px;
+      animation: badge-pulse 4s ease-in-out infinite;
     }
-
-    .nav-wordmark {
-      display: flex;
-      flex-direction: column;
-      line-height: 1;
-      padding-left: 14px;
-      border-left: 1px solid rgba(232,224,212,0.2);
+    @keyframes badge-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
     }
-
-    .nav-wordmark-lily {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: 0.18em;
-      color: var(--cream);
-    }
-
-    .nav-wordmark-studio {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 300;
-      font-size: 10px;
-      letter-spacing: 0.45em;
-      color: var(--cream-dim);
-      margin-top: 2px;
-    }
-
-    /* Desktop nav links */
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
       list-style: none;
     }
-
     .nav-links a {
-      font-size: 12px;
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      color: var(--cream-dim);
-      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 500;
       text-transform: uppercase;
-      transition: color 0.2s;
-      white-space: nowrap;
+      letter-spacing: 0.1em;
+      color: var(--gray-light);
+      transition: color 0.25s var(--ease), text-shadow 0.25s var(--ease);
     }
-
-    .nav-links a:hover { color: var(--cream); }
-
+    .nav-links a:hover {
+      color: var(--pink);
+      text-shadow: 0 0 12px var(--pink-glow);
+    }
     .nav-cta {
       background: var(--pink) !important;
       color: var(--white) !important;
-      padding: 9px 20px;
+      padding: 8px 18px !important;
       border-radius: 4px;
       font-weight: 600 !important;
-      letter-spacing: 0.06em !important;
-      transition: opacity 0.2s !important;
-      white-space: nowrap;
+      box-shadow: 0 0 14px var(--pink-glow);
+      transition: all 0.3s var(--ease) !important;
     }
-
-    .nav-cta:hover { opacity: 0.85; }
-
-    /* Hamburger button — hidden on desktop */
-    .nav-hamburger {
+    .nav-cta:hover {
+      background: var(--green) !important;
+      color: var(--navy) !important;
+      box-shadow: 0 0 22px var(--green-glow) !important;
+      transform: translateY(-2px);
+    }
+    .nav-toggle {
       display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 4px;
       background: none;
       border: none;
+      cursor: pointer;
+      padding: 8px;
     }
-
-    .nav-hamburger span {
+    .nav-toggle span {
       display: block;
-      width: 24px;
-      height: 1.5px;
-      background: var(--cream);
-      transition: all 0.3s;
+      width: 20px;
+      height: 2px;
+      background: var(--white);
+      margin: 4px 0;
+      transition: all 0.3s var(--ease);
     }
 
-    /* Mobile menu drawer */
-    .nav-mobile {
-      display: none;
-      position: fixed;
-      top: 65px; left: 0; right: 0;
-      background: rgba(13,27,42,0.98);
-      border-bottom: 1px solid rgba(232,224,212,0.1);
-      padding: 32px 40px;
-      flex-direction: column;
-      gap: 24px;
-      z-index: 99;
-    }
-
-    .nav-mobile.open { display: flex; }
-
-    .nav-mobile a {
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--cream-dim);
-      text-decoration: none;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(232,224,212,0.07);
-      transition: color 0.2s;
-    }
-
-    .nav-mobile a:hover { color: var(--cream); }
-
-    .nav-mobile .nav-cta {
-      text-align: center;
-      padding: 14px 24px !important;
-      border-bottom: none !important;
-    }
-
-    /* Responsive breakpoints */
-    /* Responsive — see end of stylesheet */
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      padding: 140px 60px 100px;
-      position: relative;
+    /* ============================================
+       2. TOP TICKER
+       ============================================ */
+    .ticker-top {
+      margin-top: 60px;
+      background: var(--navy);
+      border-bottom: 2px solid var(--pink);
       overflow: hidden;
+      padding: 10px 0;
+    }
+    .ticker {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker-scroll 30s linear infinite;
+    }
+    .ticker-text {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--cream);
+      padding: 0 8px;
+    }
+    .ticker-text .sep { color: var(--pink); padding: 0 14px; }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
-    .hero::after {
-      content: '';
-      position: absolute;
-      top: -200px; right: -200px;
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(255,61,110,0.06) 0%, transparent 70%);
-      pointer-events: none;
+    /* ============================================
+       3. HERO (Cream bg, asymmetric)
+       ============================================ */
+    .hero {
+      background: var(--cream);
+      padding: 100px 24px 80px;
     }
-
     .hero-inner {
       max-width: 1100px;
       margin: 0 auto;
-      width: 100%;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 60px;
       align-items: center;
     }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.3em;
+    .hero-caption {
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      font-weight: 500;
       text-transform: uppercase;
-      color: var(--pink);
-      margin-bottom: 28px;
-    }
-
-    .hero-eyebrow::before {
-      content: '';
-      width: 32px; height: 1px;
-      background: var(--pink);
-    }
-
-    .hero h1 {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800;
-      font-size: clamp(42px, 5vw, 68px);
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      color: var(--cream);
-      margin-bottom: 28px;
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--pink);
-    }
-
-    .hero-sub {
-      font-family: 'Lora', serif;
-      font-size: 19px;
-      font-style: italic;
-      color: var(--cream-dim);
-      line-height: 1.65;
-      margin-bottom: 48px;
-      max-width: 460px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .btn-primary {
-      background: var(--pink);
-      color: var(--white);
-      padding: 16px 36px;
-      border-radius: 4px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      text-decoration: none;
-      transition: opacity 0.2s, transform 0.2s;
-      display: inline-block;
-    }
-
-    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-
-    .btn-ghost {
-      color: var(--cream-dim);
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-decoration: none;
-      border-bottom: 1px solid rgba(232,224,212,0.25);
-      padding-bottom: 2px;
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .btn-ghost:hover { color: var(--cream); border-color: var(--cream-dim); }
-
-    /* Hero right — large lily SVG mark */
-    .hero-mark {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-
-    .hero-mark svg {
-      opacity: 0.12;
-      width: 340px;
-      height: 340px;
-    }
-
-    /* ── DIVIDER ── */
-    .divider {
-      width: 100%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(232,224,212,0.1) 30%, rgba(232,224,212,0.1) 70%, transparent);
-      margin: 0 60px;
-      width: calc(100% - 120px);
-    }
-
-    /* ── SECTION BASE ── */
-    section {
-      padding: 100px 60px;
-    }
-
-    .section-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .section-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: var(--pink);
+      letter-spacing: 0.1em;
+      color: var(--gray-warm);
       margin-bottom: 20px;
     }
-
-    .section-eyebrow::before {
-      content: '';
-      width: 24px; height: 1px;
-      background: var(--pink);
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--navy);
+      margin-bottom: 20px;
     }
-
-    .section-title {
-      font-weight: 700;
-      font-size: clamp(30px, 3.5vw, 44px);
-      letter-spacing: -0.02em;
-      line-height: 1.15;
+    .hero h1 em { font-style: italic; color: var(--pink); }
+    .hero-sub {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 400;
+      color: var(--gray-warm);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      max-width: 440px;
+    }
+    .hero-buttons { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 14px 32px;
+      background: var(--navy);
       color: var(--cream);
-      margin-bottom: 16px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s var(--ease);
+    }
+    .btn-primary:hover {
+      background: var(--pink);
+      color: var(--white);
+      box-shadow: 0 0 30px var(--pink-glow);
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--navy);
+      transition: color 0.25s var(--ease);
+    }
+    .btn-ghost:hover { color: var(--pink); }
+
+    /* Collage card stack */
+    .hero-collage { position: relative; height: 380px; }
+    .collage-card {
+      position: absolute;
+      background: var(--white);
+      border: 1px solid var(--cream-border);
+      border-radius: 4px;
+      padding: 28px 24px;
+      width: 240px;
+      transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    }
+    .collage-card:hover {
+      transform: translateY(-6px) !important;
+      box-shadow: 0 12px 40px rgba(13,27,42,0.12);
+    }
+    .collage-card .tape {
+      position: absolute;
+      top: -6px; left: 24px;
+      width: 60px; height: 16px;
+      border-radius: 2px;
+    }
+    .collage-card:nth-child(1) { top: 10px; left: 0; transform: rotate(-3deg); z-index: 3; }
+    .collage-card:nth-child(1) .tape { background: rgba(232,62,140,0.3); transform: rotate(2deg); }
+    .collage-card:nth-child(2) { top: 50px; left: 120px; transform: rotate(2deg); z-index: 2; }
+    .collage-card:nth-child(2) .tape { background: rgba(150,232,74,0.3); transform: rotate(-1deg); }
+    .collage-card:nth-child(3) { top: 140px; left: 30px; transform: rotate(-1.5deg); z-index: 1; }
+    .collage-card:nth-child(3) .tape { background: rgba(56,189,248,0.25); transform: rotate(3deg); }
+    .collage-card-number {
+      font-family: var(--font-display);
+      font-weight: 800; font-size: 2.6rem;
+      color: var(--cream-border); line-height: 1; margin-bottom: 6px;
+    }
+    .collage-card-title {
+      font-family: var(--font-serif);
+      font-size: 1.15rem; font-weight: 400;
+      color: var(--navy); margin-bottom: 6px;
+    }
+    .collage-card-desc {
+      font-family: var(--font-display);
+      font-size: 0.82rem; color: var(--gray-warm); line-height: 1.5;
+    }
+    .collage-card-caption {
+      font-family: var(--font-mono);
+      font-size: 0.48rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-warm); margin-top: 12px;
+    }
+    .sticker {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 6px 14px; border-radius: 2px;
+      box-shadow: 3px 3px 0 var(--navy);
+      z-index: 10;
+      animation: sticker-bob 5.5s ease-in-out infinite;
+    }
+    @keyframes sticker-bob {
+      0%, 100% { transform: translateY(0) rotate(var(--rot)); }
+      50% { transform: translateY(-5px) rotate(var(--rot)); }
+    }
+    .sticker-green {
+      background: var(--green); color: var(--navy);
+      --rot: -8deg; top: -10px; right: 20px;
+    }
+    .sticker-pink {
+      background: var(--pink); color: var(--white);
+      --rot: 6deg; bottom: 40px; right: 0;
     }
 
-    .section-body {
-      font-family: 'Lora', serif;
-      font-size: 17px;
-      color: var(--cream-dim);
-      line-height: 1.75;
-      max-width: 560px;
-    }
-
-    /* ── STORY SECTION ── */
+    /* ============================================
+       4. STORY (Dark, editorial quote)
+       ============================================ */
     .story {
-      background: var(--navy-mid);
+      background: var(--navy-deep);
+      padding: 90px 24px;
     }
-
     .story-inner {
       max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 100px;
-      align-items: center;
+      gap: 60px;
+      align-items: start;
     }
-
+    .story-label {
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--pink);
+      text-shadow: 0 0 16px var(--pink-glow);
+      margin-bottom: 24px;
+    }
     .story-quote {
-      font-family: 'Lora', serif;
-      font-size: clamp(22px, 2.8vw, 34px);
-      font-style: italic;
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 2.5vw, 1.8rem);
       font-weight: 400;
-      line-height: 1.45;
+      font-style: italic;
       color: var(--cream);
-      position: relative;
-      padding-left: 32px;
+      line-height: 1.35;
+      border-left: 3px solid var(--pink);
+      padding-left: 24px;
     }
-
-    .story-quote::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 8px;
-      width: 3px;
-      height: calc(100% - 16px);
-      background: var(--pink);
-      border-radius: 2px;
-    }
-
     .story-text p {
-      font-family: 'Lora', serif;
-      font-size: 17px;
-      color: var(--cream-dim);
-      line-height: 1.8;
-      margin-bottom: 20px;
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      color: var(--gray-light);
+      line-height: 1.7;
+      margin-bottom: 16px;
     }
-
-    .story-text p:last-child { margin-bottom: 0; }
-
+    .story-text p:last-of-type { margin-bottom: 24px; }
     .story-sig {
-      margin-top: 36px;
-      font-size: 13px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: var(--cream);
     }
-
     .story-sig span {
       display: block;
-      font-weight: 300;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      color: var(--cream-dim);
+      font-weight: 400;
+      color: var(--gray-mid);
       margin-top: 4px;
+      letter-spacing: 0.1em;
     }
 
-    /* ── WHAT WE MAKE ── */
-    .categories-grid {
+    /* ============================================
+       5. HOW IT WORKS (Cream bg, figure grid)
+       ============================================ */
+    .how-it-works {
+      background: var(--cream);
+      padding: 80px 24px 90px;
+    }
+    .section-header-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 56px;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      margin-bottom: 12px;
+    }
+    .section-label-warm { color: var(--gray-warm); }
+    .section-label-pink { color: var(--pink); text-shadow: 0 0 16px var(--pink-glow); }
+    .section-heading {
+      font-family: var(--font-serif);
+      font-size: 2.3rem; font-weight: 400; line-height: 1.15;
+    }
+    .section-heading-navy { color: var(--navy); }
+    .section-heading-cream { color: var(--cream); }
+    .section-heading em { font-style: italic; color: var(--pink); }
+    .section-aside {
+      font-family: var(--font-display);
+      font-size: 0.9rem; color: var(--gray-warm);
+      line-height: 1.65; align-self: end;
+    }
+    .fig-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      margin-top: 60px;
+      gap: 28px;
+    }
+    .fig-frame {
+      background: var(--navy);
+      border-radius: 4px;
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s var(--ease);
+    }
+    .fig-frame:hover { transform: translateY(-3px); }
+    .fig-frame::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    .fig-number {
+      font-family: var(--font-display);
+      font-weight: 800; font-size: 3rem;
+      color: var(--navy-light); line-height: 1;
+      margin-bottom: 10px; position: relative; z-index: 1;
+    }
+    .fig-title {
+      font-family: var(--font-serif);
+      font-size: 1.2rem; font-weight: 400;
+      color: var(--cream); margin-bottom: 8px;
+      position: relative; z-index: 1;
+    }
+    .fig-desc {
+      font-family: var(--font-display);
+      font-size: 0.88rem; color: var(--gray-light);
+      line-height: 1.6; position: relative; z-index: 1;
+    }
+    .fig-caption {
+      font-family: var(--font-mono);
+      font-size: 0.48rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-warm); margin-top: 14px; text-align: center;
     }
 
-    .cat-card {
-      background: var(--navy-mid);
-      padding: 48px 40px;
-      text-decoration: none;
-      transition: background 0.2s;
+    /* ============================================
+       6. CALMING WATER (Dark, app feature)
+       ============================================ */
+    .app-feature {
+      background: var(--navy);
+      padding: 90px 24px;
       position: relative;
       overflow: hidden;
     }
-
-    .cat-card::after {
+    .app-feature::after {
       content: '';
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 100%; height: 2px;
-      background: var(--pink);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s;
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 1;
+      background: repeating-linear-gradient(
+        to bottom, transparent, transparent 3px,
+        rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+      );
     }
-
-    .cat-card:hover::after { transform: scaleX(1); }
-    .cat-card:hover { background: #162840; }
-
-    .cat-number {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.3em;
-      color: var(--pink);
-      margin-bottom: 24px;
-      display: block;
-    }
-
-    .cat-title {
-      font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -0.01em;
-      color: var(--cream);
-      margin-bottom: 12px;
-    }
-
-    .cat-desc {
-      font-family: 'Lora', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: var(--cream-dim);
-      line-height: 1.6;
-    }
-
-    .cat-arrow {
-      display: inline-block;
-      margin-top: 28px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--cream-dim);
-      transition: color 0.2s, gap 0.2s;
-    }
-
-    .cat-card:hover .cat-arrow { color: var(--pink); }
-
-    /* ── FEATURED APP ── */
-    .app-feature {
-      background: var(--navy);
-    }
-
     .app-feature-inner {
       max-width: 1100px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
     }
-
     .app-badge {
       display: inline-block;
-      background: rgba(255,61,110,0.1);
-      border: 1px solid rgba(255,61,110,0.3);
-      color: var(--pink);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
+      font-family: var(--font-mono);
+      font-size: 0.52rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
       padding: 6px 14px;
-      border-radius: 2px;
-      margin-bottom: 24px;
-    }
-
-    .app-name {
-      font-weight: 800;
-      font-size: clamp(32px, 4vw, 52px);
-      letter-spacing: -0.03em;
-      line-height: 1.05;
-      color: var(--cream);
-      margin-bottom: 10px;
-    }
-
-    .app-tagline {
-      font-family: 'Lora', serif;
-      font-style: italic;
-      font-size: 18px;
-      color: var(--cream-dim);
-      margin-bottom: 28px;
-    }
-
-    .app-desc {
-      font-family: 'Lora', serif;
-      font-size: 16px;
-      color: var(--cream-dim);
-      line-height: 1.8;
-      margin-bottom: 40px;
-    }
-
-    .app-visual {
-      position: relative;
-    }
-
-    .app-phone-mock {
-      width: 260px;
-      margin: 0 auto;
-      display: block;
-      background: #1a2d42;
-      border-radius: 36px;
-      padding: 16px;
-      border: 1px solid rgba(232,224,212,0.1);
-      box-shadow: 0 40px 80px rgba(0,0,0,0.4);
-    }
-
-    .app-phone-screen {
-      background: linear-gradient(160deg, #0a1824 0%, #1a3a5c 100%);
-      border-radius: 24px;
-      height: 440px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 32px;
-    }
-
-    .app-screen-title {
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(232,224,212,0.5);
-    }
-
-    .app-screen-main {
-      font-family: 'Lora', serif;
-      font-size: 22px;
-      font-style: italic;
-      color: var(--cream);
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .app-screen-wave {
-      width: 80%;
-      height: 60px;
-      opacity: 0.4;
-    }
-
-    /* ── SKILLS ── */
-    .skills { background: var(--navy-mid); }
-
-    .skills-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 56px;
-    }
-
-    .skills-link {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--cream-dim);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(232,224,212,0.2);
-      padding-bottom: 2px;
-      transition: color 0.2s;
-    }
-
-    .skills-link:hover { color: var(--pink); border-color: var(--pink); }
-
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-    }
-
-    .skill-card {
-      background: var(--navy);
-      padding: 36px 32px;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-
-    .skill-card:hover { background: #0f2035; }
-
-    .skill-tag {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .skill-name {
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--cream);
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-
-    .skill-desc {
-      font-family: 'Lora', serif;
-      font-size: 14px;
-      font-style: italic;
-      color: var(--cream-dim);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .skill-price {
-      font-weight: 700;
-      font-size: 16px;
-      color: var(--cream);
-    }
-
-    .skill-price span {
-      font-weight: 300;
-      font-size: 12px;
-      color: var(--cream-dim);
-      margin-left: 4px;
-    }
-
-    /* ── NEWSLETTER ── */
-    .newsletter {
-      background: var(--navy);
-      text-align: center;
-    }
-
-    .newsletter-inner {
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .newsletter h2 {
-      font-weight: 800;
-      font-size: clamp(28px, 3.5vw, 42px);
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      color: var(--cream);
-      margin-bottom: 16px;
-    }
-
-    .newsletter-sub {
-      font-family: 'Lora', serif;
-      font-style: italic;
-      font-size: 17px;
-      color: var(--cream-dim);
-      margin-bottom: 40px;
-      line-height: 1.65;
-    }
-
-    .newsletter-form {
-      display: flex;
-      gap: 0;
-      max-width: 440px;
-      margin: 0 auto;
-    }
-
-    .newsletter-form input {
-      flex: 1;
-      background: rgba(232,224,212,0.07);
-      border: 1px solid rgba(232,224,212,0.15);
-      border-right: none;
-      border-radius: 4px 0 0 4px;
-      padding: 16px 20px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px;
-      color: var(--cream);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .newsletter-form input::placeholder { color: rgba(232,224,212,0.3); }
-    .newsletter-form input:focus { border-color: rgba(232,224,212,0.35); }
-
-    .newsletter-form button {
       background: var(--pink);
       color: var(--white);
-      border: none;
-      border-radius: 0 4px 4px 0;
-      padding: 16px 28px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: opacity 0.2s;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 14px var(--pink-glow);
+    }
+    .app-name {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+    .app-tagline {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--pink);
+      margin-bottom: 24px;
+    }
+    .app-desc {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      color: var(--gray-light);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .app-cta {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 14px 32px;
+      background: var(--cream);
+      color: var(--navy);
+      border-radius: 3px;
+      transition: all 0.35s var(--ease);
+    }
+    .app-cta:hover {
+      background: var(--pink);
+      color: var(--white);
+      box-shadow: 0 0 30px var(--pink-glow);
+      transform: translateY(-2px);
+    }
+    .app-caption {
+      font-family: var(--font-mono);
+      font-size: 0.48rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-mid);
+      margin-top: 20px;
     }
 
-    .newsletter-form button:hover { opacity: 0.85; }
-
-    .newsletter-fine {
-      font-size: 11px;
-      color: rgba(232,224,212,0.3);
-      margin-top: 16px;
-      letter-spacing: 0.05em;
+    /* ============================================
+       7. FEATURED SKILLS (Dark, scanlines)
+       ============================================ */
+    .featured-skills {
+      background: var(--navy);
+      padding: 90px 24px 100px;
+      position: relative;
+      overflow: hidden;
     }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid rgba(232,224,212,0.07);
-      padding: 48px 60px;
+    .has-scanlines::after {
+      content: '';
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 1;
+      background: repeating-linear-gradient(
+        to bottom, transparent, transparent 3px,
+        rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+      );
+    }
+    .glow-sweep {
+      position: absolute;
+      left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--pink-glow), transparent);
+      top: 25%; z-index: 2;
+      animation: sweep 9s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes sweep {
+      0%, 100% { top: 25%; opacity: 0.6; }
+      50% { top: 75%; opacity: 1; }
+    }
+    .featured-skills .container { position: relative; z-index: 3; }
+    .skill-rows { display: flex; flex-direction: column; gap: 24px; }
+    .skill-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+    }
+    .skill-row:nth-child(even) { grid-template-columns: 0.8fr 1.2fr; }
+    .skill-card {
+      background: var(--navy-light);
+      border: 1px solid var(--gray-mid);
+      border-radius: 4px;
+      padding: 28px 24px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s var(--ease);
+    }
+    .skill-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--pink);
+      box-shadow: 0 0 24px var(--pink-glow);
+    }
+    .skill-card-glow {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .skill-card-glow-pink { background: var(--pink); box-shadow: 0 0 12px var(--pink-glow); }
+    .skill-card-glow-green { background: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+    .skill-card-glow-blue { background: var(--blue); box-shadow: 0 0 12px var(--blue-glow); }
+    .skill-card-fig {
+      font-family: var(--font-mono);
+      font-size: 0.48rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-mid); margin-bottom: 12px;
+    }
+    .skill-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.52rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 4px 10px; border-radius: 3px; margin-bottom: 14px;
+    }
+    .badge-career { background: var(--green); color: var(--navy); }
+    .badge-education { background: var(--blue); color: var(--navy); }
+    .badge-business { background: var(--cream); color: var(--navy); }
+    .badge-marketing { background: var(--pink); color: var(--white); }
+    .skill-card-title {
+      font-family: var(--font-serif);
+      font-size: 1.2rem; font-weight: 400;
+      color: var(--cream); margin-bottom: 8px;
+    }
+    .skill-card-desc {
+      font-family: var(--font-display);
+      font-size: 0.88rem; color: var(--gray-light);
+      line-height: 1.6; margin-bottom: 16px;
+    }
+    .skill-card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    .skill-price {
+      font-family: var(--font-mono);
+      font-size: 0.72rem; font-weight: 600; color: var(--green);
+    }
+    .skill-link {
+      font-family: var(--font-mono);
+      font-size: 0.6rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--pink);
+      transition: text-shadow 0.25s var(--ease);
+    }
+    .skill-link:hover { text-shadow: 0 0 14px var(--pink-glow); }
 
-    .footer-left {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    /* ============================================
+       8. BLOCKQUOTE STRIP
+       ============================================ */
+    .blockquote-strip {
+      background: var(--cream);
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .blockquote-strip blockquote {
+      font-family: var(--font-serif);
+      font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+      font-weight: 400; font-style: italic;
+      color: var(--navy);
+      max-width: 700px;
+      margin: 0 auto 16px; line-height: 1.4;
+    }
+    .blockquote-strip cite {
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--gray-warm); font-style: normal;
     }
 
-    .footer-brand {
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.2em;
-      color: var(--cream);
+    /* ============================================
+       9. CTA SECTION (Dark, radial glow)
+       ============================================ */
+    .cta-section {
+      background: var(--navy);
+      padding: 90px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--pink-soft) 0%, transparent 70%);
+      pointer-events: none; opacity: 0.8;
+    }
+    .cta-section::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    .cta-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 60px;
+      align-items: center;
+      position: relative; z-index: 2;
+    }
+    .cta-heading {
+      font-family: var(--font-serif);
+      font-size: 2.3rem; font-weight: 400;
+      color: var(--cream); line-height: 1.15; margin-bottom: 12px;
+    }
+    .cta-heading em { font-style: italic; color: var(--pink); }
+    .cta-body {
+      font-family: var(--font-display);
+      font-size: 0.92rem; color: var(--gray-light); line-height: 1.6;
+    }
+    .cta-action { text-align: center; }
+    .cta-btn {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 18px 40px;
+      background: var(--cream); color: var(--navy);
+      border: none; border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.35s var(--ease);
+    }
+    .cta-btn:hover {
+      background: var(--pink); color: var(--white);
+      box-shadow: 0 0 30px var(--pink-glow);
+      transform: translateY(-2px);
+    }
+    .cta-reassurance {
+      font-family: var(--font-mono);
+      font-size: 0.5rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--gray-mid); margin-top: 16px;
     }
 
-    .footer-copy {
-      font-size: 11px;
-      color: rgba(232,224,212,0.3);
-      letter-spacing: 0.05em;
+    /* ============================================
+       10. BOTTOM TICKER
+       ============================================ */
+    .ticker-bottom {
+      background: var(--pink);
+      overflow: hidden;
+      padding: 12px 0;
     }
+    .ticker-bottom .ticker-text { color: var(--white); }
+    .ticker-bottom .ticker-text .sep { color: var(--cream); }
 
+    /* ============================================
+       11. FOOTER
+       ============================================ */
+    .site-footer {
+      background: var(--navy-deep);
+      border-top: 1px solid var(--gray-mid);
+      padding: 40px 24px;
+      text-align: center;
+    }
     .footer-links {
       display: flex;
-      gap: 32px;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 20px;
       list-style: none;
+      flex-wrap: wrap;
     }
-
     .footer-links a {
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      color: rgba(232,224,212,0.4);
-      text-decoration: none;
-      transition: color 0.2s;
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--pink);
+      transition: text-shadow 0.25s var(--ease);
+    }
+    .footer-links a:hover { text-shadow: 0 0 12px var(--pink-glow); }
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 0.52rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--gray-mid);
     }
 
-    .footer-links a:hover { color: var(--cream-dim); }
-
-    /* ── FADE IN ANIMATION ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .hero-collage { display: none; }
+      .story-inner { grid-template-columns: 1fr; gap: 40px; }
+      .fig-grid { grid-template-columns: 1fr; }
+      .section-header-split { grid-template-columns: 1fr; gap: 16px; }
+      .skill-row, .skill-row:nth-child(even) { grid-template-columns: 1fr; }
+      .cta-inner { grid-template-columns: 1fr; text-align: center; gap: 32px; }
+      .nav-links { display: none; }
+      .nav-toggle { display: block; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 60px; left: 0; right: 0;
+        background: rgba(9,20,32,0.95);
+        backdrop-filter: blur(12px);
+        padding: 24px; gap: 20px;
+        border-bottom: 1px solid var(--gray-mid);
+      }
+      .hero-buttons { justify-content: center; }
+      .story-quote { font-size: 1.3rem !important; }
     }
-
-    .hero-eyebrow { animation: fadeUp 0.6s ease both; }
-    .hero h1      { animation: fadeUp 0.6s ease 0.1s both; }
-    .hero-sub     { animation: fadeUp 0.6s ease 0.2s both; }
-    .hero-actions { animation: fadeUp 0.6s ease 0.3s both; }
-    .hero-mark    { animation: fadeUp 0.8s ease 0.2s both; }
-
-    /* ── RESPONSIVE — TABLET & PHONE ── */
-    @media screen and (max-width: 1024px) {
-      .nav-links { display: none !important; }
-      .nav-hamburger { display: flex !important; }
-      nav { padding: 18px 28px !important; }
-
-      .hero { padding: 100px 28px 60px !important; min-height: auto !important; }
-      .hero-inner { grid-template-columns: 1fr !important; gap: 32px !important; }
-      .hero-mark { display: none !important; }
-      .hero h1 { font-size: 36px !important; }
-      .hero-sub { font-size: 16px !important; max-width: 100% !important; }
-      .hero-actions { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
-
-      section { padding: 60px 28px !important; }
-      .section-title { font-size: 28px !important; }
-
-      .story-inner { grid-template-columns: 1fr !important; gap: 40px !important; }
-      .story-quote { font-size: 22px !important; padding-left: 20px !important; }
-      .story-text p { font-size: 15px !important; }
-
-      .categories-grid { grid-template-columns: 1fr !important; }
-      .cat-card { padding: 32px 24px !important; }
-
-      .app-feature-inner { grid-template-columns: 1fr !important; gap: 40px !important; }
-      .app-name { font-size: 32px !important; }
-      .app-phone-mock { width: 220px !important; }
-
-      .skills-grid { grid-template-columns: 1fr !important; }
-      .skills-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
-      .skill-card { padding: 28px 24px !important; }
-
-      .newsletter h2 { font-size: 28px !important; }
-      .newsletter-form { flex-direction: column !important; gap: 12px !important; }
-      .newsletter-form input { border-right: 1px solid rgba(232,224,212,0.15) !important; border-radius: 4px !important; }
-      .newsletter-form button { border-radius: 4px !important; }
-
-      footer { flex-direction: column !important; gap: 24px !important; text-align: center !important; padding: 36px 28px !important; }
-      .footer-links { justify-content: center !important; flex-wrap: wrap !important; gap: 16px !important; }
-      .divider { margin: 0 28px !important; width: calc(100% - 56px) !important; }
-    }
-
-    @media screen and (max-width: 480px) {
-      nav { padding: 14px 16px !important; }
-      .nav-mobile { padding: 24px 16px !important; }
-      .hero { padding: 90px 16px 48px !important; }
-      .hero h1 { font-size: 30px !important; }
-      section { padding: 48px 16px !important; }
-      .section-title { font-size: 24px !important; }
-      .story-quote { font-size: 19px !important; }
-      .app-name { font-size: 28px !important; }
-      .newsletter h2 { font-size: 24px !important; }
-      footer { padding: 32px 16px !important; }
-      .divider { margin: 0 16px !important; width: calc(100% - 32px) !important; }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 2rem; }
+      .section-heading { font-size: 1.7rem; }
+      .cta-heading { font-size: 1.7rem; }
+      .sticker { display: none; }
+      .ticker-text { font-size: 0.5rem; }
+      .app-name { font-size: 1.8rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── NAV ── -->
-  <nav>
-    <a href="#" class="nav-logo">
-      <svg class="nav-mark" width="30" height="44" viewBox="0 0 90 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="45" y1="125" x2="45" y2="72" stroke="#E8E0D4" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M45 84 Q36 70 40 56 Q44 60 45 84" fill="#E8E0D4" opacity="0.65"/>
-        <path d="M45 72 Q38 48 45 28 Q52 48 45 72" fill="#E8E0D4"/>
-        <path d="M45 72 Q28 58 20 38 Q34 50 45 72" fill="#E8E0D4"/>
-        <path d="M45 72 Q62 58 70 38 Q56 50 45 72" fill="#FF3D6E"/>
-        <path d="M45 74 Q24 70 14 56 Q30 62 45 74" fill="#E8E0D4"/>
-        <path d="M45 74 Q66 70 76 56 Q60 62 45 74" fill="#E8E0D4"/>
-        <line x1="45" y1="72" x2="40" y2="50" stroke="#E8E0D4" stroke-width="1.2" stroke-linecap="round"/>
-        <line x1="45" y1="72" x2="45" y2="48" stroke="#E8E0D4" stroke-width="1.2" stroke-linecap="round"/>
-        <line x1="45" y1="72" x2="50" y2="50" stroke="#E8E0D4" stroke-width="1.2" stroke-linecap="round"/>
-        <circle cx="40" cy="47" r="2.5" fill="#FF3D6E"/>
-        <circle cx="45" cy="45" r="2.5" fill="#FF3D6E"/>
-        <circle cx="50" cy="47" r="2.5" fill="#FF3D6E"/>
-      </svg>
-      <div class="nav-wordmark">
-        <span class="nav-wordmark-lily">LILY</span>
-        <span class="nav-wordmark-studio">STUDIO</span>
-      </div>
-    </a>
+  <!-- ========== 1. NAVIGATION ========== -->
+  <header class="site-header">
+    <nav class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img class="nav-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEGklEQVR42tVXXUxbdRT/nXvbQkMdoDKWCQPmYgzF+jFN9GXJTKaZH0uItBkyokGDPqgPxjjjg4VEnUZjsvGg0xjNGkEvcwmLD4pxGEMy50C3UuhaKBT6AReldBTobem9xwd6HZotMMpHPG/3n/M/53d+55z/ORf4P8vISFdubNT5IAAwM63GhrASJZYkEcA/DjRnOby1OKXqX7vuHYAYdmFNI7bbFw0yswAAEyMDD48Puz0aIM6AZFjFrJ1pRiNjnjsm/e467VySJJGZRYZdCLr7ng75PfHoz1I+A8TMxNZF51z5wq1cVXeIy57L5SXs3RwISRJZksTxYfcn0eBwT7Dvj1IA8Hq9OQAQkK/sn+x3sj3DCDce1wMAW2of56r6MFfVVWfFCDOTxsSVUe+Z2cnQdPBc930AwHcfrE7Vvv196uX3ppR9r3zEu6yVAMD31L7I9zcyVz57GAA0RlZVhETE6O3VMbNuTg09sbCQGs0vL+32RV07EI0rsqW8MPr6gavprfkVUDHLlQdrYCj4Aqn4MRpo/ZCPHs2B1bp2Rehzni2+OuEfioV8PhgEBKf9b4SG3BEf80O8ff9d/EAjK5Z6B8R/p5ztN+4G4cbUg6I+pyUW8B6ej4b3AMCdlkcuD/YN7iZByBt3XWgVQ5EIgamw9/cc5Bf+Blo4JTod9VAY7HKZ5iKBmviY+9X5hgPblqZzWQBExADj4tjUAKnkVpLJI3MTfvdMaOhjc9Wuwp9aj1VA0JVAZ3hK3ZIbNr3zXROmYqeo96tnZsY8e2aCvm/mivIuKqlUDcBdeWW7w9fs/sfXSumPjV6yCTr9Sww2C6LYCTn59Wyu/nmTK7DP9Nbnn02f//RPw8TUm6rKFcz860Iq2XL7TvO55ezSCjpBICJV+44EvCVGfc6TajpdnkbaI4ajlkRZkdPIerOoqmdno/7O4qq9s0seLL5e5KtpSVF7ATUJuXp2hEfdH7C9S7ecblazIJM/hYjUTDHpmFkUjYYkkopCzXvT7HIZMo5J011TANosICIAUIhIIUEgFYsHMJvTGceM9RZpcTri8ohrW9Db//7SAbU+4zjTvydOfHkvALLZbIoGIlvRrUSpvb1dAKAIrDN/29Z2fD6RqLfZbIMez1+iUTAQNkK0XaCttbXndEfHvMPhOMQ8eYvfO/DuuqdgaSoSslwty3K8sKDA8UNH90klnTJkWKJ1BdDc3Kw2NTVRQ0NDYD6ReDQej18qKS19TJZT2wGgqKhoY1KhFV9LS8ttv3T+2O6+cN6hPT4btg1rICIR7xa/p//IhtWAJlarVWVmmptUTAKRkk0wq16biYhVRVEpy8U7672dVXVzAWRrIqvbRqORNz0FYFI3DYAsJgWAczccgDbzBcEUY0E9ee1/9OblbyaTLYyWJaWCAAAAAElFTkSuQmCC" alt="Lily Studio">
+        <span class="nav-name">Lily Studio</span>
+        <span class="nav-badge">Est. 2026</span>
+      </a>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/skills.html">Skills</a></li>
+        <li><a href="/apps.html">Apps</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/privacy.html">Privacy</a></li>
+        <li><a href="/terms.html">Terms</a></li>
+        <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <!-- Desktop links -->
-    <ul class="nav-links">
-      <li><a href="/skills.html">Skills</a></li>
-      <li><a href="/apps.html">Apps</a></li>
-      <li><a href="/about.html">About</a></li>
-      <li><a href="/privacy.html">Privacy</a></li>
-      <li><a href="/terms.html">Terms</a></li>
-      <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
-    </ul>
-
-    <!-- Hamburger for mobile/tablet -->
-    <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </nav>
-
-  <!-- Mobile menu drawer -->
-  <div class="nav-mobile" id="mobileMenu">
-    <a href="/skills.html" onclick="toggleMenu()">Skills</a>
-    <a href="/apps.html" onclick="toggleMenu()">Apps</a>
-    <a href="/about.html" onclick="toggleMenu()">About</a>
-    <a href="/privacy.html" onclick="toggleMenu()">Privacy</a>
-    <a href="/terms.html" onclick="toggleMenu()">Terms</a>
-    <a href="/skills.html" class="nav-cta" onclick="toggleMenu()">Got Skills?</a>
+  <!-- ========== 2. TOP TICKER ========== -->
+  <div class="ticker-top">
+    <div class="ticker">
+      <span class="ticker-text">Career Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">Education Tools<span class="sep">✦</span></span>
+      <span class="ticker-text">Business Templates<span class="sep">✦</span></span>
+      <span class="ticker-text">Marketing Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">iOS Apps<span class="sep">✦</span></span>
+      <span class="ticker-text">Literary Companions<span class="sep">✦</span></span>
+      <span class="ticker-text">Wisdom Companions<span class="sep">✦</span></span>
+      <span class="ticker-text">Claude AI Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">Digital Products<span class="sep">✦</span></span>
+      <span class="ticker-text">Bundles<span class="sep">✦</span></span>
+      <!-- Duplicate for seamless loop -->
+      <span class="ticker-text">Career Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">Education Tools<span class="sep">✦</span></span>
+      <span class="ticker-text">Business Templates<span class="sep">✦</span></span>
+      <span class="ticker-text">Marketing Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">iOS Apps<span class="sep">✦</span></span>
+      <span class="ticker-text">Literary Companions<span class="sep">✦</span></span>
+      <span class="ticker-text">Wisdom Companions<span class="sep">✦</span></span>
+      <span class="ticker-text">Claude AI Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">Digital Products<span class="sep">✦</span></span>
+      <span class="ticker-text">Bundles<span class="sep">✦</span></span>
+    </div>
   </div>
 
-  <script>
-    function toggleMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-    }
-  </script>
-
-  <!-- ── HERO ── -->
+  <!-- ========== 3. HERO ========== -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-left">
-        <div class="hero-eyebrow">Apps · Skills · Tools</div>
+      <div class="hero-text">
+        <p class="hero-caption">Fig. 01 — Introduction</p>
         <h1>Built by a mom who just wanted stuff to <em>work.</em></h1>
         <p class="hero-sub">Lily Studio makes beautiful iOS apps, Claude AI skills, and digital tools — all built in public, from scratch, by one person learning as she goes.</p>
-        <div class="hero-actions">
+        <div class="hero-buttons">
           <a href="#apps" class="btn-primary">See What We Make</a>
           <a href="#story" class="btn-ghost">Read the story →</a>
         </div>
       </div>
-      <div class="hero-mark">
-        <!-- Large ghost lily mark -->
-        <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="100" y1="260" x2="100" y2="148" stroke="#E8E0D4" stroke-width="3" stroke-linecap="round"/>
-          <path d="M100 180 Q78 165 74 145 Q90 157 100 168" fill="#E8E0D4"/>
-          <path d="M100 148 Q88 104 100 68 Q112 104 100 148" fill="#E8E0D4"/>
-          <path d="M100 148 Q64 122 46 88 Q74 108 100 148" fill="#E8E0D4"/>
-          <path d="M100 148 Q136 122 154 88 Q126 108 100 148" fill="#FF3D6E"/>
-          <path d="M100 152 Q58 146 38 124 Q66 134 100 152" fill="#E8E0D4"/>
-          <path d="M100 152 Q142 146 162 124 Q134 134 100 152" fill="#E8E0D4"/>
-          <line x1="100" y1="148" x2="88" y2="104" stroke="#E8E0D4" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="100" y1="148" x2="100" y2="100" stroke="#E8E0D4" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="100" y1="148" x2="112" y2="104" stroke="#E8E0D4" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="88" cy="98" r="4" fill="#FF3D6E"/>
-          <circle cx="100" cy="94" r="4" fill="#FF3D6E"/>
-          <circle cx="112" cy="98" r="4" fill="#FF3D6E"/>
-        </svg>
+      <div class="hero-collage">
+        <div class="sticker sticker-green">167 Products</div>
+        <div class="sticker sticker-pink">Made with Claude</div>
+        <div class="collage-card">
+          <div class="tape"></div>
+          <div class="collage-card-number">01</div>
+          <div class="collage-card-title">Career Skills</div>
+          <div class="collage-card-desc">Resume, interview, and job search tools that get results.</div>
+          <p class="collage-card-caption">Fig. 02 — Career</p>
+        </div>
+        <div class="collage-card">
+          <div class="tape"></div>
+          <div class="collage-card-number">02</div>
+          <div class="collage-card-title">Education Tools</div>
+          <div class="collage-card-desc">Lesson plans, rubrics, and assessments for teachers.</div>
+          <p class="collage-card-caption">Fig. 03 — Education</p>
+        </div>
+        <div class="collage-card">
+          <div class="tape"></div>
+          <div class="collage-card-number">03</div>
+          <div class="collage-card-title">Business Skills</div>
+          <div class="collage-card-desc">Proposals, SOPs, and client management done right.</div>
+          <p class="collage-card-caption">Fig. 04 — Business</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
-
-  <!-- ── STORY ── -->
+  <!-- ========== 4. STORY ========== -->
   <section class="story" id="story">
-    <div class="story-inner">
+    <div class="story-inner fade-in">
       <div>
-        <div class="section-eyebrow">The Story</div>
+        <p class="story-label">The Story</p>
         <p class="story-quote">"In January 2026, I decided to build a software company. I had never written a line of code in my life."</p>
       </div>
       <div class="story-text">
@@ -972,117 +955,193 @@
     </div>
   </section>
 
-  <div class="divider"></div>
-
-  <!-- ── WHAT WE MAKE ── -->
-  <section id="apps">
-    <div class="section-inner">
-      <div class="section-eyebrow">What We Make</div>
-      <h2 class="section-title">Three ways to get more out of your day.</h2>
-    </div>
-    <div class="categories-grid">
-      <a href="#featured-app" class="cat-card">
-        <span class="cat-number">01</span>
-        <div class="cat-title">iOS Apps</div>
-        <p class="cat-desc">Beautifully designed apps for iPhone and iPad. Calm, useful, and made to feel like they belong on your home screen.</p>
-        <span class="cat-arrow">Explore apps →</span>
-      </a>
-      <a href="#skills" class="cat-card">
-        <span class="cat-number">02</span>
-        <div class="cat-title">Claude Skills</div>
-        <p class="cat-desc">Downloadable skill files that make Claude dramatically better at specific tasks — writing, research, business, education, and more.</p>
-        <span class="cat-arrow">Browse skills →</span>
-      </a>
-      <a href="#newsletter" class="cat-card">
-        <span class="cat-number">03</span>
-        <div class="cat-title">Coming Soon</div>
-        <p class="cat-desc">A podcast about building with AI. Courses for founders who want to do what we do. Join the newsletter to be first.</p>
-        <span class="cat-arrow">Get notified →</span>
-      </a>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ── FEATURED APP ── -->
-  <section class="app-feature" id="featured-app">
-    <div class="app-feature-inner">
-      <div>
-        <span class="app-badge">Now Available — iOS</span>
-        <h2 class="app-name">Calming Water</h2>
-        <p class="app-tagline">Baby & Toddler Sleep Sounds</p>
-        <p class="app-desc">Peaceful water sounds, gentle ambient audio, and soothing video — designed to help babies and toddlers settle, sleep, and stay calm. Simple enough to use at 3am. Beautiful enough to leave on all day.</p>
-        <a href="#" class="btn-primary">Download on the App Store</a>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ── SKILLS ── -->
-  <section class="skills" id="skills">
-    <div class="section-inner">
-      <div class="skills-header">
+  <!-- ========== 5. HOW IT WORKS ========== -->
+  <section class="how-it-works" id="apps">
+    <div class="container">
+      <div class="section-header-split fade-in">
         <div>
-          <div class="section-eyebrow">Claude AI Skills</div>
-          <h2 class="section-title">Make Claude work harder for you.</h2>
+          <p class="section-label section-label-warm">How It Works</p>
+          <h2 class="section-heading section-heading-navy">Three steps to <em>better</em> work</h2>
         </div>
-        <a href="#" class="skills-link">See all 72 skills →</a>
+        <p class="section-aside">Each skill is a single file. Load it into Claude, describe your task, and get professional output in minutes — not hours.</p>
       </div>
-      <div class="skills-grid">
-        <a href="#" class="skill-card">
-          <span class="skill-tag">Marketing</span>
-          <div class="skill-name">Keyword Research Generator</div>
-          <p class="skill-desc">Complete keyword clusters organized by search intent, buyer journey, and content type.</p>
-          <div class="skill-price">$15 <span>one-time download</span></div>
-        </a>
-        <a href="#" class="skill-card">
-          <span class="skill-tag">Content</span>
-          <div class="skill-name">Newsletter Writer</div>
-          <p class="skill-desc">Complete newsletter issues — subject line, hook, body, CTA — in your voice, every time.</p>
-          <div class="skill-price">$15 <span>one-time download</span></div>
-        </a>
-        <a href="#" class="skill-card">
-          <span class="skill-tag">Education</span>
-          <div class="skill-name">Rubric Creator</div>
-          <p class="skill-desc">Detailed, ready-to-use grading rubrics for any assignment in four formats.</p>
-          <div class="skill-price">$12 <span>one-time download</span></div>
-        </a>
+      <div class="fig-grid">
+        <div class="fade-in">
+          <div class="fig-frame">
+            <div class="fig-number">01</div>
+            <h3 class="fig-title">Pick a skill</h3>
+            <p class="fig-desc">Browse 167 skills across career, education, business, and marketing. Find the one that fits your task.</p>
+          </div>
+          <p class="fig-caption">Fig. 05 — Browse</p>
+        </div>
+        <div class="fade-in">
+          <div class="fig-frame">
+            <div class="fig-number">02</div>
+            <h3 class="fig-title">Load it into Claude</h3>
+            <p class="fig-desc">Drop the skill file into any Claude project. It works with Claude.ai Pro, Team, or Enterprise.</p>
+          </div>
+          <p class="fig-caption">Fig. 06 — Install</p>
+        </div>
+        <div class="fade-in">
+          <div class="fig-frame">
+            <div class="fig-number">03</div>
+            <h3 class="fig-title">Get real output</h3>
+            <p class="fig-desc">Describe your task in plain language. The skill handles the rest — complete, professional, ready to use.</p>
+          </div>
+          <p class="fig-caption">Fig. 07 — Create</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
-
-  <!-- ── NEWSLETTER ── -->
-  <section class="newsletter" id="newsletter">
-    <div class="newsletter-inner">
-      <div class="section-eyebrow" style="justify-content:center;">The Newsletter</div>
-      <h2>Build in public. Learn as we go.</h2>
-      <p class="newsletter-sub">What's working, what isn't, what we're building next. No corporate, no noise. Just honest dispatches from someone figuring it out in real time.</p>
-      <div class="newsletter-form">
-        <input type="email" placeholder="your@email.com">
-        <button type="submit">Subscribe</button>
-      </div>
-      <p class="newsletter-fine">No spam. Unsubscribe any time.</p>
+  <!-- ========== 6. CALMING WATER ========== -->
+  <section class="app-feature" id="featured-app">
+    <div class="app-feature-inner fade-in">
+      <span class="app-badge">Now Available — iOS</span>
+      <h2 class="app-name">Calming Water</h2>
+      <p class="app-tagline">Baby & Toddler Sleep Sounds</p>
+      <p class="app-desc">Peaceful water sounds, gentle ambient audio, and soothing video — designed to help babies and toddlers settle, sleep, and stay calm. Simple enough to use at 3am. Beautiful enough to leave on all day.</p>
+      <a href="#" class="app-cta">Download on the App Store</a>
+      <p class="app-caption">Fig. 08 — Calming Water</p>
     </div>
   </section>
 
-  <!-- ── FOOTER ── -->
-  <footer>
-    <div class="footer-left">
-      <span class="footer-brand">LILY STUDIO</span>
-      <span class="footer-copy">© 2026 Lily Studio. All rights reserved.</span>
+  <!-- ========== 7. FEATURED SKILLS ========== -->
+  <section class="featured-skills has-scanlines">
+    <div class="glow-sweep"></div>
+    <div class="container">
+      <div class="section-header-split fade-in" style="margin-bottom: 48px;">
+        <div>
+          <p class="section-label section-label-pink">Featured Skills</p>
+          <h2 class="section-heading section-heading-cream">Tools people <em>actually</em> use</h2>
+        </div>
+        <p class="section-aside" style="color: var(--gray-light);">Every skill is a one-time purchase. No subscriptions. Lifetime updates included.</p>
+      </div>
+      <div class="skill-rows">
+        <div class="skill-row fade-in">
+          <div class="skill-card">
+            <div class="skill-card-glow skill-card-glow-green"></div>
+            <p class="skill-card-fig">Fig. 09</p>
+            <span class="skill-badge badge-career">Career</span>
+            <h3 class="skill-card-title">Resume Tailor</h3>
+            <p class="skill-card-desc">Rewrites your resume for each job posting. ATS-optimized keywords, reworded bullets, and a gap analysis — built to get interviews.</p>
+            <div class="skill-card-footer">
+              <span class="skill-price">$20</span>
+              <a href="/skills.html" class="skill-link">View Skill →</a>
+            </div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card-glow skill-card-glow-blue"></div>
+            <p class="skill-card-fig">Fig. 10</p>
+            <span class="skill-badge badge-education">Education</span>
+            <h3 class="skill-card-title">Lesson Plan Generator</h3>
+            <p class="skill-card-desc">Complete, standards-aligned lessons with activities, assessments, and differentiation — in minutes, not hours.</p>
+            <div class="skill-card-footer">
+              <span class="skill-price">$15</span>
+              <a href="/skills.html" class="skill-link">View Skill →</a>
+            </div>
+          </div>
+        </div>
+        <div class="skill-row fade-in">
+          <div class="skill-card">
+            <div class="skill-card-glow skill-card-glow-pink"></div>
+            <p class="skill-card-fig">Fig. 11</p>
+            <span class="skill-badge badge-business">Business</span>
+            <h3 class="skill-card-title">Client Proposal Generator</h3>
+            <p class="skill-card-desc">Professional proposals with scope, deliverables, timeline, and pricing — ready to send to any client.</p>
+            <div class="skill-card-footer">
+              <span class="skill-price">$15</span>
+              <a href="/skills.html" class="skill-link">View Skill →</a>
+            </div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card-glow skill-card-glow-green"></div>
+            <p class="skill-card-fig">Fig. 12</p>
+            <span class="skill-badge badge-career">Career</span>
+            <h3 class="skill-card-title">Interview Prep Coach</h3>
+            <p class="skill-card-desc">Predicted questions with STAR-method answers tailored to your role. Walk into every interview ready.</p>
+            <div class="skill-card-footer">
+              <span class="skill-price">$15</span>
+              <a href="/skills.html" class="skill-link">View Skill →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 48px;" class="fade-in">
+        <a href="/skills.html" class="btn-primary" style="background: var(--cream); color: var(--navy);">View All 167 Skills →</a>
+      </div>
     </div>
+  </section>
+
+  <!-- ========== 8. BLOCKQUOTE STRIP ========== -->
+  <section class="blockquote-strip">
+    <div class="container fade-in">
+      <blockquote>"The best tools feel like they were made just for you."</blockquote>
+      <cite>— The Lily Studio Principle</cite>
+    </div>
+  </section>
+
+  <!-- ========== 9. CTA SECTION ========== -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <div class="fade-in">
+        <h2 class="cta-heading">Ready to make Claude work <em>smarter?</em></h2>
+        <p class="cta-body">Every skill is a one-time purchase. Load it into Claude, describe your task, and get professional results — no subscription, no learning curve.</p>
+      </div>
+      <div class="cta-action fade-in">
+        <a href="/skills.html" class="cta-btn">Explore the Skills →</a>
+        <p class="cta-reassurance">One-time purchase · No subscriptions · Lifetime updates</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 10. BOTTOM TICKER ========== -->
+  <div class="ticker-bottom">
+    <div class="ticker">
+      <span class="ticker-text">Built with Care<span class="sep">✦</span></span>
+      <span class="ticker-text">One-Time Purchase<span class="sep">✦</span></span>
+      <span class="ticker-text">167 Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">iOS Apps<span class="sep">✦</span></span>
+      <span class="ticker-text">Made by a Human<span class="sep">✦</span></span>
+      <span class="ticker-text">No Subscriptions<span class="sep">✦</span></span>
+      <span class="ticker-text">Lifetime Updates<span class="sep">✦</span></span>
+      <span class="ticker-text">Claude AI Skills<span class="sep">✦</span></span>
+      <!-- Duplicate -->
+      <span class="ticker-text">Built with Care<span class="sep">✦</span></span>
+      <span class="ticker-text">One-Time Purchase<span class="sep">✦</span></span>
+      <span class="ticker-text">167 Skills<span class="sep">✦</span></span>
+      <span class="ticker-text">iOS Apps<span class="sep">✦</span></span>
+      <span class="ticker-text">Made by a Human<span class="sep">✦</span></span>
+      <span class="ticker-text">No Subscriptions<span class="sep">✦</span></span>
+      <span class="ticker-text">Lifetime Updates<span class="sep">✦</span></span>
+      <span class="ticker-text">Claude AI Skills<span class="sep">✦</span></span>
+    </div>
+  </div>
+
+  <!-- ========== 11. FOOTER ========== -->
+  <footer class="site-footer">
     <ul class="footer-links">
       <li><a href="/skills.html">Skills</a></li>
       <li><a href="/apps.html">Apps</a></li>
       <li><a href="/about.html">About</a></li>
-      <li><a href="/privacy.html">Privacy Policy</a></li>
+      <li><a href="/privacy.html">Privacy</a></li>
       <li><a href="/terms.html">Terms</a></li>
       <li><a href="mailto:support@thelilystudio.com">Contact</a></li>
     </ul>
+    <p class="footer-copy">© 2026 Lily Studio. All rights reserved.</p>
   </footer>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
 
 </body>
 </html>
