@@ -306,18 +306,22 @@
     .btn-ghost:hover { color: var(--pink); letter-spacing: 0.1em; }
 
     /* Collage card stack */
-    .hero-collage { position: relative; height: 380px; }
+    .hero-collage {
+      position: relative;
+      height: 440px;
+      max-width: 380px;
+      margin: 0 auto;
+    }
     .collage-card {
       position: absolute;
       background: var(--white);
       border: 1px solid var(--cream-border);
       border-radius: 4px;
-      padding: 28px 24px;
-      width: 240px;
+      padding: 24px 20px;
+      width: 220px;
       transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
     }
     .collage-card:hover {
-      transform: translateY(-6px) !important;
       box-shadow: 0 12px 40px rgba(13,27,42,0.12);
     }
     .collage-card .tape {
@@ -326,12 +330,15 @@
       width: 60px; height: 16px;
       border-radius: 2px;
     }
-    .collage-card:nth-child(1) { top: 10px; left: 0; transform: rotate(-3deg); z-index: 3; }
+    .collage-card:nth-child(1) { top: 0; left: 0; transform: rotate(-2deg); z-index: 3; }
     .collage-card:nth-child(1) .tape { background: rgba(232,62,140,0.3); transform: rotate(2deg); }
-    .collage-card:nth-child(2) { top: 50px; left: 120px; transform: rotate(2deg); z-index: 2; }
+    .collage-card:nth-child(2) { top: 150px; right: 0; left: auto; transform: rotate(1.5deg); z-index: 2; }
     .collage-card:nth-child(2) .tape { background: rgba(150,232,74,0.3); transform: rotate(-1deg); }
-    .collage-card:nth-child(3) { top: 140px; left: 30px; transform: rotate(-1.5deg); z-index: 1; }
+    .collage-card:nth-child(3) { top: 290px; left: 40px; transform: rotate(-1deg); z-index: 1; }
     .collage-card:nth-child(3) .tape { background: rgba(56,189,248,0.25); transform: rotate(3deg); }
+    .collage-card:nth-child(1):hover { transform: rotate(-2deg) translateY(-4px); }
+    .collage-card:nth-child(2):hover { transform: rotate(1.5deg) translateY(-4px); }
+    .collage-card:nth-child(3):hover { transform: rotate(-1deg) translateY(-4px); }
     .collage-card-number {
       font-family: var(--font-display);
       font-weight: 800; font-size: 2.6rem;
@@ -368,11 +375,11 @@
     }
     .sticker-green {
       background: var(--green); color: var(--navy);
-      --rot: -8deg; top: -10px; right: 20px;
+      --rot: -8deg; top: 60px; right: -10px;
     }
     .sticker-pink {
       background: var(--pink); color: var(--white);
-      --rot: 6deg; bottom: 40px; right: 0;
+      --rot: 6deg; top: 250px; right: -10px;
     }
 
     /* ============================================
@@ -522,7 +529,7 @@
        6. CALMING WATER (Dark, app feature)
        ============================================ */
     .app-feature {
-      background: var(--navy);
+      background: var(--cream);
       padding: 90px 24px;
       position: relative;
       overflow: hidden;
@@ -533,7 +540,7 @@
       pointer-events: none; z-index: 1;
       background: repeating-linear-gradient(
         to bottom, transparent, transparent 3px,
-        rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+        rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 4px
       );
     }
     .app-feature-inner {
@@ -559,7 +566,7 @@
       font-family: var(--font-serif);
       font-size: clamp(2rem, 4vw, 2.8rem);
       font-weight: 400;
-      color: var(--cream);
+      color: var(--navy);
       margin-bottom: 8px;
     }
     .app-tagline {
@@ -572,7 +579,7 @@
     .app-desc {
       font-family: var(--font-display);
       font-size: 0.92rem;
-      color: var(--gray-light);
+      color: var(--gray-warm);
       line-height: 1.7;
       margin-bottom: 32px;
     }
@@ -582,8 +589,8 @@
       font-size: 0.68rem; font-weight: 600;
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 14px 32px;
-      background: var(--cream);
-      color: var(--navy);
+      background: var(--navy);
+      color: var(--cream);
       border-radius: 3px;
       transition: all 0.35s var(--ease);
     }
@@ -597,7 +604,7 @@
       font-family: var(--font-mono);
       font-size: 0.48rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--gray-mid);
+      color: var(--gray-warm);
       margin-top: 20px;
     }
 
@@ -646,13 +653,30 @@
       padding: 28px 24px 24px;
       position: relative;
       overflow: hidden;
-      transition: all 0.35s var(--ease);
+      transition: all 0.4s var(--ease);
+      cursor: pointer;
+      z-index: 1;
     }
     .skill-card:hover {
       transform: translateY(-3px) scale(1.01);
       border-color: var(--pink);
       box-shadow: 0 0 24px var(--pink-glow), 0 8px 32px rgba(0,0,0,0.3);
     }
+    .skill-card.expanded {
+      transform: scale(1.12);
+      z-index: 100;
+      border-color: var(--pink);
+      box-shadow: 0 0 40px var(--pink-glow), 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .skill-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(9,20,32,0.6);
+      z-index: 50;
+      cursor: pointer;
+    }
+    .skill-overlay.active { display: block; }
     .skill-card-glow {
       position: absolute;
       top: 0; left: 0; right: 0; height: 2px;
@@ -800,7 +824,7 @@
       font-family: var(--font-mono);
       font-size: 0.5rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--gray-mid); margin-top: 16px;
+      color: var(--green); margin-top: 16px;
     }
 
     /* ============================================
@@ -1044,13 +1068,9 @@
     </div>
   </section>
 
-  <!-- ========== DIVIDER ========== -->
-  <div style="background: var(--cream); height: 1px;">
-    <div style="max-width: 1100px; margin: 0 auto; height: 1px; background: var(--cream-border);"></div>
-  </div>
-
   <!-- ========== 7. FEATURED SKILLS ========== -->
   <section class="featured-skills has-scanlines">
+    <div class="skill-overlay" id="skillOverlay"></div>
     <div class="glow-sweep"></div>
     <div class="container">
       <div class="section-header-split fade-in" style="margin-bottom: 48px;">
@@ -1129,7 +1149,7 @@
     <div class="cta-inner">
       <div class="fade-in">
         <h2 class="cta-heading">Ready to make Claude work <em>smarter?</em></h2>
-        <p class="cta-body">Every skill is a one-time purchase. Load it into Claude, describe your task, and get professional results — make AI work for you.</p>
+        <p class="cta-body">Every skill is a one-time purchase. Load it into Claude, describe your task, and get professional results.<br>Make AI work for you.</p>
       </div>
       <div class="cta-action fade-in">
         <a href="/skills.html" class="cta-btn">Explore the Skills →</a>
@@ -1208,6 +1228,27 @@
         heroText.style.transform = `translateY(${rate * 0.4}px)`;
       }, { passive: true });
     }
+
+    // Skill card click-to-expand
+    const overlay = document.getElementById('skillOverlay');
+    const skillCards = document.querySelectorAll('.skill-card');
+    function collapseAll() {
+      skillCards.forEach(c => c.classList.remove('expanded'));
+      overlay.classList.remove('active');
+    }
+    skillCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.skill-link')) return; // let links work
+        if (card.classList.contains('expanded')) {
+          collapseAll();
+        } else {
+          collapseAll();
+          card.classList.add('expanded');
+          overlay.classList.add('active');
+        }
+      });
+    });
+    overlay.addEventListener('click', collapseAll);
   </script>
 
 </body>
