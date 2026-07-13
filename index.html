@@ -308,17 +308,15 @@
     /* Collage card stack */
     .hero-collage {
       position: relative;
-      height: 440px;
-      max-width: 380px;
-      margin: 0 auto;
+      height: 420px;
     }
     .collage-card {
       position: absolute;
       background: var(--white);
       border: 1px solid var(--cream-border);
       border-radius: 4px;
-      padding: 24px 20px;
-      width: 220px;
+      padding: 28px 24px;
+      width: 230px;
       transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
     }
     .collage-card:hover {
@@ -330,15 +328,15 @@
       width: 60px; height: 16px;
       border-radius: 2px;
     }
-    .collage-card:nth-child(1) { top: 0; left: 0; transform: rotate(-2deg); z-index: 3; }
+    .collage-card:nth-child(1) { top: 0; left: 0; transform: rotate(-3deg); z-index: 3; }
     .collage-card:nth-child(1) .tape { background: rgba(232,62,140,0.3); transform: rotate(2deg); }
-    .collage-card:nth-child(2) { top: 150px; right: 0; left: auto; transform: rotate(1.5deg); z-index: 2; }
+    .collage-card:nth-child(1):hover { transform: rotate(-3deg) translateY(-4px); }
+    .collage-card:nth-child(2) { top: 80px; left: 140px; transform: rotate(2deg); z-index: 2; }
     .collage-card:nth-child(2) .tape { background: rgba(150,232,74,0.3); transform: rotate(-1deg); }
-    .collage-card:nth-child(3) { top: 290px; left: 40px; transform: rotate(-1deg); z-index: 1; }
+    .collage-card:nth-child(2):hover { transform: rotate(2deg) translateY(-4px); }
+    .collage-card:nth-child(3) { top: 200px; left: 20px; transform: rotate(-1.5deg); z-index: 1; }
     .collage-card:nth-child(3) .tape { background: rgba(56,189,248,0.25); transform: rotate(3deg); }
-    .collage-card:nth-child(1):hover { transform: rotate(-2deg) translateY(-4px); }
-    .collage-card:nth-child(2):hover { transform: rotate(1.5deg) translateY(-4px); }
-    .collage-card:nth-child(3):hover { transform: rotate(-1deg) translateY(-4px); }
+    .collage-card:nth-child(3):hover { transform: rotate(-1.5deg) translateY(-4px); }
     .collage-card-number {
       font-family: var(--font-display);
       font-weight: 800; font-size: 2.6rem;
@@ -375,11 +373,11 @@
     }
     .sticker-green {
       background: var(--green); color: var(--navy);
-      --rot: -8deg; top: 60px; right: -10px;
+      --rot: -8deg; top: -10px; right: 10px;
     }
     .sticker-pink {
       background: var(--pink); color: var(--white);
-      --rot: 6deg; top: 250px; right: -10px;
+      --rot: 6deg; bottom: 50px; right: 0;
     }
 
     /* ============================================
@@ -529,7 +527,7 @@
        6. CALMING WATER (Dark, app feature)
        ============================================ */
     .app-feature {
-      background: var(--cream);
+      background: var(--navy);
       padding: 90px 24px;
       position: relative;
       overflow: hidden;
@@ -540,7 +538,7 @@
       pointer-events: none; z-index: 1;
       background: repeating-linear-gradient(
         to bottom, transparent, transparent 3px,
-        rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 4px
+        rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
       );
     }
     .app-feature-inner {
@@ -566,7 +564,7 @@
       font-family: var(--font-serif);
       font-size: clamp(2rem, 4vw, 2.8rem);
       font-weight: 400;
-      color: var(--navy);
+      color: var(--cream);
       margin-bottom: 8px;
     }
     .app-tagline {
@@ -579,7 +577,7 @@
     .app-desc {
       font-family: var(--font-display);
       font-size: 0.92rem;
-      color: var(--gray-warm);
+      color: var(--gray-light);
       line-height: 1.7;
       margin-bottom: 32px;
     }
@@ -589,8 +587,8 @@
       font-size: 0.68rem; font-weight: 600;
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 14px 32px;
-      background: var(--navy);
-      color: var(--cream);
+      background: var(--cream);
+      color: var(--navy);
       border-radius: 3px;
       transition: all 0.35s var(--ease);
     }
@@ -604,7 +602,7 @@
       font-family: var(--font-mono);
       font-size: 0.48rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--gray-warm);
+      color: var(--gray-mid);
       margin-top: 20px;
     }
 
@@ -1067,6 +1065,11 @@
       <p class="app-caption">Fig. 08 — Calming Water</p>
     </div>
   </section>
+
+  <!-- ========== CREAM BREAK ========== -->
+  <div style="background: var(--cream); padding: 40px 24px; text-align: center;">
+    <p style="font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gray-warm);">✦ &nbsp; More from Lily Studio &nbsp; ✦</p>
+  </div>
 
   <!-- ========== 7. FEATURED SKILLS ========== -->
   <section class="featured-skills has-scanlines">
