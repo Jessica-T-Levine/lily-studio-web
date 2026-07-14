@@ -80,9 +80,24 @@
 
     /* ========== GRID ========== */
     .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 40px 0 80px; }
-    .grid-card { background: var(--navy-light); border: 1px solid var(--gray-mid); border-radius: 4px; padding: 22px 18px; position: relative; overflow: hidden; transition: transform 0.3s var(--ease), border-color 0.3s var(--ease); display: flex; flex-direction: column; }
+    .grid-card { background: var(--navy-light); border: 1px solid var(--gray-mid); border-radius: 4px; padding: 22px 18px; position: relative; overflow: hidden; transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease); display: flex; flex-direction: column; cursor: pointer; }
     .grid-card:hover { transform: translateY(-3px); border-color: var(--pink); }
+    .grid-card.expanded {
+      transform: scale(1.08);
+      z-index: 100;
+      border-color: var(--pink);
+      box-shadow: 0 0 40px var(--pink-glow), 0 20px 60px rgba(0,0,0,0.5);
+    }
     .grid-card.hidden { display: none; }
+    .skill-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(9,20,32,0.6);
+      z-index: 50;
+      cursor: pointer;
+    }
+    .skill-overlay.active { display: block; }
     .card-glow { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
     .glow-green { background: var(--green); box-shadow: 0 0 10px var(--green-glow); }
     .glow-blue { background: var(--blue); box-shadow: 0 0 10px var(--blue-glow); }
@@ -139,6 +154,7 @@
       .hero-stats { gap: 20px; }
       .grid-layout { grid-template-columns: repeat(2, 1fr); gap: 14px; }
       .controls { top: 58px; }
+      .grid-card.expanded { transform: scale(1.05); }
     }
     @media (max-width: 480px) {
       .grid-layout { grid-template-columns: 1fr; }
@@ -147,6 +163,7 @@
       .hero-stat-num { font-size: 1.2rem; }
       .filter-tabs { gap: 6px; }
       .filter-tab { padding: 6px 12px; font-size: 0.5rem; }
+      .grid-card.expanded { transform: scale(1.02); box-shadow: 0 0 30px var(--pink-glow), 0 12px 40px rgba(0,0,0,0.4); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -211,6 +228,9 @@
       </div>
     </div>
   </section>
+
+  <!-- ========== OVERLAY ========== -->
+  <div class="skill-overlay" id="skillOverlay"></div>
 
   <!-- ========== PRODUCT GRID ========== -->
   <section class="catalog">
@@ -2358,7 +2378,29 @@
       const tabs = document.querySelectorAll('.filter-tab');
       let activeFilter = 'all';
 
+      // Click-to-expand
+      const overlay = document.getElementById('skillOverlay');
+      function collapseAll() {
+        cards.forEach(c => c.classList.remove('expanded'));
+        overlay.classList.remove('active');
+      }
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.card-buy') || e.target.closest('.bundle-skill-link')) return;
+          if (card.classList.contains('expanded')) {
+            collapseAll();
+          } else {
+            collapseAll();
+            card.classList.add('expanded');
+            overlay.classList.add('active');
+          }
+        });
+      });
+      overlay.addEventListener('click', collapseAll);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseAll(); });
+
       function filterCards() {
+        collapseAll();
         const query = searchInput.value.toLowerCase().trim();
         let visible = 0;
 
