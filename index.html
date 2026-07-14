@@ -1007,8 +1007,7 @@
         <p>The answer, it turns out, is yes. With Claude as a partner, a lot of stubbornness, and a commitment to building in public, Lily Studio ships iOS apps, Claude AI skills, and digital tools that are elegant, useful, and made with care.</p>
         <p>Nothing here was handed to us. Everything here was figured out.</p>
         <div class="story-sig">
-          Jessica Levine
-          <span>Founder, Lily Studio</span>
+          Founder, Lily Studio
         </div>
       </div>
     </div>
@@ -1235,9 +1234,11 @@
     // Skill card click-to-expand
     const overlay = document.getElementById('skillOverlay');
     const skillCards = document.querySelectorAll('.skill-card');
+    const skillsContainer = document.querySelector('.featured-skills .container');
     function collapseAll() {
       skillCards.forEach(c => c.classList.remove('expanded'));
       overlay.classList.remove('active');
+      if (skillsContainer) skillsContainer.style.zIndex = '';
     }
     skillCards.forEach(card => {
       card.addEventListener('click', (e) => {
@@ -1248,6 +1249,7 @@
           collapseAll();
           card.classList.add('expanded');
           overlay.classList.add('active');
+          if (skillsContainer) skillsContainer.style.zIndex = '60';
         }
       });
     });
