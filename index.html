@@ -665,15 +665,6 @@
       border-color: var(--pink);
       box-shadow: 0 0 40px var(--pink-glow), 0 20px 60px rgba(0,0,0,0.5);
     }
-    .skill-overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(9,20,32,0.6);
-      z-index: 10;
-      cursor: pointer;
-    }
-    .skill-overlay.active { display: block; }
     .skill-card-glow {
       position: absolute;
       top: 0; left: 0; right: 0; height: 2px;
@@ -1057,7 +1048,6 @@
   <section class="featured-skills has-scanlines">
     <div class="glow-sweep"></div>
     <div class="container">
-      <div class="skill-overlay" id="skillOverlay"></div>
       <div class="section-header-split fade-in" style="margin-bottom: 48px;">
         <div>
           <p class="section-label section-label-pink">Featured Skills</p>
@@ -1232,25 +1222,21 @@
     }
 
     // Skill card click-to-expand
-    const overlay = document.getElementById('skillOverlay');
     const skillCards = document.querySelectorAll('.skill-card');
     function collapseAll() {
       skillCards.forEach(c => c.classList.remove('expanded'));
-      overlay.classList.remove('active');
     }
     skillCards.forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.skill-link')) return; // let links work
+        if (e.target.closest('.skill-link')) return;
         if (card.classList.contains('expanded')) {
           collapseAll();
         } else {
           collapseAll();
           card.classList.add('expanded');
-          overlay.classList.add('active');
         }
       });
     });
-    overlay.addEventListener('click', collapseAll);
   </script>
 
 </body>
