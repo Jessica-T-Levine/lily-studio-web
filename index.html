@@ -1234,11 +1234,11 @@
     // Skill card click-to-expand
     const overlay = document.getElementById('skillOverlay');
     const skillCards = document.querySelectorAll('.skill-card');
-    const skillsContainer = document.querySelector('.featured-skills .container');
+    const skillsSection = document.querySelector('.featured-skills');
     function collapseAll() {
       skillCards.forEach(c => c.classList.remove('expanded'));
       overlay.classList.remove('active');
-      if (skillsContainer) skillsContainer.style.zIndex = '';
+      if (skillsSection) skillsSection.style.zIndex = '';
     }
     skillCards.forEach(card => {
       card.addEventListener('click', (e) => {
@@ -1249,7 +1249,7 @@
           collapseAll();
           card.classList.add('expanded');
           overlay.classList.add('active');
-          if (skillsContainer) skillsContainer.style.zIndex = '60';
+          if (skillsSection) skillsSection.style.zIndex = '60';
         }
       });
     });
