@@ -36,11 +36,11 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: var(--navy-deep); color: var(--cream); font-family: var(--font-display); -webkit-font-smoothing: antialiased; }
     a { text-decoration: none; color: inherit; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 
     /* ========== NAV ========== */
     .site-header { background: rgba(9,20,32,0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--gray-mid); position: sticky; top: 0; z-index: 100; }
-    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-inner { max-width: 1400px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
     .nav-brand { display: flex; align-items: center; gap: 10px; }
     .nav-logo { width: 32px; height: 32px; filter: drop-shadow(0 0 8px var(--pink-glow)); }
     .nav-name { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: var(--cream); }
@@ -89,15 +89,6 @@
       box-shadow: 0 0 40px var(--pink-glow), 0 20px 60px rgba(0,0,0,0.5);
     }
     .grid-card.hidden { display: none; }
-    .skill-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(9,20,32,0.6);
-      z-index: 50;
-      cursor: pointer;
-    }
-    .skill-overlay.active { display: block; }
     .card-glow { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
     .glow-green { background: var(--green); box-shadow: 0 0 10px var(--green-glow); }
     .glow-blue { background: var(--blue); box-shadow: 0 0 10px var(--blue-glow); }
@@ -228,9 +219,6 @@
       </div>
     </div>
   </section>
-
-  <!-- ========== OVERLAY ========== -->
-  <div class="skill-overlay" id="skillOverlay"></div>
 
   <!-- ========== PRODUCT GRID ========== -->
   <section class="catalog">
@@ -2379,10 +2367,8 @@
       let activeFilter = 'all';
 
       // Click-to-expand
-      const overlay = document.getElementById('skillOverlay');
       function collapseAll() {
         cards.forEach(c => c.classList.remove('expanded'));
-        overlay.classList.remove('active');
       }
       cards.forEach(card => {
         card.addEventListener('click', (e) => {
@@ -2392,11 +2378,9 @@
           } else {
             collapseAll();
             card.classList.add('expanded');
-            overlay.classList.add('active');
           }
         });
       });
-      overlay.addEventListener('click', collapseAll);
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseAll(); });
 
       function filterCards() {
