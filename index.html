@@ -667,10 +667,10 @@
     }
     .skill-overlay {
       display: none;
-      position: fixed;
+      position: absolute;
       inset: 0;
       background: rgba(9,20,32,0.6);
-      z-index: 50;
+      z-index: 10;
       cursor: pointer;
     }
     .skill-overlay.active { display: block; }
@@ -1234,11 +1234,9 @@
     // Skill card click-to-expand
     const overlay = document.getElementById('skillOverlay');
     const skillCards = document.querySelectorAll('.skill-card');
-    const skillsSection = document.querySelector('.featured-skills');
     function collapseAll() {
       skillCards.forEach(c => c.classList.remove('expanded'));
       overlay.classList.remove('active');
-      if (skillsSection) skillsSection.style.zIndex = '';
     }
     skillCards.forEach(card => {
       card.addEventListener('click', (e) => {
@@ -1249,7 +1247,6 @@
           collapseAll();
           card.classList.add('expanded');
           overlay.classList.add('active');
-          if (skillsSection) skillsSection.style.zIndex = '60';
         }
       });
     });
