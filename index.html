@@ -55,7 +55,7 @@
     }
     a { text-decoration: none; color: inherit; }
     img { max-width: 100%; display: block; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
     /* Fade-in on scroll */
     .fade-in {
@@ -86,7 +86,7 @@
       border-bottom: 1px solid var(--gray-mid);
     }
     .nav-inner {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 24px;
       display: flex;
@@ -220,7 +220,7 @@
       padding: 100px 24px 80px;
     }
     .hero-inner {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
@@ -328,13 +328,13 @@
       width: 60px; height: 16px;
       border-radius: 2px;
     }
-    .collage-card:nth-child(1) { top: 0; left: 20px; transform: rotate(-3deg); z-index: 3; }
+    .collage-card:nth-child(1) { top: 0; left: 60px; transform: rotate(-3deg); z-index: 3; }
     .collage-card:nth-child(1) .tape { background: rgba(232,62,140,0.3); transform: rotate(2deg); }
     .collage-card:nth-child(1):hover { transform: rotate(-3deg) translateY(-4px); }
-    .collage-card:nth-child(2) { top: 120px; left: 120px; transform: rotate(2deg); z-index: 2; }
+    .collage-card:nth-child(2) { top: 120px; left: 160px; transform: rotate(2deg); z-index: 2; }
     .collage-card:nth-child(2) .tape { background: rgba(150,232,74,0.3); transform: rotate(-1deg); }
     .collage-card:nth-child(2):hover { transform: rotate(2deg) translateY(-4px); }
-    .collage-card:nth-child(3) { top: 250px; left: 20px; transform: rotate(-1.5deg); z-index: 1; }
+    .collage-card:nth-child(3) { top: 250px; left: 60px; transform: rotate(-1.5deg); z-index: 1; }
     .collage-card:nth-child(3) .tape { background: rgba(56,189,248,0.25); transform: rotate(3deg); }
     .collage-card:nth-child(3):hover { transform: rotate(-1.5deg) translateY(-4px); }
     .collage-card-number {
@@ -373,11 +373,11 @@
     }
     .sticker-green {
       background: var(--green); color: var(--navy);
-      --rot: -8deg; top: -10px; right: 60px;
+      --rot: -8deg; top: -10px; right: 10px;
     }
     .sticker-pink {
       background: var(--pink); color: var(--white);
-      --rot: 6deg; bottom: 50px; right: 50px;
+      --rot: 6deg; bottom: 50px; right: 0;
     }
 
     /* ============================================
@@ -388,7 +388,7 @@
       padding: 90px 24px;
     }
     .story-inner {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -542,10 +542,11 @@
       );
     }
     .app-feature-inner {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
       position: relative;
       z-index: 2;
+      text-align: center;
     }
     .app-badge {
       display: inline-block;
@@ -579,6 +580,9 @@
       color: var(--gray-light);
       line-height: 1.7;
       margin-bottom: 32px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .app-cta {
       display: inline-block;
@@ -773,7 +777,7 @@
       pointer-events: none;
     }
     .cta-inner {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1.3fr 0.7fr;
