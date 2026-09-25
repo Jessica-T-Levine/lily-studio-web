@@ -236,9 +236,48 @@
     width: min(300px, calc(100% - 24px));
     box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
   }
+
+  /* ---- Lily Studio menu: slides down when you scroll back to the top, tucks away after 3 quiet seconds ---- */
+  .studio-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: rgba(9, 20, 32, 0.88);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    transform: translateY(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+  .studio-bar.show { transform: translateY(0); pointer-events: auto; }
+  .studio-bar nav {
+    max-width: 960px; margin: 0 auto; height: 52px;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .studio-bar a { color: #94A3B8; text-decoration: none; font: 600 11px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.1em; }
+  .studio-bar a:hover { color: #FFFFFF; }
+  .studio-bar a:focus-visible { outline: 2px solid var(--peach); outline-offset: 4px; border-radius: 4px; }
+  .studio-bar .brand { display: flex; align-items: center; gap: 9px; color: #FFFFFF; }
+  .studio-bar .brand { gap: 6px; }
+  .studio-bar .brand svg { color: #E83E8C; flex: none; }
+  .studio-bar ul { display: flex; align-items: center; gap: 18px; list-style: none; margin: 0; padding: 0; }
+  .studio-bar ul a { display: block; padding: 12px 0; }
+  @media (max-width: 340px) { .studio-bar ul li:first-child { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .studio-bar { transition: none; } }
 </style>
 </head>
 <body>
+<div class="studio-bar" id="studioBar">
+  <nav aria-label="Lily Studio menu">
+    <a class="brand" href="/"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Lily Studio</span></a>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/apps.html">Apps</a></li>
+      <li><a href="/skills.html">Skills</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+  </nav>
+</div>
 
 
 <div class="wrap">
@@ -1172,7 +1211,7 @@
   window.addEventListener("keydown", e => {
     if (!isHopKey(e)) return;
     const tag = document.activeElement && document.activeElement.tagName;
-    if (tag === "BUTTON" || tag === "INPUT") return; // let buttons and sliders use their own keys
+    if (tag === "BUTTON" || tag === "INPUT" || tag === "A") return; // let buttons, sliders and links use their own keys
     e.preventDefault();                               // stop the page from scrolling
     if (e.repeat || keyHeld) return;
     keyHeld = e.code || e.key;
@@ -1762,6 +1801,55 @@
       tip.hidden = true; store.set("lph-tip-closed", "1");
       try { canvas.focus({ preventScroll: true }); } catch (_) {}
     });
+  })();
+
+  // ---------- Lily Studio menu: shows when you get back to the top of the page, hides after 3 quiet seconds ----------
+  (function studioMenu() {
+    const bar = document.getElementById("studioBar");
+    if (!bar) return;
+    const inApp = document.documentElement.classList.contains("app");
+    // from the home-screen app, open the website in the browser so the game is never replaced
+    if (inApp) bar.querySelectorAll("a").forEach(a => { a.target = "_blank"; a.rel = "noopener"; });
+    const QUIET_MS = 3000;
+    let timer = 0, hovering = false;
+    function hideSoon() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (hovering || bar.contains(document.activeElement)) { hideSoon(); return; }
+        bar.classList.remove("show");
+      }, QUIET_MS);
+    }
+    function show() { bar.classList.add("show"); hideSoon(); }
+    const atTop = () => (window.scrollY || document.documentElement.scrollTop || 0) <= 2;
+
+    // scrolling back up to the very top
+    let lastY = window.scrollY || 0;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY || 0;
+      if (y < lastY && y <= 2) show();
+      lastY = y;
+    }, { passive: true });
+    // pulling down when already at the top (phones), or scrolling up with a mouse wheel or trackpad
+    let touchY = null;
+    window.addEventListener("touchstart", e => {
+      touchY = (e.target === canvas || bar.contains(e.target)) ? null : e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener("touchmove", e => {
+      if (touchY !== null && atTop() && e.touches[0].clientY - touchY > 24) { show(); touchY = null; }
+    }, { passive: true });
+    window.addEventListener("wheel", e => { if (e.deltaY < 0 && atTop()) show(); }, { passive: true });
+    // on a computer, moving the mouse up to the top edge also brings it back
+    window.addEventListener("mousemove", e => { if (e.clientY < 24 && !charging) show(); }, { passive: true });
+
+    // using the menu keeps it open; 3 quiet seconds after that, it tucks away
+    bar.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") hovering = true; show(); });
+    bar.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") { hovering = false; hideSoon(); } });
+    bar.addEventListener("pointerdown", show);
+    bar.addEventListener("focusin", show);
+    bar.addEventListener("focusout", hideSoon);
+
+    // a quick hello when the page opens, so people know it's there
+    setTimeout(show, 400);
   })();
 
   // ---------- offline support: once loaded, the game works without internet ----------
