@@ -267,6 +267,35 @@
   .studio-bar ul a { display: block; padding: 12px 0; }
   @media (max-width: 340px) { .studio-bar ul li:first-child { display: none; } }
   @media (prefers-reduced-motion: reduce) { .studio-bar { transition: none; } }
+
+  /* ---- Home-screen app only: a little menu button that raises the Lily Studio menu from the bottom ---- */
+  .menu-btn { display: none; }
+  html.app .menu-btn {
+    display: grid; place-items: center; position: fixed; z-index: 60;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html.app .menu-btn svg { width: 20px; height: 20px; }
+  html.app .menu-btn .i-close { display: none; }
+  html.app .menu-btn[aria-expanded="true"] { background: rgba(9, 20, 32, 0.88); transform: translateY(calc(-1 * var(--sheet-h, 120px))); }
+  html.app .menu-btn[aria-expanded="true"] .i-open { display: none; }
+  html.app .menu-btn[aria-expanded="true"] .i-close { display: block; }
+  html.app .menu-btn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  html.app .studio-bar {
+    top: auto; bottom: 0; padding-top: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-bottom: 0; border-top: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+  html.app .studio-bar.show { transform: translateY(0); }
+  html.app .studio-bar nav { height: auto; min-height: 64px; padding-top: 8px; padding-bottom: 8px; }
+  html.app .studio-bar ul a { padding: 16px 0; }
+  @media (prefers-reduced-motion: reduce) { html.app .menu-btn { transition: none; } }
 </style>
 </head>
 <body>
@@ -313,6 +342,10 @@
         </button>
       </div>
     </div>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Lily Studio menu" aria-expanded="false" aria-controls="studioBar">
+      <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+      <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
     <div class="app-credit">a tiny free game by <a href="https://thelilystudio.com" target="_blank" rel="noopener">Lily Studio</a></div>
   </div>
 
@@ -1830,6 +1863,23 @@
     const inApp = document.documentElement.classList.contains("app");
     // from the home-screen app, open the website in the browser so the game is never replaced
     if (inApp) bar.querySelectorAll("a").forEach(a => { a.target = "_blank"; a.rel = "noopener"; });
+
+    // Home-screen app: the menu lives at the bottom and only opens with the menu button (tap again to lower it)
+    if (inApp) {
+      const btn = document.getElementById("menuBtn");
+      if (!btn) return;
+      const setOpen = open => {
+        document.documentElement.style.setProperty("--sheet-h", bar.offsetHeight + "px");
+        bar.classList.toggle("show", open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.setAttribute("aria-label", open ? "Close Lily Studio menu" : "Lily Studio menu");
+      };
+      btn.addEventListener("click", () => setOpen(btn.getAttribute("aria-expanded") !== "true"));
+      window.addEventListener("keydown", e => { if (e.key === "Escape" && bar.classList.contains("show")) setOpen(false); });
+      bar.addEventListener("click", e => { if (e.target.closest("a")) setOpen(false); });  // tidy up after opening a page
+      window.addEventListener("resize", () => document.documentElement.style.setProperty("--sheet-h", bar.offsetHeight + "px"));
+      return;
+    }
     const QUIET_MS = 3000;
     let timer = 0, hovering = false;
     function hideSoon() {
