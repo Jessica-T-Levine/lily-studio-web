@@ -896,7 +896,10 @@
       .ticker-text { font-size: 0.5rem; }
       .app-name { font-size: 1.8rem; }
     }
-  </style>
+      /* tablet widths: keep the full menu (with Games) on one tidy line */
+    @media (min-width: 769px) and (max-width: 1000px) { .nav-links { gap: 14px; } .nav-cta { padding: 8px 12px !important; } }
+    @media (min-width: 769px) and (max-width: 860px) { .nav-links { gap: 10px; } }
+</style>
 </head>
 <body>
 
@@ -916,6 +919,7 @@
         <li><a href="/skills.html">Skills</a></li>
         <li><a href="/apps.html">Apps</a></li>
         <li><a href="/printed.html">Printed</a></li>
+        <li><a href="/hop/">Games</a></li>
         <li><a href="/about.html">About</a></li>
         <li><a href="/privacy.html">Privacy</a></li>
         <li><a href="/terms.html">Terms</a></li>
@@ -1184,6 +1188,7 @@
       <li><a href="/skills.html">Skills</a></li>
       <li><a href="/apps.html">Apps</a></li>
       <li><a href="/printed.html">Printed</a></li>
+      <li><a href="/hop/">Games</a></li>
       <li><a href="/about.html">About</a></li>
       <li><a href="/privacy.html">Privacy</a></li>
       <li><a href="/terms.html">Terms</a></li>

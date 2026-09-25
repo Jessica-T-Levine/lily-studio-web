@@ -99,7 +99,10 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
     }
-  </style>
+      /* tablet widths: keep the full menu (with Games) on one tidy line */
+    @media (min-width: 769px) and (max-width: 1000px) { .nav-links { gap: 14px; } .nav-cta { padding: 8px 12px !important; } }
+    @media (min-width: 769px) and (max-width: 860px) { .nav-links { gap: 10px; } }
+</style>
 </head>
 <body>
 
@@ -118,6 +121,7 @@
         <li><a href="/skills.html" id="nav-skills">Skills</a></li>
         <li><a href="/apps.html" id="nav-apps">Apps</a></li>
         <li><a href="/printed.html" id="nav-printed">Printed</a></li>
+        <li><a href="/hop/" id="nav-games">Games</a></li>
         <li><a href="/about.html" id="nav-about" class="active">About</a></li>
         <li><a href="/privacy.html" id="nav-privacy">Privacy</a></li>
         <li><a href="/terms.html" id="nav-terms">Terms</a></li>
