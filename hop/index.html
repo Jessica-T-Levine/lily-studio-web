@@ -1,0 +1,1780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Lily's Hop Hop</title>
+<meta name="description" content="A free, cozy frog game from Lily Studio. Hold to wind up, let go to hop, and help a very round frog make the pond bloom.">
+<meta name="theme-color" content="#2A2046">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hop Hop">
+<meta property="og:title" content="Lily's Hop Hop">
+<meta property="og:description" content="A free, cozy frog game from Lily Studio. Help a very round frog make the pond bloom.">
+<meta property="og:image" content="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Nunito:wght@500;700;800&display=swap">
+<script>
+  // Opened from the iPhone/iPad home screen? Then show the full-screen game.
+  (function () {
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    if (standalone) document.documentElement.classList.add("app");
+  })();
+</script>
+<style>
+  [hidden] { display: none !important; }
+  :root {
+    color-scheme: dark;
+    --dusk: #2A2046;
+    --dusk-deep: #1E1734;
+    --cream: #FFF3E8;
+    --muted: #C9BDE4;
+    --peach: #FFB38A;
+    --blossom: #FF8FB8;
+    --sage: #86C98A;
+    --lilac: #B9A3E3;
+    --card: #342A56;
+    --display: "Grandstander", "Chalkboard SE", "Comic Sans MS", ui-rounded, system-ui, sans-serif;
+    --body: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, #3A2C5E 0%, var(--dusk) 55%, var(--dusk-deep) 100%);
+    background-color: var(--dusk);
+    color: var(--cream);
+    font-family: var(--body);
+    padding-inline: 16px;
+    padding-block: 14px 18px;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(30px, 8vw, 38px);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+    text-wrap: balance;
+  }
+  h1 span { color: var(--blossom); }
+  .tag {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .sound {
+    flex: none;
+    font: 700 13px/1 var(--body);
+    color: var(--cream);
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 9px 13px;
+    cursor: pointer;
+  }
+  .mixer {
+    display: grid;
+    grid-template-columns: auto 1fr 2.2em;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    font-size: 14px; font-weight: 700;
+    color: var(--cream);
+  }
+  .mixer[hidden] { display: none; }
+  .mixer input[type="range"] { width: 100%; min-width: 0; accent-color: var(--blossom); height: 28px; }
+  .mixer output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .mixer input:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; border-radius: 6px; }
+  .sound:focus-visible, .again:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 400 / 580;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(10, 6, 24, 0.55), inset 0 0 0 1.5px rgba(255,255,255,0.08);
+    background: #F6A98C;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; outline: none; }
+  .hud {
+    position: absolute;
+    top: 14px; left: 16px; right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    font-family: var(--display);
+  }
+  .score { font-size: 44px; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 3px 0 rgba(90, 50, 110, 0.35); font-variant-numeric: tabular-nums; }
+  .score small { display: block; font: 800 11px/1.4 var(--body); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.85); text-shadow: none; }
+  .best { text-align: right; font: 800 12px/1.4 var(--body); letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.9); }
+  .best b { display: block; font: 800 22px/1 var(--display); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .over {
+    position: absolute; inset: 0;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 17%;
+    background: linear-gradient(rgba(42, 32, 70, 0.35), rgba(42, 32, 70, 0) 75%);
+  }
+  .over[hidden] { display: none; }
+  .panel {
+    width: min(78%, 280px);
+    background: var(--cream);
+    color: #3B2D55;
+    border-radius: 26px;
+    padding: 16px 18px 16px;
+    text-align: center;
+    display: flex; flex-direction: column; gap: 4px;
+    box-shadow: 0 14px 0 -4px rgba(255, 143, 184, 0.55), 0 20px 40px rgba(20, 10, 40, 0.4);
+    animation: pop 420ms cubic-bezier(.2, 1.6, .4, 1) both;
+  }
+  .panel h2 { font: 800 38px/1 var(--display); margin: 0; color: #5B8FD6; }
+  .panel p { margin: 0; font-size: 15px; font-weight: 700; color: #6A5A86; }
+  .panel .big { font: 800 30px/1.1 var(--display); color: #3B2D55; font-variant-numeric: tabular-nums; }
+  .panel .newbest { color: #E0628F; font-weight: 800; }
+  .again {
+    margin-top: 8px;
+    font: 800 18px/1 var(--display);
+    color: #fff;
+    background: linear-gradient(#FF9EC3, #F07AA6);
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 20px;
+    box-shadow: 0 5px 0 #C9557F;
+    cursor: pointer;
+  }
+  .again:active { transform: translateY(3px); box-shadow: 0 2px 0 #C9557F; }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .how {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-align: center;
+  }
+  .how b { color: var(--cream); }
+  footer {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px;
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--peach); font-weight: 800; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  @media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+  /* a tiny glowing lightning bug instead of the hand pointer; it glows brighter while winding up */
+  canvas { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%220.5%22%20cy%3D%220.5%22%20r%3D%220.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFF6A0%22%20stop-opacity%3D%220.8%22/%3E%3Cstop%20offset%3D%220.55%22%20stop-color%3D%22%23FFE45C%22%20stop-opacity%3D%220.36%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFE45C%22%20stop-opacity%3D%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2217%22%20r%3D%2215%22%20fill%3D%22url%28%23g%29%22/%3E%3Cellipse%20cx%3D%2212.5%22%20cy%3D%2211.5%22%20rx%3D%224%22%20ry%3D%222.4%22%20transform%3D%22rotate%28-25%2012.5%2011.5%29%22%20fill%3D%22%23FFFFFF%22%20fill-opacity%3D%220.8%22/%3E%3Cellipse%20cx%3D%2219.5%22%20cy%3D%2211.5%22%20rx%3D%224%22%20ry%3D%222.4%22%20transform%3D%22rotate%2825%2019.5%2011.5%29%22%20fill%3D%22%23FFFFFF%22%20fill-opacity%3D%220.8%22/%3E%3Cellipse%20cx%3D%2216%22%20cy%3D%2219.5%22%20rx%3D%223.6%22%20ry%3D%224.2%22%20fill%3D%22%23FFE86A%22/%3E%3Cellipse%20cx%3D%2216%22%20cy%3D%2213.5%22%20rx%3D%223%22%20ry%3D%223.2%22%20fill%3D%22%234B3A66%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%229.6%22%20r%3D%222.2%22%20fill%3D%22%234B3A66%22/%3E%3C/svg%3E") 16 16, pointer; }
+  body.winding canvas { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%220.5%22%20cy%3D%220.5%22%20r%3D%220.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFF6A0%22%20stop-opacity%3D%221.0%22/%3E%3Cstop%20offset%3D%220.55%22%20stop-color%3D%22%23FFE45C%22%20stop-opacity%3D%220.45%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFE45C%22%20stop-opacity%3D%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2217%22%20r%3D%2215.5%22%20fill%3D%22url%28%23g%29%22/%3E%3Cellipse%20cx%3D%2212.5%22%20cy%3D%2211.5%22%20rx%3D%224%22%20ry%3D%222.4%22%20transform%3D%22rotate%28-25%2012.5%2011.5%29%22%20fill%3D%22%23FFFFFF%22%20fill-opacity%3D%220.8%22/%3E%3Cellipse%20cx%3D%2219.5%22%20cy%3D%2211.5%22%20rx%3D%224%22%20ry%3D%222.4%22%20transform%3D%22rotate%2825%2019.5%2011.5%29%22%20fill%3D%22%23FFFFFF%22%20fill-opacity%3D%220.8%22/%3E%3Cellipse%20cx%3D%2216%22%20cy%3D%2219.5%22%20rx%3D%223.6%22%20ry%3D%224.2%22%20fill%3D%22%23FFF4A8%22/%3E%3Cellipse%20cx%3D%2216%22%20cy%3D%2213.5%22%20rx%3D%223%22%20ry%3D%223.2%22%20fill%3D%22%234B3A66%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%229.6%22%20r%3D%222.2%22%20fill%3D%22%234B3A66%22/%3E%3C/svg%3E") 16 16, pointer; }
+
+  /* ---- pieces used only when opened from the home screen ---- */
+  .right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .sound-icon, .app-title, .app-credit { display: none; }
+  .tip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 12px 12px 16px;
+    background: var(--card); color: var(--cream);
+    border: 1.5px solid rgba(255,255,255,0.14); border-radius: 16px;
+    font-size: 14px; line-height: 1.4;
+  }
+  .tip b { color: #FFE0EC; }
+  .tip button { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(255,255,255,0.12); color: var(--cream); font: 800 16px/1 var(--body); cursor: pointer; }
+  .tip button:focus-visible, .sound-icon:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+
+  /* Home-screen app mode: the pond fills the whole screen like a real game */
+  html.app, html.app body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.app body { position: fixed; inset: 0; padding: 0; background: var(--dusk); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  html.app .wrap { max-width: none; margin: 0; display: block; }
+  html.app header, html.app .how, html.app footer { display: none; }
+  html.app .stage { position: fixed; inset: 0; width: auto; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+  html.app .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  html.app .sound-icon {
+    display: grid; place-items: center; pointer-events: auto;
+    width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+  }
+  html.app .sound-icon svg { width: 20px; height: 20px; }
+  html.app .app-title {
+    display: block; position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+    font: 800 26px/1 var(--display); color: #fff; white-space: nowrap;
+    text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; transition: opacity 1.2s ease;
+  }
+  html.app .app-title span { color: #FFE0EC; }
+  html.app body.playing .app-title { opacity: 0; }
+  html.app .app-credit {
+    display: block; position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    text-align: center; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.6); pointer-events: none;
+  }
+  html.app .app-credit a { pointer-events: auto; color: rgba(255,255,255,0.8); text-decoration: none; }
+  html.app .mixer {
+    position: fixed; z-index: 5;
+    top: calc(env(safe-area-inset-top, 0px) + 118px); right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(300px, calc(100% - 24px));
+    box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lily's Hop <span>Hop</span></h1>
+      <p class="tag">Help a very round frog make the pond bloom.</p>
+    </div>
+    <button class="sound" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer">Sound</button>
+  </header>
+
+  <div class="mixer" id="mixer" hidden>
+    <label for="sfxVol">Game sounds</label>
+    <input type="range" id="sfxVol" min="0" max="100" step="1" value="80">
+    <output id="sfxOut" for="sfxVol">80</output>
+    <label for="pondVol">Pond sounds</label>
+    <input type="range" id="pondVol" min="0" max="100" step="1" value="50">
+    <output id="pondOut" for="pondVol">50</output>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="app-title" aria-hidden="true">Lily's Hop <span>Hop</span></div>
+    <canvas id="game" tabindex="0" aria-label="Lily's Hop Hop game. Press and hold the screen, mouse button, space bar or up arrow to wind up, then let go to hop."></canvas>
+    <div class="hud">
+      <div class="score"><span id="score">0</span><small>hops</small></div>
+      <div class="right">
+        <div class="best">best<b id="best">0</b></div>
+        <button class="sound-icon" id="soundBtn2" type="button" aria-label="Sound settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="app-credit">a tiny free game by <a href="https://thelilystudio.com" target="_blank" rel="noopener">Lily Studio</a></div>
+  </div>
+
+  <div class="tip" id="tip" role="note" hidden>
+    <div>Play it like an app: tap <b>Share</b>, then <b>Add to Home Screen</b>.</div>
+    <button type="button" id="tipClose" aria-label="Close tip">&times;</button>
+  </div>
+
+  <p class="how"><b>Press and hold</b> (tap, click, or the space bar) to wind up, <b>let go</b> to hop. Miss a pad and your frog floats, then hops back on. Land in the middle for a double bloom.</p>
+
+  <footer>
+    <span>A tiny free game by Lily Studio</span>
+    <span>·</span>
+    <a href="https://thelilystudio.com" target="_blank" rel="noopener">thelilystudio.com</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- setup ----------
+  // The game world is 400 wide on phones (taller screens simply show more sky and water),
+  // and 580 tall on wide screens (wider screens show more pond). Gameplay stays the same.
+  let W = 400, H = 580;            // logical world size (updated to fit the screen)
+  let WATER_Y = 404;               // water line (updated to fit the screen)
+  const FROG_SCREEN_X = 110;       // where the camera keeps the frog
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const stage = document.getElementById("stage");
+  const scoreEl = document.getElementById("score");
+  const bestEl = document.getElementById("best");
+  const soundBtn = document.getElementById("soundBtn");
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let scale = 1, dpr = 1;
+  function resize() {
+    const rect = stage.getBoundingClientRect();
+    const vw = Math.max(1, rect.width), vh = Math.max(1, rect.height);
+    if (400 * vh / vw >= 580) { W = 400; H = 400 * vh / vw; }   // phone / portrait
+    else { H = 580; W = 580 * vw / vh; }                         // tablet / desktop / landscape
+    WATER_Y = Math.round(H - Math.max(176, H * 0.3));
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.width = Math.round(vw * dpr);
+    canvas.height = Math.round(vh * dpr);
+    scale = canvas.width / W;
+    if (typeof layoutSky === "function") layoutSky();
+    try { if (frog && !frog.jump && state === "play") frog.y = WATER_Y; } catch (_) { /* not started yet */ }
+  }
+  window.addEventListener("resize", resize);
+
+  // ---------- storage (safe) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  };
+  let best = parseInt(store.get("lph-best", "0"), 10) || 0;
+  bestEl.textContent = best;
+
+  // ---------- sound: two independent volumes (game sounds + pond sounds) ----------
+  // Everything is made with the Web Audio API (no sound files). Audio can only start
+  // after the player's first tap/click/key press — that's a browser rule.
+  const toVol = v => Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+  let sfxVol = toVol(store.get("lph-sfx", "80"));
+  let pondVol = toVol(store.get("lph-pond", "50"));
+  let actx = null, sfxBus = null, pondBus = null, pondStarted = false;
+  const volCurve = v => Math.pow(v / 100, 2) * 1.25; // gentle curve: small slider moves = small changes when quiet
+  function audio() {
+    if (!actx) {
+      try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        sfxBus = actx.createGain(); pondBus = actx.createGain();
+        sfxBus.connect(actx.destination); pondBus.connect(actx.destination);
+        applyVolumes(true);
+      } catch (e) { actx = null; return null; }
+    }
+    if (actx.state === "suspended" && !document.hidden) actx.resume();
+    if (!pondStarted) startPond();
+    return actx;
+  }
+  function applyVolumes(instant) {
+    if (!actx) return;
+    const t = actx.currentTime;
+    if (instant) { sfxBus.gain.value = volCurve(sfxVol); pondBus.gain.value = volCurve(pondVol); return; }
+    sfxBus.gain.setTargetAtTime(volCurve(sfxVol), t, 0.05);
+    pondBus.gain.setTargetAtTime(volCurve(pondVol), t, 0.12);
+  }
+  function tone(type, f1, f2, dur, vol, delay = 0, bus) {
+    const a = audio(); if (!a) return;
+    const out = bus || sfxBus;
+    if ((out === sfxBus && sfxVol === 0) || (out === pondBus && pondVol === 0)) return;
+    const t = a.currentTime + delay;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(out);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  const sfx = {
+    boing() { tone("sine", 260, 720, 0.18, 0.18); },
+    bloom(perfect) {
+      tone("triangle", 880, 880, 0.16, 0.12);
+      tone("triangle", 1320, 1320, 0.2, 0.1, 0.07);
+      if (perfect) tone("triangle", 1760, 1760, 0.26, 0.09, 0.14);
+    },
+    plop() { tone("sine", 520, 90, 0.32, 0.22); tone("sine", 180, 60, 0.25, 0.12, 0.08); },
+    bloop() { tone("sine", 240, 520, 0.16, 0.14); },
+    twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
+    lick() { tone("sine", 900, 1500, 0.07, 0.06); },
+    gulp() { tone("sine", 520, 260, 0.12, 0.14); tone("sine", 700, 350, 0.1, 0.08, 0.1); },
+    yay() { [784, 988, 1175, 1568].forEach((f, i) => tone("triangle", f, f, 0.18, 0.07, i * 0.08)); }
+  };
+
+  // --- pond ambience: soft breeze + lapping water (filtered noise), crickets, the odd ribbit ---
+  function startPond() {
+    if (!actx || pondStarted) return;
+    pondStarted = true;
+    // soft brown noise loop
+    const len = actx.sampleRate * 3, buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+    // breeze: low and slow
+    const breezeF = actx.createBiquadFilter(); breezeF.type = "lowpass"; breezeF.frequency.value = 420;
+    const breezeG = actx.createGain(); breezeG.gain.value = 0.055;
+    const lfo1 = actx.createOscillator(); lfo1.frequency.value = 0.07;
+    const lfo1G = actx.createGain(); lfo1G.gain.value = 0.035;
+    lfo1.connect(lfo1G).connect(breezeG.gain);
+    src.connect(breezeF).connect(breezeG).connect(pondBus);
+    // water lapping: a little brighter, gently pulsing
+    const lapF = actx.createBiquadFilter(); lapF.type = "bandpass"; lapF.frequency.value = 850; lapF.Q.value = 0.7;
+    const lapG = actx.createGain(); lapG.gain.value = 0.03;
+    const lfo2 = actx.createOscillator(); lfo2.frequency.value = 0.28;
+    const lfo2G = actx.createGain(); lfo2G.gain.value = 0.022;
+    lfo2.connect(lfo2G).connect(lapG.gain);
+    src.connect(lapF).connect(lapG).connect(pondBus);
+    src.start(); lfo1.start(); lfo2.start();
+  }
+  let nextCricket = 1.5, nextRibbit = 12 + Math.random() * 10;
+  function cricket() {
+    const f = rand(4100, 4800), pulses = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < pulses; i++) tone("sine", f, f * 1.01, 0.035, 0.022, i * 0.055, pondBus);
+  }
+  function ribbit() {
+    const a = audio(); if (!a || pondVol === 0) return;
+    [0, 0.16].forEach(delay => {
+      const t = a.currentTime + delay;
+      const o = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(120, t + 0.11);
+      f.type = "lowpass"; f.frequency.value = 800;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.05, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      o.connect(f).connect(g).connect(pondBus);
+      o.start(t); o.stop(t + 0.14);
+    });
+  }
+  function updatePond(dt) {
+    if (!actx || pondVol === 0 || actx.state !== "running") return;
+    nextCricket -= dt; nextRibbit -= dt;
+    if (nextCricket <= 0) { cricket(); nextCricket = rand(0.7, 2.4); }
+    if (nextRibbit <= 0) { ribbit(); nextRibbit = rand(14, 30); }
+  }
+  // pause all sound when the page is hidden, resume when it comes back
+  document.addEventListener("visibilitychange", () => {
+    if (!actx) return;
+    if (document.hidden) actx.suspend(); else actx.resume();
+  });
+
+  // --- the sound panel: two sliders that work independently ---
+  const mixerEl = document.getElementById("mixer");
+  const sfxSlider = document.getElementById("sfxVol"), pondSlider = document.getElementById("pondVol");
+  const sfxOut = document.getElementById("sfxOut"), pondOut = document.getElementById("pondOut");
+  function renderSound() {
+    sfxSlider.value = sfxVol; pondSlider.value = pondVol;
+    sfxOut.textContent = sfxVol; pondOut.textContent = pondVol;
+    const muted = sfxVol === 0 && pondVol === 0;
+    soundBtn.style.opacity = muted ? "0.55" : "1";
+    soundBtn.setAttribute("aria-label", muted ? "Sound settings (sound is off)" : "Sound settings");
+  }
+  renderSound();
+  soundBtn.addEventListener("click", () => {
+    const open = mixerEl.hidden;
+    mixerEl.hidden = !open;
+    soundBtn.setAttribute("aria-expanded", String(open));
+    audio(); // a click is a user gesture, so sound can start here
+  });
+  const soundBtn2 = document.getElementById("soundBtn2");
+  if (soundBtn2) soundBtn2.addEventListener("click", () => soundBtn.click());
+  sfxSlider.addEventListener("input", () => {
+    sfxVol = toVol(sfxSlider.value); store.set("lph-sfx", String(sfxVol)); audio(); applyVolumes(); renderSound();
+  });
+  sfxSlider.addEventListener("change", () => sfx.boing()); // quick preview of the new level
+  pondSlider.addEventListener("input", () => {
+    pondVol = toVol(pondSlider.value); store.set("lph-pond", String(pondVol)); audio(); applyVolumes(); renderSound();
+  });
+  pondSlider.addEventListener("change", () => { if (pondVol > 0) cricket(); });
+
+  // ---------- helpers ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const PETAL_COLORS = [
+    ["#FF9EC3", "#FFD6E6"], ["#FFB38A", "#FFE1CC"], ["#C9A7F0", "#EBDDFF"],
+    ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"]
+  ];
+  const CHEERS = ["boing!", "ribbit!", "yippee!", "hop hop!", "splendid!", "wheee!", "so bouncy!", "nice toes!"];
+
+  // ---------- game state ----------
+  let pads, frog, camX, camTarget, score, state, charge, charging, chargeDir, hops;
+  let particles = [], ripples = [], popups = [], ring = null;
+  // Creature sizes: most are regular, some a bit bigger, a few up to twice the size,
+  // so each one feels like a different animal of the same kind.
+  function critterSize() {
+    const r = Math.random();
+    return r < 0.55 ? 1 + Math.random() * 0.3 : r < 0.88 ? 1.3 + Math.random() * 0.4 : 1.7 + Math.random() * 0.3;
+  }
+  // little bits of whimsy: a butterfly, dragonfly or a few lightning bugs drift by now and then
+  let critters = [], nextCritter = rand(3, 6), lastCamX = null;
+  const BUTTERFLY_COLORS = [["#FF9EC3", "#FFD6E6"], ["#C9A7F0", "#EBDDFF"], ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"]];
+  function spawnCritter() {
+    const roll = Math.random();
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const x0 = dir > 0 ? -24 : W + 24;
+    if (roll < 0.4) {
+      critters.push({ kind: "butterfly", x: x0, baseY: rand(150, WATER_Y - 50), y: 0, dir, vx: rand(26, 38), t: rand(0, 10), size: critterSize(),
+        col: BUTTERFLY_COLORS[Math.floor(Math.random() * BUTTERFLY_COLORS.length)] });
+    } else if (roll < 0.7) {
+      critters.push({ kind: "dragonfly", x: x0, baseY: rand(170, WATER_Y - 40), y: 0, dir, t: 0, bob: rand(0, 6), size: critterSize() });
+    } else {
+      // about half the time, lightning bugs drift at frog height (so the frog can catch one)
+      const y = Math.random() < 0.5 ? WATER_Y - rand(60, 110) : rand(200, WATER_Y - 30);
+      const n = 2 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < n; i++) {
+        critters.push({ kind: "bug", x: x0 - dir * i * rand(20, 40), baseY: y + rand(-30, 30), y: 0, dir, vx: rand(14, 22), t: rand(0, 10), size: critterSize() });
+      }
+    }
+  }
+  function updateCritters(dt) {
+    nextCritter -= dt;
+    if (nextCritter <= 0) {
+      if (critters.length < 4) spawnCritter();
+      nextCritter = rand(6, 13);
+    }
+    const camShift = lastCamX === null ? 0 : (camX - lastCamX) * 0.5;
+    lastCamX = camX;
+    critters.forEach(c => {
+      if (c.caught) return; // held by the frog's tongue
+      c.t += dt;
+      c.x -= camShift;
+      if (c.kind === "butterfly") {
+        c.x += c.dir * c.vx * dt;
+        c.y = c.baseY + Math.sin(c.t * 1.8) * 16 + Math.sin(c.t * 5.3) * 4;
+      } else if (c.kind === "dragonfly") {
+        // darts forward, then hovers
+        const phase = c.t % 1.7;
+        const speed = phase < 0.45 ? 190 : 6;
+        c.x += c.dir * speed * dt;
+        c.y = c.baseY + Math.sin(c.t * 3 + c.bob) * 6 + (phase >= 0.45 ? Math.sin(c.t * 22) * 0.8 : 0);
+      } else {
+        c.x += c.dir * c.vx * dt;
+        c.y = c.baseY + Math.sin(c.t * 1.3) * 12 + Math.cos(c.t * 2.1) * 5;
+      }
+    });
+    critters = critters.filter(c => !c.eaten && (c.caught || (c.dir > 0 ? c.x < W + 60 : c.x > -60)));
+  }
+  function drawButterfly(c) {
+    const flap = 0.25 + Math.abs(Math.sin(c.t * (reduceMotion ? 5 : 11))) * 0.75;
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.dir * (c.size || 1), c.size || 1);
+    ctx.save(); ctx.scale(flap, 1);
+    ctx.fillStyle = c.col[0];
+    ctx.beginPath(); ctx.ellipse(-5, -4, 5.5, 4.5, -0.5, 0, Math.PI * 2); ctx.ellipse(5, -4, 5.5, 4.5, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = c.col[1];
+    ctx.beginPath(); ctx.ellipse(-3.5, 2.5, 3.5, 3, 0.4, 0, Math.PI * 2); ctx.ellipse(3.5, 2.5, 3.5, 3, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "#4B3A66"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(0, 5); ctx.stroke();
+    ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.quadraticCurveTo(1, -9, 3, -10); ctx.moveTo(0, -5); ctx.quadraticCurveTo(-1, -9, -3, -10); ctx.stroke();
+    ctx.restore();
+  }
+  function drawDragonfly(c) {
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.dir * (c.size || 1), c.size || 1);
+    const shimmer = 0.35 + Math.abs(Math.sin(c.t * 40)) * 0.3;
+    ctx.fillStyle = `rgba(255, 255, 255, ${shimmer})`;
+    ctx.beginPath();
+    ctx.ellipse(-1, -3, 7, 2.2, -0.35, 0, Math.PI * 2);
+    ctx.ellipse(-1, 3, 7, 2.2, 0.35, 0, Math.PI * 2);
+    ctx.ellipse(-4, -2.5, 6, 2, -0.6, 0, Math.PI * 2);
+    ctx.ellipse(-4, 2.5, 6, 2, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#4FB8B4"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(3, 0); ctx.lineTo(-13, 0.5); ctx.stroke();
+    ctx.fillStyle = "#3E9C9A";
+    ctx.beginPath(); ctx.arc(4.5, 0, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawBug(c) {
+    const sz = c.size || 1;
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(sz, sz); ctx.translate(-c.x, -c.y);
+    drawBugBody(c);
+    ctx.restore();
+  }
+  function drawBugBody(c) {
+    const glow = 0.35 + 0.65 * Math.max(0, Math.sin(c.t * 2.6));
+    const g = ctx.createRadialGradient(c.x, c.y + 1, 0, c.x, c.y + 1, 10);
+    g.addColorStop(0, `rgba(255, 244, 150, ${0.85 * glow})`);
+    g.addColorStop(1, "rgba(255, 244, 150, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y + 1, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(255, 238, 120, ${0.6 + 0.4 * glow})`;
+    ctx.beginPath(); ctx.ellipse(c.x - c.dir * 1.5, c.y + 1, 2.2, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#4B3A66";
+    ctx.beginPath(); ctx.ellipse(c.x + c.dir * 1.5, c.y, 1.8, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.beginPath(); ctx.ellipse(c.x, c.y - 2, 2, 1, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  // ---------- jumping fish (goldfish, koi, blue striped) ----------
+  let fish = [], nextFish = rand(5, 9);
+  const FISH_KINDS = ["goldfish", "koi", "stripe"];
+  function fishSplash(x) {
+    for (let i = 0; i < 9; i++) {
+      const a = rand(-Math.PI * 0.9, -Math.PI * 0.1), sp = rand(50, 140);
+      particles.push({ x, y: WATER_Y + 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.8, c: i % 2 ? "#E6F7FF" : "#A9DDF0", r: rand(1.4, 2.8), kind: "drop" });
+    }
+    ripples.push({ x, y: WATER_Y + 5, r: 4, life: 0.9 });
+  }
+  // open water only: a spot counts as clear if it isn't on (or right next to) any lily pad
+  function clearWater(wx) {
+    return pads.every(p => Math.abs(wx - p.x) > p.r + 34);
+  }
+  function spawnFish() {
+    const frogScreenX = frog.x - camX;
+    for (let tries = 0; tries < 40; tries++) {
+      const sx = rand(40, W - 40);
+      if (Math.abs(sx - frogScreenX) < 70) continue;
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dx = dir * rand(45, 80);
+      const x0 = camX + sx, x1 = x0 + dx;
+      // both the jump-out spot and the landing spot must be open water
+      if (!clearWater(x0) || !clearWater(x1)) continue;
+      const f = {
+        kind: FISH_KINDS[Math.floor(Math.random() * FISH_KINDS.length)], size: critterSize() * 0.85,
+        x0, dx, h: rand(55, 85), t: 0, dur: rand(0.95, 1.2), dir,
+        x: x0, y: WATER_Y, angle: 0, landed: false
+      };
+      fish.push(f);
+      fishSplash(f.x0);
+      return true;
+    }
+    return false; // no open water right now; try again shortly
+  }
+  function updateFish(dt) {
+    nextFish -= dt;
+    if (nextFish <= 0) {
+      const jumped = fish.length < 2 && spawnFish();
+      nextFish = jumped ? rand(8, 16) : 1.5;
+    }
+    fish.forEach(f => {
+      f.t += dt / f.dur;
+      const t = Math.min(f.t, 1);
+      f.x = f.x0 + f.dx * t;
+      f.y = WATER_Y + 6 - f.h * 4 * t * (1 - t);
+      const vx = f.dx, vy = -f.h * 4 * (1 - 2 * t);
+      f.angle = Math.atan2(vy, Math.abs(vx));
+      if (f.t >= 1 && !f.landed) { f.landed = true; fishSplash(f.x); }
+    });
+    fish = fish.filter(f => f.t < 1.05);
+  }
+  function drawOneFish(f) {
+    ctx.save();
+    ctx.translate(f.x - camX, f.y);
+    ctx.scale(f.dir * 1.3 * (f.size || 1), 1.3 * (f.size || 1));
+    ctx.rotate(f.angle);
+    const wag = Math.sin(time * 18) * 0.25;
+    let body, bodyLight, tail, fin;
+    if (f.kind === "goldfish") { body = "#FF8F52"; bodyLight = "#FFC08A"; tail = "rgba(255, 170, 110, 0.85)"; fin = "#FFB27A"; }
+    else if (f.kind === "koi") { body = "#FFF3EA"; bodyLight = "#FFFFFF"; tail = "rgba(255, 236, 226, 0.9)"; fin = "#FFD9CC"; }
+    else { body = "#7FA8EE"; bodyLight = "#B9D2FA"; tail = "rgba(160, 140, 230, 0.85)"; fin = "#A690E6"; }
+    // tail
+    ctx.save(); ctx.translate(-10, 0); ctx.rotate(wag);
+    ctx.fillStyle = tail;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-7, -9, -11, -7);
+    ctx.quadraticCurveTo(-7, 0, -11, 7);
+    ctx.quadraticCurveTo(-7, 9, 0, 0);
+    ctx.fill();
+    ctx.restore();
+    // body
+    const g = ctx.createLinearGradient(0, -6, 0, 6);
+    g.addColorStop(0, body); g.addColorStop(1, bodyLight);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    // markings
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, Math.PI * 2); ctx.clip();
+    if (f.kind === "koi") {
+      ctx.fillStyle = "#FF7A6B";
+      ctx.beginPath(); ctx.ellipse(2, -3.5, 4.5, 3, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-6, 1, 3.2, 2.6, -0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#3B2D55";
+      ctx.beginPath(); ctx.ellipse(-2, 3.5, 1.6, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (f.kind === "stripe") {
+      ctx.strokeStyle = "rgba(190, 160, 240, 0.9)"; ctx.lineWidth = 2;
+      [-5, -1, 3].forEach(sx => { ctx.beginPath(); ctx.moveTo(sx, -7); ctx.quadraticCurveTo(sx + 2, 0, sx, 7); ctx.stroke(); });
+    } else {
+      ctx.fillStyle = "rgba(255, 230, 190, 0.7)";
+      ctx.beginPath(); ctx.ellipse(1, 3, 8, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    // top fin
+    ctx.fillStyle = fin;
+    ctx.beginPath(); ctx.moveTo(-4, -5.5); ctx.quadraticCurveTo(-1, -11, 4, -6); ctx.closePath(); ctx.fill();
+    // eye + blush
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(6.5, -1.5, 2.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2E2440";
+    ctx.beginPath(); ctx.arc(7, -1.4, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 130, 170, 0.5)";
+    ctx.beginPath(); ctx.ellipse(5.5, 2, 1.8, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawFish() {
+    if (!fish.length) return;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 4); ctx.clip(); // only the part above water shows
+    fish.forEach(drawOneFish);
+    ctx.restore();
+  }
+  // ---------- shooting star: rare, quiet, a little magic ----------
+  let star = null, nextStar = rand(20, 40), starTrail = [];
+  function updateStar(dt) {
+    nextStar -= dt;
+    if (!star && nextStar <= 0) {
+      // each star picks a direction: gently down, steeply down, straight sideways, or rising up
+      const DIRECTIONS = [25, 40, 60, 0, 8, -20, -35]; // degrees below (+) or above (-) level
+      const deg = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)] + rand(-6, 6);
+      const side = Math.random() < 0.5 ? 1 : -1;          // left-to-right or right-to-left
+      const speed = rand(250, 320), dur = rand(0.9, 1.3);
+      const a = deg * Math.PI / 180;
+      const vx = side * Math.cos(a) * speed, vy = Math.sin(a) * speed;
+      // aim the middle of the streak at open sky so it's always visible
+      const cx = rand(90, W - 90), cy = rand(70, Math.max(120, WATER_Y - 200));
+      star = { x: cx - vx * dur / 2, y: cy - vy * dur / 2, vx, vy, t: 0, dur };
+      sfx.twinkle();
+      if (frogIdle()) popups.push({ x: frog.x, y: WATER_Y - 104, text: "ooh!", life: 1.1, big: false });
+      nextStar = rand(35, 75);
+    }
+    if (star) {
+      star.t += dt;
+      star.x += star.vx * dt; star.y += star.vy * dt;
+      if (Math.random() < 0.6) starTrail.push({ x: star.x + rand(-2, 2), y: star.y + rand(-2, 2), life: 1, r: rand(0.8, 1.8) });
+      if (star.t >= star.dur) star = null;
+    }
+    starTrail.forEach(t => { t.life -= dt * 1.4; t.y += dt * 6; });
+    starTrail = starTrail.filter(t => t.life > 0);
+  }
+  function drawStar() {
+    starTrail.forEach(t => {
+      ctx.fillStyle = `rgba(255, 250, 225, ${0.8 * t.life})`;
+      ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.fill();
+    });
+    if (!star) return;
+    const k = star.t / star.dur;
+    const fade = Math.min(1, k * 5) * Math.min(1, (1 - k) * 4); // fade in, then out
+    const len = 0.32; // tail length in seconds of travel
+    const tx = star.x - star.vx * len, ty = star.y - star.vy * len;
+    const g = ctx.createLinearGradient(tx, ty, star.x, star.y);
+    g.addColorStop(0, "rgba(255, 245, 220, 0)");
+    g.addColorStop(1, `rgba(255, 250, 230, ${0.9 * fade})`);
+    ctx.strokeStyle = g; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(star.x, star.y); ctx.stroke();
+    // glowing sparkle head
+    const glow = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, 12);
+    glow.addColorStop(0, `rgba(255, 252, 235, ${fade})`);
+    glow.addColorStop(1, "rgba(255, 240, 200, 0)");
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(star.x, star.y, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(star.x, star.y); ctx.rotate(star.t * 4);
+    ctx.fillStyle = `rgba(255, 255, 255, ${fade})`;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const r = i % 2 === 0 ? 6 : 1.6, a = (i / 8) * Math.PI * 2;
+      ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  // ---------- frog feelings: looking around, catching bugs, happy wiggles ----------
+  let lickCooldown = 3;
+  function frogMouth() { return { x: frog.x - camX + 5, y: frog.y - 33 }; }
+  function frogIdle() { return state === "play" && !frog.jump && !charging; }
+  function updateFeelings(dt) {
+    frog.wiggle = Math.max(0, (frog.wiggle || 0) - dt);
+    frog.gulp = Math.max(0, (frog.gulp || 0) - dt);
+    lickCooldown -= dt;
+
+    // who is the frog looking at? shooting star first, then the tongue target, then nearby critters or fish
+    frog.lookAt = null;
+    if (star) frog.lookAt = { x: star.x, y: star.y };
+    else if (frog.lick) frog.lookAt = { x: frog.lick.bug.x, y: frog.lick.bug.y };
+    else {
+      const m = frogMouth(); let bestD = 230;
+      critters.forEach(c => { const d = Math.hypot(c.x - m.x, c.y - m.y); if (d < bestD) { bestD = d; frog.lookAt = { x: c.x, y: c.y }; } });
+      fish.forEach(f => { const fx = f.x - camX, d = Math.hypot(fx - m.x, f.y - m.y); if (d < 260 && d < bestD) { bestD = d; frog.lookAt = { x: fx, y: f.y }; } });
+      if (!frog.lookAt && turtle) frog.lookAt = { x: turtle.x - camX, y: turtle.y };
+      if (!frog.lookAt && flyers.length) frog.lookAt = { x: flyers[0].x, y: flyers[0].y };
+    }
+
+    // tongue: start a catch when a lightning bug drifts within reach
+    if (!frog.lick && frogIdle() && lickCooldown <= 0 && frog.face === "happy") {
+      const m = frogMouth();
+      const bug = critters.find(c => c.kind === "bug" && !c.caught && Math.hypot(c.x - m.x, c.y - m.y) < 105 && c.y < WATER_Y - 12);
+      if (bug) {
+        bug.caught = true;
+        frog.lick = { bug, t: 0, from: { x: bug.x, y: bug.y } };
+        sfx.lick();
+      }
+    }
+    if (frog.lick) {
+      const L = frog.lick, m = frogMouth();
+      L.t += dt / 0.42;
+      if (L.t < 0.5) { const e = L.t / 0.5; L.tip = { x: lerp(m.x, L.from.x, e), y: lerp(m.y, L.from.y, e) }; }
+      else { const e = (L.t - 0.5) / 0.5; const k = e * e; L.tip = { x: lerp(L.from.x, m.x, k), y: lerp(L.from.y, m.y, k) }; L.bug.x = L.tip.x; L.bug.y = L.tip.y; }
+      if (L.t >= 1) {
+        L.bug.eaten = true;
+        frog.lick = null;
+        frog.gulp = 0.7; frog.squash = 0.6;
+        popups.push({ x: frog.x, y: WATER_Y - 100, text: "yum!", life: 1, big: false });
+        sfx.gulp();
+        lickCooldown = rand(2.5, 5);
+      }
+    }
+  }
+  function drawTongue() {
+    const L = frog.lick; if (!L || !L.tip) return;
+    const m = frogMouth();
+    ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = 3.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(L.tip.x, L.tip.y); ctx.stroke();
+    ctx.fillStyle = "#FF6F9C";
+    ctx.beginPath(); ctx.arc(L.tip.x, L.tip.y, 3.8, 0, Math.PI * 2); ctx.fill();
+    if (L.t >= 0.5) drawBug(L.bug); // the caught bug rides the tongue back
+  }
+  // ---------- rare storybook flyers far off in the distance: a flying pig, unicorn and bunny ----------
+  let flyers = [], nextFlyer = rand(25, 45), flyerCam = null;
+  const FLYER_KINDS = ["pig", "unicorn", "bunny"];
+  let lastFlyerKind = null;
+  function updateFlyers(dt) {
+    nextFlyer -= dt;
+    if (nextFlyer <= 0 && flyers.length === 0) {
+      const options = FLYER_KINDS.filter(k => k !== lastFlyerKind); // never the same one twice in a row
+      const kind = options[Math.floor(Math.random() * options.length)];
+      lastFlyerKind = kind;
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      flyers.push({ kind, dir, x: dir > 0 ? -40 : W + 40, baseY: rand(70, Math.max(120, WATER_Y - 190)), y: 0, t: rand(0, 5),
+        speed: rand(28, 40), size: critterSize() * 0.9 });
+      nextFlyer = rand(45, 90);
+    }
+    const shift = flyerCam === null ? 0 : (camX - flyerCam) * 0.05; // barely moves with the camera: it's far away
+    flyerCam = camX;
+    flyers.forEach(f => {
+      f.t += dt;
+      f.x += f.dir * f.speed * dt - shift;
+      f.y = f.baseY + Math.sin(f.t * 1.1) * 10;
+    });
+    flyers = flyers.filter(f => f.dir > 0 ? f.x < W + 60 : f.x > -60);
+  }
+  function drawWing(x, y, t, scaleW) {
+    ctx.save(); ctx.translate(x, y);
+    ctx.rotate(-0.5 + Math.sin(t * 7) * 0.55);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.ellipse(-5 * scaleW, 0, 7 * scaleW, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7";
+    ctx.beginPath(); ctx.ellipse(-8 * scaleW, 1, 4 * scaleW, 2, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawFlyingPig(t) {
+    ctx.strokeStyle = "#E88AA5"; ctx.lineWidth = 1.2; ctx.lineCap = "round";
+    [-6, -2, 3, 7].forEach(lx => { ctx.beginPath(); ctx.moveTo(lx, 5); ctx.lineTo(lx - 1, 9); ctx.stroke(); });
+    ctx.beginPath(); ctx.moveTo(-12, -1); ctx.bezierCurveTo(-16, -5, -17, 1, -14, 0); ctx.stroke(); // curly tail
+    ctx.fillStyle = "#FFB6C9";
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(10, -3, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FF9AB6";
+    ctx.beginPath(); ctx.moveTo(7, -8); ctx.lineTo(9, -12); ctx.lineTo(11, -8); ctx.closePath(); ctx.fill(); // ear
+    ctx.beginPath(); ctx.ellipse(15.5, -2, 2.4, 3, 0, 0, Math.PI * 2); ctx.fill(); // snout
+    ctx.fillStyle = "#C5627F";
+    ctx.beginPath(); ctx.arc(15.3, -3, 0.6, 0, Math.PI * 2); ctx.arc(15.3, -1, 0.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.arc(11, -4.5, 1, 0, Math.PI * 2); ctx.fill();
+    drawWing(-1, -6, t, 1);
+  }
+  function drawFlyingBunny(t) {
+    ctx.fillStyle = "#FFF6EF";
+    ctx.save(); ctx.translate(8, -9); ctx.rotate(-0.9 + Math.sin(t * 2) * 0.08);
+    ctx.beginPath(); ctx.ellipse(-2, -6, 2.4, 7, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 2.4, 7, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFC4D6";
+    ctx.beginPath(); ctx.ellipse(-2, -6, 1.1, 4.8, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 1.1, 4.8, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "#FFF6EF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 10, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(9, -4, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4, 5, 5, 2, 0.2, 0, Math.PI * 2); ctx.fill(); // back feet stretched
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(-10.5, -1.5, 3, 0, Math.PI * 2); ctx.fill(); // cotton tail
+    ctx.fillStyle = "#FF9AB6";
+    ctx.beginPath(); ctx.arc(14.2, -3.5, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.arc(10.5, -5.5, 1, 0, Math.PI * 2); ctx.fill();
+    drawWing(-1, -5, t, 0.95);
+  }
+  function drawFlyingUnicorn(t) {
+    // tail
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5"].forEach((c, i) => {
+      ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(-12, -2 + i); ctx.quadraticCurveTo(-18, -2 + i * 2 + Math.sin(t * 3 + i) * 1.5, -22, 2 + i * 2); ctx.stroke();
+    });
+    // legs, tucked like it's gliding
+    ctx.strokeStyle = "#E9E1F7"; ctx.lineWidth = 1.8;
+    [[-8, -12], [-4, -8], [6, 10], [9, 13]].forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(a, 4); ctx.lineTo(b, 8); ctx.stroke(); });
+    // body, neck and head
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 13, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(6, -4); ctx.lineTo(12, -2); ctx.lineTo(19, -11); ctx.lineTo(13.5, -14); ctx.closePath(); ctx.fill(); // neck
+    ctx.save(); ctx.translate(17, -10); ctx.rotate(0.35);
+    ctx.beginPath(); ctx.ellipse(0, 0, 5.5, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // horn
+    ctx.fillStyle = "#FFD36E";
+    ctx.beginPath(); ctx.moveTo(15, -13); ctx.lineTo(19, -21); ctx.lineTo(17.5, -12.5); ctx.closePath(); ctx.fill();
+    // mane
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5", "#FFB6C9"].forEach((c, i) => {
+      ctx.fillStyle = c;
+      ctx.beginPath(); ctx.arc(13 - i * 1.9, -13 + i * 2.6, 2.1, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.arc(18, -10.5, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 150, 185, 0.6)";
+    ctx.beginPath(); ctx.arc(19.5, -8.6, 1.1, 0, Math.PI * 2); ctx.fill();
+    drawWing(0, -5, t, 1.1);
+  }
+  function drawFlyers() {
+    flyers.forEach(f => {
+      ctx.save();
+      ctx.translate(f.x, f.y);
+      ctx.scale(f.dir * f.size, f.size);
+      ctx.rotate(Math.sin(f.t * 1.1 + 1) * 0.06);
+      if (f.kind === "pig") drawFlyingPig(f.t);
+      else if (f.kind === "bunny") drawFlyingBunny(f.t);
+      else drawFlyingUnicorn(f.t);
+      ctx.restore();
+    });
+  }
+  // ---------- turtles: surface now and then, paddle a bit, dive back down ----------
+  // Closer to the bottom of the screen = closer to you = bigger. They never surface
+  // on, or swim through, a lily pad (or where the frog is floating).
+  let turtle = null, nextTurtle = rand(12, 20);
+  const SHELLS = [
+    { shell: "#7FBF7A", plate: "#5E9E62", rim: "#4E8A58", skin: "#A8D98A" },   // leafy green
+    { shell: "#6FB9B0", plate: "#4F9990", rim: "#3F7F78", skin: "#A6DCC9" },   // pond teal
+    { shell: "#C9A77A", plate: "#A9875C", rim: "#8C6E48", skin: "#B8DB94" }    // sandy
+  ];
+  function pathClearOfPads(xa, xb, y, size) {
+    const top = y - 16 * size;              // top of the shell on screen
+    if (top > WATER_Y + 34) return true;    // well below the pads: can't overlap them
+    const lo = Math.min(xa, xb) - 22 * size, hi = Math.max(xa, xb) + 22 * size;
+    return pads.every(p => p.x + p.r + 18 < lo || p.x - p.r - 18 > hi);
+  }
+  function spawnTurtle() {
+    if (state !== "play") return false; // not while the frog is in the water
+    for (let tries = 0; tries < 30; tries++) {
+      const y = rand(WATER_Y + 24, H - 42);
+      const depth = (y - (WATER_Y + 24)) / (H - 42 - (WATER_Y + 24));
+      const size = lerp(0.65, 1.35, depth) * rand(0.8, 1.35); // depth plus a bit of individuality
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const swim = rand(50, 110) * size;
+      const sx = rand(40, W - 40);
+      const x0 = camX + sx, x1 = x0 + dir * swim;
+      if (x1 - camX < 20 || x1 - camX > W - 20) continue;       // stay on screen
+      if (!pathClearOfPads(x0, x1, y, size)) continue;
+      turtle = { x0, x1, x: x0, y, size, dir, t: 0, total: rand(7, 10), look: SHELLS[Math.floor(Math.random() * SHELLS.length)] };
+      ripples.push({ x: x0, y: y + 2, r: 8 * size, life: 1 });
+      return true;
+    }
+    return false;
+  }
+  function updateTurtle(dt) {
+    if (!turtle) {
+      nextTurtle -= dt;
+      if (nextTurtle <= 0) nextTurtle = spawnTurtle() ? rand(20, 40) : 2;
+      return;
+    }
+    const T = turtle;
+    T.t += dt;
+    const swimStart = 1.1, swimEnd = T.total - 1.1;
+    const k = clamp((T.t - swimStart) / (swimEnd - swimStart), 0, 1);
+    T.x = lerp(T.x0, T.x1, k * k * (3 - 2 * k));
+    if (T.t >= swimEnd && !T.dove) { T.dove = true; ripples.push({ x: T.x, y: T.y + 2, r: 10 * T.size, life: 1 }); }
+    if (Math.random() < dt * 1.2 && T.t > swimStart && T.t < swimEnd) ripples.push({ x: T.x - T.dir * 14 * T.size, y: T.y + 3, r: 6 * T.size, life: 0.6 });
+    if (T.t >= T.total) turtle = null;
+  }
+  function drawTurtle() {
+    const T = turtle; if (!T) return;
+    // rise up (0 -> 1), stay, then sink (1 -> 0)
+    const up = T.t < 1.1 ? T.t / 1.1 : T.t > T.total - 1.1 ? (T.total - T.t) / 1.1 : 1;
+    const e = up * up * (3 - 2 * up);
+    const c = T.look;
+    const x = T.x - camX, y = T.y;
+    const paddle = Math.sin(T.t * 4);
+    ctx.save();
+    ctx.translate(x, y); ctx.scale(T.dir * T.size, T.size);
+    const lift = (1 - e) * 12; // sits lower while surfacing/diving
+    // soft shadow of the body under the water
+    ctx.fillStyle = `rgba(40, 50, 110, ${0.22 * e})`;
+    ctx.beginPath(); ctx.ellipse(0, 4, 20, 6, 0, 0, Math.PI * 2); ctx.fill();
+    // flippers paddling just under the surface
+    ctx.fillStyle = `rgba(150, 200, 150, ${0.45 * e})`;
+    ctx.beginPath(); ctx.ellipse(10, 5 + paddle, 6, 2.2, 0.5 + paddle * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-10, 5 - paddle, 5, 2, -0.5 - paddle * 0.3, 0, Math.PI * 2); ctx.fill();
+    // everything above the water line
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-40, -40, 80, 42); ctx.clip();
+    ctx.globalAlpha = e;
+    ctx.translate(0, lift);
+    // head peeking out
+    ctx.fillStyle = c.skin;
+    ctx.beginPath(); ctx.ellipse(19, -4, 6, 5, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2E2440";
+    ctx.beginPath(); ctx.arc(21.5, -5.5, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 130, 170, 0.55)";
+    ctx.beginPath(); ctx.ellipse(21, -2.5, 1.6, 1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 0.9; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(22, -2); ctx.quadraticCurveTo(23.5, -1, 24.5, -2.5); ctx.stroke();
+    // shell dome
+    ctx.fillStyle = c.rim;
+    ctx.beginPath(); ctx.ellipse(0, 0, 18, 11, 0, Math.PI, 0); ctx.fill();
+    const g = ctx.createLinearGradient(0, -12, 0, 0);
+    g.addColorStop(0, c.shell); g.addColorStop(1, c.plate);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(0, -1, 16, 10, 0, Math.PI, 0); ctx.fill();
+    // shell plates
+    ctx.fillStyle = c.plate;
+    [[-8, -4, 4, 3], [0, -6.5, 4.5, 3.2], [8, -4, 4, 3]].forEach(([px, py, rx, ry]) => {
+      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath(); ctx.ellipse(-4, -8, 6, 1.6, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // little water ring where it meets the surface
+    ctx.strokeStyle = `rgba(255, 255, 255, ${0.45 * e})`; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.ellipse(0, 1, 21, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  function drawCritters() {
+    critters.forEach(c => {
+      if (c.caught) return; // drawn on the tongue tip instead
+      if (c.kind === "butterfly") drawButterfly(c);
+      else if (c.kind === "dragonfly") drawDragonfly(c);
+      else drawBug(c);
+    });
+  }
+  const fireflies = Array.from({ length: 22 }, () => ({
+    x: Math.random() * 400, yf: Math.random(), y: 0, p: Math.random() * Math.PI * 2, s: rand(0.4, 1)
+  }));
+  // clouds come in different sizes and see-through-ness; bigger ones drift a bit faster (feel closer)
+  const clouds = Array.from({ length: 7 }, (_, i) => {
+    const s = [0.55, 1.35, 0.8, 1.1, 0.65, 1.5, 0.9][i];
+    return {
+      xf: (i + Math.random() * 0.4) / 7, x: 0,
+      yf: Math.random(), y: 0,
+      w: 90 * s,
+      s,
+      a: [0.35, 0.85, 0.5, 0.7, 0.4, 0.9, 0.55][i]
+    };
+  });
+
+  // place sky things (clouds, sparkles) across however much sky this screen has
+  function layoutSky() {
+    const skyBottom = Math.max(160, WATER_Y - 200);
+    clouds.forEach(c => { c.y = 55 + c.yf * (skyBottom - 55); });
+    fireflies.forEach(f => { f.y = 40 + f.yf * (WATER_Y - 70); });
+  }
+  function newPad(x, r) {
+    return {
+      x, r,
+      bloom: 0, bloomed: false, perfect: false,
+      phase: Math.random() * Math.PI * 2,
+      color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+      notch: rand(-0.6, 0.6),
+      flowerSide: Math.random() < 0.5 ? -1 : 1
+    };
+  }
+  let lastGapKind = null;
+  function extendPads() {
+    let last = pads[pads.length - 1];
+    while (last.x < camX + W + 360) {
+      const difficulty = Math.min(score, 40);
+      // pads come in small, medium and large sizes (small ones get a bit more common as hops go up)
+      const sizeRoll = Math.random() - difficulty * 0.004;
+      const base = sizeRoll < 0.3 ? rand(27, 34) : sizeRoll < 0.75 ? rand(40, 50) : rand(54, 64);
+      const r = clamp(base, 26, 64);
+      // pick a short, medium or long gap, never the same kind twice in a row,
+      // so the spacing feels random to the player
+      const kinds = ["short", "medium", "long"].filter(k => k !== lastGapKind);
+      const roll = Math.random();
+      const kind = kinds.length === 3
+        ? (roll < 0.3 ? "short" : roll < 0.7 ? "medium" : "long")
+        : kinds[roll < 0.5 ? 0 : 1];
+      lastGapKind = kind;
+      let gap = kind === "short" ? rand(22, 55)
+              : kind === "medium" ? rand(70, 120)
+              : rand(135, 185 + difficulty * 1.5);
+      // always keep the next pad reachable with a full-power hop (max 330)
+      gap = Math.min(gap, 312 - last.r - r);
+      const x = last.x + last.r + gap + r;
+      last = newPad(x, r);
+      pads.push(last);
+    }
+    // forget pads far behind
+    while (pads.length && pads[0].x + pads[0].r < camX - 200) pads.shift();
+  }
+  function reset() {
+    pads = [newPad(95, 50)];
+    pads[0].bloomed = true; pads[0].bloom = 1; pads[0].flowerSide = -1;
+    frog = { x: 95, y: WATER_Y, pad: pads[0], jump: null, glide: null, squash: 0, sink: 0, blink: 0, face: "happy", fromPad: null, wiggle: 0, gulp: 0, lick: null, lookAt: null };
+    ring = null;
+    camX = frog.x - FROG_SCREEN_X; camTarget = camX;
+    score = 0; hops = 0;
+    state = "play"; charge = 0; charging = false; chargeDir = 1;
+    particles = []; ripples = []; popups = [];
+    scoreEl.textContent = "0";
+    extendPads();
+  }
+
+  // ---------- input ----------
+  function startCharge() {
+    if (state !== "play" || frog.jump || charging) return;
+    audio(); // unlock audio on first gesture
+    charging = true; charge = 0; chargeDir = 1;
+    document.body.classList.add("winding");
+  }
+  function release() {
+    if (!charging) return;
+    charging = false;
+    document.body.classList.remove("winding");
+    if (state !== "play" || frog.jump) return;
+    if (frog.glide) { frog.x = frog.glide.to; frog.glide = null; }
+    const d = 30 + charge * 300;
+    const dur = 0.46 + d / 950;
+    frog.jump = { x0: frog.x, d, t: 0, dur, h: 46 + d * 0.32, y0: 0 };
+    frog.fromPad = frog.pad;
+    frog.pad = null;
+    hops++;
+    document.body.classList.add("playing"); // fades the title away after the first hop
+    sfx.boing();
+  }
+  // ---------- input: touch, mouse, and keyboard all do the same thing ----------
+  // press = start winding up, release = hop
+  let activePointer = null;
+  function pressFromPointer(e) {
+    if (!mixerEl.hidden) { mixerEl.hidden = true; soundBtn.setAttribute("aria-expanded", "false"); }
+    if (e.pointerType === "mouse" && e.button !== 0) return; // left mouse button only
+    e.preventDefault();
+    try { canvas.focus({ preventScroll: true }); } catch (_) {} // so the keyboard works right after a click
+    if (activePointer !== null) return;                       // ignore a second finger
+    activePointer = e.pointerId;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    startCharge();
+  }
+  function releaseFromPointer(e) {
+    if (activePointer === null || e.pointerId !== activePointer) return;
+    activePointer = null;
+    release();
+  }
+  if (window.PointerEvent) {
+    canvas.addEventListener("pointerdown", pressFromPointer);
+    canvas.addEventListener("pointerup", releaseFromPointer);
+    canvas.addEventListener("pointercancel", releaseFromPointer);
+    canvas.addEventListener("lostpointercapture", releaseFromPointer);
+    window.addEventListener("pointerup", releaseFromPointer); // finger or mouse let go outside the game
+  } else {
+    // older phones without pointer events
+    canvas.addEventListener("touchstart", e => { e.preventDefault(); startCharge(); }, { passive: false });
+    canvas.addEventListener("touchend", e => { e.preventDefault(); release(); }, { passive: false });
+    canvas.addEventListener("touchcancel", () => release());
+    canvas.addEventListener("mousedown", e => { if (e.button === 0) { e.preventDefault(); startCharge(); } });
+    window.addEventListener("mouseup", () => release());
+  }
+  canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+  const HOP_KEYS = ["Space", "ArrowUp", "Enter", "KeyW"];
+  let keyHeld = null;
+  function isHopKey(e) { return HOP_KEYS.includes(e.code) || e.key === " " || e.key === "Spacebar"; }
+  window.addEventListener("keydown", e => {
+    if (!isHopKey(e)) return;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === "BUTTON" || tag === "INPUT") return; // let buttons and sliders use their own keys
+    e.preventDefault();                               // stop the page from scrolling
+    if (e.repeat || keyHeld) return;
+    keyHeld = e.code || e.key;
+    startCharge();
+  });
+  window.addEventListener("keyup", e => {
+    if (!keyHeld || (e.code || e.key) !== keyHeld) return;
+    e.preventDefault();
+    keyHeld = null;
+    release();
+  });
+  // if the page loses focus mid-press (switching apps, etc.), quietly cancel the wind-up (no hop)
+  function cancelPress() { keyHeld = null; activePointer = null; charging = false; charge = 0; document.body.classList.remove("winding"); }
+  window.addEventListener("blur", cancelPress);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) cancelPress(); });
+  // start with the game focused so the space bar works straight away where the browser allows it
+  try { canvas.focus({ preventScroll: true }); } catch (_) {}
+
+  // ---------- events ----------
+  function burst(x, y, colors, n, spread) {
+    for (let i = 0; i < n; i++) {
+      const a = rand(-Math.PI, 0), s = rand(60, spread);
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: colors[i % colors.length], r: rand(2.5, 5), kind: "petal" });
+    }
+  }
+  function splash(x) {
+    for (let i = 0; i < 22; i++) {
+      const a = rand(-Math.PI * 0.95, -Math.PI * 0.05), s = rand(80, 240);
+      particles.push({ x, y: WATER_Y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: i % 2 ? "#E6F7FF" : "#A9DDF0", r: rand(2, 4.5), kind: "drop" });
+    }
+    ripples.push({ x, y: WATER_Y + 4, r: 6, life: 1 });
+    ripples.push({ x, y: WATER_Y + 4, r: 2, life: 1.25 });
+  }
+  function land(wasReturn) {
+    if (wasReturn) {
+      // back on the pad it came from; the counter starts fresh, the game keeps going
+      const pad = frog.fromPad;
+      frog.pad = pad;
+      frog.glide = { from: frog.x, to: pad.x, t: 0 };
+      frog.squash = 1; frog.face = "happy"; frog.sink = 0;
+      state = "play";
+      ripples.push({ x: frog.x, y: WATER_Y + 6, r: 10, life: 0.9 });
+      popups.push({ x: pad.x, y: WATER_Y - 90, text: "hop hop again!", life: 1, big: false });
+      return;
+    }
+    const lx = frog.x;
+    // forgiving landing: anything within the pad counts, and a near-miss
+    // just past the edge gets caught ("phew!") and the frog scoots onto the pad
+    let pad = pads.find(p => Math.abs(lx - p.x) <= p.r);
+    let caught = false;
+    if (!pad) {
+      pad = pads.find(p => Math.abs(lx - p.x) <= p.r + 14 + p.r * 0.3);
+      if (pad) {
+        caught = true;
+        frog.x = pad.x + Math.sign(lx - pad.x) * pad.r * 0.8;
+      }
+    }
+    ripples.push({ x: lx, y: WATER_Y + 6, r: 10, life: 0.9 });
+    if (!pad) {
+      state = "sinking";
+      // if a turtle is nearby, it politely dives so it never bumps the floating frog
+      if (turtle && Math.abs(turtle.x - lx) < 70 * turtle.size + 30 && turtle.t < turtle.total - 1.1) turtle.t = turtle.total - 1.1;
+      frog.face = "oops";
+      frog.sink = 0;
+      splash(lx);
+      sfx.plop();
+      // save the best streak, then the counter goes back to zero
+      if (score > best) {
+        best = score; store.set("lph-best", String(best)); bestEl.textContent = best;
+        popups.push({ x: lx, y: WATER_Y - 96, text: "new best!", life: 1.3, big: true });
+      }
+      score = 0;
+      scoreEl.textContent = "0";
+      return;
+    }
+    frog.pad = pad;
+    frog.glide = { from: frog.x, to: pad.x, t: 0 };
+    frog.squash = 1;
+    if (!pad.bloomed) {
+      const perfect = !caught && Math.abs(lx - pad.x) <= pad.r * 0.38;
+      pad.bloomed = true; pad.perfect = perfect;
+      pad.flowerSide = frog.x > pad.x ? -1 : 1;
+      score += 1;
+      if (score % 5 === 0) {
+        const cheer = score >= 20 ? "legend!" : score >= 15 ? "unstoppable!" : score >= 10 ? "froggy star!" : "on a roll!";
+        setTimeout(() => {
+          frog.wiggle = 1.1;
+          popups.push({ x: frog.x, y: WATER_Y - 118, text: cheer, life: 1.3, big: true });
+          burst(frog.x, WATER_Y - 60, ["#FF8FB8", "#FFD6E6", "#FFE27A"], 14, 170);
+          sfx.yay();
+        }, 380);
+      }
+      scoreEl.textContent = score;
+      burst(pad.x, WATER_Y - 20, pad.color, perfect ? 18 : 10, perfect ? 200 : 140);
+      popups.push({ x: frog.x, y: WATER_Y - 70, text: perfect ? "double bloom!" : caught ? "phew!" : CHEERS[Math.floor(Math.random() * CHEERS.length)], life: 1, big: perfect });
+      sfx.bloom(perfect);
+      camTarget = pad.x - FROG_SCREEN_X;
+    }
+  }
+
+  // ---------- update ----------
+  let time = 0;
+  function update(dt) {
+    time += dt;
+    if (charging) {
+      charge += chargeDir * dt * 0.8;
+      if (charge >= 1) { charge = 1; chargeDir = -1; }
+      if (charge <= 0) { charge = 0; chargeDir = 1; }
+    }
+    if (frog.glide) {
+      const gl = frog.glide;
+      gl.t = Math.min(1, gl.t + dt / 0.24);
+      const e = 1 - Math.pow(1 - gl.t, 3);
+      frog.x = lerp(gl.from, gl.to, e);
+      if (gl.t >= 1) frog.glide = null;
+    }
+    if (frog.jump) {
+      const j = frog.jump;
+      j.t += dt / j.dur;
+      const t = Math.min(j.t, 1);
+      frog.x = j.x0 + j.d * t;
+      frog.y = WATER_Y + j.y0 * (1 - t) - j.h * 4 * t * (1 - t);
+      if (!j.returning) camTarget = Math.max(camTarget, frog.x - FROG_SCREEN_X - 40);
+      if (j.t >= 1) { const wasReturn = !!j.returning; frog.jump = null; frog.y = WATER_Y; land(wasReturn); }
+    }
+    if (state === "sinking") {
+      const before = frog.sink;
+      frog.sink += dt;
+      if (before < 0.32 && frog.sink >= 0.32) { frog.face = "float"; sfx.bloop(); ripples.push({ x: frog.x, y: WATER_Y + 4, r: 8, life: 1 }); }
+      if (before < 1.1 && frog.sink >= 1.1) ripples.push({ x: frog.x, y: WATER_Y + 4, r: 20, life: 0.8 });
+      if (frog.sink >= 1.7) {
+        // hop off the ring and back onto the pad it came from
+        const back = frog.fromPad;
+        ring = { x: frog.x, life: 1 };
+        state = "returning";
+        frog.face = "happy";
+        frog.jump = { x0: frog.x, d: back.x - frog.x, t: 0, dur: 0.62, h: 78, y0: 18, returning: true };
+        camTarget = back.x - FROG_SCREEN_X;
+        ripples.push({ x: frog.x, y: WATER_Y + 4, r: 12, life: 1 });
+        sfx.boing();
+      }
+    }
+    if (ring) { ring.life -= dt * 0.8; if (ring.life <= 0) ring = null; }
+    updateCritters(dt);
+    updateFish(dt);
+    updateFlyers(dt);
+    updateTurtle(dt);
+    updateFeelings(dt);
+    updatePond(dt);
+    updateStar(dt);
+    frog.squash = Math.max(0, frog.squash - dt * 4);
+    frog.blink = (time % 3.4) < 0.12 ? 1 : 0;
+
+    camX = lerp(camX, camTarget, 1 - Math.pow(0.02, dt));
+    extendPads();
+
+    pads.forEach(p => { if (p.bloomed && p.bloom < 1) p.bloom = Math.min(1, p.bloom + dt * 2.2); });
+    particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; p.life -= dt * 1.1; });
+    particles = particles.filter(p => p.life > 0 && p.y < WATER_Y + 20);
+    ripples.forEach(r => { r.r += dt * 55; r.life -= dt * 0.9; });
+    ripples = ripples.filter(r => r.life > 0);
+    popups.forEach(p => { p.y -= dt * 34; p.life -= dt * 0.9; });
+    popups = popups.filter(p => p.life > 0);
+    const drift = reduceMotion ? 0.2 : 1;
+    fireflies.forEach(f => { f.p += dt * f.s * drift; });
+  }
+
+  // ---------- drawing ----------
+  // The sky drifts slowly through a few soft sunset moods, one full loop about every 2 minutes.
+  const SKY_MOODS = [
+    ["#7B6FD0", "#C79BDB", "#FFB0A0", "#FFD1A1"], // lavender sunset
+    ["#8A74CC", "#E0A2C8", "#FFB895", "#FFDDA0"], // rosy gold
+    ["#6D78CF", "#B79CE0", "#F7A9B8", "#FFCFB0"], // pink twilight
+    ["#7F6CC4", "#D19AD2", "#FFA88F", "#FFD7A6"]  // peachy glow
+  ];
+  const SKY_LOOP = 120; // seconds
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+  const SKY_RGB = SKY_MOODS.map(m => m.map(hexToRgb));
+  function skyColors() {
+    const pos = ((((time / SKY_LOOP) % 1) + 1) % 1) * SKY_RGB.length;
+    const i = Math.floor(pos), f = pos - i;
+    const t = f * f * (3 - 2 * f); // smooth ease between moods
+    const a = SKY_RGB[i], b = SKY_RGB[(i + 1) % SKY_RGB.length];
+    return a.map((ca, k) => {
+      const cb = b[k];
+      return `rgb(${Math.round(lerp(ca[0], cb[0], t))}, ${Math.round(lerp(ca[1], cb[1], t))}, ${Math.round(lerp(ca[2], cb[2], t))})`;
+    });
+  }
+  function sky() {
+    const c = skyColors();
+    const g = ctx.createLinearGradient(0, 0, 0, WATER_Y);
+    g.addColorStop(0, c[0]);
+    g.addColorStop(0.42, c[1]);
+    g.addColorStop(0.75, c[2]);
+    g.addColorStop(1, c[3]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, WATER_Y);
+    // sun
+    const sx = W / 2;
+    const sg = ctx.createRadialGradient(sx, WATER_Y - 10, 10, sx, WATER_Y - 10, 120);
+    sg.addColorStop(0, "rgba(255, 244, 214, 0.9)");
+    sg.addColorStop(1, "rgba(255, 210, 170, 0)");
+    ctx.fillStyle = sg; ctx.fillRect(0, WATER_Y - 140, W, 140);
+    drawStar(); // shooting star sits behind the clouds
+    drawFlyers(); // rare storybook flyers, far away behind the clouds
+    // clouds
+    clouds.forEach(c => {
+      const x = ((c.xf * (W + 200) - camX * 0.06 * c.s - time * 3 * c.s) % (W + 200) + W + 200) % (W + 200) - 100;
+      ctx.fillStyle = `rgba(255, 238, 245, ${c.a})`;
+      ctx.beginPath();
+      ctx.ellipse(x, c.y, c.w * 0.5, 12 * c.s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x - c.w * 0.18 + c.w * 0.22, c.y - 9 * c.s);
+      ctx.ellipse(x - c.w * 0.18, c.y - 9 * c.s, c.w * 0.22, 13 * c.s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x + c.w * 0.14 + c.w * 0.26, c.y - 12 * c.s);
+      ctx.ellipse(x + c.w * 0.14, c.y - 12 * c.s, c.w * 0.26, 16 * c.s, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+  function hills() {
+    const layers = [
+      { par: 0.12, base: WATER_Y - 30, amp: 36, col: "#A98AD0", f: 0.011 },
+      { par: 0.25, base: WATER_Y - 8, amp: 22, col: "#8E74C2", f: 0.018 }
+    ];
+    layers.forEach(L => {
+      ctx.fillStyle = L.col;
+      ctx.beginPath(); ctx.moveTo(0, WATER_Y);
+      for (let x = 0; x <= W + 10; x += 10) {
+        const wx = x + camX * L.par;
+        const y = L.base - (Math.sin(wx * L.f) * 0.6 + Math.sin(wx * L.f * 2.3 + 1.7) * 0.4 + 1) * L.amp * 0.5;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, WATER_Y); ctx.closePath(); ctx.fill();
+    });
+  }
+  // the setting sun sits centered and is drawn BEFORE the hills,
+  // so the hills cover its lower half and it looks like it is setting behind them
+  function sun() {
+    const sx = W / 2, sy = WATER_Y - 48;
+    const g = ctx.createRadialGradient(sx, sy, 30, sx, sy, 120);
+    g.addColorStop(0, "rgba(255, 244, 214, 0.55)");
+    g.addColorStop(1, "rgba(255, 220, 180, 0)");
+    ctx.fillStyle = g; ctx.fillRect(sx - 120, sy - 120, 240, 240);
+    ctx.fillStyle = "#FFF1D2";
+    ctx.beginPath(); ctx.arc(sx, sy, 44, 0, Math.PI * 2); ctx.fill();
+  }
+  function water() {
+    const g = ctx.createLinearGradient(0, WATER_Y, 0, H);
+    g.addColorStop(0, "#8FA6E0");
+    g.addColorStop(0.35, "#7B8FD6");
+    g.addColorStop(1, "#4E5DA8");
+    ctx.fillStyle = g; ctx.fillRect(0, WATER_Y, W, H - WATER_Y);
+    // sun reflection
+    const sx = W / 2;
+    ctx.strokeStyle = "rgba(255, 236, 200, 0.4)";
+    ctx.lineWidth = 3; ctx.lineCap = "round";
+    for (let i = 0; i < 7; i++) {
+      const y = WATER_Y + 9.5 + i * 13;
+      const w = 70 - i * 8 + Math.sin(time * 2 + i) * 6;
+      ctx.beginPath(); ctx.moveTo(sx - w / 2, y); ctx.lineTo(sx + w / 2, y); ctx.stroke();
+    }
+    // shimmer lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.144)";
+    ctx.lineWidth = 2; ctx.lineCap = "round";
+    for (let i = 0; i < 14; i++) {
+      const wx = i * 97;
+      const x = ((wx - camX * 0.9) % (W + 120) + W + 120) % (W + 120) - 60;
+      const y = WATER_Y + 26 + (i * 37) % (H - WATER_Y - 40);
+      const w = 18 + (i % 4) * 8 + Math.sin(time * 1.5 + i) * 4;
+      ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke();
+    }
+  }
+  function drawRipples() {
+    ripples.forEach(r => {
+      ctx.strokeStyle = `rgba(255,255,255,${0.55 * clamp(r.life, 0, 1)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, r.r, r.r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
+    });
+  }
+  function drawPad(p) {
+    const x = p.x - camX, bob = Math.sin(time * 1.6 + p.phase) * 1.4;
+    const y = WATER_Y + 4 + bob;
+    const ry = p.r * 0.32;
+    // shadow
+    ctx.fillStyle = "rgba(40, 40, 110, 0.25)";
+    ctx.beginPath(); ctx.ellipse(x + 3, y + 5, p.r * 1.02, ry, 0, 0, Math.PI * 2); ctx.fill();
+    // pad with notch
+    const g = ctx.createLinearGradient(0, y - ry, 0, y + ry);
+    g.addColorStop(0, "#A6E08F"); g.addColorStop(1, "#5FAE6E");
+    ctx.fillStyle = g;
+    const a0 = Math.PI * 0.5 + p.notch - 0.28, a1 = Math.PI * 0.5 + p.notch + 0.28;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.ellipse(x, y, p.r, ry, 0, a1, a0 + Math.PI * 2);
+    ctx.closePath(); ctx.fill();
+    // rim + veins
+    ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(x, y - 1, p.r * 0.92, ry * 0.8, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    ctx.strokeStyle = "rgba(60, 120, 70, 0.28)"; ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const a = Math.PI * 0.5 + p.notch + 0.9 + i * 1.05;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * p.r * 0.8, y + Math.sin(a) * ry * 0.8); ctx.stroke();
+    }
+    if (p.bloom > 0) drawFlowerBack(x, y - 2, flowerScale(p), p.color);
+  }
+  // The lotus blooms from the middle of the pad and wraps around the frog:
+  // back petals are drawn behind the frog, front petals in front of it.
+  function lotusPetal(ang, len, wid, c1, c2) {
+    ctx.save(); ctx.translate(Math.sin(ang) * 7, 0); ctx.rotate(ang);
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-wid, -len * 0.5, 0, -len);
+    ctx.quadraticCurveTo(wid, -len * 0.5, 0, 0);
+    ctx.fill(); ctx.restore();
+  }
+  function flowerScale(p) { return p.bloom > 0 ? easeOutBack(p.bloom) * (p.perfect ? 1.12 : 1) * 1.15 * clamp(p.r / 50, 0.85, 1.1) : 0; }
+  function drawFlowerBack(x, y, s, col) {
+    if (s <= 0) return;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    [-1.45, -1.0, -0.55, -0.18, 0.18, 0.55, 1.0, 1.45].forEach(a => lotusPetal(a, 50, 16, col[0], col[1]));
+    ctx.fillStyle = "#FFD85C";
+    ctx.beginPath(); ctx.ellipse(0, -12, 9, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawFlowerFront(x, y, s, col) {
+    if (s <= 0) return;
+    ctx.save(); ctx.translate(x, y + 5); ctx.scale(s, s);
+    [-1.3, -0.85, 0.85, 1.3].forEach(a => lotusPetal(a, 32, 13, col[0], col[1]));
+    [-0.4, 0, 0.4].forEach(a => lotusPetal(a, 22, 11, col[1], "#FFFFFF"));
+    ctx.restore();
+  }
+  function drawFrog() {
+    let x = frog.x - camX, y = frog.y;
+    let sx = 1, sy = 1;
+    if (charging) { sy = 1 - charge * 0.28; sx = 1 + charge * 0.18; }
+    else if (frog.squash > 0) { sy = 1 - frog.squash * 0.2; sx = 1 + frog.squash * 0.15; }
+    else if (frog.jump) { sy = 1.1; sx = 0.92; }
+    if (!frog.jump && state === "play") y += Math.sin(time * 1.6 + (frog.pad ? frog.pad.phase : 0)) * 1.4;
+    // splash down, then bob back up and float on a little ring
+    let sinkOff = 0, floatAmt = 0;
+    if (state === "sinking") {
+      const s = frog.sink;
+      if (s < 0.32) sinkOff = (s / 0.32) * 36;
+      else {
+        floatAmt = Math.min((s - 0.32) / 0.45, 1);
+        const rise = 1 - Math.pow(1 - floatAmt, 3);
+        sinkOff = lerp(36, 18, rise) + Math.sin(time * 2.2) * 2;
+      }
+      sinkOff = Math.max(sinkOff, 0.01);
+    }
+
+    ctx.save();
+    // clip at water when sinking
+    if (sinkOff > 0) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
+    ctx.translate(x, y + sinkOff);
+    // gentle happy sway while floating
+    if (floatAmt > 0) ctx.rotate(Math.sin(time * 1.6) * 0.07);
+    if (frog.wiggle > 0) ctx.rotate(Math.sin(time * 24) * 0.13 * Math.min(1, frog.wiggle));
+    ctx.scale(sx * 1.38, sy * 1.38);
+
+    const green = "#4FAE68", dark = "#3A8A52";
+    // back legs
+    ctx.fillStyle = dark;
+    if (frog.jump) {
+      ctx.beginPath(); ctx.ellipse(-20, -6, 14, 5, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(18, -6, 12, 5, 0.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.ellipse(-17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // body
+    const bg = ctx.createLinearGradient(0, -44, 0, 0);
+    bg.addColorStop(0, "#6CC47E"); bg.addColorStop(1, green);
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, -20, 23, 20, 0, 0, Math.PI * 2); ctx.fill();
+    // belly
+    ctx.fillStyle = "#C9F2C2";
+    ctx.beginPath(); ctx.ellipse(3, -13, 14, 11, 0, 0, Math.PI * 2); ctx.fill();
+    // eye bumps
+    ctx.fillStyle = "#62BC76";
+    ctx.beginPath(); ctx.arc(-9, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    // eyes
+    const lookX = frog.jump ? 2.5 : 1.5;
+    const lookY = state === "sinking" ? -2 : 0;
+    [[-9, -38], [11, -38]].forEach(([ex, ey]) => {
+      if (frog.face === "float" || frog.wiggle > 0 || frog.gulp > 0) {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(ex - 4.5, ey + 1.5); ctx.quadraticCurveTo(ex, ey - 4, ex + 4.5, ey + 1.5); ctx.stroke();
+      } else if (frog.blink && state === "play") {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(ex - 4.5, ey); ctx.quadraticCurveTo(ex, ey + 3, ex + 4.5, ey); ctx.stroke();
+      } else {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath(); ctx.arc(ex, ey, 6.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#2E2440";
+        const pr = charging ? 3.2 + charge * 1.2 : 3.4;
+        // pupils follow whatever the frog is watching (a star, a butterfly, a fish...)
+        let lx = lookX, ly = lookY;
+        if (frog.lookAt && state === "play" && !frog.jump) {
+          const dx = frog.lookAt.x - (x + ex * 1.38), dy = frog.lookAt.y - (y + ey * 1.38);
+          const dist = Math.hypot(dx, dy) || 1;
+          lx = (dx / dist) * 2.6; ly = (dy / dist) * 2.6;
+        }
+        ctx.beginPath(); ctx.arc(ex + lx, ey + ly, pr, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath(); ctx.arc(ex + lx + 1.2, ey + ly - 1.3, 1.1, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    // cheeks
+    ctx.fillStyle = "rgba(255, 130, 170, 0.55)";
+    ctx.beginPath(); ctx.ellipse(-14, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(18, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // mouth
+    ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.beginPath();
+    if (frog.lick) { ctx.ellipse(4, -25, 3.6, 2.8, 0, 0, Math.PI * 2); ctx.fillStyle = "#6B2E4A"; ctx.fill(); }
+    else if (frog.face === "oops") { ctx.arc(3, -23, 3.2, 0, Math.PI * 2); }
+    else if (frog.face === "float" || frog.wiggle > 0 || frog.gulp > 0) { ctx.moveTo(-5, -28); ctx.quadraticCurveTo(3, -19, 11, -28); }
+    else if (charging) { ctx.moveTo(-3, -26); ctx.lineTo(9, -26); }
+    else { ctx.moveTo(-4, -28); ctx.quadraticCurveTo(3, -22, 10, -28); }
+    ctx.stroke();
+    // front feet
+    if (!frog.jump) {
+      ctx.fillStyle = dark;
+      ctx.beginPath(); ctx.ellipse(-6, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    if (ring) {
+      ctx.save(); ctx.globalAlpha = clamp(ring.life, 0, 1);
+      drawFloatie(ring.x - camX, WATER_Y + 1 + Math.sin(time * 2.2) * 2, 1.38);
+      ctx.restore();
+    }
+    if (floatAmt > 0) drawFloatie(x, WATER_Y + 1 + Math.sin(time * 2.2) * 2, easeOutBack(floatAmt) * 1.38);
+
+    // charge meter: a little row of hearts-ish dots above the frog
+    if (charging) {
+      const mx = x - 26, my = frog.y - 96;
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      roundRect(mx, my, 52, 9, 4.5); ctx.fill();
+      const g = ctx.createLinearGradient(mx, 0, mx + 52, 0);
+      g.addColorStop(0, "#FFD36E"); g.addColorStop(1, "#FF8FB8");
+      ctx.fillStyle = g;
+      roundRect(mx, my, Math.max(9, 52 * charge), 9, 4.5); ctx.fill();
+    }
+  }
+  function drawFloatie(x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // back half of the ring sits behind the water line glow, front half in front
+    ctx.lineWidth = 10;
+    const stripes = ["#FF8FB8", "#FFFFFF"];
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const a0 = (i / n) * Math.PI, a1 = ((i + 1) / n) * Math.PI;
+      ctx.strokeStyle = stripes[i % 2];
+      ctx.beginPath(); ctx.ellipse(0, 0, 29, 8, 0, a0, a1); ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, -2, 27, 6, 0, Math.PI * 0.2, Math.PI * 0.45); ctx.stroke();
+    ctx.restore();
+  }
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawFireflies() {
+    fireflies.forEach(f => {
+      const x = ((f.x / 400 * W + Math.sin(f.p) * 20 - camX * 0.15) % W + W) % W;
+      const y = f.y + Math.cos(f.p * 1.3) * 10;
+      const a = 0.35 + Math.sin(f.p * 3) * 0.3;
+      ctx.fillStyle = `rgba(255, 246, 190, ${clamp(a, 0.05, 0.8)})`;
+      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function drawParticles() {
+    particles.forEach(p => {
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.fillStyle = p.c;
+      ctx.beginPath();
+      if (p.kind === "petal") ctx.ellipse(p.x - camX, p.y, p.r * 1.4, p.r * 0.8, p.vx * 0.01, 0, Math.PI * 2);
+      else ctx.arc(p.x - camX, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawPopups() {
+    popups.forEach(p => {
+      ctx.globalAlpha = clamp(p.life * 1.4, 0, 1);
+      ctx.font = `800 ${p.big ? 26 : 21}px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(90, 60, 130, 0.45)";
+      ctx.strokeText(p.text, p.x - camX, p.y);
+      ctx.fillStyle = p.big ? "#FFE27A" : "#FFFFFF";
+      ctx.fillText(p.text, p.x - camX, p.y);
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawHint() {
+    if (hops > 0 || state !== "play") return;
+    const a = 0.75 + Math.sin(time * 3) * 0.25;
+    ctx.globalAlpha = a;
+    ctx.font = '800 19px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif';
+    ctx.textAlign = "center";
+    ctx.lineWidth = 5; ctx.strokeStyle = "rgba(90, 60, 130, 0.4)";
+    const t1 = "hold to wind up", t2 = "let go to hop!";
+    ctx.strokeText(t1, W / 2, WATER_Y - 154); ctx.strokeText(t2, W / 2, WATER_Y - 128);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(t1, W / 2, WATER_Y - 154); ctx.fillText(t2, W / 2, WATER_Y - 128);
+    ctx.globalAlpha = 1;
+  }
+  function drawReeds() {
+    // short reeds tucked in between the tall ones (drawn first so tall reeds overlap them)
+    ctx.lineCap = "round";
+    const reedCount = Math.ceil((W + 160) / 140), reedWrap = reedCount * 140; // more reeds on wider screens
+    for (let i = 0; i < reedCount; i++) {
+      const wx = i * 140 + 110;
+      const x = ((wx - camX * 1.25) % reedWrap + reedWrap) % reedWrap - 80;
+      const sway = Math.sin(time * 1.4 + i * 1.7) * (reduceMotion ? 0.6 : 2.5);
+      const h = 44 + (i % 3) * 9;
+      ctx.strokeStyle = "#4757A0";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x, H); ctx.quadraticCurveTo(x + 2, H - h * 0.55, x + sway, H - h); ctx.stroke();
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x + 7, H); ctx.quadraticCurveTo(x + 10, H - h * 0.4, x + 13 + sway, H - h * 0.7); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - 6, H); ctx.quadraticCurveTo(x - 8, H - h * 0.35, x - 12 + sway, H - h * 0.6); ctx.stroke();
+      if (i % 2 === 1) {
+        ctx.fillStyle = "#6A4E86";
+        ctx.beginPath(); ctx.ellipse(x + sway, H - h - 6, 3, 8, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.strokeStyle = "#3F4E96";
+    for (let i = 0; i < reedCount; i++) {
+      const wx = i * 140 + 40;
+      const x = ((wx - camX * 1.25) % reedWrap + reedWrap) % reedWrap - 80;
+      const sway = Math.sin(time * 1.2 + i) * (reduceMotion ? 1 : 4);
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x, H); ctx.quadraticCurveTo(x + 4, H - 60, x + sway, H - 104 - (i % 3) * 18); ctx.stroke();
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x + 10, H); ctx.quadraticCurveTo(x + 14, H - 40, x + 18 + sway, H - 70); ctx.stroke();
+      if (i % 2 === 0) {
+        ctx.fillStyle = "#6A4E86";
+        ctx.beginPath(); ctx.ellipse(x + sway, H - 112 - (i % 3) * 18, 4, 11, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  function draw() {
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    sky(); sun(); hills(); drawFireflies(); water(); drawRipples(); drawTurtle();
+    pads.forEach(p => { if (p.x - camX > -80 && p.x - camX < W + 80) drawPad(p); });
+    drawFish();
+    drawCritters();
+    drawFrog();
+    drawTongue();
+    pads.forEach(p => {
+      if (p.bloom > 0 && p.x - camX > -80 && p.x - camX < W + 80) {
+        drawFlowerFront(p.x - camX, WATER_Y + 2 + Math.sin(time * 1.6 + p.phase) * 1.4, flowerScale(p), p.color);
+      }
+    });
+    drawParticles(); drawPopups(); drawHint(); drawReeds();
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = clamp((now - last) / 1000, 0, 0.05); // never negative (first frame can be stamped early)
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- "play it like an app" tip (only in a regular browser on iPhone/iPad) ----------
+  (function homeScreenTip() {
+    const tip = document.getElementById("tip");
+    const standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!tip || standalone || !iOS || store.get("lph-tip-closed", "0") === "1") return;
+    setTimeout(() => { tip.hidden = false; }, 4000);
+    document.getElementById("tipClose").addEventListener("click", () => {
+      tip.hidden = true; store.set("lph-tip-closed", "1");
+      try { canvas.focus({ preventScroll: true }); } catch (_) {}
+    });
+  })();
+
+  // ---------- offline support: once loaded, the game works without internet ----------
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+
+  resize();
+  reset();
+  draw();
+  requestAnimationFrame(frame);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
