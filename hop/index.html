@@ -211,6 +211,9 @@
   html.app .wrap { max-width: none; margin: 0; display: block; }
   html.app header, html.app .how, html.app footer { display: none; }
   html.app .stage { position: fixed; inset: 0; width: auto; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+  /* iPhone home-screen apps can report a screen that is too short (the status bar gets subtracted twice),
+     which leaves an empty strip at the bottom. --app-h is the true full-screen height, measured in the script. */
+  html.app body, html.app .stage { bottom: auto; height: 100vh; height: var(--app-h, 100vh); }
   html.app .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
   html.app .sound-icon {
     display: grid; place-items: center; pointer-events: auto;
@@ -346,7 +349,22 @@
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   let scale = 1, dpr = 1;
+  // Full-screen height for the home-screen app. iOS sometimes reports a window shorter than the screen
+  // in home-screen mode; when the app is clearly using the whole screen, trust the screen's real size.
+  const IN_APP = document.documentElement.classList.contains("app");
+  function fitAppHeight() {
+    if (!IN_APP) return;
+    const iw = window.innerWidth, ih = window.innerHeight;
+    const portrait = ih >= iw;
+    const a = window.screen.width, b = window.screen.height;
+    const sw = portrait ? Math.min(a, b) : Math.max(a, b);
+    const sh = portrait ? Math.max(a, b) : Math.min(a, b);
+    let h = Math.max(ih, document.documentElement.clientHeight);
+    if (Math.abs(iw - sw) <= 2 && sh > h && sh - h <= 120) h = sh;   // full-width window that is just a little short
+    document.documentElement.style.setProperty("--app-h", h + "px");
+  }
   function resize() {
+    fitAppHeight();
     const rect = stage.getBoundingClientRect();
     const vw = Math.max(1, rect.width), vh = Math.max(1, rect.height);
     if (400 * vh / vw >= 580) { W = 400; H = 400 * vh / vw; }   // phone / portrait
@@ -360,6 +378,8 @@
     try { if (frog && !frog.jump && state === "play") frog.y = WATER_Y; } catch (_) { /* not started yet */ }
   }
   window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => setTimeout(resize, 250));
+  window.addEventListener("pageshow", resize);
 
   // ---------- storage (safe) ----------
   const store = {
