@@ -184,6 +184,22 @@
     .buy-etsy:hover { color: var(--navy) !important; }
     .nav-cta:hover { color: var(--navy) !important; }
     .ticker-bottom .ticker-text, .ticker-bottom .ticker-text .sep { color: var(--navy) !important; }
+    /* ---- The Lily Studio v4: brand alignment ---- */
+    .nav-badge { animation: none !important; opacity: 1 !important; }
+    .btn-primary { background: var(--cobalt); color: #FFFFFF; }
+    .btn-primary:hover { background: #1950CA; color: #FFFFFF; box-shadow: 0 0 30px rgba(37,99,235,0.45); }
+    .btn-primary::before { background: rgba(125,211,252,0.3); }
+    .btn-ghost:hover { color: var(--pink-text); }
+    /* hero cards: stickers are siblings, so cards are children 3-5; order them 01, 02, 03 */
+    .hero-collage .collage-card:nth-child(3) { top: 0; left: 60px; transform: rotate(-3deg); z-index: 3; }
+    .hero-collage .collage-card:nth-child(3) .tape { background: rgba(249,102,188,0.3); transform: rotate(2deg); }
+    .hero-collage .collage-card:nth-child(3):hover { transform: rotate(-3deg) translateY(-4px); }
+    .hero-collage .collage-card:nth-child(4) { top: 120px; left: 160px; transform: rotate(2deg); z-index: 2; }
+    .hero-collage .collage-card:nth-child(4) .tape { background: rgba(163,217,119,0.3); transform: rotate(-1deg); }
+    .hero-collage .collage-card:nth-child(4):hover { transform: rotate(2deg) translateY(-4px); }
+    .hero-collage .collage-card:nth-child(5) { top: 250px; left: 60px; transform: rotate(-1.5deg); z-index: 1; }
+    .hero-collage .collage-card:nth-child(5) .tape { background: rgba(125,211,252,0.35); transform: rotate(3deg); }
+    .hero-collage .collage-card:nth-child(5):hover { transform: rotate(-1.5deg) translateY(-4px); }
 </style>
 </head>
 <body>
