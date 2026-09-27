@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're In — Lily Studio</title>
+  <meta name="description" content="Thanks for joining the Lily Studio list.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://thelilystudio.com/thanks.html">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0D1B2A;
+      --navy-deep: #091420;
+      --navy-light: #1B2D45;
+      --white: #FFFFFF;
+      --cream: #F0EDE8;
+      --cream-border: #DDD9D3;
+      --pink: #E83E8C;
+      --pink-glow: rgba(232,62,140,0.25);
+      --green: #96E84A;
+      --green-glow: rgba(150,232,74,0.25);
+      --blue: #38BDF8;
+      --blue-glow: rgba(56,189,248,0.25);
+      --purple: #A78BFA;
+      --orange: #FB923C;
+      --gray-light: #C5C1B8;
+      --gray-mid: #3A3A3A;
+      --gray-warm: #8A8578;
+      --font-serif: 'DM Serif Display', serif;
+      --font-display: 'Montserrat', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--navy-deep); color: var(--cream); font-family: var(--font-display); -webkit-font-smoothing: antialiased; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    .site-header { background: rgba(9,20,32,0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--gray-mid); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1400px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo { width: 32px; height: 32px; filter: drop-shadow(0 0 8px var(--pink-glow)); }
+    .nav-name { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: var(--cream); }
+    .nav-badge { font-family: var(--font-mono); font-size: 0.45rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; background: var(--pink); color: var(--white); padding: 3px 8px; border-radius: 3px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
+    .nav-links a { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-light); transition: color 0.3s var(--ease); }
+    .nav-links a:hover { color: var(--pink); }
+    .nav-links .active { color: var(--pink); }
+    .nav-cta { background: var(--pink) !important; color: var(--white) !important; padding: 8px 18px !important; border-radius: 4px; box-shadow: 0 0 14px var(--pink-glow); transition: all 0.3s var(--ease) !important; }
+    .nav-cta:hover { background: var(--green) !important; color: var(--navy) !important; box-shadow: 0 0 22px var(--green-glow) !important; transform: translateY(-2px); }
+    .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--cream); margin: 5px 0; transition: 0.3s; }
+    .hero { padding: 96px 0 64px; text-align: center; border-bottom: 1px solid var(--gray-mid); }
+    .hero-label { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--pink); text-shadow: 0 0 20px var(--pink-glow); margin-bottom: 16px; }
+    .hero-sub { font-family: var(--font-display); font-size: 1.1rem; color: var(--gray-light); max-width: 700px; margin: 0 auto; line-height: 1.6; }
+    .section-label { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--pink); text-shadow: 0 0 20px var(--pink-glow); margin-bottom: 16px; }
+    @media (max-width: 768px) {
+      .nav-toggle { display: block; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(9,20,32,0.98); padding: 20px 24px; gap: 16px; border-bottom: 1px solid var(--gray-mid); }
+      .nav-links.open { display: flex; }
+      .hero h1 { font-size: 1.8rem; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+    }
+    @keyframes breathe { 0%,100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.05); } }
+    .site-footer { background: var(--navy-deep); border-top: 1px solid var(--gray-mid); padding: 40px 24px; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; list-style: none; flex-wrap: wrap; }
+    .footer-links a { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pink); transition: text-shadow 0.25s var(--ease); }
+    .footer-links a:hover { text-shadow: 0 0 12px var(--pink-glow); }
+    .footer-copy { font-family: var(--font-mono); font-size: 0.52rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-mid); }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in { opacity: 1; transform: none; transition: none; }
+      .ticker, .signup::before { animation: none !important; }
+    }
+    .footer-copy { color: var(--gray-warm); }
+    .thanks { min-height: 70vh; display: flex; align-items: center; padding: 96px 0; text-align: center; position: relative; overflow: hidden; overflow: clip; }
+    .thanks::before { content: ""; position: absolute; inset: -40%; background: radial-gradient(circle at center, var(--pink-glow), transparent 55%); animation: breathe 6s ease-in-out infinite; pointer-events: none; }
+    .thanks .inner { position: relative; max-width: 620px; margin: 0 auto; }
+    .thanks h1 { font-family: var(--font-serif); font-weight: 400; font-size: 3rem; color: var(--cream); line-height: 1.15; margin-bottom: 18px; }
+    .thanks h1 em { color: var(--pink); }
+    .thanks p { font-size: 0.98rem; color: var(--gray-light); line-height: 1.7; margin-bottom: 18px; }
+    .thanks .favor { background: var(--navy-light); border: 1px solid var(--gray-mid); border-radius: 4px; padding: 18px 20px; margin: 28px auto; }
+    .thanks .favor b { color: var(--cream); }
+    .thanks .favor .addr { color: var(--pink); font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; }
+    .while { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--green) !important; margin: 32px 0 14px !important; }
+    .next-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+    .next-links a { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 18px; border: 1px solid var(--gray-mid); border-radius: 4px; color: var(--cream); transition: all 0.3s var(--ease); }
+    .next-links a:hover { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 14px var(--pink-glow); transform: translateY(-2px); }
+    @media (max-width: 768px) { .thanks h1 { font-size: 2.1rem; } }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <nav class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img class="nav-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEGklEQVR42tVXXUxbdRT/nXvbQkMdoDKWCQPmYgzF+jFN9GXJTKaZH0uItBkyokGDPqgPxjjjg4VEnUZjsvGg0xjNGkEvcwmLD4pxGEMy50C3UuhaKBT6AReldBTobem9xwd6HZotMMpHPG/3n/M/53d+55z/ORf4P8vISFdubNT5IAAwM63GhrASJZYkEcA/DjRnOby1OKXqX7vuHYAYdmFNI7bbFw0yswAAEyMDD48Puz0aIM6AZFjFrJ1pRiNjnjsm/e467VySJJGZRYZdCLr7ng75PfHoz1I+A8TMxNZF51z5wq1cVXeIy57L5SXs3RwISRJZksTxYfcn0eBwT7Dvj1IA8Hq9OQAQkK/sn+x3sj3DCDce1wMAW2of56r6MFfVVWfFCDOTxsSVUe+Z2cnQdPBc930AwHcfrE7Vvv196uX3ppR9r3zEu6yVAMD31L7I9zcyVz57GAA0RlZVhETE6O3VMbNuTg09sbCQGs0vL+32RV07EI0rsqW8MPr6gavprfkVUDHLlQdrYCj4Aqn4MRpo/ZCPHs2B1bp2Rehzni2+OuEfioV8PhgEBKf9b4SG3BEf80O8ff9d/EAjK5Z6B8R/p5ztN+4G4cbUg6I+pyUW8B6ej4b3AMCdlkcuD/YN7iZByBt3XWgVQ5EIgamw9/cc5Bf+Blo4JTod9VAY7HKZ5iKBmviY+9X5hgPblqZzWQBExADj4tjUAKnkVpLJI3MTfvdMaOhjc9Wuwp9aj1VA0JVAZ3hK3ZIbNr3zXROmYqeo96tnZsY8e2aCvm/mivIuKqlUDcBdeWW7w9fs/sfXSumPjV6yCTr9Sww2C6LYCTn59Wyu/nmTK7DP9Nbnn02f//TPw8TUm6rKFcz860Iq2XL7TvO55ezSCjpBICJV+44EvCVGfc6TajpdnkbaI4ajlkRZkdPIerOoqmdno/7O4qq9s0seLL5e5KtpSVF7ATUJuXp2hEfdH7C9S7ecblazIJM/hYjUTDHpmFkUjYYkkopCzXvT7HIZMo5J011TANosICIAUIhIIUEgFYsHMJvTGceM9RZpcTri8ohrW9Db//7SAbU+4zjTvydOfHkvALLZbIoGIlvRrUSpvb1dAKAIrDN/29Z2fD6RqLfZbIMez1+iUTAQNkK0XaCttbXndEfHvMPhOMQ8eYvfO/DuuqdgaSoSslwty3K8sKDA8UNH90klnTJkWKJ1BdDc3Kw2NTVRQ0NDYD6ReDQej18qKS19TJZT2wGgqKhoY1KhFV9LS8ttv3T+2O6+cN6hPT4btg1rICIR7xa/p//IhtWAJlarVWVmmptUTAKRkk0wq16biYhVRVEpy8U7672dVXVzAWRrIqvbRqORNz0FYFI3DYAsJgWAczccgDbzBcEUY0E9ee1/9OblbyaTLYyWJaWCAAAAAElFTkSuQmCC" alt="Lily Studio">
+        <span class="nav-name">Lily Studio</span>
+        <span class="nav-badge">Est. 2026</span>
+      </a>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/skills.html" id="nav-skills">Skills</a></li>
+        <li><a href="/apps.html" id="nav-apps">Apps</a></li>
+        <li><a href="/printed.html" id="nav-printed">Printed</a></li>
+        <li><a href="/hop/" id="nav-games">Games</a></li>
+        <li><a href="/about.html" id="nav-about">About</a></li>
+        <li><a href="/privacy.html" id="nav-privacy">Privacy</a></li>
+        <li><a href="/terms.html" id="nav-terms">Terms</a></li>
+        <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="thanks">
+    <div class="container">
+      <div class="inner">
+        <p class="section-label">You're In</p>
+        <h1>Welcome to the <em>list.</em> ✨</h1>
+        <p>Thank you for confirming! You'll only get the emails you picked, and you can unsubscribe anytime with one click at the bottom of any email.</p>
+        <div class="favor">
+          <p style="margin:0"><b>One tiny favor:</b> add <span class="addr">allgoodthings@thelilystudio.com</span> to your contacts so my emails land in your inbox, not in junk.</p>
+        </div>
+        <p class="while">While you're here</p>
+        <div class="next-links">
+          <a href="/printed.html">🖨️ Back to Printed</a>
+          <a href="/hop/">🐸 Play Hop Hop</a>
+          <a href="/about.html">🌸 Meet Lily Studio</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <ul class="footer-links">
+      <li><a href="/skills.html">Skills</a></li>
+      <li><a href="/apps.html">Apps</a></li>
+      <li><a href="/printed.html">Printed</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="/terms.html">Terms</a></li>
+      <li><a href="mailto:support@thelilystudio.com">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 Lily Studio. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
