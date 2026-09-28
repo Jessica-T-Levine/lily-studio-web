@@ -1199,6 +1199,93 @@
     </div>
   </section>
 
+  <!-- ========== TUESDAY SKILL TIPS SIGNUP ==========
+       Kit form 9972716 ("Tuesday Skill Tips signup"), tag 24064865 ("Tuesday Skill Tips").
+       Confirmation email + redirect to /thanks.html are set in Kit. Added Sept 28, 2026. -->
+  <style>
+    .tst { padding: 88px 24px; position: relative; overflow: hidden; overflow: clip; background: var(--navy-deep); }
+    .tst::before { content: ""; position: absolute; inset: -40%; background: radial-gradient(circle at center, rgba(125,211,252,0.16), transparent 55%); animation: tst-breathe 7s ease-in-out infinite; pointer-events: none; }
+    @keyframes tst-breathe { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+    .tst-card { position: relative; max-width: 640px; margin: 0 auto; background: var(--navy-light); border: 1px solid var(--gray-mid); border-radius: 18px; overflow: hidden; text-align: center; }
+    .tst-stripe { height: 6px; background: linear-gradient(90deg, #A3D977 0%, #7DD3FC 34%, #C277F5 67%, #F966BC 100%); }
+    .tst-inner { padding: 44px 36px 36px; }
+    .tst-pill { display: inline-block; background: var(--navy-deep); color: var(--blue); font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 7px 14px; border-radius: 999px; margin-bottom: 18px; }
+    .tst h2 { font-family: var(--font-serif); font-weight: 400; font-size: 2.3rem; line-height: 1.18; color: var(--cream); margin: 0 0 14px; }
+    .tst h2 em { color: #C277F5; font-style: italic; }
+    .tst-promise { font-family: var(--font-display); font-size: 0.98rem; line-height: 1.65; color: var(--gray-light); max-width: 470px; margin: 0 auto 28px; }
+    .tst-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .tst-form input[type=email] { flex: 1 1 250px; max-width: 330px; background: var(--navy-deep); border: 1px solid var(--gray-mid); border-radius: 999px; padding: 14px 20px; color: var(--cream); font-family: var(--font-display); font-size: 0.92rem; outline: none; transition: border-color 0.25s, box-shadow 0.25s; }
+    .tst-form input[type=email]::placeholder { color: var(--gray-light); opacity: 0.75; }
+    .tst-form input[type=email]:focus { border-color: var(--blue); box-shadow: 0 0 16px rgba(125,211,252,0.35); }
+    .tst-btn { background: #2563EB; color: #FFFFFF; border: none; border-radius: 999px; padding: 14px 26px; font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.25s, transform 0.25s, box-shadow 0.25s; }
+    .tst-btn:hover { background: #1950CA; transform: translateY(-2px); box-shadow: 0 0 26px rgba(37,99,235,0.45); }
+    .tst-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+    .tst-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .tst-status { min-height: 1.4em; margin: 16px 0 0; font-family: var(--font-display); font-size: 0.9rem; color: var(--green); }
+    .tst-fine { margin: 10px 0 0; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.05em; color: var(--gray-light); }
+    .tst-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (max-width: 600px) {
+      .tst { padding: 64px 16px; }
+      .tst-inner { padding: 36px 20px 28px; }
+      .tst h2 { font-size: 1.75rem; }
+      .tst-form input[type=email] { font-size: 16px; max-width: none; }  /* 16px stops iPhone zoom */
+      .tst-btn { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { .tst::before { animation: none; } }
+  </style>
+  <section class="tst" id="tuesday-tips" aria-labelledby="tst-heading">
+    <div class="tst-card">
+      <div class="tst-stripe" aria-hidden="true"></div>
+      <div class="tst-inner">
+        <span class="tst-pill">Tuesday Skill Tips</span>
+        <h2 id="tst-heading">One tiny Claude tip,<br> <em>every Tuesday.</em></h2>
+        <p class="tst-promise">One tiny Claude tip and one great skill, every Tuesday morning. Takes 60 seconds to read. Unsubscribe anytime.</p>
+        <form class="tst-form" id="tst-form" action="https://app.kit.com/forms/9972716/subscriptions" method="post">
+          <label class="tst-sr" for="tst-email">Email address</label>
+          <input id="tst-email" type="email" name="email_address" placeholder="you@example.com" autocomplete="email" required>
+          <input type="hidden" name="tags[]" value="24064865">
+          <input class="tst-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="tst-btn" type="submit">Send me the tips</button>
+        </form>
+        <p class="tst-status" id="tst-status" role="status" aria-live="polite"></p>
+        <p class="tst-fine">From The Lily Studio · No spam, ever · One click to unsubscribe</p>
+      </div>
+    </div>
+  </section>
+  <script>
+    // Tuesday Skill Tips signup: sends the email to Kit without leaving the page.
+    // If anything goes wrong it falls back to a normal form submit, so no signup is lost.
+    (function () {
+      var form = document.getElementById('tst-form');
+      if (!form) return;
+      var status = document.getElementById('tst-status');
+      var button = form.querySelector('button');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (form.website.value) return;                       // bot trap
+        var data = new FormData(form);
+        data.delete('website');
+        button.disabled = true;
+        status.textContent = 'Adding you to the list…';
+        fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: data })
+          .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }, function () { return { ok: res.ok, j: {} }; }); })
+          .then(function (r) {
+            if (r.ok && r.j.status === 'success') {
+              form.reset();
+              status.textContent = 'Almost done! Check your inbox and tap the button in our email to confirm. 💌';
+            } else if (r.j.status === 'quarantined' && r.j.url) {
+              window.location.href = r.j.url;                   // Kit's quick "are you human?" check
+            } else {
+              throw new Error('Kit said no');
+            }
+          })
+          .catch(function () { form.website.disabled = true; form.submit(); })
+          .then(function () { button.disabled = false; });
+      });
+    })();
+  </script>
+  <!-- ========== /TUESDAY SKILL TIPS SIGNUP ========== -->
+
   <!-- ========== 10. BOTTOM TICKER ========== -->
   <div class="ticker-bottom">
     <div class="ticker">
@@ -1229,6 +1316,7 @@
       <li><a href="/apps.html">Apps</a></li>
       <li><a href="/printed.html">Printed</a></li>
       <li><a href="/hop/">Games</a></li>
+      <li><a href="/skills.html#tuesday-tips">Tuesday Tips</a></li>
       <li><a href="/about.html">About</a></li>
       <li><a href="/privacy.html">Privacy</a></li>
       <li><a href="/terms.html">Terms</a></li>
