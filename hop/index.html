@@ -562,6 +562,148 @@
   ];
   const CHEERS = ["boing!", "ribbit!", "yippee!", "hop hop!", "splendid!", "wheee!", "so bouncy!", "nice toes!"];
 
+  // ---------- little bees from the bee game ----------
+  // Our bee and her six friends, drawn exactly like the bee game (same shape, face, heart wings and
+  // legs, same approved colors from bee-color-guide-v1). Everything is in "bee units"; draw() scales it.
+  const Bees = (() => {
+    const COLORS = [
+      { name: "Our bee", top: "#FFF371", bot: "#FFC921", stripe: "#E58E00", wingBack: "255, 214, 234", wingFront: "255, 228, 242", cheek: "255, 100, 132" },
+      { name: "Pink", top: "#FFE2F3", bot: "#FFC4E5", stripe: "#E987B3", wingBack: "255, 225, 240", wingFront: "255, 238, 246", cheek: "255, 90, 140" },
+      { name: "Mint", top: "#C8FDF4", bot: "#73DEC7", stripe: "#00B59F", wingBack: "220, 245, 240", wingFront: "236, 252, 248", cheek: "255, 110, 140" },
+      { name: "Lavender", top: "#FCE6FF", bot: "#D6B7FC", stripe: "#A881E3", wingBack: "236, 222, 255", wingFront: "244, 236, 255", cheek: "255, 110, 150" },
+      { name: "Blue", top: "#D7F3FF", bot: "#67AEEF", stripe: "#307BD0", wingBack: "215, 232, 255", wingFront: "232, 243, 255", cheek: "255, 120, 150" },
+      { name: "Peach", top: "#FFE9CB", bot: "#FDAC73", stripe: "#DF7242", wingBack: "255, 222, 210", wingFront: "255, 236, 228", cheek: "255, 100, 120" },
+      { name: "Strawberry", top: "#FFE3DC", bot: "#F87D7C", stripe: "#C6515B", wingBack: "255, 214, 224", wingFront: "255, 232, 238", cheek: "255, 196, 206" }
+    ];
+    // heart wings: both rise from the top of her back and lean backward; the front one is bigger
+    function wingPath(big) {
+      const L = big ? 25.7 : 20.2, w = big ? 4.9 : 3.8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-w * 0.9, -L * 0.2, -w * 1.25, -L * 0.75, -w * 0.55, -L * 0.95);
+      ctx.quadraticCurveTo(0, -L * 1.05, w * 0.55, -L * 0.95);
+      ctx.bezierCurveTo(w * 1.25, -L * 0.75, w * 0.9, -L * 0.2, 0, 0);
+      ctx.closePath();
+    }
+    function wing(back, a, pal) {
+      const big = !back;
+      const hx = back ? -9.3 : -0.9, hy = back ? -10.7 : -6.7, base = back ? -0.46 : -0.42;
+      const one = (ang, alpha) => {
+        ctx.save(); ctx.translate(hx, hy);
+        ctx.scale(1, Math.cos(ang));
+        ctx.rotate(base + Math.sin(ang) * 0.25);
+        ctx.globalAlpha *= alpha;
+        wingPath(big);
+        ctx.fillStyle = back ? `rgba(${pal.wingBack}, 0.5)` : `rgba(${pal.wingFront}, 0.78)`; ctx.fill();
+        ctx.lineCap = "round";
+        ctx.strokeStyle = back ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0.95)"; ctx.lineWidth = 1.5;
+        wingPath(big); ctx.stroke();
+        if (!back) {
+          ctx.strokeStyle = "rgba(230, 150, 190, 0.45)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(0, -2); ctx.quadraticCurveTo(-1.3, -12, 0, -21); ctx.stroke();
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.beginPath(); ctx.ellipse(-2.2, -19, 1.4, 3, -0.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      };
+      if (!reduceMotion) { one(0, 0.16); one(1.32, 0.16); }   // a soft buzz blur at the top and bottom of each beat
+      one(a, 1);
+    }
+    function antenna(bx, by, tx, ty, ball) {
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo(bx + (tx - bx) * 0.35, by + (ty - by) * 0.6, tx, ty);
+      ctx.stroke();
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.beginPath(); ctx.arc(tx, ty, ball, 0, Math.PI * 2); ctx.fill();
+    }
+    // her little legs, tucked back while she flies (three near, three far)
+    const LEG_X = [-10.2, -4.4, 1.6], KNEE = 2.1, LEG_LEN = 3.9, TUCK_BEND = 0.984;
+    function bellyY(x) { const t = (x + 1.4) / 18; return -1 + 12.7 * Math.sqrt(Math.max(0, 1 - t * t)); }
+    function legs(far, ph) {
+      const col = far ? "#3A2C52" : "#4B3A66";
+      ctx.save();
+      ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = 1.4;
+      LEG_X.forEach((lx, i) => {
+        const x = lx + (far ? 1.8 : 0), y = bellyY(x) - (far ? 1.6 : 1.1) - 0.9;
+        const sway = reduceMotion ? 0 : Math.sin(time * 6 + i * 0.9 + (far ? 0.6 : 0) + ph);
+        const a = 0.6 + sway * 0.06, b = TUCK_BEND + sway * 0.065;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+        const lower = LEG_LEN - KNEE, r = 0.5;
+        const ex = -Math.sin(b) * lower, ey = KNEE + Math.cos(b) * lower;
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(0, KNEE - r);
+        ctx.quadraticCurveTo(0, KNEE, -Math.sin(b) * r, KNEE + Math.cos(b) * r);
+        ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.translate(ex, ey); ctx.rotate(b);
+        ctx.beginPath(); ctx.ellipse(0.45, 0.3, 1.3, 0.92, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+    // one flying bee at (x, y): s = size, face = 1 (facing right) or -1, pal = one of COLORS, ph = her own timing
+    function draw(x, y, s, face, pal, ph, look) {
+      const bob = reduceMotion ? 0 : Math.sin(time * 3 + ph) * 3;
+      ctx.save();
+      ctx.translate(x, y + bob * s);
+      ctx.rotate(face * 0.05 - 0.06);
+      ctx.scale(face * s, s);
+      const flap = reduceMotion ? 0.3 : (0.5 - 0.5 * Math.cos(time * 34 + ph)) * 1.32;
+      wing(true, flap * 0.9, pal);
+      legs(true, ph);
+      // round body with a soft top-to-bottom shade
+      const g = ctx.createLinearGradient(0, -14, 0, 12);
+      g.addColorStop(0, pal.top); g.addColorStop(1, pal.bot);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.ellipse(-1.4, -1, 18, 12.7, 0, 0, Math.PI * 2); ctx.fill();
+      // two stripes that curve around her round body
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(-1.4, -1, 18, 12.7, 0, 0, Math.PI * 2); ctx.clip();
+      ctx.fillStyle = pal.stripe;
+      const band = (l, r) => {
+        const top = -14.5, mid = -1, bot = 12.5;
+        const ctrl = e => 2 * e[1] - (e[0] + e[2]) / 2;
+        ctx.beginPath();
+        ctx.moveTo(l[0], top); ctx.quadraticCurveTo(ctrl(l), mid, l[2], bot);
+        ctx.lineTo(r[2], bot); ctx.quadraticCurveTo(ctrl(r), mid, r[0], top);
+        ctx.closePath(); ctx.fill();
+      };
+      band([-14.2, -15.9, -12.9], [-10.1, -11.8, -9.0]);
+      band([-6.6, -7.6, -6.0], [-2.6, -1.6, -2.8]);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.beginPath(); ctx.ellipse(-2, -8.8, 10, 2.9, -0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      legs(false, ph);
+      // face: dark eyes with a sparkle (they glance at whatever she's looking at), rosy cheeks, happy smile
+      const blink = (time + ph) % 3.6 < 0.12;
+      let lx = 0, ly = 0;
+      if (look) { const d = Math.hypot(look.x, look.y) || 1; lx = look.x / d * 1.4 * face; ly = look.y / d * 1.4; }
+      [[5, -2], [11.5, -2.5]].forEach(([ex, ey]) => {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 1.35; ctx.lineCap = "round";
+        if (blink) { ctx.beginPath(); ctx.moveTo(ex - 2.2, ey); ctx.quadraticCurveTo(ex, ey + 1.8, ex + 2.2, ey); ctx.stroke(); }
+        else {
+          const px = ex + lx * 0.6, py = ey + ly * 0.6;
+          ctx.fillStyle = "#2E2440"; ctx.beginPath(); ctx.ellipse(px, py, 2.8, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(px + 1, py - 1.3, 1.1, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      ctx.fillStyle = `rgba(${pal.cheek}, 0.75)`;
+      ctx.beginPath(); ctx.ellipse(2.6, 3.5, 2.95, 1.75, -0.05, 0, Math.PI * 2); ctx.ellipse(12.45, 2.8, 2.5, 1.45, -0.05, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 1.6; ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(7, 5.7); ctx.quadraticCurveTo(8.6, 7.7, 10.2, 5.7); ctx.stroke();
+      wing(false, flap, pal);
+      // antennae last, so they always show in front of her wings
+      ctx.strokeStyle = "#4B3A66"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      const sway = reduceMotion ? 0 : Math.sin(time * 2.4 + ph) * 0.6;
+      antenna(5.5, -9.6, 1.2 + sway, -25.2, 1.7);
+      antenna(10.4, -9.4, 17.6 + sway, -23.6, 1.7);
+      ctx.fillStyle = "#4B3A66";
+      ctx.beginPath(); ctx.arc(5.5, -9.6, 1.1, 0, Math.PI * 2); ctx.arc(10.4, -9.4, 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    return { COLORS, draw };
+  })();
+
   // ---------- game state ----------
   let pads, frog, camX, camTarget, score, state, charge, charging, chargeDir, hops;
   let particles = [], ripples = [], popups = [], ring = null;
@@ -578,10 +720,18 @@
     const roll = Math.random();
     const dir = Math.random() < 0.5 ? 1 : -1;
     const x0 = dir > 0 ? -24 : W + 24;
-    if (roll < 0.4) {
+    if (roll < 0.3) {
+      // a few little bees buzz by together, each her own color and size (never two the same color)
+      const n = 1 + Math.floor(Math.random() * 3), y = rand(150, WATER_Y - 50);
+      const cols = Bees.COLORS.slice().sort(() => Math.random() - 0.5);
+      for (let i = 0; i < n; i++) {
+        critters.push({ kind: "bee", x: x0 - dir * i * rand(28, 50), baseY: y + rand(-40, 40), y: 0, dir, vx: rand(34, 48), t: rand(0, 10), ph: rand(0, 6),
+          size: critterSize(), col: cols[i] });
+      }
+    } else if (roll < 0.55) {
       critters.push({ kind: "butterfly", x: x0, baseY: rand(150, WATER_Y - 50), y: 0, dir, vx: rand(26, 38), t: rand(0, 10), size: critterSize(),
         col: BUTTERFLY_COLORS[Math.floor(Math.random() * BUTTERFLY_COLORS.length)] });
-    } else if (roll < 0.7) {
+    } else if (roll < 0.77) {
       critters.push({ kind: "dragonfly", x: x0, baseY: rand(170, WATER_Y - 40), y: 0, dir, t: 0, bob: rand(0, 6), size: critterSize() });
     } else {
       // about half the time, lightning bugs drift at frog height (so the frog can catch one)
@@ -607,6 +757,10 @@
       if (c.kind === "butterfly") {
         c.x += c.dir * c.vx * dt;
         c.y = c.baseY + Math.sin(c.t * 1.8) * 16 + Math.sin(c.t * 5.3) * 4;
+      } else if (c.kind === "bee") {
+        // bumbles along: speeds up and slows down, bobbing and weaving
+        c.x += c.dir * c.vx * (0.55 + 0.45 * Math.sin(c.t * 1.4 + c.ph)) * dt;
+        c.y = c.baseY + Math.sin(c.t * 2.1 + c.ph) * 14 + Math.sin(c.t * 6.3) * 2.5;
       } else if (c.kind === "dragonfly") {
         // darts forward, then hovers
         const phase = c.t % 1.7;
@@ -754,8 +908,9 @@
       ctx.fillStyle = "#FF7A6B";
       ctx.beginPath(); ctx.ellipse(2, -3.5, 4.5, 3, 0.3, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(-6, 1, 3.2, 2.6, -0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#3B2D55";
-      ctx.beginPath(); ctx.ellipse(-2, 3.5, 1.6, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+      // a small golden spot (a dark spot here looked like a second eye)
+      ctx.fillStyle = "#FFB15C";
+      ctx.beginPath(); ctx.ellipse(-2.5, 3.8, 1.9, 1.2, 0, 0, Math.PI * 2); ctx.fill();
     } else if (f.kind === "stripe") {
       ctx.strokeStyle = "rgba(190, 160, 240, 0.9)"; ctx.lineWidth = 2;
       [-5, -1, 3].forEach(sx => { ctx.beginPath(); ctx.moveTo(sx, -7); ctx.quadraticCurveTo(sx + 2, 0, sx, 7); ctx.stroke(); });
@@ -767,11 +922,14 @@
     // top fin
     ctx.fillStyle = fin;
     ctx.beginPath(); ctx.moveTo(-4, -5.5); ctx.quadraticCurveTo(-1, -11, 4, -6); ctx.closePath(); ctx.fill();
-    // eye + blush
+    // eye + blush: a soft outline so the eye shows up even on the white koi, plus a sparkle like the frog's
     ctx.fillStyle = "#FFFFFF";
-    ctx.beginPath(); ctx.arc(6.5, -1.5, 2.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6.6, -1.6, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(59, 45, 85, 0.3)"; ctx.lineWidth = 0.4; ctx.stroke();
     ctx.fillStyle = "#2E2440";
-    ctx.beginPath(); ctx.arc(7, -1.4, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(7.1, -1.5, 1.45, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(7.6, -2.1, 0.5, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "rgba(255, 130, 170, 0.5)";
     ctx.beginPath(); ctx.ellipse(5.5, 2, 1.8, 1.1, 0, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
@@ -929,21 +1087,83 @@
     ctx.beginPath(); ctx.ellipse(-8 * scaleW, 1, 4 * scaleW, 2, 0.2, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
+  // The flying pig (Jessica's sketch, Sept 28): far legs tucked behind her tummy, near legs in front,
+  // a curly spiral tail, a soft floppy ear, a three-quarter face with two eyes and a round snout facing us,
+  // and a long wing that sweeps up and back.
+  function pigWing(t) {
+    ctx.save(); ctx.translate(1.5, -6);
+    ctx.rotate(0.32 + Math.sin(t * 7) * 0.22);           // angled up and back, flapping from the shoulder
+    const g = ctx.createLinearGradient(0, 0, -20, 0);
+    g.addColorStop(0, "#FFFFFF"); g.addColorStop(1, "#F1EAFB");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7";                            // a soft inner feather
+    ctx.beginPath(); ctx.ellipse(-8.5, 0.8, 7.5, 1.9, 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(200, 180, 235, 0.8)"; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  function pigLeg(x, far) {
+    ctx.strokeStyle = far ? "#E07B99" : "#F59AB5"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x - 1.1, 8.6); ctx.stroke();
+    ctx.fillStyle = far ? "#C9607F" : "#E27A98";          // little hooves
+    ctx.beginPath(); ctx.ellipse(x - 1.2, 9.1, 0.95, 0.6, 0, 0, Math.PI * 2); ctx.fill();
+  }
   function drawFlyingPig(t) {
-    ctx.strokeStyle = "#E88AA5"; ctx.lineWidth = 1.2; ctx.lineCap = "round";
-    [-6, -2, 3, 7].forEach(lx => { ctx.beginPath(); ctx.moveTo(lx, 5); ctx.lineTo(lx - 1, 9); ctx.stroke(); });
-    ctx.beginPath(); ctx.moveTo(-12, -1); ctx.bezierCurveTo(-16, -5, -17, 1, -14, 0); ctx.stroke(); // curly tail
-    ctx.fillStyle = "#FFB6C9";
+    // far-side legs, behind her tummy
+    pigLeg(-5.5, true); pigLeg(6, true);
+    // round body, lit from above, a little rosier underneath
+    const bg = ctx.createLinearGradient(0, -7.5, 0, 7.5);
+    bg.addColorStop(0, "#FFCFDC"); bg.addColorStop(0.6, "#FFB6C9"); bg.addColorStop(1, "#F7A0B9");
+    ctx.fillStyle = bg;
     ctx.beginPath(); ctx.ellipse(0, 0, 12, 7.5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(10, -3, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#FF9AB6";
-    ctx.beginPath(); ctx.moveTo(7, -8); ctx.lineTo(9, -12); ctx.lineTo(11, -8); ctx.closePath(); ctx.fill(); // ear
-    ctx.beginPath(); ctx.ellipse(15.5, -2, 2.4, 3, 0, 0, Math.PI * 2); ctx.fill(); // snout
-    ctx.fillStyle = "#C5627F";
-    ctx.beginPath(); ctx.arc(15.3, -3, 0.6, 0, Math.PI * 2); ctx.arc(15.3, -1, 0.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.beginPath(); ctx.ellipse(-2, -4.6, 6.5, 1.8, -0.08, 0, Math.PI * 2); ctx.fill();
+    // curly spiral tail
+    ctx.strokeStyle = "#F08FAC"; ctx.lineWidth = 1.1; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    // a little spiral that starts right at her back, loops around and curls in on itself
+    for (let k = 0; k <= 40; k++) {
+      const u = k / 40, a = Math.PI * 0.15 - u * Math.PI * 2.4, r = 2.6 * (1 - u * 0.75);
+      ctx.lineTo(-14.2 + Math.cos(a) * r, -1.2 + Math.sin(a) * r);
+    }
+    ctx.stroke();
+    // near-side legs, in front of her tummy
+    pigLeg(-3, false); pigLeg(9, false);
+    // her far ear peeks up behind her head (a little smaller and darker)
+    ctx.fillStyle = "#F393AE";
+    ctx.beginPath(); ctx.moveTo(11.6, -8.6); ctx.quadraticCurveTo(13.4, -12.6, 15.6, -11.2); ctx.quadraticCurveTo(15.6, -8.8, 14.4, -7.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#E97897";
+    ctx.beginPath(); ctx.moveTo(12.6, -8.8); ctx.quadraticCurveTo(13.8, -11.3, 15, -10.6); ctx.quadraticCurveTo(15, -9.2, 14.2, -8.3); ctx.closePath(); ctx.fill();
+    // head, shaded so it feels round
+    const hg = ctx.createRadialGradient(8.5, -5.5, 0.5, 10, -3, 6.5);
+    hg.addColorStop(0, "#FFD3DF"); hg.addColorStop(1, "#FFAFC4");
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(10, -3, 6.2, 0, Math.PI * 2); ctx.fill();
+    // soft floppy ear with a pink inside
+    ctx.fillStyle = "#FFA7BF";
+    ctx.beginPath(); ctx.moveTo(6.2, -7.2); ctx.quadraticCurveTo(6.8, -12.6, 10.2, -11.4); ctx.quadraticCurveTo(10.8, -9.2, 9.6, -8.2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#FF8FAE";
+    ctx.beginPath(); ctx.moveTo(7.2, -7.8); ctx.quadraticCurveTo(7.6, -11, 9.5, -10.5); ctx.quadraticCurveTo(9.6, -9.2, 8.9, -8.4); ctx.closePath(); ctx.fill();
+    // two eyes (three-quarter view): the far one a touch smaller, each with a sparkle
     ctx.fillStyle = "#3B2D55";
-    ctx.beginPath(); ctx.arc(11, -4.5, 1, 0, Math.PI * 2); ctx.fill();
-    drawWing(-1, -6, t, 1);
+    ctx.beginPath(); ctx.ellipse(10.2, -4.6, 1.05, 1.2, 0, 0, Math.PI * 2); ctx.ellipse(13.5, -5, 0.85, 1.05, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(10.55, -5, 0.38, 0, Math.PI * 2); ctx.arc(13.8, -5.35, 0.3, 0, Math.PI * 2); ctx.fill();
+    // rosy cheek
+    ctx.fillStyle = "rgba(255, 120, 160, 0.45)";
+    ctx.beginPath(); ctx.ellipse(8.6, -1.4, 1.6, 1, 0, 0, Math.PI * 2); ctx.fill();
+    // round snout facing us, with a little depth
+    const sg = ctx.createRadialGradient(13.9, -2.4, 0.2, 14.3, -1.8, 2.25);
+    sg.addColorStop(0, "#FFB3C6"); sg.addColorStop(1, "#F2869F");
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.ellipse(14.3, -1.8, 2.03, 1.65, -0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#B8566F";
+    ctx.beginPath(); ctx.ellipse(13.63, -1.65, 0.38, 0.6, 0.15, 0, Math.PI * 2); ctx.ellipse(14.98, -1.8, 0.38, 0.6, -0.15, 0, Math.PI * 2); ctx.fill();
+    // a small happy smile under the snout
+    ctx.strokeStyle = "#3B2D55"; ctx.lineWidth = 0.45; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(13.1, 0.45); ctx.quadraticCurveTo(13.95, 1.15, 14.8, 0.45); ctx.stroke();
+    pigWing(t);
   }
   function drawFlyingBunny(t) {
     ctx.fillStyle = "#FFF6EF";
@@ -1111,6 +1331,7 @@
       if (c.caught) return; // drawn on the tongue tip instead
       if (c.kind === "butterfly") drawButterfly(c);
       else if (c.kind === "dragonfly") drawDragonfly(c);
+      else if (c.kind === "bee") Bees.draw(c.x, c.y, 0.42 * c.size, c.dir, c.col, c.ph, { x: c.dir, y: 0.15 });
       else drawBug(c);
     });
   }
@@ -1602,6 +1823,15 @@
       sinkOff = Math.max(sinkOff, 0.01);
     }
 
+    // the swim ring is a little 3D donut: its far half sits behind the frog, its near half in front
+    if (ring) {
+      ctx.save(); ctx.globalAlpha = clamp(ring.life, 0, 1);
+      drawFloatie(ring.x - camX, WATER_Y + 1 + Math.sin(time * 2.2) * 2, 1.3, "all");
+      ctx.restore();
+    }
+    const floatieY = WATER_Y + 1 + Math.sin(time * 2.2) * 2, floatieS = floatAmt > 0 ? easeOutBack(floatAmt) * 1.3 : 0;
+    if (floatAmt > 0) drawFloatie(x, floatieY, floatieS, "back");
+
     ctx.save();
     // clip at water when sinking
     if (sinkOff > 0) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
@@ -1681,12 +1911,7 @@
     }
     ctx.restore();
 
-    if (ring) {
-      ctx.save(); ctx.globalAlpha = clamp(ring.life, 0, 1);
-      drawFloatie(ring.x - camX, WATER_Y + 1 + Math.sin(time * 2.2) * 2, 1.38);
-      ctx.restore();
-    }
-    if (floatAmt > 0) drawFloatie(x, WATER_Y + 1 + Math.sin(time * 2.2) * 2, easeOutBack(floatAmt) * 1.38);
+    if (floatAmt > 0) drawFloatie(x, floatieY, floatieS, "front");
 
     // charge meter: a little row of hearts-ish dots above the frog
     if (charging) {
@@ -1699,19 +1924,27 @@
       roundRect(mx, my, Math.max(9, 52 * charge), 9, 4.5); ctx.fill();
     }
   }
-  function drawFloatie(x, y, s) {
-    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-    // back half of the ring sits behind the water line glow, front half in front
+  // The original candy-striped swim ring, now drawn all the way around.
+  // part: "back" = far half (drawn behind the frog), "front" = near half (drawn in front), "all" = whole ring
+  function drawFloatie(x, y, s, part = "all") {
+    if (s <= 0) return;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s * 1.38 / 1.3, s * 1.38 / 1.3);
     ctx.lineWidth = 10;
     const stripes = ["#FF8FB8", "#FFFFFF"];
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-      const a0 = (i / n) * Math.PI, a1 = ((i + 1) / n) * Math.PI;
+    const n = 16;   // same stripe width as before, now all the way around
+    // far half first, then the near half, so the near stripes always sit on top where they meet
+    for (let k = 0; k < n; k++) {
+      const i = (k + n / 2) % n;
+      const a0 = (i / n) * Math.PI * 2, a1 = ((i + 1) / n) * Math.PI * 2;
+      const front = a0 < Math.PI;   // 0..PI is the near (bottom) half of the ellipse
+      if ((part === "back" && front) || (part === "front" && !front)) continue;
       ctx.strokeStyle = stripes[i % 2];
-      ctx.beginPath(); ctx.ellipse(0, 0, 29, 8, 0, a0, a1); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, 0, 29, 8, 0, a0, a1 + 0.02); ctx.stroke();
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.ellipse(0, -2, 27, 6, 0, Math.PI * 0.2, Math.PI * 0.45); ctx.stroke();
+    if (part !== "back") {
+      ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, -2, 27, 6, 0, Math.PI * 0.2, Math.PI * 0.45); ctx.stroke();
+    }
     ctx.restore();
   }
   function roundRect(x, y, w, h, r) {
