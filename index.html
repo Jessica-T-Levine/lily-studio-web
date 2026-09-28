@@ -612,6 +612,108 @@
       margin-top: 20px;
     }
 
+    /* Three app cards */
+    .app-cards {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 20px;
+      text-align: left;
+    }
+    .app-card {
+      position: relative;
+      background: var(--navy-light);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: 3px solid var(--card-accent);
+      border-radius: 6px;
+      padding: 28px 24px 22px;
+      display: flex; flex-direction: column;
+      transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    }
+    .app-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 28px var(--card-glow), 0 12px 32px rgba(0,0,0,0.35);
+    }
+    .app-card-green { --card-accent: var(--green); --card-glow: var(--green-glow); }
+    .app-card-blue  { --card-accent: var(--blue);  --card-glow: var(--blue-glow); }
+    .app-card-pink  { --card-accent: var(--pink);  --card-glow: var(--pink-glow); }
+    .app-status {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 5px 10px;
+      background: var(--card-accent);
+      color: var(--navy);
+      border-radius: 3px;
+      margin-bottom: 18px;
+    }
+    .app-card-name {
+      font-family: var(--font-serif);
+      font-size: 1.6rem; font-weight: 600;
+      color: var(--cream);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .app-card-green .app-card-name { font-size: 1.9rem; }
+    .app-card-tagline {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--card-accent);
+      margin-bottom: 14px;
+    }
+    .app-card-desc {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--gray-light);
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    .app-card-fig {
+      font-family: var(--font-mono);
+      font-size: 0.5rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-light); opacity: 0.7;
+    }
+    @media (max-width: 900px) {
+      .app-cards { grid-template-columns: 1fr 1fr; }
+      .app-card-green { grid-column: 1 / -1; }
+    }
+    @media (max-width: 600px) {
+      .app-cards { grid-template-columns: 1fr; }
+    }
+
+    /* Free games (cream) */
+    .games-feature { background: var(--cream); padding: 90px 24px; }
+    .games-card {
+      display: grid; grid-template-columns: 300px 1fr; gap: 56px; align-items: center;
+    }
+    .games-art {
+      position: relative; display: block;
+      transform: rotate(-2.5deg);
+      transition: transform 0.35s var(--ease);
+    }
+    .games-art:hover { transform: rotate(0deg) scale(1.03); }
+    .games-art img {
+      width: 100%; height: auto; border-radius: 28px;
+      border: 6px solid var(--white);
+      box-shadow: 0 18px 40px rgba(11,30,63,0.18), 0 2px 6px rgba(11,30,63,0.08);
+    }
+    .games-feature .games-sticker { top: auto; right: -14px; bottom: 18px; --rot: 6deg; }
+    .games-desc { color: var(--navy); font-size: 1rem; line-height: 1.7; margin: 18px 0 12px; max-width: 480px; }
+    .games-desc strong { font-weight: 700; }
+    .games-meta {
+      font-family: var(--font-mono); font-size: 0.55rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-warm);
+      margin-bottom: 28px;
+    }
+    @media (max-width: 760px) {
+      .games-feature { padding: 70px 24px; }
+      .games-card { grid-template-columns: 1fr; gap: 36px; }
+      .games-art { max-width: 240px; margin: 0 auto; }
+      .games-feature .games-sticker { display: block; right: -10px; }
+    }
+
     /* ============================================
        7. FEATURED SKILLS (Dark, scanlines)
        ============================================ */
@@ -961,8 +1063,6 @@
         <li><a href="/printed.html">Printed</a></li>
         <li><a href="/hop/">Games</a></li>
         <li><a href="/about.html">About</a></li>
-        <li><a href="/privacy.html">Privacy</a></li>
-        <li><a href="/terms.html">Terms</a></li>
         <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
       </ul>
     </nav>
@@ -1168,22 +1268,67 @@
     </div>
   </section>
 
-  <!-- ========== 8. CALMING WATER ========== -->
+  <!-- ========== 8. APPS (three app cards) ========== -->
   <section class="app-feature" id="featured-app">
-    <div class="app-feature-inner fade-in">
-      <span class="app-badge">Coming Soon — iOS</span>
-      <h2 class="app-name">Calming Water</h2>
-      <p class="app-tagline">Baby & Toddler Sleep Sounds</p>
-      <p class="app-desc">Peaceful water sounds, gentle ambient audio, and soothing video — designed to help babies and toddlers settle, sleep, and stay calm. Simple enough to use at 3am. Beautiful enough to leave on all day.</p>
-      <a href="/apps.html" class="app-cta">Coming Soon</a>
-      <p class="app-caption">Fig. 08 — Calming Water</p>
+    <div class="app-feature-inner">
+      <div class="section-header-split fade-in" style="margin-bottom: 48px; text-align: left;">
+        <div>
+          <p class="section-label section-label-pink">iOS Apps</p>
+          <h2 class="section-heading section-heading-cream">Made to help you <em>breathe</em></h2>
+        </div>
+        <p class="section-aside" style="color: var(--gray-light);">Calm, beautiful iPhone apps from The Lily Studio. Here's what's on the way.</p>
+      </div>
+
+      <div class="app-cards fade-in">
+        <article class="app-card app-card-green">
+          <span class="app-status">Coming soon · iOS</span>
+          <h3 class="app-card-name">Blocks and Breath</h3>
+          <p class="app-card-tagline">A calm falling-block puzzle</p>
+          <p class="app-card-desc">For the moments you need to calm down. Soft marshmallow blocks, gentle sounds, and a slow breath with every piece. The game is the blocks. The experience is the breath.</p>
+          <p class="app-card-fig">Fig. 08 — Blocks and Breath</p>
+        </article>
+
+        <article class="app-card app-card-blue">
+          <span class="app-status">Coming soon · iOS</span>
+          <h3 class="app-card-name">Calming Water</h3>
+          <p class="app-card-tagline">Baby &amp; toddler sleep sounds</p>
+          <p class="app-card-desc">Peaceful water sounds and soothing video to help little ones settle, sleep, and stay calm. Simple enough to use at 3am.</p>
+          <p class="app-card-fig">Fig. 08.1 — Calming Water</p>
+        </article>
+
+        <article class="app-card app-card-pink">
+          <span class="app-status">In testing · iOS</span>
+          <h3 class="app-card-name">Fidge</h3>
+          <p class="app-card-tagline">Digital fidget toys</p>
+          <p class="app-card-desc">Tap, swipe, and play with satisfying little toys that keep your hands busy and your mind calm.</p>
+          <p class="app-card-fig">Fig. 08.2 — Fidge</p>
+        </article>
+      </div>
+
+      <div class="fade-in" style="margin-top: 44px;">
+        <a href="/apps.html" class="app-cta">See all apps →</a>
+      </div>
     </div>
   </section>
 
-  <!-- ========== CREAM BREAK ========== -->
-  <div style="background: var(--cream); padding: 40px 24px; text-align: center;">
-    <p style="font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gray-warm);">✦ &nbsp; More from Lily Studio &nbsp; ✦</p>
-  </div>
+  <!-- ========== 8B. FREE GAMES (Cream) ========== -->
+  <section class="games-feature" id="games">
+    <div class="container">
+      <div class="games-card fade-in">
+        <a href="/hop/" class="games-art" aria-label="Play Lily's Hop Hop">
+          <img src="/hop/icon-512.png" alt="A round green frog sitting on a pink lily flower in a sunset pond" width="512" height="512" loading="lazy">
+          <span class="sticker sticker-green games-sticker">Free to play</span>
+        </a>
+        <div class="games-copy">
+          <p class="section-label section-label-warm">Free Games · Fig. 13</p>
+          <h2 class="section-heading section-heading-navy">Take a little <em>hop break</em></h2>
+          <p class="games-desc"><strong>Lily's Hop Hop</strong> is a free, cozy frog game. Hold to wind up, let go to hop, and help a very round frog make the pond bloom.</p>
+          <p class="games-meta">No download · No account · Works on phone and computer</p>
+          <a href="/hop/" class="btn-primary games-btn">Play Lily's Hop Hop →</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ========== 9. CTA SECTION ========== -->
   <section class="cta-section">

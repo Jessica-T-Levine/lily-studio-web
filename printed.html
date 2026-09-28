@@ -142,6 +142,36 @@
     .hero-collage .collage-card:nth-child(5) { top: 250px; left: 60px; transform: rotate(-1.5deg); z-index: 1; }
     .hero-collage .collage-card:nth-child(5) .tape { background: rgba(125,211,252,0.35); transform: rotate(3deg); }
     .hero-collage .collage-card:nth-child(5):hover { transform: rotate(-1.5deg) translateY(-4px); }
+/* Footer */
+    .site-footer {
+      background: var(--navy-deep);
+      border-top: 1px solid var(--gray-mid);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.55rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--pink);
+      transition: text-shadow 0.25s var(--ease);
+    }
+    .footer-links a:hover { text-shadow: 0 0 12px var(--pink-glow); }
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 0.52rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--gray-light);
+    }
+
 </style>
 </head>
 <body>
@@ -162,8 +192,6 @@
         <li><a href="/printed.html" id="nav-printed" class="active">Printed</a></li>
         <li><a href="/hop/" id="nav-games">Games</a></li>
         <li><a href="/about.html" id="nav-about">About</a></li>
-        <li><a href="/privacy.html" id="nav-privacy">Privacy</a></li>
-        <li><a href="/terms.html" id="nav-terms">Terms</a></li>
         <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
       </ul>
     </nav>
@@ -190,6 +218,21 @@
       </div>
     </div>
   </section>
+
+  <footer class="site-footer">
+    <ul class="footer-links">
+      <li><a href="/skills.html">Skills</a></li>
+      <li><a href="/apps.html">Apps</a></li>
+      <li><a href="/printed.html">Printed</a></li>
+      <li><a href="/hop/">Games</a></li>
+      <li><a href="/skills.html#tuesday-tips">Tuesday Tips</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="/terms.html">Terms</a></li>
+      <li><a href="mailto:support@thelilystudio.com">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 The Lily Studio. All rights reserved.</p>
+  </footer>
 
 </body>
 </html>
