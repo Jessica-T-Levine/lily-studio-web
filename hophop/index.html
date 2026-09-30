@@ -283,7 +283,10 @@
   html.full body { position: fixed; inset: 0; padding: 0; background: #4E5DA8; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   html.full .wrap { max-width: none; margin: 0; display: block; }
   html.full header, html.full .how, html.full footer, html.full .tip, html.full .studio-bar { display: none; }
-  html.full .stage { position: fixed; inset: 0; width: auto; height: auto; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+  html.full .stage, html.full .wrap.wide .stage { position: fixed; inset: 0; width: auto; height: auto; max-width: none; aspect-ratio: auto; margin: 0; border-radius: 0; box-shadow: none; }   /* full screen wins over tall or wide */
+  html.full .wrap, html.full .wrap.wide { max-width: none; padding: 0; }
+  /* the pond's picture always fills its frame exactly (no stripe of the frame's color after turning the iPad) */
+  .stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   html.full .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
   html.full .sound-icon, html.full .small-btn {
     display: grid; place-items: center; pointer-events: auto;
@@ -604,7 +607,16 @@
     try { if (frog && !frog.jump && state === "play") frog.y = WATER_Y; } catch (_) { /* not started yet */ }
   }
   window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", () => setTimeout(resize, 250));
+  window.addEventListener("orientationchange", () => { setTimeout(resize, 250); setTimeout(resize, 700); });
+  // re-measure whenever the pond's frame itself changes size (turning the iPad, tall <-> wide, full screen)
+  if (typeof ResizeObserver === "function") {
+    let lastW = 0, lastH = 0;
+    new ResizeObserver(() => {
+      const r = stage.getBoundingClientRect();
+      if (Math.abs(r.width - lastW) < 0.5 && Math.abs(r.height - lastH) < 0.5) return;
+      lastW = r.width; lastH = r.height; resize();
+    }).observe(stage);
+  }
   window.addEventListener("pageshow", resize);
 
   // ---------- storage (safe) ----------
