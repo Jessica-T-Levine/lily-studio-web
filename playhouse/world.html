@@ -157,6 +157,21 @@
   .cbtn:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
   #soundBtn .slash { display: none; }
   #soundBtn.muted .slash { display: inline; } #soundBtn.muted .waves { display: none; }
+  /* v30: the games menu: a tiny playhouse button, and the animals with games in a column under it */
+  .games-btn canvas { width: 34px; height: 34px; display: block; }
+  .games-menu { position: absolute; top: 62px; right: 112px; z-index: 6; display: flex; flex-direction: column; gap: 8px; transition: opacity 0.8s ease; }
+  .games-menu.fade { opacity: 0; }
+  .game-item {
+    width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    background: rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(40, 30, 80, 0.2); -webkit-tap-highlight-color: transparent;
+    animation: gameIn 0.35s ease both;
+  }
+  .game-item:hover { background: rgba(255, 255, 255, 0.9); transform: scale(1.06); }
+  .game-item:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
+  .game-item canvas { width: 38px; height: 38px; display: block; }
+  @keyframes gameIn { from { opacity: 0; transform: translateY(-8px) scale(0.8); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .game-item { animation: none; } .games-menu { transition: none; } }
   #fullBtn .close { display: none; }
   #fullBtn.on .close { display: inline; } #fullBtn.on .open { display: none; }
   .stage .mixer {
@@ -202,9 +217,11 @@
   <div class="stage" id="stage">
     <canvas id="game" tabindex="0" aria-label="Lily's Playhouse, a meadow and a big playhouse where frogs, bunnies and bees live together. Click or tap anywhere to glide there. Tap a friend to visit their game. The same friends can be visited with the buttons below the game."></canvas>
     <div class="corner">
+      <button class="cbtn games-btn" id="gamesBtn" type="button" aria-label="Lily's games" title="Lily's games" aria-expanded="false" aria-controls="gamesMenu"><canvas id="gamesIcon" aria-hidden="true"></canvas></button>
       <button class="cbtn" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none"/><path class="waves" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="slash" d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></svg></button>
       <button class="cbtn" id="fullBtn" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="open" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="close" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
     </div>
+    <div class="games-menu" id="gamesMenu" hidden></div>
     <div class="mixer" id="mixer" hidden>
       <label for="sfxVol"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 17.5V6.2l10-2.2v11.3a2.6 2.6 0 1 1-1.6-2.4V7.8L10.6 9.3v8.2A2.6 2.6 0 1 1 9 15z"/></svg><span class="sr">Game sounds</span></label>
       <input type="range" id="sfxVol" min="0" max="100" step="1" value="80">
@@ -242,6 +259,7 @@
 </div>
 
 <script src="lily-creatures-v3.js"></script>
+<script src="lily-playhouse-design.js"></script>
 <script>
 (() => {
   "use strict";
@@ -560,13 +578,16 @@
   // Hop Hop about 88 units wide (twice the size of the flat frog's 44), and Nee Nee about 210 long.
   // The playhouse, 4 times its old size: big enough for Nee Nee to hop through the door.
   // It stands far ahead, where you see it the moment you arrive.
-  const HOUSE = { x: 230, y: -1650, w: 920, d: 640, wallH: 520, roofZ: 960, r: 620 };
+  // v30: the playhouse's look comes from its one design (lily-playhouse-design.js); only where it stands is set here
+  const PH = (window.LilyPlayhouse && window.LilyPlayhouse.design) || null;
+  const PHS = PH ? PH.size : { w: 920, d: 640, wallH: 520, roofZ: 960 };   // (sizes only, so the world still runs if the design file is missing)
+  const HOUSE = { x: 230, y: -1650, w: PHS.w, d: PHS.d, wallH: PHS.wallH, roofZ: PHS.roofZ, r: Math.round(Math.max(PHS.w, PHS.d) * 0.674) };
   const DOOR = { x: HOUSE.x, y: HOUSE.y + HOUSE.d / 2 };   // the front door (it faces you when you arrive)
   // The beehive from the bee game (the same straw skep), sitting on a branch of its own big tree.
   const HIVE_TREE_AT = spreadOut(-60, -150);
   let HIVE_PT = null, HIVE_BRANCH = null;
   const insideHouse = (x, y, pad) => Math.abs(x - HOUSE.x) < HOUSE.w / 2 + pad && Math.abs(y - HOUSE.y) < HOUSE.d / 2 + pad;
-  const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88 * 1.4, ry: 62 * 1.4 });   // v25: bigger
+  const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88 * 2.3, ry: 62 * 2.3 });   // v25: bigger (v30: bigger again, for bigger lily pads)
   // v21: big ponds that are always there: one on each side of the start, and two huge ones farther out
   const BIG_PONDS = { "-2,-1": 2.35, "2,-1": 2.6, "0,-6": 3, "3,-4": 2.8 };
   const bigPondAt = (cx, cy) => BIG_PONDS[cx + "," + cy] || 0;
@@ -574,7 +595,7 @@
   const NEE_SIZE = 7;             // the bee game's bunny is size 6 to 8
   const FROG_SIZE = 2;            // the bee game's pond frog is drawn at 2 x its size
   const CARROTS = [[-240, 60], [-60, 170], [110, -60], [150, -300]].map(([x, y]) => Object.assign(spreadOut(x, y), { grown: 1, regrow: 0 }));
-  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 160 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
+  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 260 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
     .concat(CARROTS.map(c => ({ x: c.x, y: c.y, r: 70 })), [{ x: HIVE_TREE_AT.x, y: HIVE_TREE_AT.y, r: 190 }]);
   const clearOf = (x, y, pad) => !KEEP_CLEAR.some(o => Math.hypot(o.x - x, o.y - y) < o.r + pad);
   const nearHome = (cx, cy) => (cx === 0 && cy === 0) || (Math.abs(cx) <= 1 && cy >= -4 && cy <= -2);   // Hop Hop's pond and the playhouse ground   // no surprise ponds right around the playhouse
@@ -821,13 +842,13 @@
       const keep = scale < 0.6 ? 2 : scale < 0.75 ? 3 : n;          // little ponds get fewer lily pads
       const ring = scale < 0.75 ? 0.5 : 0.55, padS = clamp(0.55 + 0.45 * scale, 0.72, 1.12);
       for (let i = 0; i < n; i++) {
-        const a = (i / keep) * Math.PI * 2 + r() * 0.7, pr = (22 + r() * 12) * padS, notch = r() * 6, bloom = r() < 0.5 ? pickFrom(r) : null;
+        const a = (i / keep) * Math.PI * 2 + r() * 0.7, pr = (22 + r() * 12) * padS * PAD_GROW, notch = r() * 6, bloom = r() < 0.5 ? pickFrom(r) : null;
         if (i < keep) p.pads.push({ ...padSpot(p, a, ring, pr), r: pr, notch, bloom });
       }
       if (scale > 0.8) {   // big ponds get extra lily pads so they don't look empty (large ones get lots)
         const q = seeded(hash2(cx + 777, cy + 999)), extra = Math.round((scale > 1.5 ? 7 + Math.floor(q() * 4) + (scale > 2.2 ? 8 : 0) : 2 + Math.floor(q() * 3)) * 1.8);
         for (let i = 0, tries = 0; i < extra && tries < 60; tries++) {
-          const a = q() * Math.PI * 2, rr = scale > 1.5 ? 0.15 + q() * 0.68 : q() < 0.5 ? 0.22 + q() * 0.12 : 0.74 + q() * 0.06, pr = (20 + q() * 12) * padS;
+          const a = q() * Math.PI * 2, rr = scale > 1.5 ? 0.15 + q() * 0.68 : q() < 0.5 ? 0.22 + q() * 0.12 : 0.74 + q() * 0.06, pr = (20 + q() * 12) * padS * PAD_GROW;
           const { x, y } = pondPoint(p, a, rr);
           if (!inPond(p, x, y, -pr * 0.9)) continue;   // the whole pad sits on the water
           if (p.pads.some(pd => Math.hypot(pd.x - x, pd.y - y) < pd.r + pr + 12)) continue;
@@ -972,6 +993,12 @@
     return ch;
   }
   // Hop Hop's pond, next to the playhouse: lily pads (a few already blooming) and reeds all around.
+  const PAD_GROW = 1.5;   // v30: bigger lily pads (the frogs sit on them nicely)
+  // a frog sized to sit on this pond's lily pads: his body about 60% as wide as a pad (a little bigger or smaller for each frog)
+  function frogFit(p, roll) {
+    const avg = p.pads.length ? p.pads.reduce((s, pd) => s + pd.r, 0) / p.pads.length : 40;
+    return clamp(2 * avg * 0.6 / 88 * (0.88 + roll * 0.26), 0.25, 1.1);
+  }
   function padSpot(p, a, frac, pr) {
     let pt = pondPoint(p, a, frac);
     for (let i = 0; i < 6 && !inPond(p, pt.x, pt.y, -pr * 0.9); i++) { frac *= 0.8; pt = pondPoint(p, a, frac); }
@@ -980,7 +1007,7 @@
   function makeHomePond(ch) {
     const P = HOME_POND, p = { x: P.x, y: P.y, rx: P.rx, ry: P.ry, scale: 1, pads: [], frogPad: 0, said: false, home: true };
     [[-40, -12, 30, null], [24, 22, 27, PETALS[0]], [48, -22, 24, null], [-12, 34, 22, PETALS[2]], [-60, 22, 21, null], [8, -36, 20, null]]
-      .forEach(([dx, dy, r, bloom], i) => p.pads.push({ x: P.x + dx * 1.4, y: P.y + dy * 1.4, r, notch: i * 1.7, bloom }));
+      .forEach(([dx, dy, r, bloom], i) => p.pads.push({ x: P.x + dx * 2.2, y: P.y + dy * 2.2, r: r * 1.75, notch: i * 1.7, bloom }));
     ch.pond = p;
     const q = seeded(4242);
     for (let i = 0; i < 12; i++) {
@@ -1004,10 +1031,10 @@
   function setupHopHop(ch) {
     const p = ch.pond, pd = p.pads[0];
     p.residents = [];
-    p.frogs = [{ isFrog: true, hophop: true, pond: p, pad: 0, x: pd.x, y: pd.y, size: 1,
+    p.frogs = [{ isFrog: true, hophop: true, pond: p, pad: 0, x: pd.x, y: pd.y, size: 0.7,
       blink: 2, glanceA: 1, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
       hop: 0, hopT: 0, nextHop: 3, lick: null, lickCd: 3, fly: null, nextFly: 5 }];
-    [[2, 0.55, 1.1], [4, 0.75, 0.92]].forEach(([i, sz, sx]) => {
+    [[2, 0.45, 1.1], [4, 0.55, 0.92]].forEach(([i, sz, sx]) => {
       const pd2 = p.pads[i];
       p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd2.x, y: pd2.y, size: sz, sx, blink: 1 + i, glanceA: i, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
         hop: 0, hopT: 0, nextHop: 4 + i, lick: null, lickCd: 3 + i, fly: null, nextFly: 6 + i });
@@ -1113,7 +1140,7 @@
     p.frogs = [];
     const add = (i, sizes) => {
       const pd = p.pads[i];
-      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd.x, y: pd.y, size: sizes[Math.floor(q() * sizes.length)], sx: 0.9 + q() * 0.22,
+      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd.x, y: pd.y, size: frogFit(p, q()), sx: 0.9 + q() * 0.22,
         blink: 1 + q() * 3, glanceA: q() * Math.PI * 2, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
         hop: 0, hopT: 0, nextHop: 3 + q() * 8, lick: null, lickCd: 2 + q() * 3, fly: null, nextFly: 3 + q() * 8 });
     };
@@ -1850,12 +1877,12 @@
     const H = HOUSE, x0 = H.x - H.w / 2, x1 = H.x + H.w / 2, y0 = H.y - H.d / 2, y1 = H.y + H.d / 2, Wz = H.wallH, R = H.roofZ;
     const slope = Math.atan2(R - Wz, H.w / 2), nz = Math.cos(slope), nx = Math.sin(slope);
     return [
-      { name: "front", n: [0, 1, 0], c: [H.x, y1, Wz / 2], pts: [[x0, y1, 0], [x1, y1, 0], [x1, y1, Wz], [H.x, y1, R], [x0, y1, Wz]], col: "#FFF6E6" },
-      { name: "back", n: [0, -1, 0], c: [H.x, y0, Wz / 2], pts: [[x1, y0, 0], [x0, y0, 0], [x0, y0, Wz], [H.x, y0, R], [x1, y0, Wz]], col: "#F6E6D2" },
-      { name: "left", n: [-1, 0, 0], c: [x0, H.y, Wz / 2], pts: [[x0, y0, 0], [x0, y1, 0], [x0, y1, Wz], [x0, y0, Wz]], col: "#F1DCC4" },
-      { name: "right", n: [1, 0, 0], c: [x1, H.y, Wz / 2], pts: [[x1, y1, 0], [x1, y0, 0], [x1, y0, Wz], [x1, y1, Wz]], col: "#F7E7D4" },
-      { name: "roofL", n: [-nx, 0, nz], c: [(x0 + H.x) / 2, H.y, (Wz + R) / 2], pts: [[x0, y0, Wz], [x0, y1, Wz], [H.x, y1, R], [H.x, y0, R]], col: "#E0559F", roof: true },
-      { name: "roofR", n: [nx, 0, nz], c: [(x1 + H.x) / 2, H.y, (Wz + R) / 2], pts: [[x1, y1, Wz], [x1, y0, Wz], [H.x, y0, R], [H.x, y1, R]], col: "#F966BC", roof: true }
+      { name: "front", n: [0, 1, 0], c: [H.x, y1, Wz / 2], pts: [[x0, y1, 0], [x1, y1, 0], [x1, y1, Wz], [H.x, y1, R], [x0, y1, Wz]], col: PH ? PH.colors.front : "#FFF6E6" },
+      { name: "back", n: [0, -1, 0], c: [H.x, y0, Wz / 2], pts: [[x1, y0, 0], [x0, y0, 0], [x0, y0, Wz], [H.x, y0, R], [x1, y0, Wz]], col: PH ? PH.colors.back : "#F6E6D2" },
+      { name: "left", n: [-1, 0, 0], c: [x0, H.y, Wz / 2], pts: [[x0, y0, 0], [x0, y1, 0], [x0, y1, Wz], [x0, y0, Wz]], col: PH ? PH.colors.left : "#F1DCC4" },
+      { name: "right", n: [1, 0, 0], c: [x1, H.y, Wz / 2], pts: [[x1, y1, 0], [x1, y0, 0], [x1, y0, Wz], [x1, y1, Wz]], col: PH ? PH.colors.right : "#F7E7D4" },
+      { name: "roofL", n: [-nx, 0, nz], c: [(x0 + H.x) / 2, H.y, (Wz + R) / 2], pts: [[x0, y0, Wz], [x0, y1, Wz], [H.x, y1, R], [H.x, y0, R]], col: PH ? PH.colors.roofL : "#E0559F", roof: true },
+      { name: "roofR", n: [nx, 0, nz], c: [(x1 + H.x) / 2, H.y, (Wz + R) / 2], pts: [[x1, y1, Wz], [x1, y0, Wz], [H.x, y0, R], [H.x, y1, R]], col: PH ? PH.colors.roofR : "#F966BC", roof: true }
     ];
   }
   // a shape drawn flat on a wall: u runs along the wall, v goes up (world units)
@@ -1868,8 +1895,9 @@
   const archPts = (u, w, h) => { const r = w / 2, out = [[u - r, 0], [u + r, 0], [u + r, h - r]]; for (let i = 1; i < 12; i++) { const a = (i / 12) * Math.PI; out.push([u + Math.cos(a) * r, h - r + Math.sin(a) * r]); } out.push([u - r, h - r]); return out; };
   const circlePts = (u, v, r) => Array.from({ length: 18 }, (_, i) => [u + Math.cos(i / 18 * Math.PI * 2) * r, v + Math.sin(i / 18 * Math.PI * 2) * r]);
   function drawHouse() {
+    if (!PH) return;
     const f = camF(HOUSE.x, HOUSE.y), a = clamp((Math.max(5000, farReach() + 1500) - f) / 1500, 0, 1); if (a <= 0.01) return;   // v24: seen from far away, so you can always find home
-    const N = nightness(), glass = N > 0.3 ? "#FFE08A" : "#BFE3F7";
+    const C = PH.colors, Fr = PH.front, N = nightness(), glass = N > 0.3 ? C.glassNight : C.glassDay;
     ctx.save(); ctx.globalAlpha = a;
     softGround(HOUSE.x, HOUSE.y, HOUSE.w * 0.72, HOUSE.d * 0.8, 0, "60, 100, 50", 0.3, 5, 0.6);   // its shadow on the grass
     const faces = houseFaces().filter(fc => facing(fc.n, fc.c));
@@ -1877,30 +1905,33 @@
     faces.forEach(fc => {
       if (!polyPath(fc.pts)) return;
       ctx.fillStyle = fc.col; ctx.fill();
-      ctx.strokeStyle = fc.roof ? "#D4509E" : "rgba(180, 140, 110, 0.35)"; ctx.lineWidth = fc.roof ? 3 : 1.5; ctx.lineJoin = "round"; ctx.stroke();
+      ctx.strokeStyle = fc.roof ? C.roofLine : C.wallLine; ctx.lineWidth = fc.roof ? 3 : 1.5; ctx.lineJoin = "round"; ctx.stroke();
       if (fc.roof) return;
-      const glow = () => { if (N > 0.02) { ctx.save(); ctx.globalAlpha *= N; ctx.shadowColor = "rgba(255, 210, 122, 0.9)"; ctx.shadowBlur = 18; ctx.fillStyle = "#FFE08A"; ctx.fill(); ctx.restore(); } };
+      const glow = () => { if (N > 0.02) { ctx.save(); ctx.globalAlpha *= N; ctx.shadowColor = C.glow; ctx.shadowBlur = 18; ctx.fillStyle = C.glassNight; ctx.fill(); ctx.restore(); } };
+      const windowAt = ([u, v, w, h]) => { if (onWall(fc.name, rectPts(u, v, w, h))) { ctx.fillStyle = glass; ctx.fill(); glow(); ctx.strokeStyle = C.frame; ctx.lineWidth = 3; ctx.stroke(); } };
       if (fc.name === "front" || fc.name === "back") {
-        // windows on both sides of the door, a round window up in the gable
-        [-270, 270].forEach(u => { if (onWall(fc.name, rectPts(u, 190, 150, 150))) { ctx.fillStyle = glass; ctx.fill(); glow(); ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3; ctx.stroke(); }
-          if (onWall(fc.name, rectPts(u, 160, 170, 26))) { ctx.fillStyle = "#FF9EC3"; ctx.fill(); } });   // flower boxes
-        if (onWall(fc.name, circlePts(0, 690, 70))) { ctx.fillStyle = glass; ctx.fill(); glow(); ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 4; ctx.stroke(); }
+        // windows on both sides of the door, flower boxes under them, a round window up in the gable
+        Fr.windows.forEach(windowAt);
+        Fr.flowerBoxes.forEach(([u, v, w, h]) => { if (onWall(fc.name, rectPts(u, v, w, h))) { ctx.fillStyle = C.flowerBox; ctx.fill(); } });
+        const [ru, rv, rr] = Fr.roundWindow;
+        if (onWall(fc.name, circlePts(ru, rv, rr))) { ctx.fillStyle = glass; ctx.fill(); glow(); ctx.strokeStyle = C.frame; ctx.lineWidth = 4; ctx.stroke(); }
         // a pink roof edge that hangs out over the gable, so the roof shows from the front too
-        const Wz = HOUSE.wallH, R = HOUSE.roofZ, hw = HOUSE.w / 2 + 45;
-        if (onWall(fc.name, [[-hw, Wz - 45], [0, R + 25], [hw, Wz - 45], [hw, Wz - 115], [0, R - 45], [-hw, Wz - 115]])) {
-          ctx.fillStyle = "#F966BC"; ctx.fill(); ctx.strokeStyle = "#D4509E"; ctx.lineWidth = 3; ctx.stroke();
+        const E = Fr.roofEdge, Wz = HOUSE.wallH, R = HOUSE.roofZ, hw = HOUSE.w / 2 + E.over;
+        if (onWall(fc.name, [[-hw, Wz - E.low], [0, R + E.top], [hw, Wz - E.low], [hw, Wz - E.low - E.thick], [0, R - E.low], [-hw, Wz - E.low - E.thick]])) {
+          ctx.fillStyle = C.roofEdge; ctx.fill(); ctx.strokeStyle = C.roofLine; ctx.lineWidth = 3; ctx.stroke();
         }
         if (fc.name === "front") {
-          if (onWall("front", archPts(0, 250, 340))) { ctx.fillStyle = "#6B4C9A"; ctx.fill(); ctx.strokeStyle = "#57397F"; ctx.lineWidth = 3; ctx.stroke(); }   // the big front door, closed
-          [-58, 58].forEach(u => { if (onWall("front", archPts(u, 86, 270))) { ctx.strokeStyle = "rgba(255, 255, 255, 0.22)"; ctx.lineWidth = 2; ctx.stroke(); } });   // door panels
-          if (onWall("front", circlePts(80, 160, 12))) { ctx.fillStyle = "#FFD36E"; ctx.fill(); }
+          const D = Fr.door;
+          if (onWall("front", archPts(0, D.w, D.h))) { ctx.fillStyle = C.door; ctx.fill(); ctx.strokeStyle = C.doorLine; ctx.lineWidth = 3; ctx.stroke(); }   // the big front door, closed
+          D.panels.forEach(([u, w, h]) => { if (onWall("front", archPts(u, w, h))) { ctx.strokeStyle = C.doorPanel; ctx.lineWidth = 2; ctx.stroke(); } });   // door panels
+          if (onWall("front", circlePts(D.knob[0], D.knob[1], D.knob[2]))) { ctx.fillStyle = C.knob; ctx.fill(); }
         }
       } else {
-        [-170, 170].forEach(u => { if (onWall(fc.name, rectPts(u, 200, 140, 150))) { ctx.fillStyle = glass; ctx.fill(); glow(); ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3; ctx.stroke(); } });
+        PH.side.windows.forEach(windowAt);
       }
     });
     // a soft puff of smoke from the roof
-    const sm = (time * 0.2) % 1, sp = proj(HOUSE.x + 200, HOUSE.y - 60, HOUSE.roofZ - 120 + sm * 260);
+    const SM = PH.chimneySmoke, sm = (time * 0.2) % 1, sp = proj(HOUSE.x + SM.u, HOUSE.y + SM.depth, HOUSE.roofZ - SM.below + sm * 260);
     if (sp) { ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * (1 - sm)})`; ctx.beginPath(); ctx.arc(sp.x, sp.y, (40 + sm * 50) * sp.k, 0, Math.PI * 2); ctx.fill(); }
     ctx.restore();
   }
@@ -4449,7 +4480,7 @@
         if (F.hopT > 0) {
           F.hopT -= dt;
           const dur = F.hopDur || 0.55, u = clamp(1 - F.hopT / dur, 0, 1);
-          F.hop = (F.to ? 40 : 22) * F.size * 4 * u * (1 - u);
+          F.hop = (F.to ? (F.hopH || 40 * F.size) : 22 * F.size) * 4 * u * (1 - u);
           if (F.to) { F.x = lerp(F.from.x, F.to.x, u); F.y = lerp(F.from.y, F.to.y, u); }
           if (F.hopT <= 0) {
             F.hop = 0; F.squash = 0.7;
@@ -4457,13 +4488,16 @@
             ripples.push({ x: F.x, y: F.y, r: 8 + 12 * F.size, life: 0.8 });
           }
         } else if (F.nextHop <= 0 && !ridden && !F.lick) {
-          F.hopT = 0.55; F.nextHop = rand(6, 14); F.squash = 0.5;
-          if (F.hophop && Math.random() < 0.7) {
-            const open = p.pads.map((pd, i) => i).filter(i => i !== F.pad && !p.frogs.some(o => o !== F && o.pad === i) && Math.hypot(p.pads[i].x - bee.x, p.pads[i].y - bee.y) > 40);
+          F.hopT = 0.55; F.nextHop = rand(4, 8); F.squash = 0.5;
+          if (Math.random() < (F.hophop ? 0.75 : 0.65)) {   // v30: every frog hops pad to pad now
+            const open = p.pads.map((pd, i) => i).filter(i => i !== F.pad && !p.frogs.some(o => o !== F && (o.pad === i || (o.to && o.pad === i))) && Math.hypot(p.pads[i].x - bee.x, p.pads[i].y - bee.y) > 40);
             if (open.length) {
-              const j = pick(open);
+              // usually a nearby pad, sometimes a big leap across
+              open.sort((i, j) => Math.hypot(p.pads[i].x - F.x, p.pads[i].y - F.y) - Math.hypot(p.pads[j].x - F.x, p.pads[j].y - F.y));
+              const j = Math.random() < 0.7 ? open[0] : pick(open), dist = Math.hypot(p.pads[j].x - F.x, p.pads[j].y - F.y);
               F.from = { x: F.x, y: F.y }; F.to = { x: p.pads[j].x, y: p.pads[j].y }; F.pad = j;
-              F.hopT = F.hopDur = 0.85; F.nextHop = rand(3.5, 8);
+              F.hopT = F.hopDur = clamp(0.6 + dist / 420, 0.7, 1.35); F.hopH = Math.max(40 * F.size, dist * 0.32);
+              F.nextHop = rand(F.hophop ? 3 : 3.5, F.hophop ? 6.5 : 8);
             }
           }
         }
@@ -5573,6 +5607,52 @@
     if (t > TRIP.walkOut + 0.15 && t < TRIP.wiggle) say("bzz bzz!", hx, door.doorY - door.dh * 2.4, 20);
     ctx.restore();
   }
+
+  // ---------- v30: the games menu ----------
+  // The animals that have games. A game shows in the menu once it is live (set live: true and its page).
+  const GAMES = [
+    { id: "frog", name: "Play Lily's Hop Hop", href: PAGES.frog, live: true,
+      draw: (g, w, h) => { if (FROG && FROG.draw) FROG.draw(g, w / 2, h * 0.86, h / 74, Math.PI + 0.35, 0.32, { happy: 1, shadow: false }); } },
+    { id: "bee", name: "The bee game", href: null, live: false,
+      draw: (g, w, h) => { if (LC && LC.bee) LC.bee.draw(g, w / 2, h * 0.52, h / 64, Math.PI / 2 + 0.6, 0.3, { t: 0, ph: 0, pal: 0, happy: 1 }); } },
+    { id: "bunny", name: "The bunny game", href: null, live: false,
+      draw: (g, w, h) => { if (LC && LC.bunny) LC.bunny.draw(g, w / 2, h * 0.9, h / 44, Math.PI / 2 + 0.5, 0.3, {}); } }
+  ];
+  const gamesBtn = document.getElementById("gamesBtn"), gamesMenu = document.getElementById("gamesMenu"), gamesIcon = document.getElementById("gamesIcon");
+  const iconDpr = () => Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+  function paintIcon(cv, css, fn) {
+    const d = iconDpr(); cv.width = cv.height = Math.round(css * d);
+    const g = cv.getContext("2d"); g.clearRect(0, 0, cv.width, cv.height);
+    try { fn(g, cv.width, cv.height); } catch (_) {}
+  }
+  // the tiny playhouse, drawn from the playhouse's one design
+  paintIcon(gamesIcon, 34, (g, w, h) => { if (window.LilyPlayhouse) window.LilyPlayhouse.drawIcon(g, w / 2, h / 2, h * 0.9, 0); });
+  let gamesTimer = 0, gamesFade = 0;
+  function closeGames() {
+    clearTimeout(gamesTimer); clearTimeout(gamesFade);
+    gamesMenu.classList.add("fade");
+    gamesBtn.setAttribute("aria-expanded", "false");
+    gamesFade = setTimeout(() => { gamesMenu.hidden = true; gamesMenu.classList.remove("fade"); }, 800);
+  }
+  function openGames() {
+    clearTimeout(gamesTimer); clearTimeout(gamesFade);
+    gamesMenu.innerHTML = "";
+    GAMES.filter(gm => gm.live && gm.href).forEach(gm => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "game-item"; b.setAttribute("aria-label", gm.name); b.title = gm.name;
+      const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true"); b.appendChild(cv);
+      paintIcon(cv, 38, gm.draw);
+      b.addEventListener("pointerdown", e => e.stopPropagation());
+      b.addEventListener("click", e => { e.stopPropagation(); closeGames(); openPage(gm.href); });
+      gamesMenu.appendChild(b);
+    });
+    gamesMenu.classList.remove("fade"); gamesMenu.hidden = false;
+    gamesBtn.setAttribute("aria-expanded", "true");
+    gamesTimer = setTimeout(closeGames, 10000);   // it fades away by itself after 10 seconds
+  }
+  gamesBtn.addEventListener("pointerdown", e => e.stopPropagation());
+  gamesBtn.addEventListener("click", e => { e.stopPropagation(); if (gamesMenu.hidden || gamesMenu.classList.contains("fade")) openGames(); else closeGames(); });
+  gamesMenu.addEventListener("pointerdown", e => e.stopPropagation());
 
   // ---------- loop ----------
   let last = performance.now();

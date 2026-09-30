@@ -239,7 +239,7 @@
     .site-header .nav-links { flex-shrink: 0; }
     .site-header .nav-brand { flex-shrink: 1; min-width: 0; }
     @media (max-width: 1540px) { .site-header .nav-badge { display: none; } }
-    @media (min-width: 769px) and (max-width: 960px) {
+    @media (min-width: 769px) and (max-width: 1200px) {
       .site-header .nav-flower { width: 120px; }
       .site-header .nav-flower img { width: 130px; height: 130px; top: -4px; }
       .site-header .nav-wordmark img { height: 60px; }
@@ -256,7 +256,7 @@
       /* Menu v6b: bigger flower, nudged left; bigger "The Lily Studio" words */
     .site-header .nav-flower img { width: 210px; height: 210px; top: -6px; left: -44px; }
     .site-header .nav-wordmark img { height: 100px; }
-    @media (min-width: 769px) and (max-width: 960px) {
+    @media (min-width: 769px) and (max-width: 1200px) {
       .site-header .nav-flower img { width: 160px; height: 160px; top: -4px; left: -24px; }
       .site-header .nav-wordmark img { height: 72px; }
     }
@@ -268,6 +268,15 @@
       .site-header .nav-wordmark img { height: 56px; }
     }
       @media (min-width: 961px) and (max-width: 1100px) { .site-header .nav-flower img { left: -24px; } }
+    /* Menu fit (Sept 30): on iPad-portrait widths the words ran into the links */
+    @media (min-width: 769px) and (max-width: 960px) {
+      .site-header .nav-flower { width: 104px; }
+      .site-header .nav-flower img { width: 140px; height: 140px; left: -22px; }
+      .site-header .nav-wordmark img { height: 54px; }
+      .site-header .nav-links { gap: 16px; }
+      .site-header .nav-links a { font-size: 0.64rem; letter-spacing: 0.08em; }
+      .site-header .nav-links a.nav-cta { padding: 9px 12px !important; }
+    }
   </style>
 </head>
 <body>
