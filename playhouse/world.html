@@ -219,7 +219,7 @@
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="gopop" id="goPop" hidden>
-      <a id="goLink" href="/hop/">Play Hop Hop?</a>
+      <a id="goLink" href="/hophop/">Play Hop Hop?</a>
     </div>
     <button class="hivebtn" id="hiveBtn" type="button" hidden aria-label="Pollen full. Fly to the hive to drop it off">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-3.3 0-6 2.4-6 5.4V9h12v-.6C18 5.4 15.3 3 12 3z" fill="#E5A23A"/><rect x="4.5" y="9" width="15" height="4" rx="2" fill="#F2C46B"/><rect x="3.5" y="13" width="17" height="4.2" rx="2.1" fill="#E5A23A"/><rect x="4.5" y="17.2" width="15" height="3.8" rx="1.9" fill="#F2C46B"/><path d="M10 21v-2.2a2 2 0 0 1 4 0V21z" fill="#5A3A1E"/></svg>
@@ -1735,7 +1735,7 @@
   // Tapping an animal: it gets happy (a wiggle and a little burst of hearts).
   // A main character with a live page (right now: any frog, for Lily's Hop Hop) also shows
   // "Go to page?". Tapping it twice quickly (a double tap or double click) goes straight there.
-  const PAGES = { frog: "/hop/" };
+  const PAGES = { frog: "/hophop/" };
   const framed = (() => { try { return window.top !== window; } catch (_) { return true; } })();
   const goPop = document.getElementById("goPop"), goLink = document.getElementById("goLink");
   goLink.target = framed ? "_top" : "_self"; goLink.rel = "noopener";
