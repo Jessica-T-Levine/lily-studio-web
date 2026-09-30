@@ -4559,7 +4559,10 @@
     if (L && L.tip) {
       const b = proj(L.tip.x, L.tip.y, L.tip.z);
       if (b) {
-        const mx = x, my = baseY - hopPx - s * (22 * Math.cos(pitch) - 14 * Math.sin(pitch));   // his mouth on screen
+        // his mouth: on the front of his face (21 frog units forward, 16.4 up, in the middle), turned and tipped
+        // exactly the way the 3D frog is drawn, and squished with him when he squashes or stretches in a hop
+        const sq = F.squash || 0, stj = jumping ? Math.sin(u * Math.PI) : 0, fx = 21 * (1 + 0.12 * sq), fz = 16.4 * (1 - 0.2 * sq) * (1 + 0.08 * stj);
+        const mx = x + s * fx * Math.sin(yaw), my = baseY - hopPx - s * (fx * Math.cos(yaw) * Math.sin(pitch) + fz * Math.cos(pitch));
         ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = Math.max(1.5, 2.4 * s); ctx.lineCap = "round";
         ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(b.x, b.y); ctx.stroke();
         ctx.fillStyle = "#FF6F9C"; ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(2, 2.8 * s), 0, Math.PI * 2); ctx.fill();
