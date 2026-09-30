@@ -159,7 +159,7 @@
   #soundBtn.muted .slash { display: inline; } #soundBtn.muted .waves { display: none; }
   /* v30: the games menu: a tiny playhouse button, and the animals with games in a column under it */
   .games-btn canvas { width: 34px; height: 34px; display: block; }
-  .games-menu { position: absolute; top: 62px; right: 112px; z-index: 6; display: flex; flex-direction: column; gap: 8px; transition: opacity 0.8s ease; }
+  .games-menu { position: absolute; top: 62px; right: 12px; z-index: 6; display: flex; flex-direction: column; gap: 8px; transition: opacity 0.8s ease; }
   .games-menu.fade { opacity: 0; }
   .game-item {
     width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
@@ -217,9 +217,9 @@
   <div class="stage" id="stage">
     <canvas id="game" tabindex="0" aria-label="Lily's Playhouse, a meadow and a big playhouse where frogs, bunnies and bees live together. Click or tap anywhere to glide there. Tap a friend to visit their game. The same friends can be visited with the buttons below the game."></canvas>
     <div class="corner">
-      <button class="cbtn games-btn" id="gamesBtn" type="button" aria-label="Lily's games" title="Lily's games" aria-expanded="false" aria-controls="gamesMenu"><canvas id="gamesIcon" aria-hidden="true"></canvas></button>
       <button class="cbtn" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none"/><path class="waves" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="slash" d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></svg></button>
       <button class="cbtn" id="fullBtn" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="open" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="close" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+      <button class="cbtn games-btn" id="gamesBtn" type="button" aria-label="Lily's games" title="Lily's games" aria-expanded="false" aria-controls="gamesMenu"><canvas id="gamesIcon" aria-hidden="true"></canvas></button>
     </div>
     <div class="games-menu" id="gamesMenu" hidden></div>
     <div class="mixer" id="mixer" hidden>
@@ -5620,13 +5620,25 @@
   ];
   const gamesBtn = document.getElementById("gamesBtn"), gamesMenu = document.getElementById("gamesMenu"), gamesIcon = document.getElementById("gamesIcon");
   const iconDpr = () => Math.min(3, Math.max(2, window.devicePixelRatio || 1));
-  function paintIcon(cv, css, fn) {
-    const d = iconDpr(); cv.width = cv.height = Math.round(css * d);
-    const g = cv.getContext("2d"); g.clearRect(0, 0, cv.width, cv.height);
-    try { fn(g, cv.width, cv.height); } catch (_) {}
+  function paintIcon(cv, css, fn, fill = 0.8) {
+    const d = iconDpr(), n = Math.round(css * d); cv.width = cv.height = n;
+    const g = cv.getContext("2d"); g.clearRect(0, 0, n, n);
+    // draw it on a roomy scratch canvas first, then find exactly where the picture is
+    const big = n * 2, t = document.createElement("canvas"); t.width = t.height = big;
+    const tg = t.getContext("2d");
+    try { tg.translate(big / 4, big / 4); fn(tg, n, n); } catch (_) { return; }
+    let x0 = big, y0 = big, x1 = -1, y1 = -1;
+    try {
+      const px = tg.getImageData(0, 0, big, big).data;
+      for (let y = 0; y < big; y++) for (let x = 0; x < big; x++) if (px[(y * big + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    } catch (_) { g.drawImage(t, -big / 4, -big / 4); return; }
+    if (x1 < x0) return;
+    const w = x1 - x0 + 1, h = y1 - y0 + 1, k = Math.min(n * fill / w, n * fill / h);
+    g.imageSmoothingQuality = "high";
+    g.drawImage(t, x0, y0, w, h, (n - w * k) / 2, (n - h * k) / 2, w * k, h * k);   // exactly in the middle
   }
   // the tiny playhouse, drawn from the playhouse's one design
-  paintIcon(gamesIcon, 34, (g, w, h) => { if (window.LilyPlayhouse) window.LilyPlayhouse.drawIcon(g, w / 2, h / 2, h * 0.9, 0); });
+  paintIcon(gamesIcon, 34, (g, w, h) => { if (window.LilyPlayhouse) window.LilyPlayhouse.drawIcon(g, w / 2, h / 2, h * 0.9, 0); }, 0.84);
   let gamesTimer = 0, gamesFade = 0;
   function closeGames() {
     clearTimeout(gamesTimer); clearTimeout(gamesFade);
@@ -5641,7 +5653,7 @@
       const b = document.createElement("button");
       b.type = "button"; b.className = "game-item"; b.setAttribute("aria-label", gm.name); b.title = gm.name;
       const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true"); b.appendChild(cv);
-      paintIcon(cv, 38, gm.draw);
+      paintIcon(cv, 38, gm.draw, 0.86);
       b.addEventListener("pointerdown", e => e.stopPropagation());
       b.addEventListener("click", e => { e.stopPropagation(); closeGames(); openPage(gm.href); });
       gamesMenu.appendChild(b);
