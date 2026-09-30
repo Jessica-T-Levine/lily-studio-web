@@ -288,6 +288,9 @@
   /* the pond's picture always fills its frame exactly (no stripe of the frame's color after turning the iPad) */
   .stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   html.full .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  /* true full screen: Safari (iPad) puts its own X button in the top-left corner, so the hop number sits just below it */
+  html.full:fullscreen .score { margin-top: 58px; }
+  html.full:-webkit-full-screen .score { margin-top: 58px; }
   html.full .sound-icon, html.full .small-btn {
     display: grid; place-items: center; pointer-events: auto;
     width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
