@@ -255,6 +255,41 @@
     box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
   }
 
+  /* ---- Full screen: the button above the game, and the pond filling the whole window ---- */
+  .big-btn {
+    display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 50%; cursor: pointer; color: var(--cream);
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+  }
+  .big-btn:hover { background: rgba(255,255,255,0.16); }
+  .big-btn:focus-visible, .small-btn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  html.app .big-btn { display: none; }   /* the home-screen app is already full screen */
+  .small-btn { display: none; }
+  html.full, html.full body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.full body { position: fixed; inset: 0; padding: 0; background: #4E5DA8; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  html.full .wrap { max-width: none; margin: 0; display: block; }
+  html.full header, html.full .how, html.full footer, html.full .tip, html.full .studio-bar { display: none; }
+  html.full .stage { position: fixed; inset: 0; width: auto; height: auto; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+  html.full .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  html.full .sound-icon, html.full .small-btn {
+    display: grid; place-items: center; pointer-events: auto;
+    width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+  }
+  html.full .sound-icon svg, html.full .small-btn svg { width: 20px; height: 20px; }
+  html.full .app-title {
+    display: block; position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+    font: 800 26px/1 var(--display); color: #fff; white-space: nowrap;
+    text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; transition: opacity 1.2s ease;
+  }
+  html.full .app-title span { color: #FFE0EC; }
+  html.full body.playing .app-title { opacity: 0; }
+  html.full .mixer {
+    position: fixed; z-index: 5;
+    top: calc(env(safe-area-inset-top, 0px) + 168px); right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(300px, calc(100% - 24px));
+    box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
+  }
+
   /* ---- Lily Studio menu: slides down when you scroll back to the top, tucks away after 3 quiet seconds ---- */
   .studio-bar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 50;
@@ -336,6 +371,7 @@
     </div>
     <div class="head-btns">
       <a class="to-playhouse" href="/playhouse/" aria-label="Back to Lily’s Playhouse" title="Back to Lily’s Playhouse"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v8.5h11V10"/><path d="M10.5 18.5v-4.5h3v4.5"/></svg></a>
+      <button class="big-btn" id="bigBtn" type="button" aria-label="Play full screen" title="Play full screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg></button>
       <button class="sound" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer">Sound</button>
     </div>
   </header>
@@ -356,6 +392,7 @@
       <div class="score"><span id="score">0</span><small>hops</small></div>
       <div class="right">
         <div class="best">best<b id="best">0</b></div>
+        <button class="small-btn" id="smallBtn" type="button" aria-label="Leave full screen" title="Leave full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></button>
         <button class="sound-icon" id="soundBtn2" type="button" aria-label="Sound settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
         </button>
@@ -2157,6 +2194,47 @@
 
     // a quick hello when the page opens, so people know it's there
     setTimeout(show, 400);
+  })();
+
+  // ---------- full screen: the pond fills the whole window (and the whole screen where the browser allows it) ----------
+  (function bigScreen() {
+    const root = document.documentElement, bigBtn = document.getElementById("bigBtn"), smallBtn = document.getElementById("smallBtn");
+    if (!bigBtn || !smallBtn || root.classList.contains("app")) return;
+    const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+    let scrollBack = 0;
+    function relayout() { resize(); setTimeout(resize, 80); setTimeout(resize, 400); }
+    function enter() {
+      if (root.classList.contains("full")) return;
+      scrollBack = window.scrollY || 0;
+      root.classList.add("full");
+      bigBtn.setAttribute("aria-pressed", "true");
+      try {   // real full screen where the browser allows it (not on iPhone: there it fills the browser window)
+        const req = root.requestFullscreen || root.webkitRequestFullscreen;
+        if (req && !fsEl()) { const p = req.call(root, { navigationUI: "hide" }); if (p && p.catch) p.catch(() => {}); }
+      } catch (_) {}
+      relayout();
+      try { canvas.focus({ preventScroll: true }); } catch (_) {}
+    }
+    function leave() {
+      if (!root.classList.contains("full")) return;
+      root.classList.remove("full");
+      bigBtn.setAttribute("aria-pressed", "false");
+      try {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (fsEl() && exit) { const p = exit.call(document); if (p && p.catch) p.catch(() => {}); }
+      } catch (_) {}
+      relayout();
+      window.scrollTo(0, scrollBack);
+      try { bigBtn.focus({ preventScroll: true }); } catch (_) {}
+    }
+    bigBtn.addEventListener("click", enter);
+    smallBtn.addEventListener("click", e => { e.stopPropagation(); leave(); });
+    smallBtn.addEventListener("pointerdown", e => e.stopPropagation());
+    window.addEventListener("keydown", e => { if (e.key === "Escape" && root.classList.contains("full")) leave(); });
+    // leaving the browser's own full screen (its Escape key or gesture) brings the page back too
+    const onFs = () => { if (!fsEl() && root.classList.contains("full")) leave(); else relayout(); };
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
   })();
 
   // ---------- offline support: once loaded, the game works without internet ----------
