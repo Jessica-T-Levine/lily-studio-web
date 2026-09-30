@@ -262,7 +262,7 @@
   const FROG = (LC && LC.frog) || window.HopHop3D || null;   // Hop Hop: the approved 3D master design from creature library v3 (Sept 29, 2026)
   if (LC) LC.settings.reduceMotion = !!reduceMotion;
 
-  let scale = 1, dpr = 1;
+  let scale = 1, dpr = 1, dprBest = 1, dprCap = 9;
   function resize() {
     const rect = stage.getBoundingClientRect();
     const vw = Math.max(1, rect.width), vh = Math.max(1, rect.height);
@@ -270,7 +270,9 @@
     else { H = 580; W = 580 * vw / vh; }
     dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     dpr = Math.min(Math.max(dpr, 1.5), 3);
-    while (vw * vh * dpr * dpr > 7.5e6 && dpr > 1.25) dpr -= 0.25;   // crisp everywhere, only easing off on huge screens
+    while (vw * vh * dpr * dpr > 4.2e6 && dpr > 1.25) dpr -= 0.25;   // crisp everywhere, easing off on big screens (an iPad draws far more dots than a phone)
+    dprBest = dpr;
+    dpr = Math.max(1, Math.min(dpr, dprCap));   // v24: eased off further while frames are slow (see the loop)
     canvas.width = Math.round(vw * dpr);
     canvas.height = Math.round(vh * dpr);
     scale = canvas.width / W;
@@ -577,10 +579,54 @@
   const clearOf = (x, y, pad) => !KEEP_CLEAR.some(o => Math.hypot(o.x - x, o.y - y) < o.r + pad);
   const nearHome = (cx, cy) => (cx === 0 && cy === 0) || (Math.abs(cx) <= 1 && cy >= -4 && cy <= -2);   // Hop Hop's pond and the playhouse ground   // no surprise ponds right around the playhouse
   function pickFrom(r) { return PETALS[Math.floor(r() * PETALS.length)]; }
+  // v24: ponds come in different shapes. Each pond's edge is its oval (rx, ry, turned by rot) pushed in
+  // and out by a gentle shape: a bean, a clover, a teardrop, a long pond... sh.max is how far out it
+  // ever reaches (so ponds still keep clear of each other and of the playhouse).
+  const TAU = Math.PI * 2;
+  function pondShapeOf(cx, cy) {
+    const q = seeded(hash2(cx * 31 + 17, cy * 57 - 91));
+    const kinds = [["round", 2], ["oval", 2], ["bean", 3], ["long", 2], ["clover", 2], ["drop", 2], ["blob", 3]];
+    let roll = q() * kinds.reduce((s, k) => s + k[1], 0), kind = "oval";
+    for (const k of kinds) { if ((roll -= k[1]) <= 0) { kind = k[0]; break; } }
+    const sh = { kind, st: 1, rot: q() * Math.PI, a1: 0, p1: q() * TAU, a2: 0, p2: q() * TAU, a3: 0, p3: q() * TAU, a5: 0.025 + q() * 0.03, p5: q() * TAU, dent: 0, pd: 0, max: 1 };
+    if (kind === "round") { sh.st = 0.9; sh.a2 = 0.03; }
+    else if (kind === "oval") { sh.st = 1.1 + q() * 0.2; }
+    else if (kind === "bean") { sh.st = 1.3 + q() * 0.2; sh.dent = 0.26 + q() * 0.1; sh.pd = q() < 0.5 ? Math.PI / 2 : -Math.PI / 2; }
+    else if (kind === "long") { sh.st = 1.55 + q() * 0.3; sh.a3 = 0.05; }
+    else if (kind === "clover") { sh.st = 1; sh.a3 = 0.13 + q() * 0.04; }
+    else if (kind === "drop") { sh.st = 1.1; sh.a1 = 0.15 + q() * 0.05; sh.a2 = 0.05; }
+    else { sh.st = 1 + q() * 0.3; sh.a2 = 0.06 + q() * 0.05; sh.a3 = 0.06 + q() * 0.05; }   // a lumpy, natural blob
+    let mx = 0; for (let i = 0; i < 72; i++) mx = Math.max(mx, shapeR(sh, i / 72 * TAU)); sh.max = mx;
+    return sh;
+  }
+  function shapeR(sh, a) {
+    let s = 1 + sh.a1 * Math.cos(a - sh.p1) + sh.a2 * Math.cos(2 * (a - sh.p2)) + sh.a3 * Math.cos(3 * (a - sh.p3)) + sh.a5 * Math.cos(5 * (a - sh.p5));
+    if (sh.dent) { const d = angWrap(a - sh.pd); s -= sh.dent * Math.exp(-d * d / 0.22); }
+    return s;
+  }
+  function angWrap(d) { d = d % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
+  const pondS = (p, a) => (p.sh ? shapeR(p.sh, a) : 1);
+  // a spot on the pond: angle a around it, frac of the way out to its edge, plus pad more
+  function pondPoint(p, a, frac, pad = 0) {
+    const s = pondS(p, a), lx = Math.cos(a) * (p.rx * s * frac + pad), ly = Math.sin(a) * (p.ry * s * frac + pad);
+    const c = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0);
+    return { x: p.x + lx * c - ly * sn, y: p.y + lx * sn + ly * c };
+  }
+  function pondLocal(p, x, y) {
+    const dx = x - p.x, dy = y - p.y, c = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0);
+    return [dx * c + dy * sn, -dx * sn + dy * c];
+  }
+  function pondAngle(p, x, y) { const [lx, ly] = pondLocal(p, x, y); return Math.atan2(ly / p.ry, lx / p.rx); }
+  // how far out a spot is: under 1 is in the water
+  function pondDist(p, x, y, pad = 0) {
+    const [lx, ly] = pondLocal(p, x, y), s = pondS(p, Math.atan2(ly / p.ry, lx / p.rx));
+    const u = lx / Math.max(1, p.rx * s + pad), v = ly / Math.max(1, p.ry * s + pad);
+    return Math.sqrt(u * u + v * v);
+  }
+  function pondPts(p, pad, n) { const out = []; for (let i = 0; i < n; i++) { const q = pondPoint(p, i / n * TAU, 1, pad); out.push([q.x, q.y]); } return out; }
   function inPond(p, x, y, pad) {
     if (!p) return false;
-    const dx = (x - p.x) / (p.rx + pad), dy = (y - p.y) / (p.ry + pad);
-    return dx * dx + dy * dy < 1;
+    return pondDist(p, x, y, pad) < 1;
   }
   // ---------- regions: the meadow changes as she explores ----------
   // Big soft areas (each a few hops across) blend from one kind of place to the next.
@@ -709,19 +755,21 @@
       const sp = pondSpec(cx, cy) || { x: x0 + CS / 2, y: y0 + CS / 2, scale: 1, gone: true }, scale = sp.scale;
       const rx = (big ? 110 + r() * 35 : 90 + r() * 45) * scale, ry = (big ? 90 + r() * 35 : 70 + r() * 35) * scale;
       const ux = r(), uy = r();
-      const p = { x: sp.x, y: sp.y, rx, ry, scale, pads: [], frogPad: -1, said: false };
+      const shp = sp.sh || pondShapeOf(cx, cy), dims = pondDims(rx / scale, ry / scale, scale, shp);
+      const p = { x: sp.x, y: sp.y, rx: dims.rx, ry: dims.ry, rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
       const n = 4 + Math.floor(r() * (big ? 3 : 2));
       const keep = scale < 0.6 ? 2 : scale < 0.75 ? 3 : n;          // little ponds get fewer lily pads
       const ring = scale < 0.75 ? 0.5 : 0.55, padS = clamp(0.55 + 0.45 * scale, 0.72, 1.12);
       for (let i = 0; i < n; i++) {
         const a = (i / keep) * Math.PI * 2 + r() * 0.7, pr = (22 + r() * 12) * padS, notch = r() * 6, bloom = r() < 0.5 ? pickFrom(r) : null;
-        if (i < keep) p.pads.push({ x: p.x + Math.cos(a) * rx * ring, y: p.y + Math.sin(a) * ry * ring, r: pr, notch, bloom });
+        if (i < keep) p.pads.push({ ...padSpot(p, a, ring, pr), r: pr, notch, bloom });
       }
       if (scale > 1.1) {   // big ponds get extra lily pads so they don't look empty (large ones get lots)
         const q = seeded(hash2(cx + 777, cy + 999)), extra = scale > 1.5 ? 7 + Math.floor(q() * 4) + (scale > 2.2 ? 8 : 0) : 2 + Math.floor(q() * 3);
         for (let i = 0, tries = 0; i < extra && tries < 60; tries++) {
           const a = q() * Math.PI * 2, rr = scale > 1.5 ? 0.15 + q() * 0.68 : q() < 0.5 ? 0.22 + q() * 0.12 : 0.74 + q() * 0.06, pr = (20 + q() * 12) * padS;
-          const x = p.x + Math.cos(a) * rx * rr, y = p.y + Math.sin(a) * ry * rr;
+          const { x, y } = pondPoint(p, a, rr);
+          if (!inPond(p, x, y, -pr * 0.9)) continue;   // the whole pad sits on the water
           if (p.pads.some(pd => Math.hypot(pd.x - x, pd.y - y) < pd.r + pr + 12)) continue;
           p.pads.push({ x, y, r: pr, notch: q() * 6, bloom: q() < 0.5 ? pickFrom(q) : null }); i++;
         }
@@ -733,13 +781,13 @@
       for (let i = 0; i < nr; i++) {
         const a = r() * Math.PI * 2, out = 6 + r() * 14, h = 80 + r() * 90, ph = r() * 6, cat = r() < 0.5;
         if (scale < 0.75 && i % 2) continue;
-        ch.reeds.push({ x: p.x + Math.cos(a) * (p.rx + out), y: p.y + Math.sin(a) * (p.ry + out), h, ph, cat });
+        ch.reeds.push({ ...pondPoint(p, a, 1, out), h, ph, cat });
       }
       if (scale > 1.5) {
         const q = seeded(hash2(cx - 4242, cy + 2424));
         for (let i = 0; i < 14; i++) {
           const a = q() * Math.PI * 2, out = 6 + q() * 14;
-          ch.reeds.push({ x: p.x + Math.cos(a) * (p.rx + out), y: p.y + Math.sin(a) * (p.ry + out), h: 80 + q() * 90, ph: q() * 6, cat: q() < 0.5 });
+          ch.reeds.push({ ...pondPoint(p, a, 1, out), h: 80 + q() * 90, ph: q() * 6, cat: q() < 0.5 });
         }
       }
       if (sp.gone) { ch.pond = null; ch.reeds = []; }
@@ -864,6 +912,11 @@
     return ch;
   }
   // Hop Hop's pond, next to the playhouse: lily pads (a few already blooming) and reeds all around.
+  function padSpot(p, a, frac, pr) {
+    let pt = pondPoint(p, a, frac);
+    for (let i = 0; i < 6 && !inPond(p, pt.x, pt.y, -pr * 0.9); i++) { frac *= 0.8; pt = pondPoint(p, a, frac); }
+    return pt;
+  }
   function makeHomePond(ch) {
     const P = HOME_POND, p = { x: P.x, y: P.y, rx: P.rx, ry: P.ry, scale: 1, pads: [], frogPad: 0, said: false, home: true };
     [[-40, -12, 30, null], [24, 22, 27, PETALS[0]], [48, -22, 24, null], [-12, 34, 22, PETALS[2]], [-60, 22, 21, null], [8, -36, 20, null]]
@@ -872,7 +925,7 @@
     const q = seeded(4242);
     for (let i = 0; i < 12; i++) {
       const a = Math.PI + q() * Math.PI, out = 6 + q() * 14;   // reeds only along the far bank, so they never hide Hop Hop
-      ch.reeds.push({ x: p.x + Math.cos(a) * (p.rx + out), y: p.y + Math.sin(a) * (p.ry + out), h: 80 + q() * 90, ph: q() * 6, cat: q() < 0.5 });
+      ch.reeds.push({ ...pondPoint(p, a, 1, out), h: 80 + q() * 90, ph: q() * 6, cat: q() < 0.5 });
     }
   }
   function addHiveTree(ch) {
@@ -908,7 +961,7 @@
     for (let i = 0; i < n; i++) {
       for (let tries = 0; tries < 10; tries++) {
         const a = q() * Math.PI * 2, out = 1.2 + q() * 0.35;
-        const x = p.x + Math.cos(a) * p.rx * out, y = p.y + Math.sin(a) * p.ry * out;
+        const { x, y } = pondPoint(p, a, out);
         if (!turtleSpotOk(ch, x, y, false)) continue;
         if (p.residents.some(o => Math.hypot(o.x - x, o.y - y) < 60)) continue;
         p.residents.push({ isTurtle: true, pond: p, x, y, a: q() * Math.PI * 2, face: q() < 0.5 ? 1 : -1, mode: "rest", timer: 1 + q() * 6, tx: x, ty: y,
@@ -938,13 +991,19 @@
     rawPonds.set(key, raw);
     return raw;
   }
-  function placePond(raw, scale) {
-    const rx = raw.rawRx * scale, ry = raw.rawRy * scale;
-    // the pond (and its reeds) stays inside its own patch of meadow, except a large one, which sits in the middle and spills over
-    const mx = Math.min(Math.max(150, rx + 30), CS / 2 - 5), my = Math.min(Math.max(150, ry + 30), CS / 2 - 5);
-    return { x: raw.cx * CS + mx + raw.ux * (CS - 2 * mx), y: raw.cy * CS + my + raw.uy * (CS - 2 * my), rx, ry, scale };
+  function pondDims(rawRx, rawRy, scale, sh) {
+    let rx = rawRx * scale * sh.st, ry = rawRy * scale / sh.st;
+    const reach = Math.max(rx, ry) * sh.max, LIM = 640;   // even the biggest lake leaves room around it
+    if (reach > LIM) { rx *= LIM / reach; ry *= LIM / reach; }
+    return { rx, ry };
   }
-  const pondReach = p => Math.max(p.rx, p.ry);
+  function placePond(raw, scale) {
+    const sh = pondShapeOf(raw.cx, raw.cy), { rx, ry } = pondDims(raw.rawRx, raw.rawRy, scale, sh), R = Math.max(rx, ry) * sh.max;
+    // the pond (and its reeds) stays inside its own patch of meadow, except a large one, which sits in the middle and spills over
+    const m = Math.min(Math.max(150, R + 30), CS / 2 - 5);
+    return { x: raw.cx * CS + m + raw.ux * (CS - 2 * m), y: raw.cy * CS + m + raw.uy * (CS - 2 * m), rx, ry, rot: sh.rot, sh, scale };
+  }
+  const pondReach = p => Math.max(p.rx, p.ry) * (p.sh ? p.sh.max : 1);
   function largePond(cx, cy) {
     const raw = rawPond(cx, cy);
     if (!raw || raw.scale <= 1.5 || (Math.abs(cx) <= 2 && Math.abs(cy) <= 2 && !bigPondAt(cx, cy))) return null;   // never right next to where she starts (except the planned big ones)
@@ -981,7 +1040,7 @@
     return sp;
   }
   function pondScale(q, big) {
-    const opts = big ? [[0.62, 1], [0.82, 2], [1, 3], [1.22, 3], [1.4, 2], [2, 3], [2.5, 2], [3, 1]] : [[0.4, 1], [0.5, 2], [0.65, 3], [0.82, 3], [1, 2], [1.25, 1], [1.85, 1], [2.3, 1]];
+    const opts = big ? [[0.5, 1], [0.62, 1], [0.82, 2], [1, 3], [1.22, 3], [1.4, 2], [2, 3], [2.5, 2], [3, 1], [3.6, 1]] : [[0.32, 1], [0.4, 1], [0.5, 2], [0.65, 3], [0.82, 3], [1, 2], [1.25, 1], [1.6, 1], [1.85, 1], [2.3, 1], [2.9, 0.6]];
     let roll = q() * opts.reduce((a, o) => a + o[1], 0);
     for (const o of opts) { if ((roll -= o[1]) <= 0) return o[0] * (0.94 + q() * 0.12); }
     return 1;
@@ -1036,10 +1095,10 @@
     return out;
   }
   function pruneChunks() {
-    if (chunks.size < 140) return;
+    if (chunks.size < 1100) return;
     const bx = Math.floor(bee.x / CS), by = Math.floor(bee.y / CS);
     for (const [key, ch] of chunks) {
-      if (Math.abs(ch.cx - bx) > 7 || Math.abs(ch.cy - by) > 7) chunks.delete(key); // rebuilt the same way if she comes back
+      if (Math.abs(ch.cx - bx) > 18 || Math.abs(ch.cy - by) > 18) chunks.delete(key); // rebuilt the same way if she comes back
     }
   }
 
@@ -1746,7 +1805,7 @@
   const archPts = (u, w, h) => { const r = w / 2, out = [[u - r, 0], [u + r, 0], [u + r, h - r]]; for (let i = 1; i < 12; i++) { const a = (i / 12) * Math.PI; out.push([u + Math.cos(a) * r, h - r + Math.sin(a) * r]); } out.push([u - r, h - r]); return out; };
   const circlePts = (u, v, r) => Array.from({ length: 18 }, (_, i) => [u + Math.cos(i / 18 * Math.PI * 2) * r, v + Math.sin(i / 18 * Math.PI * 2) * r]);
   function drawHouse() {
-    const f = camF(HOUSE.x, HOUSE.y), a = clamp((5000 - f) / 800, 0, 1); if (a <= 0.01) return;
+    const f = camF(HOUSE.x, HOUSE.y), a = clamp((Math.max(5000, farReach() + 1500) - f) / 1500, 0, 1); if (a <= 0.01) return;   // v24: seen from far away, so you can always find home
     const N = nightness(), glass = N > 0.3 ? "#FFE08A" : "#BFE3F7";
     ctx.save(); ctx.globalAlpha = a;
     softGround(HOUSE.x, HOUSE.y, HOUSE.w * 0.72, HOUSE.d * 0.8, 0, "60, 100, 50", 0.3, 5, 0.6);   // its shadow on the grass
@@ -2165,6 +2224,7 @@
     if (kind === "house") s.ref = { x: HOUSE.x, y: HOUSE.y };
     if (kind === "hive") s.ref = { x: HIVE_PT.x, y: HIVE_PT.y };
     auto.shot = s; auto.last = kind; auto.t = 0;
+    if (s.ref) auto.sm = null;
     auto.dur = kind === "glide" ? rand(14, 24) : kind === "rise" ? rand(12, 18) : kind === "follow" || kind === "frog" ? rand(14, 26) : rand(12, 20);
     // the circle starts from wherever the camera already is, so nothing swings around
     if (s.ref) auto.ang = Math.atan2(camY - s.ref.y, camX - s.ref.x);
@@ -2174,12 +2234,16 @@
   }
   function updateAuto(dt) {
     if (bee.hop || time - lastUserAt < AUTO_AFTER) { auto.on = false; auto.shot = null; return; }
-    if (!auto.on) { auto.on = true; auto.yaw = camYaw; auto.lift = liftTarget; auto.vx = auto.vy = 0; auto.shot = null; auto.last = null; }
+    if (!auto.on) { auto.on = true; auto.yaw = camYaw; auto.lift = liftTarget; auto.vx = auto.vy = 0; auto.spinV = 0; auto.shot = null; auto.last = null; }
     move.target = null; move.vx = move.vy = 0; spin = 0;
     auto.t += dt;
     const cur = auto.shot && auto.shot.ref;
     if (!auto.shot || auto.t > auto.dur || (cur && (cur.state === "inside" || (cur.alpha != null && cur.alpha < 0.5)))) pickShot();
-    const S = auto.shot, R = S.ref, u = clamp(auto.t / auto.dur, 0, 1), arc = Math.sin(u * Math.PI);
+    const S = auto.shot, R0 = S.ref, u = clamp(auto.t / auto.dur, 0, 1), arc = Math.sin(u * Math.PI);
+    // v24: follow a softened copy of what it's looking at, so hops and turns become one long glide
+    if (R0 && !auto.sm) auto.sm = { x: R0.x, y: R0.y, z: R0.z || 0 };
+    if (R0) { const ks = 1 - Math.exp(-dt * 0.9); auto.sm.x += (R0.x - auto.sm.x) * ks; auto.sm.y += (R0.y - auto.sm.y) * ks; auto.sm.z += ((R0.z || 0) - auto.sm.z) * ks; }
+    const R = R0 ? { x: auto.sm.x, y: auto.sm.y, z: auto.sm.z, kind: R0.kind, size: R0.size, rx: R0.rx, ry: R0.ry, sh: R0.sh } : null;
     let cx, cy, look, wantLift, maxV = 75;
     if (S.kind === "glide") {                  // float forward over the meadow, rising a little and settling again
       auto.h += Math.sin(time * 0.13 + 1.3) * 0.06 * dt;
@@ -2196,7 +2260,7 @@
       if (S.kind === "follow" && R.kind === "bunny") { dist = 220 + 42 * R.size; wantLift = 10 + 60 * arc; maxV = 130; }
       else if (S.kind === "follow") { dist = 230; wantLift = clamp((R.z || 120) - 110, -20, 200) + 20 * arc; maxV = 130; }
       else if (S.kind === "frog") { dist = 150 + 60 * R.size; wantLift = -25 + 50 * arc; }
-      else if (S.kind === "pond") { dist = Math.max(R.rx, R.ry) + 260; wantLift = 160 + 200 * arc; speed = 0.04; }
+      else if (S.kind === "pond") { dist = pondReach(R) + 260; wantLift = 160 + 200 * arc; speed = 0.04; }
       else if (S.kind === "house") { dist = 1350; wantLift = 120 + 220 * arc; speed = 0.03; }
       else { dist = 420; wantLift = clamp(HIVE_PT.z - 180, 0, 200) + 40 * arc; }
       auto.ang += auto.spin * speed * dt;
@@ -2208,7 +2272,10 @@
     const k = 1 - Math.exp(-dt * 0.8);
     auto.vx += ((d > 1 ? dx / d * v : 0) - auto.vx) * k; auto.vy += ((d > 1 ? dy / d * v : 0) - auto.vy) * k;
     const wantYaw = Math.atan2(look.y - camY, look.x - camX) + Math.sin(time * 0.21) * 0.04;   // a gentle, breathing sway
-    auto.yaw += angDiff(wantYaw, auto.yaw) * (1 - Math.exp(-dt * 0.7));
+    // turning eases in and out too (a turn speed that grows and settles), so it never snaps round
+    const wantSpin = clamp(angDiff(wantYaw, auto.yaw) * 0.7, -0.5, 0.5);
+    auto.spinV = (auto.spinV || 0) + (wantSpin - (auto.spinV || 0)) * (1 - Math.exp(-dt * 1.6));
+    auto.yaw += auto.spinV * dt;
     auto.lift += (clamp(wantLift + Math.sin(time * 0.37) * 12, LIFT_MIN, LIFT_MAX) - auto.lift) * (1 - Math.exp(-dt * 0.5));
     const nx = camX + auto.vx * dt, ny = camY + auto.vy * dt, c = Math.cos(auto.yaw), s = Math.sin(auto.yaw);
     if (insideHouse(nx + c * CAM_DIST, ny + s * CAM_DIST, 330) && !insideHouse(bee.x, bee.y, 330)) { auto.vx = auto.vy = 0; auto.t = auto.dur; return; }   // never through the playhouse
@@ -2615,9 +2682,11 @@
     [19.5, [60, 50, 140, 0.26]], [21, [22, 22, 72, 0.42]], [24, [18, 20, 64, 0.46]]
   ];
   const RISE = 6.3, SET = 19.2;   // sunrise and sunset
-  const SKY_MID = -Math.PI / 2 - 0.1;   // the sun and moon arc across the sky you see when you arrive
+  const SKY_MID = -Math.PI / 2 + 0.45, SKY_SPREAD = 0.7;   // the sun and moon arc across the sky you see when you arrive (v24: to the right of the playhouse, so its roof doesn't hide them)
   let testHour = null;            // add #h7 or #h21.5 to the link to see that hour (for checking)
-  try { const mh = /^#h(\d{1,2}(\.\d+)?)$/.exec(location.hash); if (mh) testHour = parseFloat(mh[1]) % 24; } catch (_) {}
+  try { const mh = /^#h(\d{1,2}(\.\d+)?)/.exec(location.hash); if (mh) testHour = parseFloat(mh[1]) % 24; } catch (_) {}
+  let testMoon = null;            // add &m90 to the link to see the moon at that angle from the sun (0 new, 90 half, 180 full)
+  try { const mm = /[#&]m(\d{1,3}(\.\d+)?)/.exec(location.hash); if (mm) testMoon = parseFloat(mm[1]) % 360; } catch (_) {}
   function hourNow() {
     if (testHour !== null) return testHour;
     const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
@@ -2653,7 +2722,7 @@
   function drawSunMoon() {
     const h = HOUR, dayLen = SET - RISE;
     if (h > RISE - 0.4 && h < SET + 0.4) {
-      const p = (h - RISE) / dayLen, x = skyX(SKY_MID + (p - 0.5) * 0.9);
+      const p = (h - RISE) / dayLen, x = skyX(SKY_MID + (p - 0.5) * SKY_SPREAD);
       if (x !== null) {
         const G = goldness(), y = HORIZON - 14 - Math.sin(clamp(p, 0, 1) * Math.PI) * (HORIZON - 70);
         const sg = ctx.createRadialGradient(x, y, 20, x, y, 120);
@@ -2662,19 +2731,65 @@
         ctx.fillStyle = G > 0.1 ? "#FFF1D2" : "#FFF8E6"; ctx.beginPath(); ctx.arc(x, y, 28 + 6 * G, 0, Math.PI * 2); ctx.fill();
       }
     }
-    const nightLen = 24 - dayLen, nh = ((h - SET) + 24) % 24;
-    if (nh < nightLen) {
-      const p = nh / nightLen, x = skyX(SKY_MID + (p - 0.5) * 0.9);
-      if (x !== null) {
-        const y = HORIZON - 14 - Math.sin(p * Math.PI) * (HORIZON - 70);
-        const mg = ctx.createRadialGradient(x, y, 8, x, y, 70);
-        mg.addColorStop(0, "rgba(230, 230, 255, 0.35)"); mg.addColorStop(1, "rgba(230, 230, 255, 0)");
-        ctx.fillStyle = mg; ctx.fillRect(x - 70, y - 70, 140, 140);
-        ctx.fillStyle = "#F4F1E4"; ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "rgba(200, 196, 220, 0.5)";
-        [[-6, -4, 3.5], [5, 3, 3], [-1, 7, 2]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(x + dx, y + dy, r, 0, Math.PI * 2); ctx.fill(); });
+    // v24: the real moon. Its shape is today's shape, and it rises and sets about when the real one does
+    // (so sometimes it's up in the daytime, pale, just like outside, and on a new moon it isn't there).
+    const M = moonNow();
+    if (M.illum > 0.03) {
+      const up = ((h - M.rise) + 24) % 24;
+      if (up < 12.4) {
+        const p = up / 12.4, x = skyX(SKY_MID + (p - 0.5) * SKY_SPREAD);
+        if (x !== null) {
+          const y = HORIZON - 14 - Math.sin(p * Math.PI) * (HORIZON - 70);
+          const N = nightness(), vis = (0.4 + 0.6 * N) * clamp(Math.sin(p * Math.PI) * 4, 0, 1);   // paler in the daytime, rising out of the hills
+          const mg = ctx.createRadialGradient(x, y, 8, x, y, 70);
+          mg.addColorStop(0, `rgba(230, 230, 255, ${0.35 * M.illum * N})`); mg.addColorStop(1, "rgba(230, 230, 255, 0)");
+          ctx.fillStyle = mg; ctx.fillRect(x - 70, y - 70, 140, 140);
+          drawMoonShape(x, y, 18, M, vis);
+        }
       }
     }
+  }
+  // Where the moon is in its month, from the date: how far it is from the sun around the sky (0 = new,
+  // 180 = full). Short astronomy formulas (the main terms of the moon's and sun's paths): good to well
+  // under a degree, so the shape matches the real moon.
+  const RAD = Math.PI / 180;
+  function moonElongation(ms) {
+    const d = ms / 86400000 + 2440587.5 - 2451545.0;   // days since Jan 1, 2000 (noon)
+    const g = (357.529 + 0.98560028 * d) * RAD, sun = 280.459 + 0.98564736 * d + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g);
+    const Mm = (134.963 + 13.064993 * d) * RAD, D = (297.850 + 12.190749 * d) * RAD, Fm = (93.272 + 13.229350 * d) * RAD;
+    const moon = 218.316 + 13.176396 * d + 6.289 * Math.sin(Mm) + 1.274 * Math.sin(2 * D - Mm) + 0.658 * Math.sin(2 * D)
+      + 0.214 * Math.sin(2 * Mm) - 0.186 * Math.sin(g) - 0.114 * Math.sin(2 * Fm);
+    return (((moon - sun) % 360) + 360) % 360;
+  }
+  let moonCache = null;
+  function moonNow() {
+    const now = Date.now();
+    if (moonCache && now - moonCache.at < 60000) return moonCache;
+    const e = testMoon !== null ? testMoon : moonElongation(now);
+    // the moon crosses the sky about 50 minutes later each day: at new moon it goes with the sun, at full
+    // moon it rises at sunset, at a half moon it rises around noon (waxing) or midnight (waning)
+    const noon = (RISE + SET) / 2, transit = (noon + e / 360 * 24.84) % 24;
+    moonCache = { at: now, e, illum: (1 - Math.cos(e * RAD)) / 2, waxing: e < 180, rise: (transit - 6.2 + 24) % 24 };
+    return moonCache;
+  }
+  // The lit part faces the sun: on the right while it grows (waxing), on the left while it shrinks.
+  function drawMoonShape(x, y, r, M, alpha) {
+    ctx.save();
+    ctx.fillStyle = `rgba(214, 218, 240, ${0.14 * alpha})`;   // the dark part, just barely there
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    const k = 1 - 2 * M.illum, rx = r * Math.abs(k), right = M.waxing;
+    const bulgeRight = right ? k > 0 : k < 0;   // a crescent's inner edge bulges toward the lit side, a fat moon's away from it
+    ctx.beginPath();
+    ctx.arc(x, y, r, -Math.PI / 2, Math.PI / 2, !right);
+    if (bulgeRight) ctx.ellipse(x, y, Math.max(0.01, rx), r, 0, Math.PI / 2, -Math.PI / 2, true);
+    else ctx.ellipse(x, y, Math.max(0.01, rx), r, 0, Math.PI / 2, Math.PI * 1.5, false);
+    ctx.closePath();
+    ctx.globalAlpha *= alpha;
+    ctx.fillStyle = "#F4F1E4"; ctx.fill();
+    ctx.clip();
+    ctx.fillStyle = "rgba(200, 196, 220, 0.5)";
+    [[-6, -4, 3.5], [5, 3, 3], [-1, 7, 2]].forEach(([dx, dy, cr]) => { ctx.beginPath(); ctx.arc(x + dx, y + dy, cr, 0, Math.PI * 2); ctx.fill(); });
+    ctx.restore();
   }
   // the clock in the corner of the game
   function partOfDay(h) { return h < 5 ? "night" : h < 7 ? "early morning" : h < 11.5 ? "morning" : h < 13.5 ? "midday" : h < 17 ? "afternoon" : h < 20 ? "evening" : "night"; }
@@ -2963,6 +3078,112 @@
     hillLayer(2.1, 18, "#9FCB8F", [4, 7, 11, 17]);
     hillLayer(4.2, 9, "#8FC585", [19, 29, 41, 57]);
   }
+  // v24: the world goes on and on. Past the close-up detail, the faraway world is drawn simply (its colored
+  // meadows, ponds, trees, bushes and flowers as little shapes), all the way out to the hills. The higher
+  // you are, the farther you see. Each color is drawn in one go, so it stays light enough for phones.
+  const FAR_FROM = 2250;
+  const farReach = () => lerp(4200, 11500, clamp((camH - 156) / 640, 0, 1));
+  let farNew = 0;
+  function farBits(ch) {
+    if (ch.far) return ch.far;
+    const f = { patches: ch.patches.map(p => ({ x: p.x, y: p.y, r: (p.rx + p.ry) * 0.55, rot: p.rot, col: p.col })), dots: [], trees: [], pond: null };
+    if (ch.pond) f.pond = pondPts(ch.pond, 0, 18);
+    ch.flowers.forEach(fl => f.dots.push({ x: fl.x, y: fl.y, z: fl.h, r: Math.max(10, fl.R * 0.42), col: fl.col[0] }));
+    ch.bushes.forEach(b => { f.dots.push({ x: b.x, y: b.y, z: b.bh * 0.5, r: b.br * 0.9, col: b.tone ? "#6FAE6A" : "#5E9E62" });
+      if (b.bl && b.bl.length) f.dots.push({ x: b.x, y: b.y, z: b.bh * 0.75, r: b.br * 0.35, col: b.bcol }); });
+    ch.shrooms.forEach(m => f.dots.push({ x: m.x, y: m.y, z: m.h * 0.9, r: m.w * 0.45, col: (SHROOM_COLORS[m.col] || SHROOM_COLORS[0]).c }));
+    ch.trees.forEach(t => f.trees.push({ x: t.x, y: t.y, h: t.h, w: t.w }));
+    if (ch.lavender.length) for (let i = 0; i < ch.lavender.length; i += 6) { const l = ch.lavender[i]; f.dots.push({ x: l.x, y: l.y, z: l.h * 0.6, r: 16, col: "#A98BE0" }); }
+    ch.far = f;
+    return f;
+  }
+  function drawFarField() {
+    const reach = farReach(), ratio = (W / 2) / F + 0.15;
+    // which patches of world lie in view between the close-up detail and the far edge
+    const pts = [[camX, camY]];
+    [-1, 1].forEach(sd => pts.push([camX + camC * reach - camS * reach * ratio * sd, camY + camS * reach + camC * reach * ratio * sd]));
+    const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
+    const x0 = Math.floor((Math.min(...xs) - CS) / CS), x1 = Math.floor((Math.max(...xs) + CS) / CS);
+    const y0 = Math.floor((Math.min(...ys) - CS) / CS), y1 = Math.floor((Math.max(...ys) + CS) / CS);
+    // each color keeps a flat list of shapes: x, y, width, height (height 0 = a round dot)
+    const groups = new Map(), add = (col, x, y, a, b) => { let g = groups.get(col); if (!g) groups.set(col, g = []); g.push(x, y, a, b); };
+    const water = [], canopy = [], canopyDark = [], trunks = [];
+    farNew = 0;
+    const cands = [];
+    for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
+      const mx = cx * CS + CS / 2, my = cy * CS + CS / 2, dx = mx - camX, dy = my - camY;
+      const f = dx * camC + dy * camS, side = -dx * camS + dy * camC;
+      if (f < FAR_FROM - CS || f > reach + CS || Math.abs(side) > f * ratio + CS) continue;
+      cands.push({ cx, cy, f });
+    }
+    cands.sort((a, b) => a.f - b.f);   // the nearest ones get built first
+    for (const c of cands) {
+      const key = c.cx + "," + c.cy;
+      let ch = chunks.get(key);
+      if (!ch) { if (farNew >= 6) continue; ch = chunkAt(c.cx, c.cy); farNew++; }   // a few new patches each frame, so nothing stutters
+      const fb = farBits(ch);
+      fb.patches.forEach(p => {
+        const q = proj(p.x, p.y, 0); if (!q || q.f < FAR_FROM || q.f > reach) return;
+        const hr = p.r * q.k; if (hr < 0.8) return;
+        add(p.col, q.x, q.y, hr, Math.max(0.3, hr * camH / q.f));
+      });
+      if (fb.pond) {
+        const c0 = proj(ch.pond.x, ch.pond.y, 0);
+        if (c0 && c0.f > FAR_FROM - 200 && c0.f < reach) water.push(fb.pond);
+      }
+      fb.dots.forEach(d => {
+        const q = proj(d.x, d.y, d.z); if (!q || q.f < FAR_FROM || q.f > reach) return;
+        const r = d.r * q.k; if (r < 0.45 || q.x < -10 || q.x > W + 10) return;
+        add(d.col, q.x, q.y, r, 0);
+      });
+      fb.trees.forEach(t => {
+        const b = proj(t.x, t.y, 0); if (!b || b.f < FAR_FROM || b.f > reach) return;
+        const k = b.k, cw = t.w * 2.6 * k, top = b.y - t.h * 0.72 * k;
+        if (b.x < -cw * 2 || b.x > W + cw * 2) return;
+        trunks.push([b.x - t.w * 0.15 * k, top + cw * 0.5, t.w * 0.3 * k, Math.max(0, b.y - top - cw * 0.5)]);
+        canopyDark.push([b.x + cw * 0.42, top + cw * 0.3, cw * 0.72]);
+        canopyDark.push([b.x - cw * 0.5, top + cw * 0.28, cw * 0.62]);
+        canopy.push([b.x - cw * 0.1, top, cw]);
+      });
+    }
+    ctx.save();
+    // colored meadows first (lavender, clover, sunflower gold...), then the ponds, then everything standing up
+    const fillGroup = (g, col) => {
+      ctx.fillStyle = col; ctx.beginPath();
+      for (let i = 0; i < g.length; i += 4) {
+        const x = g[i], y = g[i + 1], a = g[i + 2], b = g[i + 3];
+        ctx.moveTo(x + a, y);
+        if (b) ctx.ellipse(x, y, a, b, 0, 0, TAU); else ctx.arc(x, y, a, 0, TAU);
+      }
+      ctx.fill();
+    };
+    groups.forEach((g, col) => { if (col.startsWith("rgba")) fillGroup(g, col); });
+    if (water.length) {
+      ctx.fillStyle = "#9CB1E6"; ctx.beginPath();
+      water.forEach(pts => { let first = true; pts.forEach(([x, y]) => { const q = proj(x, y, 0); if (!q) return; if (first) { ctx.moveTo(q.x, q.y); first = false; } else ctx.lineTo(q.x, q.y); }); ctx.closePath(); });
+      ctx.fill();
+    }
+    groups.forEach((g, col) => { if (!col.startsWith("rgba")) fillGroup(g, col); });
+    if (trunks.length) { ctx.fillStyle = "#9A7654"; ctx.beginPath(); trunks.forEach(([x, y, w, h]) => ctx.rect(x, y, w, h)); ctx.fill(); }
+    [[canopyDark, "#5E9E62"], [canopy, "#7DBB76"]].forEach(([arr, col]) => {
+      if (!arr.length) return;
+      ctx.fillStyle = col; ctx.beginPath(); arr.forEach(([x, y, r]) => { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); }); ctx.fill();
+    });
+    // the haze: faraway things melt softly into the hills, and the close-up detail takes over up close
+    const yAt = f => HORIZON + camH * F / f, yNear = yAt(FAR_FROM + 200);
+    if (yNear > HORIZON + 1) {
+      // a soft green-blue haze: the sky's color near the hills mixed with faraway meadow
+      const sc = skyColors()[3].match(/\d+/g).map(Number), mix = [168, 206, 170];
+      const hz = `rgba(${Math.round(sc[0] * 0.45 + mix[0] * 0.55)}, ${Math.round(sc[1] * 0.45 + mix[1] * 0.55)}, ${Math.round(sc[2] * 0.45 + mix[2] * 0.55)}, `;
+      const g = ctx.createLinearGradient(0, HORIZON, 0, yNear);
+      [reach, reach * 0.8, reach * 0.62, reach * 0.48, reach * 0.36, FAR_FROM + 200].forEach(f => {
+        const u = clamp((yAt(f) - HORIZON) / (yNear - HORIZON), 0, 1), a = 0.72 * clamp((f - FAR_FROM - 200) / (reach - FAR_FROM - 200), 0, 1) ** 1.1;
+        g.addColorStop(u, hz + a.toFixed(3) + ")");
+      });
+      ctx.fillStyle = g; ctx.fillRect(0, HORIZON - 1, W, yNear - HORIZON + 1);
+    }
+    ctx.restore();
+  }
   function drawGroundBase() {
     const g = ctx.createLinearGradient(0, HORIZON, 0, H);
     g.addColorStop(0, "#C6E4A9"); g.addColorStop(0.22, "#A8D78E"); g.addColorStop(1, "#86C676");
@@ -3011,16 +3232,20 @@
         softGround(p.x, p.y, p.rx * 1.15, p.ry * 1.15, p.rot, c.rgb, c.a, it.d > 900 ? 3 : 6);   // fewer layers far away (keeps phones smooth)
         return;
       }
-      softGround(p.x, p.y, p.rx + 34, p.ry + 30, 0, "214, 236, 176", 0.9, 5, 0.8);   // the soft, sandy bank fades into the grass
-      if (groundPath(ellipsePts(p.x, p.y, p.rx, p.ry, 0, 72))) {
-        const far = proj(p.x + camC * p.ry, p.y + camS * p.ry, 0), near = proj(p.x - camC * p.ry, p.y - camS * p.ry, 0);
+      // the soft, sandy bank fades into the grass, following the pond's own shape
+      if (it.d > 1400) softGround(p.x, p.y, pondReach(p) + 34, pondReach(p) * 0.85 + 30, 0, "214, 236, 176", 0.6, 3, 0.8);
+      else [38, 24, 11].forEach(pad => { if (groundPath(pondPts(p, pad, 48))) { ctx.fillStyle = "rgba(214, 236, 176, 0.32)"; ctx.fill(); } });
+      const R = pondReach(p), nPts = it.d > 1400 ? 40 : 84;
+      if (groundPath(pondPts(p, 0, nPts))) {
+        const far = proj(p.x + camC * R, p.y + camS * R, 0), near = proj(p.x - camC * R, p.y - camS * R, 0);
         const y0 = far ? far.y : HORIZON, y1 = near ? near.y : H;
         const wg = ctx.createLinearGradient(0, y0, 0, Math.max(y0 + 1, y1));
         wg.addColorStop(0, "#BCCBF2"); wg.addColorStop(0.45, "#93A9E2"); wg.addColorStop(1, "#7188D0");
         ctx.fillStyle = wg; ctx.fill();
         ctx.strokeStyle = "rgba(255, 255, 255, 0.55)"; ctx.lineWidth = 1.6; ctx.stroke();
-      }
-      softGround(p.x, p.y - p.ry * 0.25, p.rx * 0.7, p.ry * 0.42, 0, "255, 255, 255", 0.14, 5, 0.3);   // gentle shine on the water
+        ctx.save(); ctx.clip();   // the shine and the lily pads stay on the water
+      } else ctx.save();
+      { const sp = pondPoint(p, -Math.PI / 2, 0.25); softGround(sp.x, sp.y, Math.min(p.rx, p.ry) * 0.8, Math.min(p.rx, p.ry) * 0.5, p.rot || 0, "255, 255, 255", 0.14, 5, 0.3); }   // gentle shine on the water
       p.pads.forEach(pd => {
         const padPts = (r) => { const out = [[pd.x, pd.y]]; for (let i = 0; i <= 36; i++) { const a = pd.notch + 0.32 + (i / 36) * (Math.PI * 2 - 0.64); out.push([pd.x + Math.cos(a) * r, pd.y + Math.sin(a) * r]); } return out; };
         if (groundPath(padPts(pd.r))) { ctx.fillStyle = "#5FAE6E"; ctx.fill(); ctx.strokeStyle = "rgba(40, 110, 60, 0.55)"; ctx.lineWidth = 1.2; ctx.stroke(); }
@@ -3032,6 +3257,7 @@
           ctx.stroke();
         }
       });
+      ctx.restore();
     });
   }
 
@@ -4006,7 +4232,7 @@
   function openWaterIn(p, pad) {
     for (let tries = 0; tries < 20; tries++) {
       const a = rand(0, Math.PI * 2), rr = Math.sqrt(Math.random()) * 0.72;
-      const x = p.x + Math.cos(a) * p.rx * rr, y = p.y + Math.sin(a) * p.ry * rr;
+      const { x, y } = pondPoint(p, a, rr);
       if (p.pads.some(pd => Math.hypot(pd.x - x, pd.y - y) < pd.r + pad)) continue;
       if (Math.hypot(bee.x - x, bee.y - y) < 70) continue;
       return { x, y };
@@ -4080,7 +4306,7 @@
   }
   // ---------- turtles that hang out at the ponds ----------
   function pondWet(p, x, y) {   // 0 on the bank, 1 out in the water, a soft blend right at the edge
-    const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry, d = Math.sqrt(dx * dx + dy * dy);
+    const d = pondDist(p, x, y, 0);
     return clamp((1.02 - d) / 0.14, 0, 1);
   }
   function pathClear(ch, T, x1, y1) {
@@ -4101,14 +4327,15 @@
       let x, y, water;
       if (Math.random() < (inWater ? 0.35 : 0.3)) {   // a slow swim out to open water
         const a = rand(0, Math.PI * 2), rr = Math.sqrt(Math.random()) * 0.7;
-        x = p.x + Math.cos(a) * p.rx * rr; y = p.y + Math.sin(a) * p.ry * rr; water = true;
+        ({ x, y } = pondPoint(p, a, rr)); water = true;
       } else {                                         // a stroll along the bank, usually not far from where she is
-        const here = Math.atan2((T.y - p.y) / p.ry, (T.x - p.x) / p.rx);
+        const here = pondAngle(p, T.x, T.y);
         const a = inWater ? rand(0, Math.PI * 2) : here + rand(-0.9, 0.9), out = rand(1.18, 1.55);
-        x = p.x + Math.cos(a) * p.rx * out; y = p.y + Math.sin(a) * p.ry * out; water = false;
+        ({ x, y } = pondPoint(p, a, out)); water = false;
       }
       if (Math.hypot(x - T.x, y - T.y) < 25) continue;
       if (!turtleSpotOk(ch, x, y, water) || !pathClear(ch, T, x, y)) continue;
+      if (water && inWater && !inPond(p, (T.x + x) / 2, (T.y + y) / 2, -10)) continue;
       T.tx = x; T.ty = y; T.mode = "go"; T.nap = 0;
       return;
     }
@@ -4285,23 +4512,29 @@
     if (FROG !== (LC && LC.frog)) { FROG.draw(ctx, x, y, s, yaw, pitch, pose); return; }
     let k = 1; try { const T = ctx.getTransform(); k = Math.hypot(T.a, T.b) || 1; } catch (_) {}
     const L = 40, TOP = 64, BOT = 22;   // roomy enough for his shadow and his tiny hop
-    const w = Math.max(2, Math.ceil(2 * L * s * k)), h = Math.max(2, Math.ceil((TOP + BOT) * s * k));
+    const step = Math.ceil(Math.log(Math.max(0.05, s * k)) / Math.log(1.1)), sk = Math.pow(1.1, step), sB = sk / k;   // v24: size steps 10% apart
+    const w = Math.max(2, Math.ceil(2 * L * sk)), h = Math.max(2, Math.ceil((TOP + BOT) * sk));
     const moving = pose.dance || pose.jump > 0 || pose.squash > 0.01 || pose.armR > 0;   // v21: a wave is moving too
-    const key = moving ? null : [w, h, Math.round(yaw * 50), Math.round(pitch * 100), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0].join(",");
+    const big = s * k >= 2.5, turnSteps = s * k < 1.2 ? 10 : big ? 24 : 16;   // little faraway frogs don't need every tiny turn
+    const key = moving ? null : [step, Math.round(yaw * turnSteps), Math.round(pitch * 45), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0].join(",");
     if (!F.pic) { F.pic = document.createElement("canvas"); F.picCtx = F.pic.getContext("2d"); F.picKey = ""; }
     if (frogRedrawT !== time) { frogRedrawT = time; frogRedraws = 0; }
-    const stale = F.picDrawn && s * k < 2.5 && frogRedraws >= 3;
+    // v24: only a few refreshes each frame (a big frog that's dancing or hopping always gets his), and a little
+    // faraway frog refreshes a bit less often: his hop still looks smooth at that size
+    const tooSoon = !big && time - (F.picT === undefined ? -9 : F.picT) < (key === null ? 0.06 : 0.25);
+    const stale = F.picDrawn && (tooSoon || (!(key === null && big) && frogRedraws >= (big ? 4 : 2)));
     if ((key === null || key !== F.picKey) && !stale) {
-      if (s * k < 2.5) frogRedraws++;
+      frogRedraws++; F.picT = time;
       F.picDrawn = true;
       if (F.pic.width !== w || F.pic.height !== h) { F.pic.width = w; F.pic.height = h; }
       const c2 = F.picCtx;
       c2.setTransform(1, 0, 0, 1, 0, 0); c2.clearRect(0, 0, w, h);
       c2.setTransform(k, 0, 0, k, 0, 0);
-      FROG.draw(c2, L * s, TOP * s, s, yaw, pitch, pose);
-      F.picKey = key || "";
+      FROG.draw(c2, L * sB, TOP * sB, sB, yaw, pitch, pose);
+      F.picKey = key || ""; F.picS = sB;
     }
-    ctx.drawImage(F.pic, x - L * s, y - TOP * s, w / k, h / k);
+    const f = s / (F.picS || s);   // the picture scaled to his size right now
+    ctx.drawImage(F.pic, x - L * s, y - TOP * s, F.pic.width / k * f, F.pic.height / k * f);
   }
   function drawPondFrogFlat(F, p) {
     const s = 2 * F.size * p.k, x = p.x, baseY = p.y + 2 * p.k, hopPx = F.hop * p.k;
@@ -4644,13 +4877,14 @@
     const dusk = duskAmount();
     drawSky(dusk);
     drawGroundBase();
+    drawFarField();
     const list = chunksAround(camX + camC * 1150, camY + camS * 1150, 1650);
     drawDecals(list);
     drawRipples();
     {
       const hz = skyColors()[3].replace("rgb(", "rgba(").replace(")", ", ");
       const hg = ctx.createLinearGradient(0, HORIZON - 2, 0, HORIZON + (H - HORIZON) * 0.3);
-      hg.addColorStop(0, hz + "0.55)"); hg.addColorStop(1, hz + "0)");
+      hg.addColorStop(0, hz + (0.55 - 0.3 * clamp((camH - 156) / 640, 0, 1)).toFixed(3) + ")"); hg.addColorStop(1, hz + "0)");
       ctx.fillStyle = hg; ctx.fillRect(0, HORIZON - 2, W, (H - HORIZON) * 0.3 + 2);
     }
     // everything standing up, drawn far to near so closer things overlap farther ones
@@ -5283,13 +5517,28 @@
     if (document.hidden) { if (!bgTick) bgTick = setInterval(() => { for (let i = 0; i < 20; i++) update(0.05); }, 1000); }
     else { clearInterval(bgTick); bgTick = null; last = performance.now(); }
   });
+  // v24: smooth on every screen. The loop watches how long frames take. If they're slow (a busy iPad), the
+  // picture gets a little less sharp so movement stays smooth; when there's room again, it sharpens back up.
+  const perf = { avg: 16.7, t: 0, good: 0, drops: 0 };
+  function tunePerf(ms) {
+    if (ms > 250) return;   // back from a hidden tab: not a slow frame
+    perf.avg += (ms - perf.avg) * 0.06; perf.t += ms;
+    if (perf.t < 1200) return;
+    perf.t = 0;
+    if (perf.avg > 24 && dpr > 1) { dprCap = Math.max(1, dpr - 0.25); perf.good = 0; perf.drops++; resize(); }
+    else if (perf.avg < 17.5 && dpr < dprBest && perf.drops < 5) { perf.good += 1200; if (perf.good > 7000) { dprCap = dpr + 0.25; perf.good = 0; resize(); } }
+    else perf.good = 0;
+  }
   function frame(now) {
-    const dt = clamp((now - last) / 1000, 0, 0.05);
+    const ms = now - last;
+    const dt = clamp(ms / 1000, 0, 0.05);
     last = now;
+    tunePerf(ms);
     update(dt);
     draw();
     requestAnimationFrame(frame);
   }
+  window.__perf = () => ({ dpr, dprBest, avg: Math.round(perf.avg * 10) / 10, chunks: chunks.size });
   resize();
   draw();
   requestAnimationFrame(frame);
