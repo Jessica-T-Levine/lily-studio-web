@@ -91,6 +91,13 @@
     font-size: 14px;
     color: var(--muted);
   }
+  .head-btns { display: flex; align-items: center; gap: 8px; flex: none; }
+  .to-playhouse {
+    display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--cream);
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18); text-decoration: none;
+  }
+  .to-playhouse:hover { background: rgba(255,255,255,0.16); }
+  .to-playhouse:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
   .sound {
     flex: none;
     font: 700 13px/1 var(--body);
@@ -312,6 +319,7 @@
     <a class="brand" href="/"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Lily Studio</span></a>
     <ul>
       <li><a href="/">Home</a></li>
+      <li><a href="/playhouse/">Playhouse</a></li>
       <li><a href="/apps.html">Apps</a></li>
       <li><a href="/skills.html">Skills</a></li>
       <li><a href="/about.html">About</a></li>
@@ -326,7 +334,10 @@
       <h1>Lily's Hop <span>Hop</span></h1>
       <p class="tag">Help a very round frog make the pond bloom.</p>
     </div>
-    <button class="sound" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer">Sound</button>
+    <div class="head-btns">
+      <a class="to-playhouse" href="/playhouse/" aria-label="Back to Lily’s Playhouse" title="Back to Lily’s Playhouse"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v8.5h11V10"/><path d="M10.5 18.5v-4.5h3v4.5"/></svg></a>
+      <button class="sound" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer">Sound</button>
+    </div>
   </header>
 
   <div class="mixer" id="mixer" hidden>

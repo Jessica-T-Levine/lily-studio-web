@@ -1024,6 +1024,7 @@
     .btn-primary:hover { background: #1950CA; color: #FFFFFF; box-shadow: 0 0 30px rgba(37,99,235,0.45); }
     .btn-primary::before { background: rgba(125,211,252,0.3); }
     .btn-ghost:hover { color: var(--pink-text); }
+    .games-playhouse { display: inline-block; margin: 14px 0 0 18px; }
     /* hero cards: stickers are siblings, so cards are children 3-5; order them 01, 02, 03 */
     .hero-collage .collage-card:nth-child(3) { top: 0; left: 60px; transform: rotate(-3deg); z-index: 3; }
     .hero-collage .collage-card:nth-child(3) .tape { background: rgba(249,102,188,0.3); transform: rotate(2deg); }
@@ -1168,7 +1169,7 @@
         <li><a href="/skills.html">Skills</a></li>
         <li><a href="/apps.html">Apps</a></li>
         <li><a href="/printed.html">Printed</a></li>
-        <li><a href="/hop/">Lily’s Playhouse</a></li>
+        <li><a href="/playhouse/">Lily’s Playhouse</a></li>
         <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
       </ul>
     </nav>
@@ -1382,6 +1383,7 @@
           <p class="games-desc"><strong>Lily's Hop Hop</strong> is a free, cozy frog game. Hold to wind up, let go to hop, and help a very round frog make the pond bloom.</p>
           <p class="games-meta">No download · No account · Works on phone and computer</p>
           <a href="/hop/" class="btn-primary games-btn">Play Lily's Hop Hop →</a>
+          <a href="/playhouse/" class="btn-ghost games-playhouse">Visit Lily’s Playhouse →</a>
         </div>
       </div>
     </div>
@@ -1517,7 +1519,7 @@
       <li><a href="/skills.html">Skills</a></li>
       <li><a href="/apps.html">Apps</a></li>
       <li><a href="/printed.html">Printed</a></li>
-      <li><a href="/hop/">Lily’s Playhouse</a></li>
+      <li><a href="/playhouse/">Lily’s Playhouse</a></li>
       <li><a href="/skills.html#tuesday-tips">Tuesday Tips</a></li>
       <li><a href="/about.html">About</a></li>
       <li><a href="/privacy.html">Privacy</a></li>
@@ -1603,7 +1605,7 @@
   (function () {
     var table = document.getElementById('studio-table');
     if (!table) return;
-    var CARDS = [{"n": "01", "k": "Claude Skills", "title": "Skills that make Claude <em>good at your job</em>", "desc": "181 tools for work, study and life.", "href": "/skills.html", "cta": "Browse skills", "icon": "skill", "color": "pink"}, {"n": "02", "k": "iOS Apps", "title": "Calm apps, <em>beautifully made</em>", "desc": "Blocks and Breath is coming soon.", "href": "/apps.html", "cta": "See the apps", "icon": "app", "color": "blue"}, {"n": "03", "k": "Playhouse", "title": "A tiny world of <em>cozy games</em>", "desc": "Free to play. Come say hi to the frog.", "href": "/hop/", "cta": "Come play", "icon": "play", "color": "green"}, {"n": "04", "k": "Printed", "title": "Small things, <em>made by hand</em>", "desc": "3D printed designs, made at home.", "href": "/printed.html", "cta": "See the prints", "icon": "print", "color": "peach"}, {"n": "05", "k": "Tuesday Tips", "title": "One tiny tip, <em>every Tuesday</em>", "desc": "A 60-second Claude tip in your inbox.", "href": "/skills.html#tuesday-tips", "cta": "Get the tips", "icon": "tips", "color": "lavender"}];
+    var CARDS = [{"n": "01", "k": "Claude Skills", "title": "Skills that make Claude <em>good at your job</em>", "desc": "181 tools for work, study and life.", "href": "/skills.html", "cta": "Browse skills", "icon": "skill", "color": "pink"}, {"n": "02", "k": "iOS Apps", "title": "Calm apps, <em>beautifully made</em>", "desc": "Blocks and Breath is coming soon.", "href": "/apps.html", "cta": "See the apps", "icon": "app", "color": "blue"}, {"n": "03", "k": "Playhouse", "title": "A tiny world of <em>cozy games</em>", "desc": "Free to play. Come say hi to the frog.", "href": "/playhouse/", "cta": "Come play", "icon": "play", "color": "green"}, {"n": "04", "k": "Printed", "title": "Small things, <em>made by hand</em>", "desc": "3D printed designs, made at home.", "href": "/printed.html", "cta": "See the prints", "icon": "print", "color": "peach"}, {"n": "05", "k": "Tuesday Tips", "title": "One tiny tip, <em>every Tuesday</em>", "desc": "A 60-second Claude tip in your inbox.", "href": "/skills.html#tuesday-tips", "cta": "Get the tips", "icon": "tips", "color": "lavender"}];
     var ICONS = {"skill": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M32 58V26\"/><path d=\"M32 40c-9 0-15-6-16-15 9 0 15 6 16 15z\"/><path d=\"M32 32c8 0 13-5 14-13-8 0-13 5-14 13z\"/><path d=\"M32 26c-3-5-3-11 0-16 3 5 3 11 0 16z\"/><circle cx=\"46\" cy=\"10\" r=\"1.6\" fill=\"currentColor\"/><circle cx=\"16\" cy=\"16\" r=\"1.2\" fill=\"currentColor\"/></svg>", "app": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"19\" y=\"6\" width=\"26\" height=\"52\" rx=\"6\"/><path d=\"M29 11h6\"/><path d=\"M32 42c-5 0-8-4-8-9 5 0 8 4 8 9zM32 42c5 0 8-4 8-9-5 0-8 4-8 9zM32 42c-2-4-2-9 0-13 2 4 2 9 0 13z\"/><path d=\"M27 51h10\"/></svg>", "play": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"32\" cy=\"50\" rx=\"24\" ry=\"7\"/><path d=\"M20 44c0-10 5-16 12-16s12 6 12 16\"/><circle cx=\"26\" cy=\"27\" r=\"4.5\"/><circle cx=\"38\" cy=\"27\" r=\"4.5\"/><circle cx=\"26\" cy=\"27\" r=\"1.4\" fill=\"currentColor\"/><circle cx=\"38\" cy=\"27\" r=\"1.4\" fill=\"currentColor\"/><path d=\"M28 38c2.5 2 5.5 2 8 0\"/><path d=\"M50 12l1.5 3.5L55 17l-3.5 1.5L50 22l-1.5-3.5L45 17l3.5-1.5z\"/></svg>", "print": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M24 14h16l-2 8c6 4 9 11 9 18 0 9-7 16-15 16s-15-7-15-16c0-7 3-14 9-18z\"/><path d=\"M20 38h24M19 45h26\"/><circle cx=\"46\" cy=\"12\" r=\"1.4\" fill=\"currentColor\"/></svg>", "tips": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"10\" y=\"18\" width=\"44\" height=\"30\" rx=\"3\"/><path d=\"M10 21l22 15 22-15\"/><path d=\"M47 8l1.5 3.5L52 13l-3.5 1.5L47 18l-1.5-3.5L42 13l3.5-1.5z\"/></svg>"};
     var STAR = '<svg class="st" viewBox="0 0 24 24" style="{s}"><path fill="currentColor" d="M12 0c.8 6.2 5.8 11.2 12 12-6.2.8-11.2 5.8-12 12-.8-6.2-5.8-11.2-12-12C6.2 11.2 11.2 6.2 12 0z"/></svg>';
     var stars = STAR.replace('{s}','top:22%;left:22%') + STAR.replace('{s}','top:34%;right:20%;width:5px;height:5px') + STAR.replace('{s}','top:14%;left:58%;width:4px;height:4px');
