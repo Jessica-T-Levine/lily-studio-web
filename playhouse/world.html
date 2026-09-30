@@ -566,7 +566,7 @@
   const HIVE_TREE_AT = spreadOut(-60, -150);
   let HIVE_PT = null, HIVE_BRANCH = null;
   const insideHouse = (x, y, pad) => Math.abs(x - HOUSE.x) < HOUSE.w / 2 + pad && Math.abs(y - HOUSE.y) < HOUSE.d / 2 + pad;
-  const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88, ry: 62 });
+  const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88 * 1.4, ry: 62 * 1.4 });   // v25: bigger
   // v21: big ponds that are always there: one on each side of the start, and two huge ones farther out
   const BIG_PONDS = { "-2,-1": 2.35, "2,-1": 2.6, "0,-6": 3, "3,-4": 2.8 };
   const bigPondAt = (cx, cy) => BIG_PONDS[cx + "," + cy] || 0;
@@ -574,7 +574,7 @@
   const NEE_SIZE = 7;             // the bee game's bunny is size 6 to 8
   const FROG_SIZE = 2;            // the bee game's pond frog is drawn at 2 x its size
   const CARROTS = [[-240, 60], [-60, 170], [110, -60], [150, -300]].map(([x, y]) => Object.assign(spreadOut(x, y), { grown: 1, regrow: 0 }));
-  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 115 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
+  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 160 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
     .concat(CARROTS.map(c => ({ x: c.x, y: c.y, r: 70 })), [{ x: HIVE_TREE_AT.x, y: HIVE_TREE_AT.y, r: 190 }]);
   const clearOf = (x, y, pad) => !KEEP_CLEAR.some(o => Math.hypot(o.x - x, o.y - y) < o.r + pad);
   const nearHome = (cx, cy) => (cx === 0 && cy === 0) || (Math.abs(cx) <= 1 && cy >= -4 && cy <= -2);   // Hop Hop's pond and the playhouse ground   // no surprise ponds right around the playhouse
@@ -585,22 +585,54 @@
   const TAU = Math.PI * 2;
   function pondShapeOf(cx, cy) {
     const q = seeded(hash2(cx * 31 + 17, cy * 57 - 91));
-    const kinds = [["round", 2], ["oval", 2], ["bean", 3], ["long", 2], ["clover", 2], ["drop", 2], ["blob", 3]];
+    const kinds = [["round", 3], ["oval", 3], ["wavy", 3], ["heart", 1.4], ["flower", 1.4], ["bean", 2], ["long", 1.5], ["clover", 1], ["drop", 1], ["blob", 2]];
     let roll = q() * kinds.reduce((s, k) => s + k[1], 0), kind = "oval";
     for (const k of kinds) { if ((roll -= k[1]) <= 0) { kind = k[0]; break; } }
     const sh = { kind, st: 1, rot: q() * Math.PI, a1: 0, p1: q() * TAU, a2: 0, p2: q() * TAU, a3: 0, p3: q() * TAU, a5: 0.025 + q() * 0.03, p5: q() * TAU, dent: 0, pd: 0, max: 1 };
-    if (kind === "round") { sh.st = 0.9; sh.a2 = 0.03; }
-    else if (kind === "oval") { sh.st = 1.1 + q() * 0.2; }
+    if (kind === "round") { sh.st = 1; sh.round = true; sh.a5 = 0.01; }   // v25: truly round
+    else if (kind === "oval") { sh.st = 1.2 + q() * 0.25; sh.a5 = 0.012; }
     else if (kind === "bean") { sh.st = 1.3 + q() * 0.2; sh.dent = 0.26 + q() * 0.1; sh.pd = q() < 0.5 ? Math.PI / 2 : -Math.PI / 2; }
     else if (kind === "long") { sh.st = 1.55 + q() * 0.3; sh.a3 = 0.05; }
     else if (kind === "clover") { sh.st = 1; sh.a3 = 0.13 + q() * 0.04; }
     else if (kind === "drop") { sh.st = 1.1; sh.a1 = 0.15 + q() * 0.05; sh.a2 = 0.05; }
+    else if (kind === "wavy") { sh.st = 1 + q() * 0.3; sh.a7 = 0.045 + q() * 0.03; sh.p7 = q() * TAU; sh.a9 = 0.03 + q() * 0.02; sh.p9 = q() * TAU; sh.a2 = 0.04; }   // v25: a wavy shoreline
+    else if (kind === "heart") { sh.st = 1; sh.round = true; sh.a5 = 0.012; sh.tab = HEART_TAB; }    // v25: a puffy bubble heart
+    else if (kind === "flower") { sh.st = 1; sh.round = true; sh.a5 = 0; sh.tab = q() < 0.5 ? FLOWER5_TAB : FLOWER6_TAB; }   // v25: a bubble flower
     else { sh.st = 1 + q() * 0.3; sh.a2 = 0.06 + q() * 0.05; sh.a3 = 0.06 + q() * 0.05; }   // a lumpy, natural blob
     let mx = 0; for (let i = 0; i < 72; i++) mx = Math.max(mx, shapeR(sh, i / 72 * TAU)); sh.max = mx;
     return sh;
   }
+  // v25: a heart and a flower are traced once as outlines (how far the edge is at each angle around the middle),
+  // then softened so every point and dip is round and bubbly
+  const SHAPE_N = 256;
+  function shapeTable(fn) {
+    let t = new Float32Array(SHAPE_N);
+    for (let i = 0; i < SHAPE_N; i++) t[i] = fn(i / SHAPE_N * TAU);
+    for (let pass = 0; pass < 6; pass++) {   // soften
+      const u = new Float32Array(SHAPE_N);
+      for (let i = 0; i < SHAPE_N; i++) u[i] = (t[(i + SHAPE_N - 2) % SHAPE_N] + 2 * t[(i + SHAPE_N - 1) % SHAPE_N] + 3 * t[i] + 2 * t[(i + 1) % SHAPE_N] + t[(i + 2) % SHAPE_N]) / 9;
+      t = u;
+    }
+    let mx = 0; t.forEach(v => { mx = Math.max(mx, v); });
+    return t.map(v => v / mx * 1.08);
+  }
+  // the heart: the classic heart curve, measured from a point a little above its middle
+  const HEART_TAB = (() => {
+    const pts = [];
+    for (let i = 0; i < 720; i++) { const t = i / 720 * TAU; pts.push([16 * Math.sin(t) ** 3, 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t) - 1.5]); }
+    const ang = pts.map(([x, y]) => [Math.atan2(y, x), Math.hypot(x, y)]);
+    return shapeTable(a => {   // the edge distance at angle a (nearest traced point)
+      let best = 0, bd = 9;
+      for (const [pa, r] of ang) { const d = Math.abs(angWrap(pa - a)); if (d < bd) { bd = d; best = r; } }
+      return best;
+    });
+  })();
+  const flowerTab = n => shapeTable(a => 0.7 + 0.3 * Math.pow(Math.abs(Math.cos(n * a / 2)), 0.55));
+  const FLOWER5_TAB = flowerTab(5), FLOWER6_TAB = flowerTab(6);
   function shapeR(sh, a) {
     let s = 1 + sh.a1 * Math.cos(a - sh.p1) + sh.a2 * Math.cos(2 * (a - sh.p2)) + sh.a3 * Math.cos(3 * (a - sh.p3)) + sh.a5 * Math.cos(5 * (a - sh.p5));
+    if (sh.a7) s += sh.a7 * Math.cos(7 * (a - sh.p7)) + sh.a9 * Math.cos(9 * (a - sh.p9));
+    if (sh.tab) { const u = (((a / TAU) % 1) + 1) % 1 * SHAPE_N, i = Math.floor(u) % SHAPE_N, f = u - Math.floor(u); s += sh.tab[i] * (1 - f) + sh.tab[(i + 1) % SHAPE_N] * f - 1; }
     if (sh.dent) { const d = angWrap(a - sh.pd); s -= sh.dent * Math.exp(-d * d / 0.22); }
     return s;
   }
@@ -740,7 +772,7 @@
     const ch = { cx, cy, biome, patches: [], tufts: [], flowers: [], rocks: [], shrooms: [], pond: null, lavender: [], clovers: [], puffs: [], trees: [], reeds: [], bushes: [] };
     // a large pond next door can reach into this patch of meadow: nothing grows in its water
     const nbPonds = [];
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       if (!dx && !dy) continue;
       const sp = pondSpec(cx + dx, cy + dy);
       if (sp && sp.scale > 1.5) nbPonds.push(sp);
@@ -755,7 +787,7 @@
       const sp = pondSpec(cx, cy) || { x: x0 + CS / 2, y: y0 + CS / 2, scale: 1, gone: true }, scale = sp.scale;
       const rx = (big ? 110 + r() * 35 : 90 + r() * 45) * scale, ry = (big ? 90 + r() * 35 : 70 + r() * 35) * scale;
       const ux = r(), uy = r();
-      const shp = sp.sh || pondShapeOf(cx, cy), dims = pondDims(rx / scale, ry / scale, scale, shp);
+      const shp = sp.sh || pondShapeOf(cx, cy), dims = pondDims(rx / scale, ry / scale, scale, shp);   // (the same size the planner worked out)
       const p = { x: sp.x, y: sp.y, rx: dims.rx, ry: dims.ry, rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
       const n = 4 + Math.floor(r() * (big ? 3 : 2));
       const keep = scale < 0.6 ? 2 : scale < 0.75 ? 3 : n;          // little ponds get fewer lily pads
@@ -764,8 +796,8 @@
         const a = (i / keep) * Math.PI * 2 + r() * 0.7, pr = (22 + r() * 12) * padS, notch = r() * 6, bloom = r() < 0.5 ? pickFrom(r) : null;
         if (i < keep) p.pads.push({ ...padSpot(p, a, ring, pr), r: pr, notch, bloom });
       }
-      if (scale > 1.1) {   // big ponds get extra lily pads so they don't look empty (large ones get lots)
-        const q = seeded(hash2(cx + 777, cy + 999)), extra = scale > 1.5 ? 7 + Math.floor(q() * 4) + (scale > 2.2 ? 8 : 0) : 2 + Math.floor(q() * 3);
+      if (scale > 0.8) {   // big ponds get extra lily pads so they don't look empty (large ones get lots)
+        const q = seeded(hash2(cx + 777, cy + 999)), extra = Math.round((scale > 1.5 ? 7 + Math.floor(q() * 4) + (scale > 2.2 ? 8 : 0) : 2 + Math.floor(q() * 3)) * 1.8);
         for (let i = 0, tries = 0; i < extra && tries < 60; tries++) {
           const a = q() * Math.PI * 2, rr = scale > 1.5 ? 0.15 + q() * 0.68 : q() < 0.5 ? 0.22 + q() * 0.12 : 0.74 + q() * 0.06, pr = (20 + q() * 12) * padS;
           const { x, y } = pondPoint(p, a, rr);
@@ -777,7 +809,7 @@
       if (r() < 0.7) p.frogPad = Math.floor(r() * n) % keep;
       ch.pond = p;
       // reeds and cattails around the edge (fewer around the little ponds)
-      const nr = big ? 16 : 10;
+      const nr = Math.round((big ? 16 : 10) * 1.4);
       for (let i = 0; i < nr; i++) {
         const a = r() * Math.PI * 2, out = 6 + r() * 14, h = 80 + r() * 90, ph = r() * 6, cat = r() < 0.5;
         if (scale < 0.75 && i % 2) continue;
@@ -920,7 +952,7 @@
   function makeHomePond(ch) {
     const P = HOME_POND, p = { x: P.x, y: P.y, rx: P.rx, ry: P.ry, scale: 1, pads: [], frogPad: 0, said: false, home: true };
     [[-40, -12, 30, null], [24, 22, 27, PETALS[0]], [48, -22, 24, null], [-12, 34, 22, PETALS[2]], [-60, 22, 21, null], [8, -36, 20, null]]
-      .forEach(([dx, dy, r, bloom], i) => p.pads.push({ x: P.x + dx, y: P.y + dy, r, notch: i * 1.7, bloom }));
+      .forEach(([dx, dy, r, bloom], i) => p.pads.push({ x: P.x + dx * 1.4, y: P.y + dy * 1.4, r, notch: i * 1.7, bloom }));
     ch.pond = p;
     const q = seeded(4242);
     for (let i = 0; i < 12; i++) {
@@ -991,9 +1023,11 @@
     rawPonds.set(key, raw);
     return raw;
   }
+  const POND_GROW = 1.7;   // v25: every pond and lake is bigger
   function pondDims(rawRx, rawRy, scale, sh) {
-    let rx = rawRx * scale * sh.st, ry = rawRy * scale / sh.st;
-    const reach = Math.max(rx, ry) * sh.max, LIM = 640;   // even the biggest lake leaves room around it
+    if (sh.round) { const m = (rawRx + rawRy) / 2; rawRx = rawRy = m; }   // a heart or a flower keeps its true shape
+    let rx = rawRx * scale * sh.st * POND_GROW, ry = rawRy * scale / sh.st * POND_GROW;
+    const reach = Math.max(rx, ry) * sh.max, LIM = scale > 1.5 ? 900 : 315;   // a lake leaves room around it (and an everyday pond stays inside its own patch of meadow)
     if (reach > LIM) { rx *= LIM / reach; ry *= LIM / reach; }
     return { rx, ry };
   }
@@ -1008,7 +1042,7 @@
     const raw = rawPond(cx, cy);
     if (!raw || raw.scale <= 1.5 || (Math.abs(cx) <= 2 && Math.abs(cy) <= 2 && !bigPondAt(cx, cy))) return null;   // never right next to where she starts (except the planned big ones)
     const me = placePond(raw, raw.scale);
-    if (!bigPondAt(cx, cy)) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+    if (!bigPondAt(cx, cy)) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {   // v25: lakes are bigger, so look farther
       if (!dx && !dy) continue;
       const n = rawPond(cx + dx, cy + dy);
       if (n && n.scale > 1.5 && (bigPondAt(n.cx, n.cy) || n.h > raw.h)) {   // two large ponds close together: only one of them gets to be large
@@ -1028,7 +1062,7 @@
       if (!sp) {
         sp = placePond(raw, Math.min(raw.scale, 1.25));
         // a large pond next door that would overlap this one takes its place
-        for (let dy = -1; dy <= 1 && sp; dy++) for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -2; dy <= 2 && sp; dy++) for (let dx = -2; dx <= 2; dx++) {
           if (!dx && !dy) continue;
           const L = largePond(cx + dx, cy + dy);
           if (L && Math.hypot(L.x - sp.x, L.y - sp.y) < pondReach(L) + pondReach(sp) + 50) { sp = null; break; }
