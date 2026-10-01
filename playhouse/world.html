@@ -7,7 +7,7 @@
 <title>Lily’s Playhouse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
 <style>
   :root {
     color-scheme: dark;
@@ -260,6 +260,7 @@
 
 <script src="lily-creatures-v4.js"></script>
 <script src="lily-playhouse-design.js"></script>
+<script src="lily-flag-design.js"></script>
 <script>
 (() => {
   "use strict";
@@ -1934,6 +1935,359 @@
     // a soft puff of smoke from the roof
     const SM = PH.chimneySmoke, sm = (time * 0.2) % 1, sp = proj(HOUSE.x + SM.u, HOUSE.y + SM.depth, HOUSE.roofZ - SM.below + sm * 260);
     if (sp) { ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * (1 - sm)})`; ctx.beginPath(); ctx.arc(sp.x, sp.y, (40 + sm * 50) * sp.k, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  // ---------- v33: the playhouse flag (its look lives in lily-flag-design.js) ----------
+  // A tall pole stands on the middle of the roof, above the trees. The flag is a real cloth in the world:
+  // a grid of points that ripples in the breeze, with the flag's picture wrapped onto it, so it turns and
+  // waves as the camera moves around it. At night the flag and the gold ball glow softly.
+  const FLAGD = window.LilyFlag ? window.LilyFlag.design : null;
+  const flagTex = [null, null], flagTexT = [-1, -1];
+  function flagTexture(back) {
+    const i = back ? 1 : 0;
+    if (!flagTex[i]) { flagTex[i] = document.createElement("canvas"); flagTex[i].width = 640; flagTex[i].height = Math.round(640 * FLAGD.flag.height / FLAGD.flag.width); }
+    if (time - flagTexT[i] > 0.12 || flagTexT[i] < 0) { window.LilyFlag.paint(flagTex[i], time, back); flagTexT[i] = time; }   // the sparkles twinkle a few times a second
+    return flagTex[i];
+  }
+  // ---------- v34: a little gold statue of Hop Hop on top of the pole (an homage to the frog who started it all) ----------
+  // Hop Hop is drawn from the creature library, then turned to polished gold: his own shading is kept (so he
+  // still looks round and 3D), his colors become warm gold, and a bright shine sits on top.
+  const goldFrog = { pic: null, src: null, key: "" };
+  const GOLD_RAMP = [[0, [74, 46, 11]], [0.32, [142, 97, 30]], [0.6, [214, 160, 52]], [0.84, [244, 208, 108]], [1, [255, 247, 214]]];
+  function drawGoldFrog(x, y, s, yaw, pitch) {
+    if (!LC || !LC.frog) return;
+    let k = 1; try { const T = ctx.getTransform(); k = Math.hypot(T.a, T.b) || 1; } catch (_) {}
+    const step = Math.ceil(Math.log(Math.max(0.05, s * k)) / Math.log(1.1)), sk = Math.pow(1.1, step), sB = sk / k;
+    const L = 40, TOP = 64, BOT = 10, w = Math.max(2, Math.ceil(2 * L * sk)), h = Math.max(2, Math.ceil((TOP + BOT) * sk));
+    const key = [step, Math.round(yaw * 24), Math.round(pitch * 30), nightness() > 0.5 ? 1 : 0].join(",");
+    if (!goldFrog.pic) { goldFrog.pic = document.createElement("canvas"); goldFrog.src = document.createElement("canvas"); }
+    if (key !== goldFrog.key) {
+      goldFrog.key = key;
+      const P = goldFrog.pic, S2 = goldFrog.src;
+      [P, S2].forEach(cv => { if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } });
+      const a = S2.getContext("2d"); a.setTransform(1, 0, 0, 1, 0, 0); a.clearRect(0, 0, w, h); a.setTransform(k, 0, 0, k, 0, 0);
+      LC.frog.draw(a, L * sB, TOP * sB, sB, yaw, pitch, { t: 0, happy: 1, blink: false });   // smiling, eyes happy, sitting proud
+      const c2 = P.getContext("2d"); c2.setTransform(1, 0, 0, 1, 0, 0); c2.clearRect(0, 0, w, h);
+      c2.drawImage(S2, 0, 0);
+      // polished gold: each bit of Hop Hop keeps how light or dark it is, mapped onto a gold ramp
+      // (deep bronze in the shadows, warm gold in the middle, pale gold where the light hits)
+      const im = c2.getImageData(0, 0, w, h), d = im.data; let lo = 1, hi = 0;
+      for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 128) continue; const Lm = (0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]) / 255; if (Lm < lo) lo = Lm; if (Lm > hi) hi = Lm; }
+      for (let i = 0; i < d.length; i += 4) {
+        if (!d[i + 3]) continue;
+        const Lm = (0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]) / 255, tt = Math.pow(clamp((Lm - lo) / Math.max(0.05, hi - lo), 0, 1), 1.1);
+        let j = 1; while (j < GOLD_RAMP.length - 1 && tt > GOLD_RAMP[j][0]) j++;
+        const A = GOLD_RAMP[j - 1], B = GOLD_RAMP[j], u = clamp((tt - A[0]) / (B[0] - A[0]), 0, 1);
+        d[i] = A[1][0] + (B[1][0] - A[1][0]) * u; d[i + 1] = A[1][1] + (B[1][1] - A[1][1]) * u; d[i + 2] = A[1][2] + (B[1][2] - A[1][2]) * u;
+      }
+      c2.putImageData(im, 0, 0);
+      c2.globalCompositeOperation = "destination-in"; c2.drawImage(S2, 0, 0);                          // only where Hop Hop is
+      c2.globalCompositeOperation = "source-atop";                                                      // a polished shine from the top left
+      const sh = c2.createRadialGradient(w * 0.38, h * 0.3, 0, w * 0.38, h * 0.3, w * 0.42);
+      sh.addColorStop(0, "rgba(255, 250, 220, 0.6)"); sh.addColorStop(0.45, "rgba(255, 240, 190, 0.15)"); sh.addColorStop(1, "rgba(255, 240, 190, 0)");
+      c2.fillStyle = sh; c2.fillRect(0, 0, w, h);
+      c2.globalCompositeOperation = "source-over";
+    }
+    ctx.drawImage(goldFrog.pic, x - L * s, y - TOP * s, w / k * (s / sB), h / k * (s / sB));
+  }
+  // draws image triangle (s0, s1, s2) onto screen triangle (d0, d1, d2)
+  function texTri(img, s0, s1, s2, d0, d1, d2) {
+    const den = (s1[0] - s0[0]) * (s2[1] - s0[1]) - (s2[0] - s0[0]) * (s1[1] - s0[1]); if (!den) return;
+    const a = ((d1.x - d0.x) * (s2[1] - s0[1]) - (d2.x - d0.x) * (s1[1] - s0[1])) / den;
+    const b = ((d1.y - d0.y) * (s2[1] - s0[1]) - (d2.y - d0.y) * (s1[1] - s0[1])) / den;
+    const c = ((d2.x - d0.x) * (s1[0] - s0[0]) - (d1.x - d0.x) * (s2[0] - s0[0])) / den;
+    const d = ((d2.y - d0.y) * (s1[0] - s0[0]) - (d1.y - d0.y) * (s2[0] - s0[0])) / den;
+    const e = d0.x - a * s0[0] - c * s0[1], f = d0.y - b * s0[0] - d * s0[1];
+    // grow the triangle a hair so neighbors meet without seams
+    const mx = (d0.x + d1.x + d2.x) / 3, my = (d0.y + d1.y + d2.y) / 3, g = p => { const vx = p.x - mx, vy = p.y - my, l = Math.hypot(vx, vy) || 1; return [p.x + vx / l * 1.1, p.y + vy / l * 1.1]; };
+    ctx.save(); ctx.beginPath(); const A = g(d0), B = g(d1), C = g(d2); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(C[0], C[1]); ctx.closePath(); ctx.clip();
+    ctx.transform(a, b, c, d, e, f); ctx.drawImage(img, 0, 0); ctx.restore();
+  }
+  let flagGlow = null;
+  function drawFlagGlow() {
+    const G = flagGlow; if (!G) return;
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    if (G.gp) {   // a big soft glow around the flag, so home can be found from far away
+      const g = ctx.createRadialGradient(G.gp.x, G.gp.y, 0, G.gp.x, G.gp.y, G.R);
+      g.addColorStop(0, `rgba(${FLAGD.glow}, ${0.13 * G.N})`); g.addColorStop(1, `rgba(${FLAGD.glow}, 0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(G.gp.x, G.gp.y, G.R, 0, Math.PI * 2); ctx.fill();
+    }
+    if (G.outline.length > 2) {   // the cloth itself softly lit, like a lantern
+      ctx.beginPath(); G.outline.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
+      ctx.fillStyle = `rgba(120, 100, 90, ${0.12 * G.N})`; ctx.fill();
+    }
+    const gl = ctx.createRadialGradient(G.bx, G.by, G.br * 0.8, G.bx, G.by, G.br * 5);   // the gold ball shines
+    gl.addColorStop(0, `rgba(255, 220, 130, ${0.35 * G.N})`); gl.addColorStop(1, "rgba(255, 220, 130, 0)");
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(G.bx, G.by, G.br * 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // where the flagpole stands: in the front yard, to the right of the playhouse
+  const FLAGPOLE = FLAGD ? { x: HOUSE.x + HOUSE.w / 2 + FLAGD.pole.at.right, y: HOUSE.y + HOUSE.d / 2 + FLAGD.pole.at.front } : null;
+  // ---------- v36: the pollinator garden in the flagpole's planter ----------
+  const POLLI = (() => {
+    if (!FLAGD) return [];
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const kinds = ["cone", "susan", "lavender", "balm", "milkweed", "salvia", "aster", "goldenrod", "sunny"], out = [], R = FLAGD.pole.base.r;
+    [[0.2, 10], [0.38, 17], [0.56, 24], [0.76, 34]].forEach(([rf, n], ri) => {
+      for (let i = 0; i < n; i++) {
+        const t = (i + rnd() * 0.6) / n * Math.PI * 2 + ri;
+        const r = R * Math.min(0.79, rf + (rnd() - 0.5) * 0.06);
+        out.push({ dx: Math.cos(t) * r, dy: Math.sin(t) * r, kind: kinds[Math.floor(rnd() * kinds.length)],
+          h: [118, 98, 80, 62][ri] * (0.7 + rnd() * 0.6), ph: rnd() * 6.28, sz: 0.95 + rnd() * 0.95 });
+      }
+    });
+    return out;
+  })();
+  function drawPolliFlower(fl, px, py, z0, k) {
+    const b = proj(px + fl.dx, py + fl.dy, z0), sway = Math.sin(time * 1.3 + fl.ph) * (reduceMotion ? 1 : 3);
+    const h = proj(px + fl.dx + sway, py + fl.dy, z0 + fl.h);
+    if (!b || !h) return;
+    const s = h.k * (fl.sz || 1);   // screen pixels per world unit at the flower (the garden flowers are big and showy)
+    // stem and a couple of leaves
+    ctx.strokeStyle = fl.kind === "lavender" ? "#7FA889" : "#5FAE68"; ctx.lineWidth = Math.max(0.8, 3.2 * s); ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(b.x + sway * s * 0.5, (b.y + h.y) / 2, h.x, h.y); ctx.stroke();
+    if (fl.kind !== "lavender" && fl.kind !== "salvia") {
+      ctx.fillStyle = "#6CBF74";
+      const lx = (b.x * 0.6 + h.x * 0.4), ly = (b.y * 0.6 + h.y * 0.4);
+      ctx.beginPath(); ctx.ellipse(lx - 7 * s, ly, 9 * s, 3.2 * s, 0.5, 0, Math.PI * 2); ctx.ellipse(lx + 7 * s, ly - 6 * s, 8 * s, 3 * s, -0.5, 0, Math.PI * 2); ctx.fill();
+    }
+    const x = h.x, y = h.y;
+    if (fl.kind === "cone") {          // purple coneflower: pink petals that droop down around a tall orange cone
+      for (let i = 0; i < 10; i++) {
+        const a = i / 10 * Math.PI * 2, cx = Math.cos(a), sy = Math.sin(a);
+        ctx.fillStyle = i % 2 ? "#E58BC1" : "#EE9FCD";
+        ctx.beginPath(); ctx.ellipse(x + cx * 9 * s, y + 4 * s + Math.abs(sy) * 3 * s + (sy > 0 ? 2 * s : 0), 8 * s, 2.6 * s, a * 0.35 + (cx > 0 ? 0.35 : -0.35), 0, Math.PI * 2); ctx.fill();
+      }
+      const g = ctx.createRadialGradient(x - 2 * s, y - 4 * s, 0.5 * s, x, y - 2 * s, 7 * s);
+      g.addColorStop(0, "#F2A65A"); g.addColorStop(1, "#B5622A");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 1 * s, 5.5 * s, 6.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (fl.kind === "susan") {  // black-eyed Susan: golden petals around a dark brown middle
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2;
+        ctx.fillStyle = i % 2 ? "#F7B731" : "#FFC93C";
+        ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 8 * s, y + Math.sin(a) * 4.2 * s, 6.5 * s, 2.4 * s, Math.atan2(Math.sin(a) * 0.52, Math.cos(a)), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = "#4A2B17"; ctx.beginPath(); ctx.ellipse(x, y - 0.5 * s, 4.2 * s, 3.4 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255, 220, 160, 0.35)"; ctx.beginPath(); ctx.arc(x - 1.2 * s, y - 1.6 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+    } else if (fl.kind === "lavender") { // lavender: slim stems topped with spikes of tiny purple buds
+      for (let st = -1; st <= 1; st++) {
+        const tx = x + st * 6 * s, ty = y + Math.abs(st) * 6 * s;
+        ctx.strokeStyle = "#7FA889"; ctx.lineWidth = Math.max(0.6, 1.6 * s);
+        ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(tx, ty + 14 * s); ctx.stroke();
+        for (let j = 0; j < 7; j++) { ctx.fillStyle = j % 2 ? "#9D7FD6" : "#B597E8"; ctx.beginPath(); ctx.ellipse(tx + (j % 2 ? 1.6 : -1.6) * s, ty + 14 * s - j * 3.4 * s, 2.1 * s, 2.6 * s, 0, 0, Math.PI * 2); ctx.fill(); }
+      }
+    } else if (fl.kind === "balm") {   // bee balm: a shaggy crown of thin red-pink petals pointing out and up
+      for (let i = 0; i < 16; i++) {
+        const a = -Math.PI + i / 15 * Math.PI, len = 11 * s;
+        ctx.strokeStyle = i % 2 ? "#E8556F" : "#F2708A"; ctx.lineWidth = Math.max(0.8, 2.2 * s);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(a) * len * 0.5, y + Math.sin(a) * len * 0.6 - 2 * s, x + Math.cos(a) * len, y + Math.sin(a) * len * 0.8); ctx.stroke();
+      }
+      ctx.fillStyle = "#B8405A"; ctx.beginPath(); ctx.ellipse(x, y, 4 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (fl.kind === "milkweed") { // milkweed: a round cluster of tiny pink star flowers (monarchs love it)
+      for (let i = 0; i < 14; i++) {
+        const a = i * 2.4, r = Math.sqrt(i / 14) * 8 * s, fx = x + Math.cos(a) * r, fy = y - 3 * s + Math.sin(a) * r * 0.75;
+        ctx.fillStyle = i % 3 ? "#F4A3BE" : "#E687A8";
+        ctx.beginPath(); for (let p = 0; p < 5; p++) { const pa = p / 5 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(fx + Math.cos(pa) * 2.4 * s, fy + Math.sin(pa) * 2.4 * s); ctx.lineTo(fx + Math.cos(pa + 0.63) * 1 * s, fy + Math.sin(pa + 0.63) * 1 * s); } ctx.closePath(); ctx.fill();
+      }
+    } else if (fl.kind === "aster") {  // aster: lots of thin purple petals around a little yellow middle
+      for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; ctx.strokeStyle = i % 2 ? "#9B7FE0" : "#B39AF0"; ctx.lineWidth = Math.max(0.7, 1.8 * s);
+        ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 2.5 * s, y + Math.sin(a) * 1.4 * s); ctx.lineTo(x + Math.cos(a) * 8.5 * s, y + Math.sin(a) * 4.6 * s); ctx.stroke(); }
+      ctx.fillStyle = "#FFD447"; ctx.beginPath(); ctx.ellipse(x, y, 3 * s, 2.2 * s, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (fl.kind === "goldenrod") { // goldenrod: soft arching plumes of tiny golden flowers
+      [-1, 0, 1].forEach(br => { for (let j = 0; j < 9; j++) { const u = j / 8, bx = x + br * (4 + u * 9) * s, by = y + 6 * s - u * 14 * s + br * br * u * u * 6 * s;
+        ctx.fillStyle = j % 2 ? "#F2C230" : "#FFD84D"; ctx.beginPath(); ctx.arc(bx, by, (2.4 - u * 0.9) * s, 0, Math.PI * 2); ctx.fill(); } });
+    } else if (fl.kind === "sunny") {  // little sunflower: bright yellow petals around a big brown middle
+      for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; ctx.fillStyle = i % 2 ? "#FFB81C" : "#FFD23F";
+        ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 10 * s, y + Math.sin(a) * 6 * s, 6 * s, 2.6 * s, Math.atan2(Math.sin(a) * 0.6, Math.cos(a)), 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#6E4526"; ctx.beginPath(); ctx.ellipse(x, y, 6 * s, 4.4 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#8E5A32"; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(x + Math.cos(i * 2.4) * 3 * s, y + Math.sin(i * 2.4) * 2 * s, 0.8 * s, 0, Math.PI * 2); ctx.fill(); }
+    } else {                           // salvia: tall spikes of deep violet-blue flowers
+      for (let j = 0; j < 8; j++) { ctx.fillStyle = j % 2 ? "#5B5FC7" : "#7173D9"; ctx.beginPath(); ctx.ellipse(x + (j % 2 ? 2 : -2) * s, y + 18 * s - j * 3.6 * s, 2.4 * s, 3 * s, j % 2 ? 0.5 : -0.5, 0, Math.PI * 2); ctx.fill(); }
+    }
+  }
+  // bees and butterflies that always visit the garden, drifting from flower to flower
+  function drawPolliVisitors(px, py, z0, front, poleF) {
+    const R = FLAGD.pole.base.r;
+    [["bee", 0, "ours"], ["bee", 2.3, "pink"], ["bee", 4.1, "mint"], ["fly", 1.2, ["#FFB34D", "#FFE0A8"]], ["fly", 3.4, ["#C9A7F0", "#EBDDFF"]]].forEach(([kind, ph, col], i) => {
+      const t = time * (kind === "bee" ? 0.35 : 0.22) + ph;
+      const wx = px + Math.cos(t) * R * (0.55 + 0.25 * Math.sin(t * 1.7 + i)), wy = py + Math.sin(t * 1.3) * R * 0.6;
+      const wz = z0 + 95 + Math.sin(t * 2.6 + i) * 22 + (kind === "fly" ? 30 : 0);
+      if ((camF(wx, wy) < poleF) !== front) return;
+      const q = proj(wx, wy, wz); if (!q) return;
+      const vx = -Math.sin(t), vy = Math.cos(t), dir = (-vx * camS + vy * camC) >= 0 ? 1 : -1;
+      if (kind === "bee") { if (LC) LC.bee.draw(ctx, q.x, q.y, 0.34 * q.k, dir * (Math.PI / 2 + 0.3), 0.15, { t: time, ph: ph, pal: col, flying: true, lift: 0, speed: 30 }); }
+      else drawButterfly(q.x, q.y, 1.1 * q.k, dir, time + ph, col);
+    });
+  }
+  // is a spot inside the flagpole's planter (plus a little room around it)? Meadow plants don't grow there.
+  function inPlanter(x, y, pad) { return !!FLAGPOLE && Math.hypot(x - FLAGPOLE.x, y - FLAGPOLE.y) < FLAGD.pole.base.r + (pad || 0); }
+  // the front of the planter, drawn last so it always covers the plants inside it: the front of the stone wall
+  // and the front half of the rim's top, between the soil and the outer edge
+  function drawPlanterFront(px, py, B) {
+    const ring = (z, r) => { const pts = []; for (let i = 0; i < 48; i++) { const t = i / 48 * Math.PI * 2; pts.push(proj(px + Math.cos(t) * r, py + Math.sin(t) * r, z)); } return pts; };
+    const bot = ring(0, B.r), top = ring(B.h, B.r), inner = ring(B.h + 1, B.r * 0.84);
+    if (![...bot, ...top, ...inner].every(Boolean)) return;
+    // the front half of a ring on screen: from its leftmost point to its rightmost point, along the lower side
+    const frontArc = pts => {
+      const xs = pts.map(p => p.x), l = xs.indexOf(Math.min(...xs)), r = xs.indexOf(Math.max(...xs)), n = pts.length;
+      const step = pts[(l + 1) % n].y > pts[(l + n - 1) % n].y ? 1 : -1, out = [];
+      for (let i = l, c = 0; c <= n; c++) { out.push(pts[i]); if (i === r) break; i = (i + step + n) % n; }
+      return out;
+    };
+    const fb = frontArc(bot), ft = frontArc(top), fi = frontArc(inner);
+    // the wall
+    const l = ft[0].x, r = ft[ft.length - 1].x, sg = ctx.createLinearGradient(l, 0, r, 0);
+    sg.addColorStop(0, B.stone[0]); sg.addColorStop(0.5, B.stone[1]); sg.addColorStop(1, B.stone[2]);
+    ctx.fillStyle = sg; ctx.beginPath();
+    ft.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    for (let i = fb.length - 1; i >= 0; i--) ctx.lineTo(fb[i].x, fb[i].y);
+    ctx.closePath(); ctx.fill();
+    // the front of the rim's top
+    ctx.fillStyle = B.stone[0]; ctx.beginPath();
+    ft.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    for (let i = fi.length - 1; i >= 0; i--) ctx.lineTo(fi[i].x, fi[i].y);
+    ctx.closePath(); ctx.fill();
+    // a soft line where the rim's top meets the wall
+    ctx.strokeStyle = "rgba(160, 140, 120, 0.35)"; ctx.lineWidth = Math.max(0.6, 1.2 * ft[0].k);
+    ctx.beginPath(); ft.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke();
+  }
+  function drawFlagpole() {
+    const f = camF(FLAGPOLE.x, FLAGPOLE.y), a = clamp((Math.max(5000, farReach() + 1500) - f) / 1500, 0, 1);   // seen from far away, like the playhouse
+    drawFlag(a * (f < 120 ? clamp((f - 45) / 75, 0, 1) : 1));
+  }
+  function drawFlag(alpha) {
+    if (!FLAGD || alpha <= 0.01) return;
+    const D = FLAGD, N = nightness(), B = D.pole.base;
+    const px = FLAGPOLE.x, py = FLAGPOLE.y, z0 = B.h, zTop = D.pole.height;
+    const pb = proj(px, py, z0), pt = proj(px, py, zTop);
+    if (!pb || !pt) return;
+    ctx.save(); ctx.globalAlpha = alpha;
+    flagGlow = null;
+    // its soft shadow on the grass
+    softGround(px + 40, py + 20, B.r * 1.5, B.r * 1.1, 0, "60, 100, 50", 0.28, 5, 0.6);
+    // the round stone base (a low planter) with flowers around the pole
+    const ring = (z, r) => { const pts = []; for (let i = 0; i < 28; i++) { const t = i / 28 * Math.PI * 2; pts.push([px + Math.cos(t) * r, py + Math.sin(t) * r, z]); } return pts; };
+    const g0 = proj(px, py, 0);
+    if (g0) {
+      // the side of the planter: the band between the bottom ring and the top ring, lit from the left
+      const bot = ring(0, B.r).map(p => proj(...p)), top = ring(B.h, B.r).map(p => proj(...p));
+      if (bot.every(Boolean) && top.every(Boolean)) {
+        const xs = bot.map(p => p.x), l = Math.min(...xs), r = Math.max(...xs);
+        const sg = ctx.createLinearGradient(l, 0, r, 0);
+        sg.addColorStop(0, B.stone[0]); sg.addColorStop(0.5, B.stone[1]); sg.addColorStop(1, B.stone[2]);
+        ctx.fillStyle = sg;
+        ctx.beginPath(); bot.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill();
+        // the side wall: fill the shape between the two rings
+        const li = xs.indexOf(l), ri = xs.indexOf(r);
+        ctx.beginPath(); ctx.moveTo(bot[li].x, bot[li].y); ctx.lineTo(top[li].x, top[li].y); ctx.lineTo(top[ri].x, top[ri].y); ctx.lineTo(bot[ri].x, bot[ri].y); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); top.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
+        ctx.fillStyle = B.stone[0]; ctx.fill();
+        // soil and flowers inside the rim
+        const soil = ring(B.h + 1, B.r * 0.84).map(p => proj(...p));
+        if (soil.every(Boolean)) {
+          ctx.beginPath(); soil.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
+          ctx.fillStyle = B.soil; ctx.fill();
+        }
+      }
+    }
+    const poleF = camF(px, py), garden = POLLI.map(fl => ({ fl, f: camF(px + fl.dx, py + fl.dy) }));
+    // nothing in the garden may hang down over the front of the planter's wall: clip to the top of the rim
+    const rimPts = ring(B.h, B.r * 0.97).map(p => proj(...p));
+    let clipped = false, clipPath = null;
+    if (rimPts.every(Boolean)) {
+      const xs2 = rimPts.map(p => p.x), lI = xs2.indexOf(Math.min(...xs2)), rI = xs2.indexOf(Math.max(...xs2));
+      const cyR = (rimPts[lI].y + rimPts[rI].y) / 2, n = rimPts.length;
+      // walk the front half of the rim (the half lower on screen) from left to right
+      const front = []; let i = lI, step = rimPts[(lI + 1) % n].y > rimPts[(lI + n - 1) % n].y ? 1 : -1;
+      for (let c = 0; c <= n; c++) { front.push(rimPts[i]); if (i === rI) break; i = (i + step + n) % n; }
+      const wide = W * 2;
+      clipPath = new Path2D(); clipPath.moveTo(rimPts[lI].x - wide, cyR); clipPath.lineTo(rimPts[lI].x, rimPts[lI].y);
+      front.forEach(p => clipPath.lineTo(p.x, p.y));
+      clipPath.lineTo(rimPts[rI].x + wide, cyR); clipPath.lineTo(rimPts[rI].x + wide, -H * 4); clipPath.lineTo(rimPts[lI].x - wide, -H * 4); clipPath.closePath();
+      ctx.save(); ctx.clip(clipPath); clipped = true;
+    }
+    // soft leafy greens filling the bed, so the flowers grow out of a full, lush planting
+    for (let i = 0; i < 44; i++) {
+      const t = i * 2.4, r = Math.sqrt((i + 0.5) / 44) * B.r * 0.84, q = proj(px + Math.cos(t) * r, py + Math.sin(t) * r, B.h + 4);
+      if (!q) continue;
+      const rr = Math.max(1.2, 26 * q.k);
+      ctx.fillStyle = i % 3 ? "#78C27C" : "#62B06A";
+      ctx.beginPath(); ctx.ellipse(q.x, q.y - rr * 0.3, rr * 1.2, rr * 0.6, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = "rgba(255, 255, 255, 0.18)"; ctx.beginPath(); ctx.ellipse(q.x - rr * 0.3, q.y - rr * 0.6, rr * 0.5, rr * 0.18, -0.2, 0, Math.PI * 2); ctx.fill();
+    }
+    garden.filter(g => g.f >= poleF && !g.fl.hangsOver).sort((p, q) => q.f - p.f).forEach(g => drawPolliFlower(g.fl, px, py, B.h, pb.k));
+    if (clipped) ctx.restore();
+    drawPolliVisitors(px, py, B.h, false, poleF);
+    // the pole: white, a little thicker at the bottom, lit from the left
+    const pwT = Math.max(1.2, D.pole.width * pt.k), pwB = Math.max(1.6, D.pole.widthBase * pb.k);
+    const pg = ctx.createLinearGradient(pb.x - pwB, 0, pb.x + pwB, 0);
+    pg.addColorStop(0, D.pole.color[0]); pg.addColorStop(0.4, D.pole.color[1]); pg.addColorStop(1, D.pole.color[2]);
+    ctx.fillStyle = pg;
+    ctx.beginPath(); ctx.moveTo(pb.x - pwB / 2, pb.y); ctx.lineTo(pt.x - pwT / 2, pt.y); ctx.lineTo(pt.x + pwT / 2, pt.y); ctx.lineTo(pb.x + pwB / 2, pb.y); ctx.closePath(); ctx.fill();
+    if (clipped) { ctx.save(); ctx.clip(clipPath); }
+    garden.filter(g => g.f < poleF && !g.fl.hangsOver).sort((p, q) => q.f - p.f).forEach(g => drawPolliFlower(g.fl, px, py, B.h, pb.k));
+    if (clipped) ctx.restore();
+    drawPolliVisitors(px, py, B.h, true, poleF);
+    drawPlanterFront(px, py, B);
+    // RULE (Jessica, Oct 1): the planter's wall is always in front of every plant growing in it. Only a plant
+    // made to hang over the edge (hangsOver: true, like a trailing vine) may be drawn on top of the wall.
+    garden.filter(g => g.fl.hangsOver).sort((p, q) => q.f - p.f).forEach(g => drawPolliFlower(g.fl, px, py, B.h, pb.k));
+    // a little cleat near the bottom where the rope is tied, and the rope running up to the top
+    const cl = proj(px + 24, py, 260), clTop = proj(px + 18, py, zTop - 20);
+    if (cl && clTop) {
+      ctx.strokeStyle = D.pole.rope; ctx.lineWidth = Math.max(0.6, 3 * cl.k); ctx.lineCap = "round";
+      const sway = Math.sin(time * 1.4) * 6 * cl.k;
+      ctx.beginPath(); ctx.moveTo(cl.x, cl.y); ctx.quadraticCurveTo((cl.x + clTop.x) / 2 + sway + 4 * cl.k, (cl.y + clTop.y) / 2, clTop.x, clTop.y); ctx.stroke();
+      ctx.fillStyle = "#C9BCAE"; ctx.beginPath(); ctx.ellipse(cl.x, cl.y, Math.max(1.4, 10 * cl.k), Math.max(0.8, 4 * cl.k), 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // the waving cloth: u runs from the pole out to the free end, v from the top down
+    const fw = D.flag.width, fh = D.flag.height, amp = D.flag.wave * (reduceMotion ? 0.3 : 1);
+    const near = pt.k * fw > 70, NX = near ? 14 : 4, NY = near ? 7 : 2;
+    const at = (u, v) => {
+      const w = Math.sin(time * 2.4 - u * 4.6) * amp * u + Math.sin(time * 1.3 + v * 2.2) * amp * 0.25 * u;
+      return proj(px + u * fw * 0.97, py + w, zTop - 34 - v * fh - u * u * 16);
+    };
+    const grid = [];
+    for (let j = 0; j <= NY; j++) { const row = []; for (let i = 0; i <= NX; i++) row.push(at(i / NX, j / NY)); grid.push(row); }
+    // which side of the flag faces you? (seen from behind, the back picture is used, so the words read correctly)
+    const c00 = grid[0][0], c10 = grid[0][NX], c01 = grid[NY][0];
+    const back = c00 && c10 && c01 ? ((c10.x - c00.x) * (c01.y - c00.y) - (c10.y - c00.y) * (c01.x - c00.x)) < 0 : false;
+    const tex = flagTexture(back), TW = tex.width, TH = tex.height;
+    const tx = i => (back ? 1 - i / NX : i / NX) * TW;
+    for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
+      const p00 = grid[j][i], p10 = grid[j][i + 1], p01 = grid[j + 1][i], p11 = grid[j + 1][i + 1];
+      if (!p00 || !p10 || !p01 || !p11) continue;
+      const s00 = [tx(i), j / NY * TH], s10 = [tx(i + 1), j / NY * TH], s01 = [tx(i), (j + 1) / NY * TH], s11 = [tx(i + 1), (j + 1) / NY * TH];
+      texTri(tex, s00, s10, s11, p00, p10, p11);
+      texTri(tex, s00, s11, s01, p00, p11, p01);
+      // soft light and shade on the ripples
+      const sl = Math.cos(time * 2.4 - (i + 0.5) / NX * 4.6) * ((i + 0.5) / NX);
+      ctx.beginPath(); ctx.moveTo(p00.x, p00.y); ctx.lineTo(p10.x, p10.y); ctx.lineTo(p11.x, p11.y); ctx.lineTo(p01.x, p01.y); ctx.closePath();
+      ctx.fillStyle = sl > 0 ? `rgba(255, 255, 255, ${0.14 * sl})` : `rgba(90, 60, 120, ${-0.12 * sl})`; ctx.fill();
+    }
+    // the two gold rings that clip the flag's sleeve onto the pole
+    [0.1, 0.9].forEach(v => {
+      const rp = proj(px, py, zTop - 34 - v * fh); if (!rp) return;
+      const rw = Math.max(1.6, D.pole.width * 1.5 * rp.k), rh = rw * 0.45;
+      ctx.strokeStyle = "#E9C15E"; ctx.lineWidth = Math.max(1, rw * 0.35);
+      ctx.beginPath(); ctx.ellipse(rp.x, rp.y, rw, rh, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = "rgba(255, 246, 210, 0.8)"; ctx.lineWidth = Math.max(0.6, rw * 0.12);
+      ctx.beginPath(); ctx.ellipse(rp.x, rp.y, rw, rh, 0, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+    });
+    // a little gold cap on the pole and a gold statue of Hop Hop sitting on it, facing out over the meadow
+    const br = Math.max(2.2, D.pole.ball * pt.k), bx = pt.x, by = pt.y - br * 0.6;
+    const capR = Math.max(2, 34 * pt.k), capH = capR * 0.32;
+    const cg = ctx.createLinearGradient(pt.x - capR, 0, pt.x + capR, 0);
+    cg.addColorStop(0, "#B38A3E"); cg.addColorStop(0.4, "#FFF0B8"); cg.addColorStop(1, "#A9803A");
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(pt.x, pt.y, capR, capH, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E9C15E"; ctx.beginPath(); ctx.ellipse(pt.x, pt.y - capH * 0.5, capR * 0.92, capH * 0.8, 0, 0, Math.PI * 2); ctx.fill();
+    const frogS = 2.6 * pt.k, frogYaw = angDiff(Math.PI / 2, camYaw), frogPitch = Math.atan2(Math.max(10, camH - zTop), Math.max(30, pt.f));
+    if (pt.k * 110 > 3) drawGoldFrog(pt.x, pt.y - capH * 0.6, frogS, frogYaw, frogPitch);
+    if (N > 0.02) {   // remembered for the night glow, drawn after the evening light so it really glows
+      const outline = [...grid[0], ...grid[NY].slice().reverse()].filter(Boolean);
+      const gp = proj(px + fw * 0.5, py, zTop - 34 - fh * 0.5);
+      flagGlow = { N: N * alpha, outline, gp, R: gp ? Math.max(30, fw * 1.3 * gp.k) : 0, bx, by: pt.y - 40 * pt.k, br: Math.max(3, 30 * pt.k) };
+    }
     ctx.restore();
   }
   function drawHouseLights() {}
@@ -5008,10 +5362,11 @@
     residentHits = []; houseScreen = null;
     const inView = (p, m) => p && p.x > -m && p.x < W + m;
     list.forEach(ch => {
-      ch.tufts.forEach(t => { const p = proj(t.x, t.y, 0); if (inView(p, 60) && p.f < 950 && p.f > 80) items.push({ f: p.f, d: () => drawTuft(t, p) }); });
-      ch.rocks.forEach(r => { const p = proj(r.x, r.y, 0); if (inView(p, 80)) items.push({ f: p.f, d: () => drawRock(r, p) }); });
-      ch.shrooms.forEach(m => { const p = proj(m.x, m.y, 0); if (inView(p, m.w * (p ? p.k : 1) + 40)) items.push({ f: p.f, d: () => drawShroom(m, p) }); });
+      ch.tufts.forEach(t => { if (inPlanter(t.x, t.y, 20)) return; const p = proj(t.x, t.y, 0); if (inView(p, 60) && p.f < 950 && p.f > 80) items.push({ f: p.f, d: () => drawTuft(t, p) }); });
+      ch.rocks.forEach(r => { if (inPlanter(r.x, r.y, 30)) return; const p = proj(r.x, r.y, 0); if (inView(p, 80)) items.push({ f: p.f, d: () => drawRock(r, p) }); });
+      ch.shrooms.forEach(m => { if (inPlanter(m.x, m.y, 30)) return; const p = proj(m.x, m.y, 0); if (inView(p, m.w * (p ? p.k : 1) + 40)) items.push({ f: p.f, d: () => drawShroom(m, p) }); });
       ch.flowers.forEach(fl => {
+        if (inPlanter(fl.x, fl.y, 40)) return;
         const pb = proj(fl.x, fl.y, 0), ph = proj(fl.x, fl.y, fl.h);
         if (!pb || !ph || !inView(pb, fl.R * pb.k + 40)) return;
         items.push({ f: pb.f + 0.6, d: () => drawFlower(fl, pb, ph) });
@@ -5024,11 +5379,11 @@
           }
         }
       });
-      ch.reeds.forEach(rd => { const p = proj(rd.x, rd.y, 0); if (p && p.f > 80 && inView(p, 60)) items.push({ f: p.f, d: () => drawReed(rd, p) }); });
-      ch.lavender.forEach(l => { const p = proj(l.x, l.y, 0); if (p && p.f > 80 && p.f < 950 && inView(p, 40)) items.push({ f: p.f, d: () => drawLavender(l, p) }); });
-      ch.clovers.forEach(c => { const p = proj(c.x, c.y, 0); if (p && p.f > 60 && p.f < 800 && inView(p, 40)) items.push({ f: p.f, d: () => drawClover(c, p) }); });
-      ch.bushes.forEach(b => { const p = proj(b.x, b.y, 0); if (p && p.f > 70 && inView(p, b.br * 1.6 * p.k + 30)) items.push({ f: p.f, d: () => drawBush19(b, p) }); });
-      ch.puffs.forEach(d => { const pb = proj(d.x, d.y, 0), ph = proj(d.x, d.y, d.h); if (pb && ph && pb.f > 80 && inView(pb, 80)) items.push({ f: pb.f, d: () => drawPuff(d, pb, ph) }); });
+      ch.reeds.forEach(rd => { if (inPlanter(rd.x, rd.y, 20)) return; const p = proj(rd.x, rd.y, 0); if (p && p.f > 80 && inView(p, 60)) items.push({ f: p.f, d: () => drawReed(rd, p) }); });
+      ch.lavender.forEach(l => { if (inPlanter(l.x, l.y, 20)) return; const p = proj(l.x, l.y, 0); if (p && p.f > 80 && p.f < 950 && inView(p, 40)) items.push({ f: p.f, d: () => drawLavender(l, p) }); });
+      ch.clovers.forEach(c => { if (inPlanter(c.x, c.y, 20)) return; const p = proj(c.x, c.y, 0); if (p && p.f > 60 && p.f < 800 && inView(p, 40)) items.push({ f: p.f, d: () => drawClover(c, p) }); });
+      ch.bushes.forEach(b => { if (inPlanter(b.x, b.y, 60)) return; const p = proj(b.x, b.y, 0); if (p && p.f > 70 && inView(p, b.br * 1.6 * p.k + 30)) items.push({ f: p.f, d: () => drawBush19(b, p) }); });
+      ch.puffs.forEach(d => { if (inPlanter(d.x, d.y, 20)) return; const pb = proj(d.x, d.y, 0), ph = proj(d.x, d.y, d.h); if (pb && ph && pb.f > 80 && inView(pb, 80)) items.push({ f: pb.f, d: () => drawPuff(d, pb, ph) }); });
       ch.trees.forEach(t => {
         const p = proj(t.x, t.y, 0);
         if (p && p.f > 90 && inView(p, t.w * 5 * p.k + 60)) items.push({ f: p.f, d: () => drawTree(t, p) });
@@ -5131,6 +5486,7 @@
     }
     // the playhouse
     { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), d: () => drawHouse() }); }
+    if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, d: () => drawFlagpole() }); }
     if (friend) {
       const p = proj(friend.x, friend.y, friend.z);
       if (inView(p, 80)) {
@@ -5154,6 +5510,7 @@
     drawParticles();
     drawChargeMeter();
     drawLight(dusk);
+    drawFlagGlow(); flagGlow = null;
     {
       const vg = ctx.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.45, W / 2, H * 0.5, Math.max(W, H) * 0.8);
       vg.addColorStop(0, "rgba(40, 30, 70, 0)"); vg.addColorStop(1, "rgba(40, 30, 70, 0.16)");
@@ -5683,7 +6040,8 @@
 
   // ---------- loop ----------
   let last = performance.now();
-  window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }) };
+  window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }),
+    look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
   let bgTick = null;
   document.addEventListener("visibilitychange", () => {
