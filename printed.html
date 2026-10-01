@@ -208,6 +208,7 @@
     .site-header .nav-links { flex-shrink: 0; }
     .site-header .nav-brand { flex-shrink: 1; min-width: 0; }
     @media (max-width: 1540px) { .site-header .nav-badge { display: none; } }
+    .site-header .nav-badge.is-tight { display: none; }
     @media (min-width: 769px) and (max-width: 1200px) {
       .site-header .nav-flower { width: 120px; }
       .site-header .nav-flower img { width: 130px; height: 130px; top: -4px; }
@@ -261,7 +262,6 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links">
-        <li><a href="/skills.html" id="nav-skills">Skills</a></li>
         <li><a href="/apps.html" id="nav-apps">Apps</a></li>
         <li><a href="/printed.html" id="nav-printed" class="active">Printed</a></li>
         <li><a href="/playhouse/" id="nav-games">Lily’s Playhouse</a></li>
@@ -321,6 +321,25 @@
       lastY = y;
     }, { passive: true });
   })();
+</script>
+<script>
+/* Header guard (update 20): hide the "Est. 2026" badge whenever it would touch the menu,
+   on any screen size and any browser zoom, so it can never sit on top of a menu link. */
+(function () {
+  var badge = document.querySelector('.site-header .nav-badge');
+  var links = document.querySelector('.site-header .nav-links');
+  if (!badge || !links) return;
+  function fit() {
+    badge.classList.remove('is-tight');
+    if (getComputedStyle(badge).display === 'none' || getComputedStyle(links).display === 'none') return;
+    if (badge.getBoundingClientRect().right + 24 > links.getBoundingClientRect().left) badge.classList.add('is-tight');
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(links);
+})();
 </script>
 </body>
 </html>
