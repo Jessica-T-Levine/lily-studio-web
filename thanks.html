@@ -197,6 +197,41 @@
       .site-header .nav-links a { font-size: 0.64rem; letter-spacing: 0.08em; }
       .site-header .nav-links a.nav-cta { padding: 9px 12px !important; }
     }
+  
+    /* ===== Update 21: the Lily's Playhouse dropdown ("Play Games") =====
+       Computer: hover over "Lily's Playhouse" (or press the little arrow).
+       iPad and phone: tap the little arrow; tapping the words still goes to the Playhouse.
+       Phone menu (the three lines): "Play Games" sits right under Lily's Playhouse. */
+    .site-header .nav-drop { position: relative; display: flex; align-items: center; gap: 4px; }
+    .site-header .nav-drop-btn { background: none; border: 0; padding: 8px 6px; margin: -8px -6px -8px 0; color: #CCCFD4; cursor: pointer; display: grid; place-items: center; border-radius: 6px; -webkit-tap-highlight-color: transparent; }
+    .site-header .nav-drop-btn svg { width: 12px; height: 12px; display: block; transition: transform 0.25s ease; }
+    .site-header .nav-drop-btn:hover, .site-header .nav-drop.open .nav-drop-btn { color: #F966BC; }
+    .site-header .nav-drop-btn:focus-visible { outline: 2px solid #F966BC; outline-offset: 2px; }
+    .site-header .nav-drop.open .nav-drop-btn svg { transform: rotate(180deg); }
+    .site-header .nav-drop-menu { position: absolute; top: 100%; left: 50%; padding-top: 16px; transform: translate(-50%, 6px); opacity: 0; visibility: hidden; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s; z-index: 130; }
+    .site-header .nav-drop.open .nav-drop-menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s; }
+    @media (hover: hover) and (min-width: 769px) {
+      .site-header .nav-drop:hover .nav-drop-menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s; }
+      .site-header .nav-drop:hover .nav-drop-btn { color: #F966BC; }
+      .site-header .nav-drop:hover .nav-drop-btn svg { transform: rotate(180deg); }
+    }
+    .site-header .nav-drop-panel { list-style: none; margin: 0; padding: 8px; min-width: 200px; background: rgba(6, 18, 42, 0.98); border: 1px solid #233554; border-radius: 12px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 18px rgba(249, 102, 188, 0.12); position: relative; }
+    .site-header .nav-drop-panel::before { content: ""; position: absolute; top: -7px; left: 50%; width: 12px; height: 12px; background: rgba(6, 18, 42, 0.98); border-left: 1px solid #233554; border-top: 1px solid #233554; transform: translateX(-50%) rotate(45deg); }
+    .site-header .nav-links .nav-drop-panel a { display: block; padding: 12px 16px; border-radius: 8px; white-space: nowrap; text-align: center; color: #FDFBF7; position: relative; }
+    .site-header .nav-links .nav-drop-panel a::after { display: none; }
+    .site-header .nav-links .nav-drop-panel a:hover, .site-header .nav-links .nav-drop-panel a:focus-visible, .site-header .nav-links .nav-drop-panel a[aria-current="page"] { background: rgba(249, 102, 188, 0.12); color: #F966BC; text-shadow: none; }
+    .site-header .nav-links .nav-drop-panel a:focus-visible { outline: 2px solid #F966BC; outline-offset: 1px; }
+    @media (max-width: 768px) {
+      .site-header .nav-links { background: #06122A !important; }   /* solid, so the page never shows through the open phone menu */
+      .site-header .nav-drop { flex-direction: column; align-items: center; gap: 0; }
+      .site-header .nav-drop-btn { display: none; }
+      .site-header .nav-drop-menu { position: static; padding: 12px 0 0; transform: none; opacity: 1; visibility: visible; transition: none; }
+      .site-header .nav-drop-panel { padding: 0; min-width: 0; background: none; border: 0; box-shadow: none; }
+      .site-header .nav-drop-panel::before { display: none; }
+      .site-header .nav-links .nav-drop-panel a { display: inline-block; padding: 2px 0; text-align: center; font-size: 0.78rem; color: #CCCFD4; background: none; }
+      .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
+    }
+    @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
   </style>
 </head>
 <body>
@@ -214,7 +249,15 @@
       <ul class="nav-links">
         <li><a href="/apps.html" id="nav-apps">Apps</a></li>
         <li><a href="/printed.html" id="nav-printed">Printed</a></li>
-        <li><a href="/playhouse/" id="nav-games">Lily’s Playhouse</a></li>
+        <li class="nav-drop">
+          <a href="/playhouse/" id="nav-games">Lily’s Playhouse</a>
+          <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu" aria-label="More in Lily’s Playhouse"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-drop-menu" id="nav-drop-menu">
+            <ul class="nav-drop-panel">
+              <li><a href="/playhouse/games/">Play Games</a></li>
+            </ul>
+          </div>
+        </li>
         <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
       </ul>
     </nav>
@@ -285,6 +328,23 @@
   window.addEventListener('load', fit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   if (window.ResizeObserver) new ResizeObserver(fit).observe(links);
+})();
+</script>
+<script>
+/* Update 21: the Lily's Playhouse dropdown. The little arrow opens and closes it (that's how it works
+   on iPad and phones); a computer can also just hover. It closes when you tap somewhere else, press
+   Escape, scroll, or click into the Playhouse world. */
+(function () {
+  var drop = document.querySelector('.site-header .nav-drop');
+  if (!drop) return;
+  var btn = drop.querySelector('.nav-drop-btn');
+  function set(open) { drop.classList.toggle('open', open); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); set(!drop.classList.contains('open')); });
+  document.addEventListener('click', function (e) { if (!drop.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drop.classList.contains('open')) { set(false); btn.focus(); } });
+  window.addEventListener('scroll', function () { if (drop.classList.contains('open')) set(false); }, { passive: true });
+  window.addEventListener('blur', function () { set(false); });
+  drop.addEventListener('mouseleave', function () { if (window.matchMedia('(hover: hover)').matches) set(false); });
 })();
 </script>
 </body>
