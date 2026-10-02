@@ -1764,7 +1764,7 @@
   // Tapping an animal: it gets happy (a wiggle and a little burst of hearts).
   // A main character with a live page (right now: any frog, for Lily's Hop Hop) also shows
   // "Go to page?". Tapping it twice quickly (a double tap or double click) goes straight there.
-  const PAGES = { frog: "/hophop/" };
+  const PAGES = { frog: "/hophop/", neenee: "/neenee/" };   // v38: Nee Nee's game
   const framed = (() => { try { return window.top !== window; } catch (_) { return true; } })();
   const goPop = document.getElementById("goPop"), goLink = document.getElementById("goLink");
   goLink.target = framed ? "_top" : "_self"; goLink.rel = "noopener";
@@ -1772,7 +1772,7 @@
   function openPage(url) { hidePop(); if (framed) { try { window.top.location.href = url; } catch (_) { window.open(url, "_blank", "noopener"); } } else location.href = url; }
   // The popup shows while the mouse is on a frog ("hover"), or after a tap on a touch screen ("tap").
   // It rides along above him as he moves.
-  const PAGE_ASK = { frog: "Play Hop Hop?" };
+  const PAGE_ASK = { frog: "Play Hop Hop?", neenee: "Play with Nee Nee?" };
   let popFor = null, popMode = null, overPop = false, hoverOff = 0;
   let popFade = 0;
   function hidePop() {   // a soft fade, then gone
@@ -1814,11 +1814,11 @@
     lastUserAt = time;
     const a = h.ref, now = performance.now();
     if (h.kind === "frog") { if (a) { a.wiggle = 1.1; } sfx.ribbit(); }
-    else if (h.kind === "bunny") {
+    else if (h.kind === "bunny" || h.kind === "neenee") {
       a.happy = 1.4; sfx.friend();
       if (a.state !== "hop" && a.state !== "munch" && a.state !== "enter" && a.state !== "exit") { a.state = "idle"; a.idle = "up"; a.timer = 1.8; a.faceCam = true; }
     } else if (h.kind === "bee") { a.happy = 1.4; sfx.friend(); }
-    if (a) burst(a.x, a.y, (a.z || 0) + (h.kind === "bunny" ? 16 * a.size : h.kind === "frog" ? 60 * a.size : 20), ["#FF9EC3", "#FFD6E6", "#FFE27A"], 10, 90);
+    if (a) burst(a.x, a.y, (a.z || 0) + (h.kind === "bunny" || h.kind === "neenee" ? 16 * a.size : h.kind === "frog" ? 60 * a.size : 20), ["#FF9EC3", "#FFD6E6", "#FFE27A"], 10, 90);
     const page = PAGES[h.kind];
     if (!page) { lastTap = null; return; }
     if (lastTap && lastTap.kind === h.kind && now - lastTap.t < 450) { lastTap = null; openPage(page); return; }
@@ -2470,7 +2470,7 @@
   // the first animals you meet
   // v32: Nee Nee first (cream, both ears up), then friends of every size, including two very small ones
   [[40, 60, 4, 1, "ours", null], [-320, 260, 3.3, 0, "caramel"], [520, -420, 5, 0, "gray"], [-120, -560, 2.1, 0, "spotted"], [760, 150, 4, 0, "pink"], [-520, 420, 5.8, 0, "cocoa"], [640, 520, 1.9, 0, "lavender"]]
-    .forEach(([x, y, s, sx, pal, ears]) => { const q = spreadOut(x, y); ANIMALS.push(newBunny(q.x, q.y, s, sx || 0, pal, ears)); });
+    .forEach(([x, y, s, sx, pal, ears], i) => { const q = spreadOut(x, y), b = newBunny(q.x, q.y, s, sx || 0, pal, ears); if (i === 0) b.neenee = true; ANIMALS.push(b); });   // v38: the first one is the real Nee Nee
   { const b = newBee(START.x, START.y, 101, "ours", 1); b.sit = 7; b.sx = 1; ANIMALS.push(b); }   // on the flower right in front of you
   [["pink", 250, 60, 170, 0.8], ["mint", 40, 150, 130, 0.8], ["lavender", 420, -300, 200, 1.2], ["blue", -200, -200, 150, 0.65],
    ["peach", 120, -700, 260, 1.05], ["strawberry", 600, -150, 120, 0.72], ["ours", -60, -900, 220, 1.3], ["mint", 700, -800, 180, 0.6], ["pink", -380, 120, 200, 1.75], ["blue", 330, 180, 140, 0.45]]
@@ -2491,7 +2491,7 @@
     censusT -= dt; if (censusT > 0) return; censusT = 0.8;
     for (let i = ANIMALS.length - 1; i >= 0; i--) {
       const a = ANIMALS[i];
-      if (a.state !== "inside" && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off
+      if (a.state !== "inside" && !a.neenee && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off (v38: never Nee Nee)
     }
     const near = k => ANIMALS.filter(a => a.kind === k && Math.hypot(a.x - bee.x, a.y - bee.y) < NEAR_R).length;
     if (near("bunny") < BUNNIES_NEAR) { const s = hiddenSpot(900, NEAR_R); if (s) ANIMALS.push(newBunny(s.x, s.y, pick(BUNNY_SIZES))); }
@@ -5449,7 +5449,7 @@
           if (LC) LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(bunnyPose(a), { pal: a.pal, ears: a.ears || undefined }));
           else drawBunny(p.x, p.y, S, screenDir(Math.cos(a.heading), Math.sin(a.heading)), a.z);
           ctx.restore();
-          residentHits.push({ kind: "bunny", ref: a, x: p.x, y: p.y - 14 * S, r: Math.max(22, 16 * S * a.sx), top: p.y - 36 * S, f: p.f });
+          residentHits.push({ kind: a.neenee ? "neenee" : "bunny", ref: a, x: p.x, y: p.y - 14 * S, r: Math.max(22, 16 * S * a.sx), top: p.y - 36 * S, f: p.f });
         } });
       } else {
         const z = a.sit > 0 ? a.z : a.z + Math.sin(time * 2 + a.ph) * 6, p = proj(a.x, a.y, z);
@@ -5987,7 +5987,7 @@
       draw: (g, w, h) => { if (FROG && FROG.draw) FROG.draw(g, w / 2, h * 0.86, h / 74, Math.PI + 0.35, 0.32, { happy: 1, shadow: false }); } },
     { id: "bee", name: "The bee game", href: null, live: false,
       draw: (g, w, h) => { if (LC && LC.bee) LC.bee.draw(g, w / 2, h * 0.52, h / 64, Math.PI / 2 + 0.6, 0.3, { t: 0, ph: 0, pal: 0, happy: 1 }); } },
-    { id: "bunny", name: "The bunny game", href: null, live: false,
+    { id: "bunny", name: "Play Lily’s Bun Nee Nee", href: PAGES.neenee, live: true,
       draw: (g, w, h) => { if (LC && LC.bunny) LC.bunny.draw(g, w / 2, h * 0.9, h / 44, Math.PI / 2 + 0.5, 0.3, {}); } }
   ];
   const gamesBtn = document.getElementById("gamesBtn"), gamesMenu = document.getElementById("gamesMenu"), gamesIcon = document.getElementById("gamesIcon");
@@ -6041,6 +6041,8 @@
   // ---------- loop ----------
   let last = performance.now();
   window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }),
+    neenee: () => { const n = ANIMALS.find(a => a.neenee); return n ? { x: n.x, y: n.y } : null; },
+    hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
   let bgTick = null;

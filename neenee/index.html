@@ -1,0 +1,2859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Lily’s Bun Nee Nee</title>
+<meta name="description" content="A free, cozy bunny game from Lily Studio. Hop Nee Nee around a garden that never ends, keep her tummy full of carrots, and meet her bunny friends.">
+<meta name="theme-color" content="#2A2046">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nee Nee">
+<meta property="og:title" content="Lily’s Bun Nee Nee">
+<meta property="og:description" content="A free, cozy bunny game from Lily Studio. Hop Nee Nee around an endless garden and munch carrots.">
+<meta property="og:image" content="https://thelilystudio.com/neenee/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="A round white bunny holding a carrot in a sunset meadow">
+<meta property="og:url" content="https://thelilystudio.com/neenee/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Lily Studio">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://thelilystudio.com/neenee/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Nunito:wght@500;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<script>
+  // Opened from the iPhone/iPad home screen? Then show the full-screen game.
+  (function () {
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    if (standalone) document.documentElement.classList.add("app");
+  })();
+</script>
+<style>
+  [hidden] { display: none !important; }
+  :root {
+    color-scheme: dark;
+    --dusk: #2A2046;
+    --dusk-deep: #1E1734;
+    --cream: #FFF3E8;
+    --muted: #C9BDE4;
+    --peach: #FFB38A;
+    --blossom: #FF8FB8;
+    --carrot: #FF9A4D;
+    --sage: #86C98A;
+    --lilac: #B9A3E3;
+    --card: #342A56;
+    --display: "Grandstander", "Chalkboard SE", "Comic Sans MS", ui-rounded, system-ui, sans-serif;
+    --body: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, #3A2C5E 0%, var(--dusk) 55%, var(--dusk-deep) 100%);
+    background-color: var(--dusk);
+    color: var(--cream);
+    font-family: var(--body);
+    padding-inline: 16px;
+    padding-block: 14px 18px;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(30px, 8vw, 38px);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+    text-wrap: balance;
+  }
+  h1 span { color: var(--carrot); }
+  .tag {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .head-btns { display: flex; align-items: center; gap: 8px; flex: none; }
+  .to-playhouse {
+    display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--cream);
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18); text-decoration: none;
+  }
+  .to-playhouse:hover { background: rgba(255,255,255,0.16); }
+  .to-playhouse:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  .sound {
+    flex: none;
+    font: 700 13px/1 var(--body);
+    color: var(--cream);
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 9px 13px;
+    cursor: pointer;
+  }
+  .mixer {
+    display: grid;
+    grid-template-columns: auto 1fr 2.2em;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    font-size: 14px; font-weight: 700;
+    color: var(--cream);
+  }
+  .mixer[hidden] { display: none; }
+  .mixer input[type="range"] { width: 100%; min-width: 0; accent-color: var(--carrot); height: 28px; }
+  .mixer output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .mixer input:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; border-radius: 6px; }
+  .sound:focus-visible, .again:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 400 / 580;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(10, 6, 24, 0.55), inset 0 0 0 1.5px rgba(255,255,255,0.08);
+    background: #8DB6EE;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; outline: none; }
+  .hud {
+    position: absolute;
+    top: 14px; left: 16px; right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    font-family: var(--display);
+  }
+  .score { font-size: 44px; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 3px 0 rgba(90, 50, 110, 0.35); font-variant-numeric: tabular-nums; }
+  .score small { display: block; font: 800 11px/1.4 var(--body); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.85); text-shadow: none; }
+  .best { text-align: right; font: 800 12px/1.4 var(--body); letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.9); }
+  .best b { display: block; font: 800 22px/1 var(--display); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .over {
+    position: absolute; inset: 0;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 17%;
+    background: linear-gradient(rgba(42, 32, 70, 0.35), rgba(42, 32, 70, 0) 75%);
+  }
+  .over[hidden] { display: none; }
+  .panel {
+    width: min(78%, 280px);
+    background: var(--cream);
+    color: #3B2D55;
+    border-radius: 26px;
+    padding: 16px 18px 16px;
+    text-align: center;
+    display: flex; flex-direction: column; gap: 4px;
+    box-shadow: 0 14px 0 -4px rgba(255, 143, 184, 0.55), 0 20px 40px rgba(20, 10, 40, 0.4);
+    animation: pop 420ms cubic-bezier(.2, 1.6, .4, 1) both;
+  }
+  .panel h2 { font: 800 38px/1 var(--display); margin: 0; color: #5B8FD6; }
+  .panel p { margin: 0; font-size: 15px; font-weight: 700; color: #6A5A86; }
+  .panel .big { font: 800 30px/1.1 var(--display); color: #3B2D55; font-variant-numeric: tabular-nums; }
+  .panel .newbest { color: #E0628F; font-weight: 800; }
+  .again {
+    margin-top: 8px;
+    font: 800 18px/1 var(--display);
+    color: #fff;
+    background: linear-gradient(#FF9EC3, #F07AA6);
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 20px;
+    box-shadow: 0 5px 0 #C9557F;
+    cursor: pointer;
+  }
+  .again:active { transform: translateY(3px); box-shadow: 0 2px 0 #C9557F; }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .how {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-align: center;
+  }
+  .how b { color: var(--cream); }
+  footer {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px;
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--peach); font-weight: 800; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  @media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+  /* ---- pieces used only when opened from the home screen ---- */
+  .right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .sound-icon, .app-title, .app-credit { display: none; }
+  .tip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 12px 12px 16px;
+    background: var(--card); color: var(--cream);
+    border: 1.5px solid rgba(255,255,255,0.14); border-radius: 16px;
+    font-size: 14px; line-height: 1.4;
+  }
+  .tip b { color: #FFE0EC; }
+  .tip button { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(255,255,255,0.12); color: var(--cream); font: 800 16px/1 var(--body); cursor: pointer; }
+  .tip button:focus-visible, .sound-icon:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+
+  /* Home-screen app mode: the pond fills the whole screen like a real game */
+  html.app, html.app body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.app body { position: fixed; inset: 0; padding: 0; background: var(--dusk); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  html.app .wrap { max-width: none; margin: 0; display: block; }
+  html.app header, html.app .how, html.app footer { display: none; }
+  html.app .stage { position: fixed; inset: 0; width: auto; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+  /* iOS 26 home-screen apps stop drawing a little above the bottom edge (WebKit bug 301108).
+     That strip shows the page background, so paint it the same color as the bottom of the pond. */
+  html.app, html.app body { background: #7DBE6E; }
+  html.app .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  html.app .sound-icon {
+    display: grid; place-items: center; pointer-events: auto;
+    width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+  }
+  html.app .sound-icon svg { width: 20px; height: 20px; }
+  html.app .app-title {
+    display: block; position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+    font: 800 26px/1 var(--display); color: #fff; white-space: nowrap;
+    text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; transition: opacity 1.2s ease;
+  }
+  html.app .app-title span { color: #FFD3A6; }
+  html.app body.playing .app-title { opacity: 0; }
+  html.app .app-credit {
+    display: block; position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    text-align: center; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.6); pointer-events: none;
+  }
+  html.app .app-credit a { pointer-events: auto; color: rgba(255,255,255,0.8); text-decoration: none; }
+  html.app .mixer {
+    position: fixed; z-index: 5;
+    top: calc(env(safe-area-inset-top, 0px) + 118px); right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(300px, calc(100% - 24px));
+    box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
+  }
+
+  /* ---- Full screen: the button above the game, and the pond filling the whole window ---- */
+  .big-btn {
+    display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 50%; cursor: pointer; color: var(--cream);
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+  }
+  .big-btn:hover { background: rgba(255,255,255,0.16); }
+  .big-btn:focus-visible, .small-btn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  html.app .big-btn { display: none; }   /* the home-screen app is already full screen */
+  /* tall <-> wide: the pond can be the tall phone shape or a wide shape that fills a computer or iPad */
+  .shape-btn {
+    display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 50%; cursor: pointer; color: var(--cream);
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+  }
+  .shape-btn:hover { background: rgba(255,255,255,0.16); }
+  .shape-btn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  .shape-btn .i-tall, .wrap.wide .shape-btn .i-wide { display: none; }
+  .wrap.wide .shape-btn .i-tall { display: block; }
+  html.app .shape-btn { display: none; }
+  @media (max-width: 600px) { .shape-btn { display: none; } }   /* on a phone the pond is always tall */
+  .wrap.wide { max-width: 1200px; }
+  .wrap.wide .stage { aspect-ratio: 16 / 10; width: min(100%, calc((100vh - 330px) * 1.6)); width: min(100%, calc((100svh - 330px) * 1.6)); margin: 0 auto; }
+  .wrap.wide .how, .wrap.wide .tip { max-width: 640px; margin-left: auto; margin-right: auto; }
+  @media (max-width: 600px) { .wrap.wide { max-width: 440px; } .wrap.wide .stage { aspect-ratio: 400 / 580; width: 100%; } }
+  .small-btn { display: none; }
+  html.full, html.full body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.full body { position: fixed; inset: 0; padding: 0; background: #7DBE6E; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  html.full .wrap { max-width: none; margin: 0; display: block; }
+  html.full header, html.full .how, html.full footer, html.full .tip, html.full .studio-bar { display: none; }
+  html.full .stage, html.full .wrap.wide .stage { position: fixed; inset: 0; width: auto; height: auto; max-width: none; aspect-ratio: auto; margin: 0; border-radius: 0; box-shadow: none; }   /* full screen wins over tall or wide */
+  html.full .wrap, html.full .wrap.wide { max-width: none; padding: 0; }
+  /* the pond's picture always fills its frame exactly (no stripe of the frame's color after turning the iPad) */
+  .stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  html.full .hud { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); }
+  /* true full screen: Safari (iPad) puts its own X button in the top-left corner, so the hop number sits just below it */
+  html.full:fullscreen .score { margin-top: 58px; }
+  html.full:-webkit-full-screen .score { margin-top: 58px; }
+  html.full .sound-icon, html.full .small-btn {
+    display: grid; place-items: center; pointer-events: auto;
+    width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+  }
+  html.full .sound-icon svg, html.full .small-btn svg { width: 20px; height: 20px; }
+  html.full .app-title {
+    display: block; position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+    font: 800 26px/1 var(--display); color: #fff; white-space: nowrap;
+    text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; transition: opacity 1.2s ease;
+  }
+  html.full .app-title span { color: #FFD3A6; }
+  html.full body.playing .app-title { opacity: 0; }
+  html.full .mixer {
+    position: fixed; z-index: 5;
+    top: calc(env(safe-area-inset-top, 0px) + 168px); right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(300px, calc(100% - 24px));
+    box-shadow: 0 12px 30px rgba(20, 10, 40, 0.35);
+  }
+
+  /* ---- The Lily Studio menu bar: the same one as every page of the site ---- */
+  .site-header, .site-header * { margin: 0; padding: 0; box-sizing: border-box; }
+  .site-header a { text-decoration: none; color: inherit; }
+  .site-header { display: block; gap: 0; position: sticky; top: 0; z-index: 40; font-family: "Montserrat", var(--body); -webkit-font-smoothing: antialiased; }   /* (the game's own header style must not touch the menu bar) */
+  /* NAV */
+    .site-header { background: rgba(6,18,42,0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid #233554; position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 1400px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-logo { width: 32px; height: 32px; filter: drop-shadow(0 0 8px rgba(249,102,188,0.25)); }
+  .nav-name { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: #FDFBF7; }
+  .nav-badge { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.45rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; background: #F966BC; color: #0B1E3F; padding: 3px 8px; border-radius: 3px; }
+  .nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
+  .nav-links a { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.58rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #CCCFD4; transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .nav-links a:hover { color: #F966BC; }
+  .nav-links .active { color: #F966BC; }
+  .nav-cta { background: #2563EB !important; color: #FFFFFF !important; padding: 8px 18px !important; border-radius: 4px; box-shadow: 0 0 14px rgba(37,99,235,0.45); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+  .nav-cta:hover { background: #A3D977 !important; color: #0B1E3F !important; box-shadow: 0 0 22px rgba(163,217,119,0.25) !important; transform: translateY(-2px); }
+  .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+  .nav-toggle span { display: block; width: 22px; height: 2px; background: #FDFBF7; margin: 5px 0; transition: 0.3s; }
+  @media (max-width: 768px) {
+      .nav-toggle { display: block; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(6,18,42,0.98); padding: 20px 24px; gap: 16px; border-bottom: 1px solid #233554; }
+      .nav-links.open { display: flex; }
+      .hero h1 { font-size: 1.8rem; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+  @media (min-width: 769px) and (max-width: 1000px) { .nav-links { gap: 14px; } .nav-cta { padding: 8px 12px !important; } }
+  @media (min-width: 769px) and (max-width: 860px) { .nav-links { gap: 10px; } }
+  .nav-lockup { height: 46px; width: auto; display: block; }
+  @media (max-width: 768px) { .nav-lockup { height: 38px; } }
+  .nav-cta:hover { color: #0B1E3F !important; }
+  /* ---- The Lily Studio v4: brand alignment ---- */
+    .nav-badge { animation: none !important; opacity: 1 !important; }
+  /* ===== Menu v5 (Sept 2026): bigger menu; flower = Home, words = About ===== */
+    .site-header .nav-inner { max-width: 1200px; height: 104px; padding: 0 32px; }
+  .site-header .nav-brand { display: flex; align-items: center; gap: 4px; }
+  .site-header .nav-flower, .site-header .nav-wordmark { display: block; border-radius: 8px; transition: transform 0.3s ease, filter 0.3s ease; }
+  .site-header .nav-flower img { height: 84px; width: 84px; display: block; }
+  .site-header .nav-wordmark img { height: 84px; width: auto; display: block; }
+  .site-header .nav-flower:hover { transform: rotate(-8deg) scale(1.06); filter: drop-shadow(0 0 10px rgba(249,102,188,0.55)); }
+  .site-header .nav-wordmark:hover { filter: drop-shadow(0 0 10px rgba(249,102,188,0.45)); }
+  .site-header .nav-flower:focus-visible, .site-header .nav-wordmark:focus-visible { outline: 2px solid #F966BC; outline-offset: 3px; }
+  .site-header .nav-badge { font-size: 0.6rem; padding: 4px 10px; margin-left: 10px; }
+  .site-header .nav-links { gap: 36px; }
+  .site-header .nav-links a { font-size: 0.82rem; letter-spacing: 0.12em; }
+  .site-header .nav-links a.nav-cta { font-size: 0.8rem; padding: 12px 24px !important; }
+  @media (max-width: 1100px) {
+      .site-header .nav-links { gap: 24px; }
+      .site-header .nav-links a { font-size: 0.72rem; }
+    }
+  @media (max-width: 768px) {
+      .site-header .nav-inner { height: 76px; padding: 0 16px; }
+      .site-header .nav-flower img, .site-header .nav-wordmark img { height: 60px; }
+      .site-header .nav-flower img { width: 60px; }
+      .site-header .nav-badge { display: none; }
+      .site-header .nav-links a { font-size: 0.9rem; }
+    }
+  /* Menu v6: the flower is bigger than the menu bar and its bottom petals poke out below it.
+       It never changes the page spacing (it floats), and the whole bar, flower included,
+       slides away when you scroll down and comes back when you scroll up. */
+    .site-header { transition: transform 0.35s ease; will-change: transform; }
+  .site-header.is-hidden { transform: translateY(calc(-100% - 90px)); }
+  .site-header .nav-flower { position: relative; width: 150px; height: 84px; flex-shrink: 0; align-self: center; }
+  .site-header .nav-flower img { position: absolute; top: -6px; left: 0; width: 160px; height: 160px; max-width: none; filter: none; }
+  .site-header .nav-wordmark { margin-left: 0; }
+  .site-header .nav-links { flex-shrink: 0; }
+  .site-header .nav-brand { flex-shrink: 1; min-width: 0; }
+  @media (max-width: 1540px) { .site-header .nav-badge { display: none; } }
+    .site-header .nav-badge.is-tight { display: none; }
+  @media (min-width: 769px) and (max-width: 1200px) {
+      .site-header .nav-flower { width: 120px; }
+      .site-header .nav-flower img { width: 130px; height: 130px; top: -4px; }
+      .site-header .nav-wordmark img { height: 60px; }
+      .site-header .nav-links { gap: 20px; }
+      .site-header .nav-links a { font-size: 0.68rem; }
+      .site-header .nav-links a.nav-cta { padding: 10px 16px !important; }
+    }
+  @media (max-width: 768px) {
+      .site-header .nav-flower { width: 92px; height: 60px; }
+      .site-header .nav-flower img { width: 104px; height: 104px; top: -4px; }
+      .site-header .nav-wordmark img { height: 52px; }
+    }
+  @media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
+  /* Menu v6b: bigger flower, nudged left; bigger "The Lily Studio" words */
+    .site-header .nav-flower img { width: 210px; height: 210px; top: -6px; left: -44px; }
+  .site-header .nav-wordmark img { height: 100px; }
+  @media (min-width: 769px) and (max-width: 1200px) {
+      .site-header .nav-flower img { width: 160px; height: 160px; top: -4px; left: -24px; }
+      .site-header .nav-wordmark img { height: 72px; }
+    }
+  @media (max-width: 768px) {
+      .site-header .nav-flower img { width: 128px; height: 128px; top: -4px; left: -14px; }
+      .site-header .nav-wordmark img { height: 64px; }
+    }
+  @media (max-width: 380px) {
+      .site-header .nav-wordmark img { height: 56px; }
+    }
+  @media (min-width: 961px) and (max-width: 1100px) { .site-header .nav-flower img { left: -24px; } }
+  @media (min-width: 769px) and (max-width: 960px) {
+      .site-header .nav-flower { width: 104px; }
+      .site-header .nav-flower img { width: 140px; height: 140px; left: -22px; }
+      .site-header .nav-wordmark img { height: 54px; }
+      .site-header .nav-links { gap: 16px; }
+      .site-header .nav-links a { font-size: 0.64rem; letter-spacing: 0.08em; }
+      .site-header .nav-links a.nav-cta { padding: 9px 12px !important; }
+    }
+  html.app .site-header, html.full .site-header { display: none; }
+  /* the page's own spacing moves inside, so the menu bar reaches both edges */
+  html:not(.app):not(.full) body { padding: 0; margin: 0; }
+  html:not(.app):not(.full) .wrap { padding: 26px 16px 18px; }
+  @media (max-width: 768px) { html:not(.app):not(.full) .wrap { padding-top: 64px; } }   /* room for the flower that pokes out below the bar */
+  /* a wide pond lines up with the flower's side of the menu bar, so it starts below the flower's petals */
+  @media (min-width: 769px) { html:not(.app):not(.full) .wrap.wide { padding-top: 76px; } }
+  @media (min-width: 1201px) { html:not(.app):not(.full) .wrap.wide { padding-top: 112px; } }
+  .studio-bar { display: none; }
+  html.app .studio-bar { display: block; }
+
+  /* ---- Lily Studio menu (home-screen app only): a bottom sheet ---- */
+  .studio-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: rgba(9, 20, 32, 0.88);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    transform: translateY(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+  .studio-bar.show { transform: translateY(0); pointer-events: auto; }
+  .studio-bar nav {
+    max-width: 960px; margin: 0 auto; height: 52px;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .studio-bar a { color: #94A3B8; text-decoration: none; font: 600 11px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.1em; }
+  .studio-bar a:hover { color: #FFFFFF; }
+  .studio-bar a:focus-visible { outline: 2px solid var(--peach); outline-offset: 4px; border-radius: 4px; }
+  .studio-bar .brand { display: flex; align-items: center; gap: 9px; color: #FFFFFF; }
+  .studio-bar .brand { gap: 6px; }
+  .studio-bar .brand svg { color: #E83E8C; flex: none; }
+  .studio-bar ul { display: flex; align-items: center; gap: 18px; list-style: none; margin: 0; padding: 0; }
+  .studio-bar ul a { display: block; padding: 12px 0; }
+  @media (max-width: 340px) { .studio-bar ul li:first-child { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .studio-bar { transition: none; } }
+
+  /* ---- Home-screen app only: a little menu button that raises the Lily Studio menu from the bottom ---- */
+  .menu-btn { display: none; }
+  html.app .menu-btn {
+    display: grid; place-items: center; position: fixed; z-index: 60;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer;
+    background: rgba(42, 32, 70, 0.28); border: 1.5px solid rgba(255,255,255,0.35); color: #fff;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html.app .menu-btn svg { width: 20px; height: 20px; }
+  html.app .menu-btn .i-close { display: none; }
+  html.app .menu-btn[aria-expanded="true"] { background: rgba(9, 20, 32, 0.88); transform: translateY(calc(-1 * var(--sheet-h, 120px))); }
+  html.app .menu-btn[aria-expanded="true"] .i-open { display: none; }
+  html.app .menu-btn[aria-expanded="true"] .i-close { display: block; }
+  html.app .menu-btn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
+  html.app .studio-bar {
+    top: auto; bottom: 0; padding-top: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-bottom: 0; border-top: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+  html.app .studio-bar.show { transform: translateY(0); }
+  html.app .studio-bar nav { height: auto; min-height: 64px; padding-top: 8px; padding-bottom: 8px; }
+  html.app .studio-bar ul a { padding: 16px 0; }
+  @media (prefers-reduced-motion: reduce) { html.app .menu-btn { transition: none; } }
+
+    /* ===== Update 21: the Lily's Playhouse dropdown ("Play Games") =====
+       Computer: hover over "Lily's Playhouse" (or press the little arrow).
+       iPad and phone: tap the little arrow; tapping the words still goes to the Playhouse.
+       Phone menu (the three lines): "Play Games" sits right under Lily's Playhouse. */
+    .site-header .nav-drop { position: relative; display: flex; align-items: center; gap: 4px; }
+    .site-header .nav-drop-btn { background: none; border: 0; padding: 8px 6px; margin: -8px -6px -8px 0; color: #CCCFD4; cursor: pointer; display: grid; place-items: center; border-radius: 6px; -webkit-tap-highlight-color: transparent; }
+    .site-header .nav-drop-btn svg { width: 12px; height: 12px; display: block; transition: transform 0.25s ease; }
+    .site-header .nav-drop-btn:hover, .site-header .nav-drop.open .nav-drop-btn { color: #F966BC; }
+    .site-header .nav-drop-btn:focus-visible { outline: 2px solid #F966BC; outline-offset: 2px; }
+    .site-header .nav-drop.open .nav-drop-btn svg { transform: rotate(180deg); }
+    .site-header .nav-drop-menu { position: absolute; top: 100%; left: 50%; padding-top: 16px; transform: translate(-50%, 6px); opacity: 0; visibility: hidden; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s; z-index: 130; }
+    .site-header .nav-drop.open .nav-drop-menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s; }
+    @media (hover: hover) and (min-width: 769px) {
+      .site-header .nav-drop:hover .nav-drop-menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s; }
+      .site-header .nav-drop:hover .nav-drop-btn { color: #F966BC; }
+      .site-header .nav-drop:hover .nav-drop-btn svg { transform: rotate(180deg); }
+    }
+    .site-header .nav-drop-panel { list-style: none; margin: 0; padding: 8px; min-width: 200px; background: rgba(6, 18, 42, 0.98); border: 1px solid #233554; border-radius: 12px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 18px rgba(249, 102, 188, 0.12); position: relative; }
+    .site-header .nav-drop-panel::before { content: ""; position: absolute; top: -7px; left: 50%; width: 12px; height: 12px; background: rgba(6, 18, 42, 0.98); border-left: 1px solid #233554; border-top: 1px solid #233554; transform: translateX(-50%) rotate(45deg); }
+    .site-header .nav-links .nav-drop-panel a { display: block; padding: 12px 16px; border-radius: 8px; white-space: nowrap; text-align: center; color: #FDFBF7; position: relative; }
+    .site-header .nav-links .nav-drop-panel a::after { display: none; }
+    .site-header .nav-links .nav-drop-panel a:hover, .site-header .nav-links .nav-drop-panel a:focus-visible, .site-header .nav-links .nav-drop-panel a[aria-current="page"] { background: rgba(249, 102, 188, 0.12); color: #F966BC; text-shadow: none; }
+    .site-header .nav-links .nav-drop-panel a:focus-visible { outline: 2px solid #F966BC; outline-offset: 1px; }
+    @media (max-width: 768px) {
+      .site-header .nav-links { background: #06122A !important; }   /* solid, so the page never shows through the open phone menu */
+      .site-header .nav-drop { flex-direction: column; align-items: center; gap: 0; }
+      .site-header .nav-drop-btn { display: none; }
+      .site-header .nav-drop-menu { position: static; padding: 12px 0 0; transform: none; opacity: 1; visibility: visible; transition: none; }
+      .site-header .nav-drop-panel { padding: 0; min-width: 0; background: none; border: 0; box-shadow: none; }
+      .site-header .nav-drop-panel::before { display: none; }
+      .site-header .nav-links .nav-drop-panel a { display: inline-block; padding: 2px 0; text-align: center; font-size: 0.78rem; color: #CCCFD4; background: none; }
+      .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
+    }
+    @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
+  
+  /* ===== Lily's Bun Nee Nee: the game's own pieces ===== */
+  canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--peach); }
+  .keyhint {
+    position: absolute; left: 16px; right: 16px; bottom: 118px; margin: 0 auto; width: fit-content;
+    padding: 10px 18px; border-radius: 999px;
+    background: rgba(40, 28, 70, 0.74); color: #FFFFFF; font: 800 14px/1.3 var(--body); text-align: center;
+    pointer-events: none; opacity: 0; transition: opacity 0.25s ease;
+  }
+  .keyhint.show { opacity: 1; }
+  /* on-screen buttons for phones and tablets (same as the bee game) */
+  .pad { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+  .pad[hidden] { display: none; }
+  .pad-turn { display: flex; gap: 8px; align-items: flex-end; }
+  .pbtn {
+    pointer-events: auto; width: 54px; height: 54px; padding: 0; border: 0; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    background: rgba(255, 255, 255, 0.58); color: #4B3A66; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(40, 30, 80, 0.22), inset 0 -3px 0 rgba(120, 90, 180, 0.16);
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease, background 0.12s ease;
+  }
+  .pbtn svg { width: 26px; height: 26px; }
+  .pbtn.small { width: 46px; height: 46px; }
+  .pbtn.small svg { width: 27px; height: 27px; }
+  .pbtn.on { transform: scale(0.93); background: rgba(255, 228, 200, 0.92); }
+  .pbtn.hop { width: 76px; height: 76px; background: rgba(255, 154, 77, 0.9); color: #5A2A00; font: 800 13px/1 var(--body); letter-spacing: 0.04em; }
+  .pbtn.hop.on { background: rgba(255, 190, 130, 0.95); }
+  .pbtn:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
+  /* her tummy (5 carrots) is drawn in the game's top-right corner, so the buttons over the game sit on the left */
+  .hud { justify-content: flex-start; }
+  .right { align-items: flex-start; flex-direction: row; gap: 8px; }
+  html.full:fullscreen .hud .right, html.full:-webkit-full-screen .hud .right { margin-top: 58px; }   /* below Safari's own X on iPad */
+  /* home-screen app: the menu button sits top-left (the hop button lives in the bottom-right), and the title sits below the tummy */
+  html.app .menu-btn { top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); right: auto; bottom: auto; }
+  html.app .menu-btn[aria-expanded="true"] { transform: none; }
+  html.app .hud { left: calc(max(16px, env(safe-area-inset-left, 0px)) + 54px); }
+  html.app .app-title, html.full .app-title { z-index: 2; top: calc(env(safe-area-inset-top, 0px) + 64px); }
+  html.app .pad { bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+  html.app .pad:not([hidden]) ~ .app-credit { display: none; }   /* the buttons need that space */
+  html.full .pad { bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+</style>
+</head>
+<body>
+<div class="studio-bar" id="studioBar">
+  <nav aria-label="Lily Studio menu">
+    <a class="brand" href="/"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Lily Studio</span></a>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/playhouse/">Playhouse</a></li>
+      <li><a href="/apps.html">Apps</a></li>
+      <li><a href="/skills.html">Skills</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+  </nav>
+</div>
+
+
+  <header class="site-header">
+    <nav class="nav-inner">
+      <div class="nav-brand">
+        <a href="/" class="nav-flower" aria-label="Home" title="Home"><img src="data:image/webp;base64,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" alt="" width="48" height="48"></a>
+        <a href="/about.html" class="nav-wordmark" aria-label="About The Lily Studio" title="About The Lily Studio"><img src="data:image/webp;base64,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" alt="The Lily Studio" width="110" height="48"></a>
+        <span class="nav-badge">Est. 2026</span>
+      </div>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="/apps.html" id="nav-apps">Apps</a></li>
+        <li><a href="/printed.html" id="nav-printed">Printed</a></li>
+        <li class="nav-drop">
+          <a href="/playhouse/" id="nav-games" class="active">Lily’s Playhouse</a>
+          <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu" aria-label="More in Lily’s Playhouse"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-drop-menu" id="nav-drop-menu">
+            <ul class="nav-drop-panel">
+              <li><a href="/playhouse/games/">Play Games</a></li>
+            </ul>
+          </div>
+        </li>
+        <li><a href="/skills.html" class="nav-cta">Got Skills?</a></li>
+      </ul>
+    </nav>
+  </header>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lily’s Bun <span>Nee Nee</span></h1>
+      <p class="tag">Hop a very round bunny around a garden that never ends, and munch carrots.</p>
+    </div>
+    <div class="head-btns">
+      <a class="to-playhouse" href="/playhouse/" aria-label="Back to Lily’s Playhouse" title="Back to Lily’s Playhouse"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v8.5h11V10"/><path d="M10.5 18.5v-4.5h3v4.5"/></svg></a>
+      <button class="shape-btn" id="shapeBtn" type="button" aria-pressed="false" aria-label="Make the garden wide" title="Make the garden wide"><svg class="i-wide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2.5"/></svg><svg class="i-tall" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"/></svg></button>
+      <button class="big-btn" id="bigBtn" type="button" aria-label="Play full screen" title="Play full screen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg></button>
+      <button class="sound" id="soundBtn" type="button" aria-expanded="false" aria-controls="mixer">Sound</button>
+    </div>
+  </header>
+
+  <div class="mixer" id="mixer" hidden>
+    <label for="sfxVol">Bunny sounds</label>
+    <input type="range" id="sfxVol" min="0" max="100" step="1" value="80">
+    <output id="sfxOut" for="sfxVol">80</output>
+    <label for="gardenVol">Garden sounds</label>
+    <input type="range" id="gardenVol" min="0" max="100" step="1" value="50">
+    <output id="gardenOut" for="gardenVol">50</output>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="app-title" aria-hidden="true">Lily’s Bun <span>Nee Nee</span></div>
+    <canvas id="game" tabindex="0" aria-label="Lily’s Bun Nee Nee. Tap anywhere and the bunny hops there. Tap a carrot and she hops over and munches it. Hold the mouse button, the trackpad click or the space bar to make her hop forward faster and faster. Move the pointer left or right, or use the left and right arrows, to steer."></canvas>
+    <div class="hud">
+      <div class="right">
+        <button class="small-btn" id="smallBtn" type="button" aria-label="Leave full screen" title="Leave full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></button>
+        <button class="sound-icon" id="soundBtn2" type="button" aria-label="Sound settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="pad" id="touchPad" hidden>
+      <div class="pad-turn">
+        <button class="pbtn" type="button" data-turn="left" aria-label="Turn left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="pbtn small" type="button" id="aroundBtn" aria-label="Turn around"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5h7a5.25 5.25 0 0 1 0 10.5H7"/><path d="M10.5 4l-3.5 3.5 3.5 3.5"/></svg></button>
+        <button class="pbtn" type="button" data-turn="right" aria-label="Turn right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <button class="pbtn hop" type="button" id="hopBtn" aria-label="Hold to hop forward, faster the longer you hold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg>hop</button>
+    </div>
+    <div class="keyhint" id="keyHint" aria-hidden="true">Click the game to play with your keyboard</div>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Lily Studio menu" aria-expanded="false" aria-controls="studioBar">
+      <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+      <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="app-credit">a tiny free game by <a href="https://thelilystudio.com" target="_blank" rel="noopener">Lily Studio</a></div>
+  </div>
+
+  <div class="tip" id="tip" role="note" hidden>
+    <div>Play it like an app: tap <b>Share</b>, then <b>Add to Home Screen</b>.</div>
+    <button type="button" id="tipClose" aria-label="Close tip">&times;</button>
+  </div>
+
+  <p class="how">Keep the <b>carrots in the corner</b> full: they are her tummy, and she gets slow and sleepy when they run out. <b>Tap anywhere</b> and she hops there. <b>Tap a carrot</b> and she hops over, pulls it up and munches it. <b>Hold</b> the <b>mouse button</b>, the <b>trackpad click</b> or the <b>space bar</b> (or the <b>hop</b> button on a phone or tablet) and she hops forward, faster and bigger the longer you hold, until she's at full speed. Move the pointer left or right of the middle, or use the <b>left/right arrows</b>, to steer her. Let go and she slows to a stop. On a computer, click the game once so the keys work too. Leave her alone for a bit and she finds her own fun.</p>
+
+  <footer>
+    <span>A tiny free game by Lily Studio</span>
+    <span>·</span>
+    <a href="https://thelilystudio.com" target="_blank" rel="noopener">thelilystudio.com</a>
+  </footer>
+</div>
+
+<script src="lily-creatures-v4.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  // ---------- setup ----------
+  let W = 400, H = 580;
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const stage = document.getElementById("stage");
+  const soundBtn = document.getElementById("soundBtn");
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Every character comes from the shared Lily's Playhouse creature library (one master design each).
+  const LC = window.LilyCreatures || null;
+  if (!LC) {
+    const note = document.createElement("p");
+    note.className = "proto";
+    note.textContent = "The creature library file (lily-creatures-v4.js) didn't load, so the characters can't be drawn. Check that it sits next to this page.";
+    stage.after(note);
+  } else LC.settings.reduceMotion = !!reduceMotion;
+
+  let scale = 1, dpr = 1;
+  function resize() {
+    const rect = stage.getBoundingClientRect();
+    const vw = Math.max(1, rect.width), vh = Math.max(1, rect.height);
+    if (400 * vh / vw >= 580) { W = 400; H = 400 * vh / vw; }
+    else { H = 580; W = 580 * vw / vh; }
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.width = Math.round(vw * dpr);
+    canvas.height = Math.round(vh * dpr);
+    scale = canvas.width / W;
+  }
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => { setTimeout(resize, 250); setTimeout(resize, 700); });
+  // re-measure whenever the game's frame itself changes size (turning the iPad, tall <-> wide, full screen)
+  if (typeof ResizeObserver === "function") {
+    let lastW = 0, lastH = 0;
+    new ResizeObserver(() => {
+      const r = stage.getBoundingClientRect();
+      if (Math.abs(r.width - lastW) < 0.5 && Math.abs(r.height - lastH) < 0.5) return;
+      lastW = r.width; lastH = r.height; resize();
+    }).observe(stage);
+  }
+  window.addEventListener("pageshow", resize);
+
+  // ---------- storage (safe: works even when the browser blocks it) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  };
+
+  // ---------- helpers ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  function hash2(x, y) {
+    let h = Math.imul(x, 374761393) + Math.imul(y, 668265263) ^ 0x5bf03635;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function seeded(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function angDiff(a, b) {
+    let d = (a - b) % (Math.PI * 2);
+    if (d > Math.PI) d -= Math.PI * 2;
+    if (d < -Math.PI) d += Math.PI * 2;
+    return d;
+  }
+
+  // ---------- sound (all made in code, no sound files) ----------
+  const toVol = v => Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+  let sfxVol = toVol(store.get("bun-sfx", "80"));
+  let gardenVol = toVol(store.get("bun-garden", "50"));
+  let actx = null, sfxBus = null, gardenBus = null, ambStarted = false, noiseBuf = null, gardenWind = null;
+  const volCurve = v => Math.pow(v / 100, 2) * 1.25;
+  function audio() {
+    if (!actx) {
+      try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        sfxBus = actx.createGain(); gardenBus = actx.createGain();
+        sfxBus.connect(actx.destination); gardenBus.connect(actx.destination);
+        sfxBus.gain.value = volCurve(sfxVol); gardenBus.gain.value = volCurve(gardenVol);
+        const len = Math.floor(actx.sampleRate * 0.5);
+        noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      } catch (e) { actx = null; return null; }
+    }
+    if (actx.state === "suspended" && !document.hidden) actx.resume();
+    if (!ambStarted) startGarden();
+    return actx;
+  }
+  function applyVolumes() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    sfxBus.gain.setTargetAtTime(volCurve(sfxVol), t, 0.05);
+    gardenBus.gain.setTargetAtTime(volCurve(gardenVol), t, 0.12);
+  }
+  function tone(type, f1, f2, dur, vol, delay = 0, bus) {
+    const a = audio(); if (!a) return;
+    const out = bus || sfxBus;
+    if ((out === sfxBus && sfxVol === 0) || (out === gardenBus && gardenVol === 0)) return;
+    const t = a.currentTime + delay;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(out);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  // a short burst of filtered noise: crunches, rustles and little pops
+  function noise(freq, q, dur, vol, delay = 0, type = "bandpass") {
+    const a = audio(); if (!a || !noiseBuf || sfxVol === 0) return;
+    const t = a.currentTime + delay;
+    const src = a.createBufferSource(); src.buffer = noiseBuf;
+    const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+    const g = a.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(sfxBus);
+    src.start(t, Math.random() * 0.3); src.stop(t + dur + 0.02);
+  }
+  const sfx = {
+    hop(power = 0.2) { tone("sine", 280 + power * 160, 560 + power * 420, 0.12 + power * 0.1, 0.09 + power * 0.04); noise(900, 0.8, 0.06, 0.03); },   // a springy boing, bigger for bigger hops
+    land(power = 0.2) { tone("sine", 190, 90, 0.1 + power * 0.08, 0.07 + power * 0.07); noise(700, 0.8, 0.08, 0.03 + power * 0.03); },   // a soft thump in the grass
+    pop() { tone("sine", 380, 900, 0.1, 0.1); noise(1500, 1, 0.12, 0.05); tone("sine", 900, 1300, 0.08, 0.05, 0.08); },
+    crunch() {
+      const f = rand(1800, 3000);
+      noise(f, 1.4, 0.06, 0.13); noise(f * 1.3, 1.6, 0.05, 0.08, 0.055); noise(f * 0.8, 1.2, 0.04, 0.05, 0.1);
+    },
+    happy() { [784, 988, 1175].forEach((f, i) => tone("triangle", f, f, 0.16, 0.06, i * 0.08)); },
+    binky() { tone("sine", 400, 1100, 0.2, 0.09); tone("triangle", 1319, 1568, 0.18, 0.05, 0.14); },
+    boop() { tone("sine", 700, 1000, 0.08, 0.05); },
+    sniff() { noise(3200, 2, 0.04, 0.03); noise(3400, 2, 0.04, 0.03, 0.09); },
+    sparkle() { [2093, 2637, 3136].forEach((f, i) => tone("sine", f, f * 1.02, 0.28, 0.02, 0.04 + i * 0.07)); },
+    twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
+    snore() { tone("sine", 160, 120, 0.6, 0.025); },
+    buzz() { tone("sawtooth", 210, 230, 0.35, 0.012); },
+    ribbit() { [0, 0.16].forEach(d => tone("sawtooth", 190, 120, 0.12, 0.02, d)); },   // v11: Hop Hop says hi
+    frogHop() { tone("sine", 240, 520, 0.14, 0.05); }
+  };
+  // garden ambience: a soft breeze, birds in the day, crickets at dusk
+  function startGarden() {
+    if (!actx || ambStarted) return;
+    ambStarted = true;
+    const len = actx.sampleRate * 3, buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const bf = actx.createBiquadFilter(); bf.type = "lowpass"; bf.frequency.value = 520;
+    const bg = actx.createGain(); bg.gain.value = 0.06; gardenWind = bg;
+    const lfo = actx.createOscillator(); lfo.frequency.value = 0.06;
+    const lg = actx.createGain(); lg.gain.value = 0.04;
+    lfo.connect(lg).connect(bg.gain);
+    src.connect(bf).connect(bg).connect(gardenBus);
+    const rf = actx.createBiquadFilter(); rf.type = "bandpass"; rf.frequency.value = 1800; rf.Q.value = 0.6;
+    const rg = actx.createGain(); rg.gain.value = 0.012;
+    src.connect(rf).connect(rg).connect(gardenBus);
+    src.start(); lfo.start();
+  }
+  let nextBird = 3, nextCricket = 1.5;
+  function chirp() {
+    const n = 2 + Math.floor(Math.random() * 3), base = rand(2400, 3300);
+    for (let i = 0; i < n; i++) tone("sine", base, base * rand(1.15, 1.35), 0.07, 0.028, i * rand(0.09, 0.13), gardenBus);
+  }
+  function cricket() {
+    const f = rand(4100, 4800), pulses = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < pulses; i++) tone("sine", f, f * 1.01, 0.035, 0.02, i * 0.055, gardenBus);
+  }
+  function updateGardenSound(dt, dusk) {
+    if (!actx || gardenVol === 0 || actx.state !== "running") return;
+    nextBird -= dt; nextCricket -= dt;
+    if (nextBird <= 0) { if (dusk < 0.5) chirp(); nextBird = rand(5, 13); }
+    if (nextCricket <= 0) { if (dusk > 0.35) cricket(); nextCricket = rand(0.7, 2.2); }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!actx) return;
+    if (document.hidden) actx.suspend(); else actx.resume();
+  });
+
+  // the sound panel
+  const mixerEl = document.getElementById("mixer");
+  const sfxSlider = document.getElementById("sfxVol"), gardenSlider = document.getElementById("gardenVol");
+  const sfxOut = document.getElementById("sfxOut"), gardenOut = document.getElementById("gardenOut");
+  function renderSound() {
+    sfxSlider.value = sfxVol; gardenSlider.value = gardenVol;
+    sfxOut.textContent = sfxVol; gardenOut.textContent = gardenVol;
+    const muted = sfxVol === 0 && gardenVol === 0;
+    soundBtn.style.opacity = muted ? "0.55" : "1";
+    soundBtn.setAttribute("aria-label", muted ? "Sound settings (sound is off)" : "Sound settings");
+  }
+  renderSound();
+  function closeMixer() { if (!mixerEl.hidden) { mixerEl.hidden = true; soundBtn.setAttribute("aria-expanded", "false"); } }
+  soundBtn.addEventListener("click", () => {
+    const open = mixerEl.hidden;
+    mixerEl.hidden = !open;
+    soundBtn.setAttribute("aria-expanded", String(open));
+    audio();
+  });
+  sfxSlider.addEventListener("input", () => { sfxVol = toVol(sfxSlider.value); store.set("bun-sfx", String(sfxVol)); audio(); applyVolumes(); renderSound(); });
+  sfxSlider.addEventListener("change", () => sfx.crunch());
+  gardenSlider.addEventListener("input", () => { gardenVol = toVol(gardenSlider.value); store.set("bun-garden", String(gardenVol)); audio(); applyVolumes(); renderSound(); });
+  gardenSlider.addEventListener("change", () => { if (gardenVol > 0) chirp(); });
+
+  // ---------- the endless garden ----------
+  // The ground is cut into square chunks. Each chunk is built from its own seed, so the same
+  // spot always has the same carrots, flowers and bushes, no matter how far she hops.
+  const CS = 420;
+  const chunks = new Map();
+  const eaten = new Map();          // carrot id -> the time it was munched (it grows back later)
+  const REGROW = 45, GROW_TIME = 3;
+  const PETALS = [
+    ["#FF9EC3", "#FFD6E6"], ["#FFB38A", "#FFE1CC"], ["#C9A7F0", "#EBDDFF"],
+    ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"], ["#FFFFFF", "#FFF4F8"]
+  ];
+  const START = { x: 200, y: 400 };
+  // v14: trees, the same as Lily's Playhouse (v32+) and the bee game (v38+): same shapes, same sizes compared to Nee Nee.
+  // In the Playhouse Nee Nee is size 4 (world units per bunny unit); here she is 2.1 (BUN), so every Playhouse
+  // distance is multiplied by 2.1 / 4. TREE_H and TREE_W are the Playhouse's own numbers (1.5x taller, 1.2x wider).
+  const PH_SCALE = 2.1 / 4, TREE_H = 1.5, TREE_W = 1.2;
+  const HOME_TREES = [{ x: 470, y: 60 }, { x: -260, y: -240 }];   // two trees near the start, in view, clear of the carrots
+  function makeChunk(cx, cy) {
+    const r = seeded(hash2(cx, cy));
+    const x0 = cx * CS, y0 = cy * CS;
+    const home = cx === 0 && cy === 0;
+    const ch = { cx, cy, patches: [], beds: [], carrots: [], tufts: [], flowers: [], clovers: [], rocks: [], bushes: [], puffs: [], trees: [] };
+    const nearStart = (x, y, pad) => home && Math.hypot(x - START.x, y - START.y) < pad;
+    const free = (x, y, pad) =>
+      !nearStart(x, y, 60 + pad) &&
+      !ch.beds.some(b => Math.hypot(b.x - x, b.y - y) < b.r + pad) &&
+      !ch.bushes.some(b => Math.hypot(b.x - x, b.y - y) < b.r + pad) &&
+      !ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < o.s + pad) &&
+      !ch.trees.some(t => Math.hypot(t.x - x, t.y - y) < t.w + pad);
+    // soft patches of lighter and darker grass
+    for (let i = 0; i < 3; i++) {
+      ch.patches.push({ x: x0 + r() * CS, y: y0 + r() * CS, rx: 90 + r() * 120, ry: 60 + r() * 90, rot: r() * 3, rgb: r() < 0.55 ? "196, 232, 164" : "124, 192, 112", a: r() < 0.55 ? 0.5 : 0.35 });
+    }
+    // v14: a big old tree now and then (Playhouse meadow trees, Playhouse sizes)
+    const addTree = (tx, ty) => {
+      const t = { x: tx, y: ty, h: (340 + r() * 140) * TREE_H * PH_SCALE, w: (44 + r() * 22) * TREE_W * PH_SCALE, can: [] };
+      const nb = 7 + Math.floor(r() * 4);
+      for (let i = 0; i < nb; i++) t.can.push({ dx: (r() - 0.5) * 2.6, dz: (r() - 0.3) * 0.9, r: 0.55 + r() * 0.5, shade: Math.floor(r() * 3) });
+      t.can.sort((a, b) => a.shade - b.shade);
+      ch.trees.push(t);
+    };
+    HOME_TREES.forEach(h => { if (Math.floor(h.x / CS) === cx && Math.floor(h.y / CS) === cy) addTree(h.x, h.y); });
+    if (!home && Math.abs(cx) + Math.abs(cy) > 1 && r() < 0.22) {
+      const tx = x0 + 80 + r() * (CS - 160), ty = y0 + 80 + r() * (CS - 160);
+      if (free(tx, ty, 60)) addTree(tx, ty);
+    }
+    // carrot beds: a soft, darker clover mound with carrots poking up through it
+    const addBed = (bx, by, n) => {
+      const bed = { x: bx, y: by, r: 30 + n * 7, rot: r() * 3 };
+      ch.beds.push(bed);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + r() * 0.6, d = n === 1 ? 0 : bed.r * (0.35 + r() * 0.35);
+        ch.carrots.push({ id: cx + "," + cy + "," + ch.carrots.length, x: bx + Math.cos(a) * d, y: by + Math.sin(a) * d, ph: r() * 6, size: 0.9 + r() * 0.25, bed });
+      }
+    };
+    if (home) {
+      // she starts with a little bed of carrots just ahead, and a single one off to the side
+      addBed(200, 255, 5);
+      addBed(320, 330, 1);
+    } else {
+      const beds = r() < 0.7 ? (r() < 0.25 ? 2 : 1) : 0;
+      for (let i = 0, tries = 0; i < beds && tries < 20; tries++) {
+        const bx = x0 + 70 + r() * (CS - 140), by = y0 + 70 + r() * (CS - 140);
+        if (!free(bx, by, 60)) continue;
+        addBed(bx, by, 3 + Math.floor(r() * 4)); i++;
+      }
+      if (r() < 0.45) {   // a wild carrot all on its own
+        const bx = x0 + 40 + r() * (CS - 80), by = y0 + 40 + r() * (CS - 80);
+        if (free(bx, by, 40)) addBed(bx, by, 1);
+      }
+    }
+    // round, leafy bushes (some with blossoms)
+    const nb = home ? 1 : Math.floor(r() * 3);
+    for (let i = 0, tries = 0; i < nb && tries < 20; tries++) {
+      const bx = home ? 60 : x0 + 50 + r() * (CS - 100), by = home ? 250 : y0 + 50 + r() * (CS - 100);
+      if (!free(bx, by, 40)) continue;
+      const b = { x: bx, y: by, r: 26 + r() * 22, h: 34 + r() * 30, blobs: [], bloom: r() < 0.5 ? pick(PETALS.slice(0, 3)) : null, ph: r() * 6 };
+      const n = 4 + Math.floor(r() * 3);
+      for (let j = 0; j < n; j++) b.blobs.push({ dx: (r() - 0.5) * 1.6, dz: 0.35 + r() * 0.7, rr: 0.45 + r() * 0.35, shade: Math.floor(r() * 3) });
+      b.blobs.sort((a, c) => a.shade - c.shade);
+      ch.bushes.push(b); i++;
+    }
+    const nr = Math.floor(r() * 2.4);
+    for (let i = 0; i < nr; i++) {
+      const x = x0 + r() * CS, y = y0 + r() * CS;
+      if (free(x, y, 30)) ch.rocks.push({ x, y, s: 8 + r() * 14 });
+    }
+    for (let i = 0; i < 26; i++) {
+      const x = x0 + r() * CS, y = y0 + r() * CS;
+      if (!free(x, y, 4)) continue;
+      ch.tufts.push({ x, y, h: 10 + r() * 20, lean: (r() - 0.5) * 0.6, ph: r() * 6, dark: r() < 0.5 });
+    }
+    const nf = 5 + Math.floor(r() * 6);
+    for (let i = 0; i < nf; i++) {
+      const x = x0 + r() * CS, y = y0 + r() * CS;
+      if (!free(x, y, 12)) continue;
+      ch.flowers.push({ x, y, h: 14 + r() * 22, col: pick(PETALS), type: Math.floor(r() * 3), ph: r() * 6, s: 0.55 + r() * 0.35 });
+    }
+    const nc = 6 + Math.floor(r() * 8);
+    for (let i = 0; i < nc; i++) {
+      const x = x0 + r() * CS, y = y0 + r() * CS;
+      if (free(x, y, 6)) ch.clovers.push({ x, y, s: 0.5 + r() * 0.4, pink: r() < 0.3 });
+    }
+    if (r() < 0.35) {
+      const x = x0 + 40 + r() * (CS - 80), y = y0 + 40 + r() * (CS - 80);
+      if (free(x, y, 16)) ch.puffs.push({ x, y, h: 34 + r() * 16, ph: r() * 6, puffed: false });
+    }
+    return ch;
+  }
+  function chunkAt(cx, cy) {
+    const key = cx + "," + cy;
+    let ch = chunks.get(key);
+    if (!ch) { ch = makeChunk(cx, cy); chunks.set(key, ch); }
+    return ch;
+  }
+  function chunksAround(x, y, rad) {
+    const out = [];
+    const x0 = Math.floor((x - rad) / CS), x1 = Math.floor((x + rad) / CS);
+    const y0 = Math.floor((y - rad) / CS), y1 = Math.floor((y + rad) / CS);
+    for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) out.push(chunkAt(cx, cy));
+    return out;
+  }
+  function pruneChunks() {
+    if (chunks.size < 140) return;
+    const bx = Math.floor(bun.x / CS), by = Math.floor(bun.y / CS);
+    for (const [key, ch] of chunks) {
+      if (Math.abs(ch.cx - bx) > 7 || Math.abs(ch.cy - by) > 7) chunks.delete(key);   // rebuilt the same way if she comes back
+    }
+  }
+  // how grown a carrot is: 1 = ready to munch, 0 = just munched (it sprouts back after a while)
+  function carrotGrow(c) {
+    if (!eaten.has(c.id)) return 1;
+    const since = time - eaten.get(c.id);
+    if (since < REGROW) return 0;
+    const g = (since - REGROW) / GROW_TIME;
+    if (g >= 1) { eaten.delete(c.id); return 1; }
+    return g;
+  }
+  function carrotReady(c) { return carrotGrow(c) >= 1 && c !== claimed; }
+
+  // ---------- the camera: behind her and a little above, always showing the sky ----------
+  const F = 330, NEAR = 20, FAR = 1400, CAM_DIST = 230, CAM_UP = 118;
+  let HORIZON = 210;
+  let camYaw = -Math.PI / 2, camYawTarget = camYaw, camC = Math.cos(camYaw), camS = Math.sin(camYaw);
+  let camX = 0, camY = 0, camH = CAM_UP;
+  function proj(x, y, z) {
+    const dx = x - camX, dy = y - camY;
+    const f = dx * camC + dy * camS;
+    if (f < NEAR) return null;
+    const side = -dx * camS + dy * camC, k = F / f;
+    return { x: W / 2 + side * k, y: HORIZON + (camH - z) * k, k, f };
+  }
+  function groundAt(sx, sy) {
+    if (sy <= HORIZON + 2) return null;
+    const f = camH * F / (sy - HORIZON), side = (sx - W / 2) * f / F;
+    return { x: camX + camC * f - camS * side, y: camY + camS * f + camC * side };
+  }
+  function fadeFor(f) {
+    const far = clamp((FAR - f) / 350, 0, 1);
+    const near = f < 200 ? clamp((f - 110) / 90, 0, 1) : 1;   // things right under the camera fade so they never block her
+    return far * near;
+  }
+  function screenDir(vx, vy) { const side = -vx * camS + vy * camC; return side >= 0 ? 1 : -1; }
+  function groundPath(pts) {
+    const cam = pts.map(([x, y]) => { const dx = x - camX, dy = y - camY; return [dx * camC + dy * camS, -dx * camS + dy * camC]; });
+    const out = [], N = 8;
+    for (let i = 0; i < cam.length; i++) {
+      const a = cam[i], b = cam[(i + 1) % cam.length], ain = a[0] >= N, bin = b[0] >= N;
+      if (ain) out.push(a);
+      if (ain !== bin) { const t = (N - a[0]) / (b[0] - a[0]); out.push([N, a[1] + (b[1] - a[1]) * t]); }
+    }
+    if (out.length < 3) return false;
+    ctx.beginPath();
+    out.forEach(([f, side], i) => { const k = F / f, x = W / 2 + side * k, y = HORIZON + camH * k; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+    ctx.closePath();
+    return true;
+  }
+  function ellipsePts(cx, cy, rx, ry, rot, n) {
+    const pts = [], c = Math.cos(rot), s = Math.sin(rot);
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2, lx = Math.cos(a) * rx, ly = Math.sin(a) * ry; pts.push([cx + lx * c - ly * s, cy + lx * s + ly * c]); }
+    return pts;
+  }
+  function softGround(x, y, rx, ry, rot, rgb, alpha, layers = 6, inner = 0.35) {
+    for (let i = 0; i < layers; i++) {
+      const t = i / (layers - 1), sc = 1 - t * (1 - inner);
+      if (groundPath(ellipsePts(x, y, rx * sc, ry * sc, rot, 20))) {
+        ctx.fillStyle = `rgba(${rgb}, ${alpha / layers * 1.7})`; ctx.fill();
+      }
+    }
+  }
+
+  // ---------- the bunny ----------
+  // She hops in little bounces toward wherever you tap. Tap a carrot and she hops over,
+  // pulls it up, sits up with it in her paws and munches it down. No score, no goal.
+  const BUN = 2.1;                  // world units per bunny unit (she's about 30 bunny units long)
+  const HOP_LEN = 56, STOP_AT = 30; // one bounce when she wanders on her own, and how close she stops in front of a carrot
+  // Running (Jessica's controls): hold the space bar or the hop button and she hops forward over and over,
+  // faster, farther and higher the longer you hold, up to full speed. The arrows steer. Let go and she slows to a stop.
+  const RUN_MIN = 44, RUN_MAX = 150;   // hop length when she starts running, and at full speed
+  const RUN_RAMP = 2.4;                // seconds of holding to reach full speed
+  let running = false, runV = 0, runPeakSaid = false;
+  const bun = {
+    x: START.x, y: START.y, z: 0, heading: -Math.PI / 2, visYaw: -Math.PI / 2 + Math.PI - 0.7, peekSide: 1, face: 1, faceS: 1,
+    mode: "sit", hop: null, target: null, pending: null, pause: 0,
+    stretch: 0, up: 0, flop: 0, groom: 0, chew: 0, squash: 0,
+    wiggle: 0, happy: 0, blink: 2, earFlick: 0, earFlickSide: 1, look: 0,
+    munch: null, act: null
+  };
+  let claimed = null;               // the carrot she's on her way to (or munching)
+  // v15: her tummy. 5 = full. It drains one carrot a minute; each carrot she munches fills one back.
+  // At 0 she's hungry: slow, low hops, no zooming, and she dozes off when nobody is playing.
+  const TUMMY_MAX = 5, TUMMY_DRAIN = 1 / 60, SLOW_LEN = 0.65, SLOW_DUR = 1.5, TUMMY_PAUSE_AFTER = 120;
+  let tummy = TUMMY_MAX, hungrySaid = false, hungryLook = 0;
+  const hungry = () => tummy <= 0;
+  camX = bun.x - camC * CAM_DIST; camY = bun.y - camS * CAM_DIST;
+  let time = 0, hops = 0, lastInputAt = 0, tapRing = null, lastTurnAt = -9;
+  let particles = [], popups = [], crumbs = [], carrotHits = [], lastHits = [];
+  let tummyPop = 0;   // v15: a little bounce on the meter when a carrot is added
+  let bunScreen = { x: W / 2, y: H / 2, s: 1, f: 999 };
+
+  function setTarget(x, y, carrot) {
+    if (claimed && claimed !== carrot) claimed = null;
+    bun.target = { x, y, carrot: carrot || null };
+    if (carrot) claimed = carrot;
+    endAct();
+    bun.flop = Math.min(bun.flop, 0.99);
+  }
+  function wakeUp() {
+    lastInputAt = time;
+    document.body.classList.add("playing");   // the title over the game fades once you start playing
+    if (bun.act && bun.act.kind === "flop" && bun.act.hungry) {   // v15: you woke her from her hungry nap
+      bun.act = null; nextAct = 1.5;
+      popups.push({ x: bun.x, y: bun.y, z: 60, text: pick(["yawn...", "*stretch*", "hungry..."]), life: 1.2, big: false });
+    }
+  }
+  function startHop() {
+    const t = bun.target;
+    let tx = t.x, ty = t.y;
+    const d = Math.hypot(tx - bun.x, ty - bun.y);
+    const stop = t.carrot ? STOP_AT : 0;
+    if (d <= stop + 4) { arrive(); return; }
+    bun.heading = Math.atan2(ty - bun.y, tx - bun.x);
+    const len = Math.min(HOP_LEN * (hungry() ? SLOW_LEN : 1), d - stop);
+    const x1 = bun.x + Math.cos(bun.heading) * len, y1 = bun.y + Math.sin(bun.heading) * len;
+    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.34 + len / 420) * (hungry() ? SLOW_DUR : 1), peak: (10 + len * 0.28) * (hungry() ? 0.7 : 1) };
+    bun.mode = "hop";
+    if (d > 36) camYawTarget = bun.heading;   // the camera swings around behind her as she goes
+    hops++;
+    sfx.hop();
+  }
+  function arrive() {
+    const t = bun.target;
+    bun.target = null;
+    if (t && t.carrot && carrotGrow(t.carrot) >= 1) { startMunch(t.carrot); return; }
+    claimed = null;
+    bun.mode = "sit";
+    bun.squash = Math.max(bun.squash, 0.5);
+    if (bun.pending) { const p = bun.pending; bun.pending = null; setTarget(p.x, p.y, p.carrot); }
+  }
+  function startMunch(c) {
+    claimed = c;
+    bun.peekSide = angDiff(bun.heading, camYaw) >= 0 ? -1 : 1;
+    bun.heading = Math.atan2(c.y - bun.y, c.x - bun.x);
+    bun.mode = "pull";
+    bun.munch = { c, t: 0, bites: 0, left: 1, nextBite: 0.7 };
+    eaten.set(c.id, time);   // it leaves the ground now; it'll sprout back later
+    sfx.pop();
+    popups.push({ x: c.x, y: c.y, z: 60, text: pick(["pop!", "found one!", "carrot!", "ooh!"]), life: 1, big: false });
+    for (let i = 0; i < 10; i++) {
+      const a = rand(0, Math.PI * 2), s = rand(30, 70);
+      particles.push({ x: c.x, y: c.y, z: 3, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: rand(60, 130), life: 0.8, c: i % 2 ? "#7FC476" : "#B7E29C", r: rand(2, 3.4), kind: "petal", rot: rand(0, 6) });
+    }
+  }
+  function land() {
+    const h = bun.hop;
+    bun.hop = null;
+    const power = h ? clamp(h.peak / 110, 0, 1) : 0.2;
+    bun.squash = 0.6 + power * 0.5;   // bigger hops land with a bigger squish
+    bun.mode = "sit";
+    sfx.land(power);
+    // a little puff of grass where she lands
+    for (let i = 0; i < 4; i++) {
+      const a = rand(0, Math.PI * 2), s = rand(20, 45);
+      particles.push({ x: bun.x, y: bun.y, z: 2, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: rand(30, 70), life: 0.5, c: i % 2 ? "#7FC476" : "#B7E29C", r: rand(1.6, 2.6), kind: "petal", rot: rand(0, 6) });
+    }
+    checkPuffs();
+    if (h && h.carrot) {
+      // she aimed for a carrot and landed right beside it: munch time
+      if (carrotGrow(h.carrot) >= 1) { startMunch(h.carrot); return; }
+      claimed = null;
+    }
+    if (h && h.run && runV > 0.97 && !runPeakSaid && !hungry()) { runPeakSaid = true; popups.push({ x: bun.x, y: bun.y, z: 60, text: pick(["zoom!", "wheee!", "so fast!", "full speed!"]), life: 1, big: true }); }
+    if (bun.target) bun.pause = 0.05;
+    else if (h && h.run) bun.pause = running ? (hungry() ? 0.25 : lerp(0.1, 0, runV)) : 0;
+  }
+  // ---------- running ----------
+  function canHop() { return !bun.hop && bun.mode === "sit"; }
+  function startRun() {
+    audio();
+    if (!running) { bun.target = null; bun.pending = null; claimed = null; endAct(); }
+    running = true;
+  }
+  function stopRun() { running = false; }
+  // one running hop straight ahead: short and low at first, long, high and quick at full speed
+  function startRunHop() {
+    const weak = hungry();   // v15: too hungry to zoom: short, low, slow hops
+    const len = weak ? lerp(RUN_MIN, RUN_MAX, runV * 0.2) * SLOW_LEN : lerp(RUN_MIN, RUN_MAX, runV);
+    const x1 = bun.x + Math.cos(bun.heading) * len, y1 = bun.y + Math.sin(bun.heading) * len;
+    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.36 + len / 600) * (weak ? SLOW_DUR : 1), peak: (10 + len * 0.26) * (weak ? 0.7 : 1), run: true };
+    bun.mode = "hop";
+    camYawTarget = bun.heading;
+    hops++;
+    sfx.hop(runV * 0.8);
+  }
+  function finishMunch() {
+    const m = bun.munch;
+    bun.munch = null; claimed = null;
+    bun.mode = "sit";
+    bun.happy = 1.4; bun.wiggle = 1;
+    sfx.happy();
+    // v15: one more carrot in her tummy
+    const wasHungry = hungry();
+    tummy = Math.min(TUMMY_MAX, tummy + 1);
+    hungrySaid = false; tummyPop = 1;
+    if (tummy >= TUMMY_MAX) popups.push({ x: bun.x, y: bun.y, z: 76, text: pick(["so full!", "full tummy!", "yum, all full!"]), life: 1.3, big: true });
+    else if (wasHungry) popups.push({ x: bun.x, y: bun.y, z: 76, text: pick(["much better!", "energy!", "ahh, yum!"]), life: 1.2, big: false });
+    // the leafy top drops to the grass
+    for (let i = 0; i < 4; i++) particles.push({ x: bun.x + Math.cos(bun.heading) * 14, y: bun.y + Math.sin(bun.heading) * 14, z: 18, vx: rand(-15, 15), vy: rand(-15, 15), vz: rand(10, 30), life: 1.4, c: i % 2 ? "#6CBF74" : "#8ED48A", r: rand(2.5, 3.6), kind: "leaf", rot: rand(0, 6) });
+    if (Math.random() < 0.4 && !bun.pending) setTimeout(() => { if (bun.mode === "sit" && !bun.target) startAct("binky"); }, 650);
+    if (bun.pending) { const p = bun.pending; bun.pending = null; setTarget(p.x, p.y, p.carrot); }
+  }
+  function updateMunch(dt) {
+    const m = bun.munch;
+    m.t += dt;
+    if (bun.mode === "pull") {
+      bun.up = Math.min(1, bun.up + dt * 3);
+      if (m.t > 0.55) { bun.mode = "munch"; m.t = 0; }
+      return;
+    }
+    bun.up = Math.min(1, bun.up + dt * 3);
+    m.nextBite -= dt;
+    // chewing: her cheeks puff and her mouth goes nibble nibble
+    bun.chew = 0.5 + 0.5 * Math.sin(time * 22);
+    if (m.nextBite <= 0) {
+      m.bites++;
+      m.left = Math.max(0, 1 - m.bites / 5);
+      m.nextBite = 0.55 + Math.random() * 0.15;
+      sfx.crunch();
+      for (let i = 0; i < 5; i++) crumbs.push({ x: rand(-2, 2), y: rand(-2, 2), vx: rand(-30, 40), vy: rand(-60, -10), life: rand(0.5, 0.8), r: rand(1.3, 2.4), c: i % 2 ? "#FF9A4D" : "#FFB870" });
+      if (m.bites === 2 || m.bites === 4) popups.push({ x: bun.x, y: bun.y, z: 58, text: pick(["munch munch!", "nom nom!", "crunchy!", "yum!", "so good!", "nibble nibble!"]), life: 1, big: false });
+      if (m.bites >= 5) finishMunch();
+    }
+  }
+
+  // ---------- when nobody is playing: she keeps herself busy ----------
+  // After a few quiet seconds she does little bunny things: washes her face, sits up and looks
+  // around, flicks an ear, does a happy binky, hops off to find a carrot, or flops down for a nap.
+  const IDLE_AFTER = 5;
+  let nextAct = 1.5;
+  setTimeout(() => { if (bun.mode === "sit" && !bun.act && !running) startAct("peek"); }, 0);   // she says hi when the game opens
+  function endAct() { if (bun.act) { bun.act = null; } nextAct = 1.5; }
+  function startAct(kind) {
+    const dur = { groom: 3, look: 3.2, ear: 0.7, binky: 0.8, flop: rand(8, 12), sniff: 1.4, peek: rand(3.5, 5) }[kind] || 1;
+    if (kind === "peek") bun.peekSide = angDiff(bun.heading, camYaw) >= 0 ? -1 : 1;   // she turns around to look at you
+    bun.act = { kind, t: 0, dur, said: false };
+    if (kind === "binky") { sfx.binky(); popups.push({ x: bun.x, y: bun.y, z: 80, text: pick(["binky!", "wheee!", "hop hop!"]), life: 1.1, big: true }); }
+    if (kind === "sniff") sfx.sniff();
+    if (kind === "flop") popups.push({ x: bun.x, y: bun.y, z: 60, text: pick(["flop!", "cozy...", "sleepy..."]), life: 1.1, big: false });
+  }
+  function nearestCarrot(rad) {
+    let best = null, bd = rad;
+    chunksAround(bun.x, bun.y, rad).forEach(ch => ch.carrots.forEach(c => {
+      if (!carrotReady(c)) return;
+      const d = Math.hypot(c.x - bun.x, c.y - bun.y);
+      if (d < bd) { bd = d; best = c; }
+    }));
+    return best;
+  }
+  function updateIdle(dt) {
+    const quiet = bun.mode === "sit" && !bun.target && !running && time - lastInputAt > IDLE_AFTER;
+    if (bun.act) {
+      bun.act.t += dt;
+      if (bun.act.t >= bun.act.dur) { const k = bun.act.kind; bun.act = null; nextAct = k === "flop" ? rand(4, 7) : rand(2, 4.5); }
+    } else if (quiet && hungry()) {
+      // v15: too hungry to play: she sniffs toward the nearest carrot, then dozes off until you wake her
+      if (time - lastInputAt > IDLE_AFTER + 3) { startAct("flop"); bun.act.dur = 1e9; bun.act.hungry = true; }
+    } else if (quiet) {
+      nextAct -= dt;
+      if (nextAct <= 0) {
+        const idleFor = time - lastInputAt;
+        const opts = [["groom", 3], ["look", 3], ["ear", 2], ["binky", 1.5], ["sniff", 2], ["peek", 3.5]];
+        if (idleFor > 12) opts.push(["wander", 4]);
+        if (idleFor > 25) opts.push(["flop", 2]);
+        let total = opts.reduce((a, o) => a + o[1], 0), roll = Math.random() * total, kind = opts[0][0];
+        for (const o of opts) { if ((roll -= o[1]) <= 0) { kind = o[0]; break; } }
+        if (kind === "wander") {
+          // off she goes, somewhere close (v15: she leaves the carrots for you to give her)
+          const a = bun.heading + rand(-1.2, 1.2), d = rand(100, 220); setTarget(bun.x + Math.cos(a) * d, bun.y + Math.sin(a) * d, null);
+        } else startAct(kind);
+      }
+    }
+    // turn her pose toward what she's doing
+    const a = bun.act, k = 1 - Math.exp(-dt * 8);
+    let wantUp = 0, wantGroom = 0, wantFlop = 0, wantLook = 0;
+    if (a) {
+      const u = a.t / a.dur, env = Math.min(1, a.t / 0.35, (a.dur - a.t) / 0.35);
+      if (a.kind === "groom") { wantUp = 0.45 * env; wantGroom = env; }
+      else if (a.kind === "look") { wantUp = 0.9 * env; wantLook = Math.sin(u * Math.PI * 2) * env; }
+      else if (a.kind === "ear") { if (a.t < dt * 1.5) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; } }
+      else if (a.kind === "sniff") { wantUp = 0.25 * env; }
+      else if (a.kind === "peek") { wantUp = 0.35 * env; if (!a.said && a.t > 0.8) { a.said = true; bun.happy = 1.2; popups.push({ x: bun.x, y: bun.y, z: 70, text: pick(["hi!", "hello!", "peekaboo!"]), life: 1.1, big: false }); } }
+      else if (a.kind === "flop") {
+        wantFlop = env;
+        if (a.t > 2 && Math.floor(a.t / 2.2) !== Math.floor((a.t - dt) / 2.2)) { sfx.snore(); popups.push({ x: bun.x, y: bun.y, z: 50, text: "z", life: 1.4, big: false, drift: true }); }
+      }
+    }
+    // v15: hungry and awake: her head turns toward the nearest carrot (she can smell it)
+    if (hungry() && !a && bun.mode === "sit") {
+      hungryLook -= dt;
+      if (hungryLook <= 0) {
+        hungryLook = 0.5;
+        const c = nearestCarrot(700);
+        bun.sniffAt = c ? clamp(angDiff(Math.atan2(c.y - bun.y, c.x - bun.x), bun.heading) / 1.2, -1, 1) : 0;
+      }
+      wantLook = bun.sniffAt || 0;
+      wantUp = Math.max(wantUp, 0.15);
+    }
+    if (bun.mode !== "pull" && bun.mode !== "munch") bun.up += (wantUp - bun.up) * k;
+    bun.groom += (wantGroom - bun.groom) * k;
+    bun.flop += (wantFlop - bun.flop) * (1 - Math.exp(-dt * 4));
+    bun.look += (wantLook - bun.look) * k;
+  }
+  function binkyOffset() {
+    const a = bun.act;
+    if (!a || a.kind !== "binky") return { z: 0, spin: 0 };
+    const u = clamp(a.t / a.dur, 0, 1);
+    return { z: 34 * 4 * u * (1 - u), spin: Math.sin(u * Math.PI) * 0.5 };
+  }
+
+  // ---------- input ----------
+  // Tap anywhere: she hops there at a regular pace. Tap a carrot: she hops over and munches it.
+  // Hold the space bar (or the hop button) to run: faster and faster the longer you hold. Arrows steer.
+  function toGame(e) {
+    const r = canvas.getBoundingClientRect();
+    return { sx: (e.clientX - r.left) / r.width * W, sy: (e.clientY - r.top) / r.height * H };
+  }
+  function tapAt(p) {
+    wakeUp(); audio(); closeMixer();
+    // 1) a carrot under your finger (the closest one wins)
+    let best = null, bf = Infinity;
+    lastHits.forEach(h => {
+      if (Math.hypot(p.sx - h.x, p.sy - h.y) < h.rad && h.f < bf && carrotGrow(h.c) >= 1) { bf = h.f; best = h.c; }
+    });
+    let tx, ty, carrot = null;
+    if (best) { tx = best.x; ty = best.y; carrot = best; }
+    else {
+      const g = groundAt(p.sx, p.sy);
+      if (g) { tx = g.x; ty = g.y; }
+      else { const a = camYaw + Math.atan((p.sx - W / 2) / F); tx = bun.x + Math.cos(a) * 200; ty = bun.y + Math.sin(a) * 200; }   // up in the sky: just that way
+    }
+    tapRing = { x: tx, y: ty, t: 0, carrot: !!carrot };
+    if (hopKey !== "Pointer") { stopRun(); runV = Math.min(runV, 0.3); }
+    if (bun.mode === "pull" || bun.mode === "munch") { bun.pending = { x: tx, y: ty, carrot }; return !!carrot; }   // she finishes her carrot first
+    setTarget(tx, ty, carrot);
+    return !!carrot;
+  }
+  // On a computer the keys only reach the game once it has focus (on a website it sits in its own frame).
+  const hasKeyboard = (() => { try { return matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (_) { return false; } })();
+  const keyHintEl = document.getElementById("keyHint");
+  function gameHasFocus() { try { return document.hasFocus(); } catch (_) { return true; } }
+  function updateKeyHint() { keyHintEl.classList.toggle("show", hasKeyboard && !gameHasFocus()); }
+  function grabKeys() { try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {} setTimeout(updateKeyHint, 30); }
+  window.addEventListener("focus", updateKeyHint);
+  window.addEventListener("blur", updateKeyHint);
+  setInterval(updateKeyHint, 600);
+  updateKeyHint();
+  let hopKey = null, ptrHold = null;
+  const HOLD_TO_RUN = 0.28;   // seconds of holding the mouse or trackpad click before she starts running
+  canvas.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !gameHasFocus()) grabKeys(); });
+  canvas.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && hasKeyboard && !gameHasFocus()) grabKeys();   // v12: the first click wakes up the keys and also counts as a tap or hold
+    if (e.pointerType === "touch") showTouchPad();
+    const wasSaver = ss.on;   // v16: the first touch during the screensaver just wakes the game up
+    wakeUp(); closeMixer();
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    if (wasSaver) { try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {} return; }
+    try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {}
+    const p = toGame(e);
+    const onCarrot = tapAt(p);
+    // v12: keep holding the mouse button (or the trackpad click, or a finger) and she runs,
+    // just like holding the space bar. Move the pointer left or right of her to steer.
+    ptrHold = { id: e.pointerId, sx: p.sx, sy: p.sy, t0: time, run: false, carrot: onCarrot };
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  canvas.addEventListener("pointermove", e => {
+    if (!ptrHold || e.pointerId !== ptrHold.id) return;
+    const p = toGame(e); ptrHold.sx = p.sx; ptrHold.sy = p.sy;
+  });
+  function endPointerHold(e) {
+    if (!ptrHold || (e && e.pointerId !== ptrHold.id)) return;
+    ptrHold = null;
+    if (hopKey === "Pointer") { hopKey = null; stopRun(); }
+  }
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => canvas.addEventListener(t, endPointerHold));
+  canvas.addEventListener("contextmenu", e => e.preventDefault());
+  // keyboard: left/right arrows (or A/D) turn her and the view turns with her;
+  // hold the space bar, up arrow or down arrow (or W/S) to run: faster the longer you hold
+  const keys = new Set();
+  const TURN = { ArrowLeft: -1, KeyA: -1, ArrowRight: 1, KeyD: 1, BtnLeft: -1, BtnRight: 1 };
+  const HOPK = ["Space", "ArrowUp", "ArrowDown", "KeyW", "KeyS"];
+  const KEY_NAMES = { ArrowLeft: "ArrowLeft", Left: "ArrowLeft", ArrowRight: "ArrowRight", Right: "ArrowRight", ArrowUp: "ArrowUp", Up: "ArrowUp", ArrowDown: "ArrowDown", Down: "ArrowDown", " ": "Space", Spacebar: "Space", a: "KeyA", A: "KeyA", d: "KeyD", D: "KeyD", w: "KeyW", W: "KeyW", s: "KeyS", S: "KeyS" };
+  function keyCodeOf(e) {
+    if (e.code && (e.code in TURN || HOPK.includes(e.code))) return e.code;
+    return KEY_NAMES[e.key] || e.code || "";
+  }
+  document.addEventListener("keydown", e => {
+    const code = keyCodeOf(e);
+    const turn = code in TURN, hop = HOPK.includes(code);
+    if (!turn && !hop) return;
+    const el = document.activeElement, tag = el && el.tagName;
+    if (tag === "INPUT") return;                                  // the volume sliders use the arrow keys
+    if (tag === "BUTTON" || tag === "A") { try { el.blur(); canvas.focus({ preventScroll: true }); } catch (_) {} }
+    e.preventDefault();
+    closeMixer(); wakeUp();
+    if (e.repeat) return;
+    audio();
+    if (turn) { keys.add(code); lastTurnAt = time; }
+    if (hop && !hopKey) { hopKey = code; startRun(); }
+  }, true);
+  document.addEventListener("keyup", e => {
+    const code = keyCodeOf(e);
+    keys.delete(code);
+    if (code === hopKey) { hopKey = null; stopRun(); }
+  }, true);
+  // ---------- on-screen buttons (phones and tablets): the same controls as the keyboard ----------
+  const touchPad = document.getElementById("touchPad"), hopBtn = document.getElementById("hopBtn"), aroundBtn = document.getElementById("aroundBtn");
+  function showTouchPad() { if (touchPad.hidden) touchPad.hidden = false; }
+  if (!hasKeyboard) showTouchPad();
+  function padPress(btn, e) {
+    e.preventDefault(); e.stopPropagation();
+    wakeUp(); audio(); closeMixer();
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {}
+    btn.classList.add("on");
+  }
+  touchPad.querySelectorAll("[data-turn]").forEach(btn => {
+    const code = btn.dataset.turn === "left" ? "BtnLeft" : "BtnRight";
+    btn.addEventListener("pointerdown", e => { padPress(btn, e); keys.add(code); lastTurnAt = time; });
+    const end = () => { keys.delete(code); btn.classList.remove("on"); };
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => btn.addEventListener(t, end));
+  });
+  aroundBtn.addEventListener("pointerdown", e => {
+    padPress(aroundBtn, e);
+    if (canHop() || running) { bun.heading += Math.PI; camYawTarget = bun.heading; lastTurnAt = time; bun.target = null; claimed = null; endAct(); sfx.boop(); }
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => aroundBtn.addEventListener(t, () => aroundBtn.classList.remove("on")));
+  hopBtn.addEventListener("pointerdown", e => { padPress(hopBtn, e); if (!hopKey) { hopKey = "BtnHop"; startRun(); } });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => hopBtn.addEventListener(t, () => { hopBtn.classList.remove("on"); if (hopKey === "BtnHop") { hopKey = null; stopRun(); } }));
+  touchPad.addEventListener("contextmenu", e => e.preventDefault());
+  touchPad.querySelectorAll(".pbtn").forEach(b => b.addEventListener("click", e => { if (e.detail === 0) e.preventDefault(); }));
+  // leaving the page mid-press quietly stops her running
+  function cancelInput() { keys.clear(); hopKey = null; ptrHold = null; stopRun(); }
+  window.addEventListener("blur", cancelInput);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) cancelInput(); });
+  try { canvas.focus({ preventScroll: true }); } catch (_) {}
+
+  // ---------- visitors ----------
+  let critters = [], nextCritter = rand(2, 4), beeVisit = null, nextBeeVisit = rand(14, 22);
+  let frogVisit = null, nextFrogVisit = rand(30, 45);   // v11: Hop Hop the Frog (3D, from the creature library) hops over to visit
+  const FRIEND_PALS = ["pink", "mint", "lavender", "blue", "peach", "strawberry"];
+  const BUTTERFLY_COLORS = [["#FF9EC3", "#FFD6E6"], ["#C9A7F0", "#EBDDFF"], ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"]];
+  function aheadSpot(fwd, side) { return { x: camX + camC * fwd - camS * side, y: camY + camS * fwd + camC * side }; }
+  function updateCritters(dt) {
+    nextCritter -= dt;
+    if (nextCritter <= 0) {
+      if (critters.length < 6) {
+        const s = aheadSpot(rand(280, 700), rand(-320, 320));
+        if (Math.random() < 0.2 + duskAmount() * 0.5) {
+          const n = 2 + Math.floor(Math.random() * 3), a = rand(0, 6.28), z = rand(30, 110);
+          for (let i = 0; i < n; i++) critters.push({ kind: "bug", x: s.x + rand(-40, 40), y: s.y + rand(-40, 40), z: z + rand(-20, 20), a: a + rand(-0.3, 0.3), sp: rand(14, 24), t: rand(0, 9), size: rand(1.4, 2) });
+        } else critters.push({ kind: "butterfly", x: s.x, y: s.y, z: rand(40, 140), a: rand(0, 6.28), sp: rand(30, 50), t: rand(0, 9), size: rand(1.6, 2.4), col: pick(BUTTERFLY_COLORS) });
+      }
+      nextCritter = rand(5, 10);
+    }
+    critters.forEach(c => {
+      c.t += dt;
+      c.a += Math.sin(c.t * (c.kind === "bug" ? 0.5 : 0.7)) * (c.kind === "bug" ? 0.3 : 0.5) * dt;
+      c.x += Math.cos(c.a) * c.sp * dt; c.y += Math.sin(c.a) * c.sp * dt;
+      c.z = clamp(c.z + Math.sin(c.t * 1.8) * 18 * dt, 22, 180);
+    });
+    critters = critters.filter(c => Math.hypot(c.x - camX, c.y - camY) < 1400);
+    updateBeeVisit(dt);
+    updateFrogVisit(dt);
+  }
+  // v11: Now and then Hop Hop the Frog hops over to say hi. He hops up next to Nee Nee, does his
+  // happy (a short wiggle and a tiny hop) for a few seconds, then hops off again.
+  const FROG_SIZE = BUN * 0.72;                 // Hop Hop is a little smaller than Nee Nee
+  function frogStartHop(fv, tx, ty, len) {
+    const d = Math.hypot(tx - fv.x, ty - fv.y) || 1, L = Math.min(len, d);
+    fv.heading = Math.atan2(ty - fv.y, tx - fv.x);
+    fv.hop = { x0: fv.x, y0: fv.y, x1: fv.x + (tx - fv.x) / d * L, y1: fv.y + (ty - fv.y) / d * L, t: 0, dur: 0.46 + L / 400, h: 14 + L * 0.22 };
+    sfx.frogHop();
+  }
+  function updateFrogVisit(dt) {
+    if (!frogVisit) {
+      nextFrogVisit -= dt;
+      if (nextFrogVisit > 0 || !LC || !LC.frog || beeVisit) return;
+      nextFrogVisit = rand(60, 100);
+      const dir = Math.random() < 0.5 ? 1 : -1, st = aheadSpot(CAM_DIST + rand(200, 320), -dir * rand(260, 360));
+      frogVisit = { x: st.x, y: st.y, z: 0, heading: 0, hop: null, rest: 0.3, phase: "in", t: 0, danceT: 0, said: false, squash: 0, exit: rand(0, Math.PI * 2), gone: 0 };
+      return;
+    }
+    const fv = frogVisit;
+    fv.t += dt; fv.squash = Math.max(0, fv.squash - dt * 4);
+    if (fv.hop) {
+      const h = fv.hop; h.t = Math.min(1, h.t + dt / h.dur);
+      fv.x = lerp(h.x0, h.x1, h.t); fv.y = lerp(h.y0, h.y1, h.t); fv.z = Math.sin(Math.PI * h.t) * h.h;
+      if (h.t >= 1) { fv.hop = null; fv.z = 0; fv.squash = 0.6; fv.rest = rand(0.25, 0.45); }
+      return;
+    }
+    fv.rest -= dt;
+    const dBun = Math.hypot(bun.x - fv.x, bun.y - fv.y);
+    if (fv.phase === "in") {
+      if (dBun < 78) {                                           // made it: say hi and do his happy
+        fv.phase = "stay"; fv.danceT = 0; fv.stay = rand(5, 7);
+        fv.heading = Math.atan2(bun.y - fv.y, bun.x - fv.x);
+        if (!fv.said) {
+          fv.said = true; sfx.ribbit();
+          popups.push({ x: fv.x, y: fv.y, z: 50, text: pick(["ribbit, hi Nee Nee!", "hop hop, hi!", "ribbit!"]), life: 1.3, big: false });
+          if (bun.mode === "sit" && !bun.act && !running) { bun.happy = 1.4; bun.earFlick = 1; bun.wiggle = 0.8; }
+        }
+      } else if (fv.rest <= 0) {
+        // hop toward a spot beside her (she may have moved)
+        const side = Math.atan2(fv.y - bun.y, fv.x - bun.x);
+        frogStartHop(fv, bun.x + Math.cos(side) * 62, bun.y + Math.sin(side) * 62, 70);
+      }
+    } else if (fv.phase === "stay") {
+      fv.danceT += dt;
+      fv.heading = Math.atan2(bun.y - fv.y, bun.x - fv.x);        // keeps looking at his friend
+      if (fv.danceT > fv.stay || dBun > 220) { fv.phase = "out"; fv.rest = 0; }
+    } else {
+      if (fv.rest <= 0) frogStartHop(fv, fv.x + Math.cos(fv.exit) * 400, fv.y + Math.sin(fv.exit) * 400, 80);
+      if (Math.hypot(fv.x - camX, fv.y - camY) > 1300 || fv.t > 60) frogVisit = null;
+    }
+  }
+  // Now and then Buzz Buzz the Bee flies over to visit, sometimes with a friend or two, sometimes
+  // just her friends. They buzz in, circle around Nee Nee for a few seconds saying hi, then fly off.
+  function updateBeeVisit(dt) {
+    if (!beeVisit) {
+      nextBeeVisit -= dt;
+      if (nextBeeVisit > 0 || !LC) return;
+      nextBeeVisit = rand(45, 80);
+      const roll = Math.random(), pals = [];
+      if (roll < 0.5) pals.push("ours");                                           // Buzz Buzz on her own
+      else if (roll < 0.85) { pals.push("ours"); const n = 1 + (Math.random() < 0.4 ? 1 : 0); for (let i = 0; i < n; i++) pals.push(pick(FRIEND_PALS.filter(p => !pals.includes(p)))); }
+      else { const n = 1 + (Math.random() < 0.5 ? 1 : 0); for (let i = 0; i < n; i++) pals.push(pick(FRIEND_PALS.filter(p => !pals.includes(p)))); }   // just friends
+      const dir = Math.random() < 0.5 ? 1 : -1, st = aheadSpot(CAM_DIST + rand(140, 260), -dir * rand(260, 340));
+      beeVisit = { t: 0, stay: rand(6, 9), said: false, bees: pals.map((pal, i) => ({
+        pal, x: st.x + rand(-30, 30), y: st.y + rand(-30, 30), z: rand(70, 110), vx: 0, vy: 0, vz: 0,
+        off: (i / pals.length) * Math.PI * 2, ph: rand(0, 6), ring: rand(58, 78), yaw: 0
+      })), exit: rand(0, Math.PI * 2) };
+      return;
+    }
+    const v = beeVisit;
+    v.t += dt;
+    const leaving = v.t > v.stay;
+    v.bees.forEach((b, i) => {
+      let tx, ty, tz;
+      if (!leaving) {
+        // circling around her, a little above her ears
+        const a = v.t * 0.9 + b.off;
+        tx = bun.x + Math.cos(a) * b.ring; ty = bun.y + Math.sin(a) * b.ring;
+        tz = 60 + Math.sin(v.t * 2.2 + b.ph) * 10 + i * 6;
+      } else {
+        tx = b.x + Math.cos(v.exit) * 600; ty = b.y + Math.sin(v.exit) * 600; tz = b.z + 200;
+      }
+      const k = 1 - Math.exp(-dt * 2.4);
+      b.vx = lerp(b.vx, (tx - b.x) * 1.8, k); b.vy = lerp(b.vy, (ty - b.y) * 1.8, k); b.vz = lerp(b.vz, (tz - b.z) * 1.8, k);
+      const sp = Math.hypot(b.vx, b.vy), cap = leaving ? 260 : 190;
+      if (sp > cap) { b.vx *= cap / sp; b.vy *= cap / sp; }
+      b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
+      if (Math.hypot(b.vx, b.vy) > 8) b.yaw = Math.atan2(b.vy, b.vx);
+    });
+    const lead = v.bees[0];
+    if (!v.said && Math.hypot(lead.x - bun.x, lead.y - bun.y) < 130) {
+      v.said = true; sfx.buzz();
+      const star = v.bees.some(b => b.pal === "ours");
+      popups.push({ x: lead.x, y: lead.y, z: lead.z + 30, text: star ? pick(["bzz, hi Nee Nee!", "bzz, hi!", "hello friend!"]) : pick(["bzz, hi!", "hello!", "bzz bzz!"]), life: 1.3, big: false });
+      if (bun.mode === "sit" && !bun.act && !running) { bun.happy = 1.4; bun.earFlick = 1; bun.wiggle = 0.8; }
+    }
+    if (v.t > v.stay + 5) beeVisit = null;
+  }
+  // dandelion puffs near where she lands let their seeds float away
+  function checkPuffs() {
+    chunksAround(bun.x, bun.y, 200).forEach(ch => ch.puffs.forEach(d => {
+      if (d.puffed || Math.hypot(d.x - bun.x, d.y - bun.y) > 60) return;
+      d.puffed = true;
+      for (let i = 0; i < 26; i++) {
+        const an = rand(0, Math.PI * 2), sp = rand(8, 30);
+        particles.push({ x: d.x, y: d.y, z: d.h + rand(-6, 12), vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, vz: rand(10, 30), life: rand(3.5, 5.5), c: "#FFFFFF", r: rand(1.4, 2.2), kind: "seed", tw: rand(0, 6) });
+      }
+      popups.push({ x: d.x, y: d.y, z: d.h + 30, text: "whoosh!", life: 1, big: false });
+      sfx.sparkle();
+    }));
+  }
+
+  // ---------- v13: bunny friends live around the garden (creature library v4) ----------
+  // The same bunny friends as Lily's Playhouse (v32) and the bee game (v38): nine colors, up / bent / lop ears,
+  // different ear lengths and widths, and many sizes (about one in five very small, like a baby). Their sizes
+  // compare to Nee Nee exactly the way they do in the Playhouse, where Nee Nee is size 4.
+  // They hop about, wash their faces, sit up, flick an ear, nap and do binkies. When Nee Nee comes close they turn
+  // to her and get happy (sometimes they say hi); if she hops right up to one, it hops aside to make room.
+  // They leave her carrots alone, and a cream friend never has both ears up, so nobody looks just like Nee Nee.
+  const FRIENDS = [];
+  const PH_NEE = 4, PH_SIZES = [1.9, 2.1, 2.3, 3, 3.3, 3.6, 4, 4.4, 4.8, 5.3, 5.8];   // Playhouse sizes (Nee Nee = 4)
+  const friendSize = phs => BUN * phs / PH_NEE;                                      // the same sizes, in this garden
+  const BUNNY_PALS = ["ours", "caramel", "gray", "cocoa", "spotted", "oreo", "pink", "lavender", "mint"];
+  const FRIENDS_NEAR = 5, FRIEND_R = 1100, FU = BUN / PH_NEE;   // FU: Playhouse distances, scaled to this garden
+  let friendCensus = 0, lastFriendHi = -99;
+  function randomEars() {
+    const r = Math.random();
+    const left = r < 0.5 ? "up" : r < 0.6 ? "bent" : r < 0.67 ? "up" : r < 0.75 ? "bent" : r < 0.87 ? "lop" : r < 0.94 ? "lop" : "up";
+    const right = r < 0.5 ? "up" : r < 0.6 ? "up" : r < 0.67 ? "bent" : r < 0.75 ? "bent" : r < 0.87 ? "lop" : r < 0.94 ? "up" : "lop";
+    const fat = Math.random() < 0.2;
+    return { left, right, len: fat ? rand(0.78, 0.9) : rand(0.82, 1.15), wide: fat ? rand(1.2, 1.4) : 1 };
+  }
+  function newFriend(x, y, phs, pal, ears) {
+    pal = pal || pick(BUNNY_PALS);
+    ears = ears || randomEars();
+    if (pal === "ours" && ears.left === "up" && ears.right === "up") ears[Math.random() < 0.5 ? "left" : "right"] = pick(["bent", "lop"]);
+    return { pal, ears, x, y, z: 0, size: friendSize(phs), sx: rand(0.9, 1.12), home: { x, y }, heading: rand(0, 6.28), headingT: rand(0, 6.28),
+      state: "rest", timer: rand(0.3, 3), u: 0, from: null, to: null, goal: null, happy: 0, squash: 0, idle: null, faceCam: false,
+      greeted: false, flopAt: 0, earSide: 1, ph: rand(0, 6) };
+  }
+  const camF = (x, y) => (x - camX) * camC + (y - camY) * camS;
+  // somewhere a bunny can stand: not in a bush, on a rock or in a carrot bed, and not on another bunny
+  function friendBlocked(x, y, self, pad = 10) {
+    for (const ch of chunksAround(x, y, 70)) {
+      if (ch.bushes.some(b => Math.hypot(b.x - x, b.y - y) < b.r + pad + 4)) return true;
+      if (ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < o.s + pad)) return true;
+      if (ch.trees.some(t => Math.hypot(t.x - x, t.y - y) < t.w + pad + 6)) return true;   // v14
+      if (ch.beds.some(b => Math.hypot(b.x - x, b.y - y) < b.r * 1.1 + pad)) return true;
+    }
+    return FRIENDS.some(o => o !== self && Math.hypot(o.x - x, o.y - y) < 11 * (o.size + (self ? self.size : BUN)));
+  }
+  function friendSpotOk(x, y, self) {
+    if (friendBlocked(x, y, self)) return false;
+    const bf = camF(bun.x, bun.y), side = -(x - camX) * camS + (y - camY) * camC;
+    if (camF(x, y) < bf + 80 * FU && Math.abs(side) < 230 * FU) return false;   // never stands between you and Nee Nee
+    return Math.hypot(bun.x - x, bun.y - y) > 170 * FU;
+  }
+  function hiddenFriendSpot(minD, maxD) {
+    for (let i = 0; i < 25; i++) {
+      const a = rand(0, Math.PI * 2), d = rand(minD, maxD), x = bun.x + Math.cos(a) * d, y = bun.y + Math.sin(a) * d;
+      const f = camF(x, y), side = -(x - camX) * camS + (y - camY) * camC;
+      const seen = f > 40 && f < FAR && Math.abs(side) / f < 0.75;   // somewhere you can't see, so nobody pops in
+      if (seen || friendBlocked(x, y, null, 20)) continue;
+      return { x, y };
+    }
+    return null;
+  }
+  function friendHop(n, tx, ty) {
+    n.from = { x: n.x, y: n.y }; n.to = { x: tx, y: ty }; n.u = 0; n.state = "hop";
+    n.headingT = Math.atan2(ty - n.y, tx - n.x);
+  }
+  function friendStep(n, dt) {
+    n.happy = Math.max(0, n.happy - dt); n.squash = Math.max(0, n.squash - dt * 3);
+    const dB = Math.hypot(bun.x - n.x, bun.y - n.y);
+    const napping = n.state === "idle" && n.idle === "flop";
+    // Nee Nee hopped right up to her: make room
+    if (n.state !== "hop" && dB < 15 * (n.size + BUN)) {
+      const a = Math.atan2(n.y - bun.y, n.x - bun.x);
+      for (let i = 0; i < 6; i++) {
+        const aa = a + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 0.6, len = rand(13, 20) * n.size;
+        const tx = n.x + Math.cos(aa) * len, ty = n.y + Math.sin(aa) * len;
+        if (!friendBlocked(tx, ty, n, 4)) { n.idle = null; n.z = 0; friendHop(n, tx, ty); break; }
+      }
+    }
+    // she comes close: turn to her and get happy (a sleepy one keeps napping)
+    if (dB > 300) n.greeted = false;
+    else if (dB < 150 && !n.greeted && !napping && (n.state === "rest" || n.state === "idle" || n.state === "pause")) {
+      n.greeted = true; n.happy = 1.6; n.state = "idle"; n.idle = "hi"; n.timer = 1.8; n.faceCam = false; n.z = 0;
+      if (time - lastFriendHi > 7 && Math.random() < 0.6) {
+        lastFriendHi = time;
+        popups.push({ x: n.x, y: n.y, z: 34 * n.size, text: pick(["hi Nee Nee!", "hello!", "hi!", "yay, Nee Nee!"]), life: 1.2, big: false });
+        sfx.boop();
+        if (bun.mode === "sit" && !bun.act && !running) { bun.happy = 1.2; bun.earFlick = 1; }
+      }
+    }
+    if (n.state === "rest") {
+      n.timer -= dt;
+      if (n.timer <= 0) {
+        n.goal = null;
+        for (let i = 0; i < 14 && !n.goal; i++) {
+          const a = rand(0, Math.PI * 2), d = rand(60, 320) * FU, x = n.home.x + Math.cos(a) * d, y = n.home.y + Math.sin(a) * d;
+          if (friendSpotOk(x, y, n)) n.goal = { x, y };
+        }
+        if (n.goal) n.state = "go"; else n.timer = 1;
+      }
+    }
+    if (n.state === "go") {
+      const dx = n.goal.x - n.x, dy = n.goal.y - n.y, d = Math.hypot(dx, dy);
+      if (d < 14 * FU) {
+        n.state = "idle"; n.idle = pick(["up", "groom", "look", "up", "flop", "ear", "binky", "ear"]); n.timer = rand(2, 4.5); n.faceCam = Math.random() < 0.6;
+        if (n.idle === "flop") { n.timer = rand(5, 10); n.faceCam = false; }   // a lazy nap in the sun
+        if (n.idle === "binky") { n.timer = 1.5; n.faceCam = false; }
+        if (n.idle === "ear") n.earSide = Math.random() < 0.5 ? 1 : -1;
+      } else {
+        const len = Math.min(d, rand(13, 20) * n.size), tx = n.x + dx / d * len, ty = n.y + dy / d * len;
+        if (Math.hypot(bun.x - tx, bun.y - ty) < 170 * FU || friendBlocked(tx, ty, n, 4)) { n.state = "idle"; n.idle = "look"; n.timer = 1.5; n.faceCam = false; }
+        else friendHop(n, tx, ty);
+      }
+    } else if (n.state === "hop") {
+      n.u = Math.min(1, n.u + dt / 0.5);
+      n.x = lerp(n.from.x, n.to.x, n.u); n.y = lerp(n.from.y, n.to.y, n.u); n.z = Math.sin(n.u * Math.PI) * 6.5 * n.size;
+      if (n.u >= 1) { n.z = 0; n.state = "pause"; n.timer = rand(0.12, 0.3); n.squash = 0.6; }
+    } else if (n.state === "pause") {
+      n.timer -= dt; if (n.timer <= 0) n.state = n.goal ? "go" : "rest";
+    } else if (n.state === "idle") {
+      n.timer -= dt;
+      if (n.faceCam) n.headingT = camYaw + Math.PI;
+      if (n.idle === "hi") n.headingT = Math.atan2(bun.y - n.y, bun.x - n.x);
+      if (n.idle === "binky") {   // happy little leaps in place, with a twist in the air
+        const u = (1.5 - n.timer) / 0.5, ph = u - Math.floor(u);
+        n.z = u < 3 ? Math.sin(ph * Math.PI) * 7 * n.size : 0;
+        if (ph < 0.5 && u < 3) n.headingT += dt * 5 * (Math.floor(u) % 2 ? -1 : 1);
+      }
+      if (n.timer <= 0) { n.idle = null; n.state = "rest"; n.timer = rand(0.8, 2.5); n.z = 0; n.goal = null; }
+    }
+    n.heading += angDiff(n.headingT, n.heading) * (1 - Math.exp(-dt * 8));
+  }
+  function friendPose(n) {
+    const pose = { t: time, ph: n.ph, stretch: n.state === "hop" ? Math.sin(n.u * Math.PI) : 0, squash: n.squash, happy: n.happy > 0 ? 1 : 0 };
+    if (n.state === "idle") {
+      if (n.idle === "up" || n.idle === "hi") pose.up = 1;
+      if (n.idle === "groom") pose.groom = 1;
+      if (n.idle === "look") pose.look = Math.sin(time * 1.2);
+      if (n.idle === "flop") pose.flop = clamp(Math.min(n.timer, 1.5) / 0.6, 0, 1) * clamp((time - (n.flopAt || (n.flopAt = time))) / 0.6, 0, 1);
+      if (n.idle === "ear") { pose.earFlick = (time * 0.9) % 1; pose.earFlickSide = n.earSide || 1; }
+      if (n.idle === "binky") { pose.stretch = n.z > 1 ? 0.8 : 0; pose.happy = 1; }
+    }
+    if (!(n.state === "idle" && n.idle === "flop")) n.flopAt = 0;
+    if (n.happy > 0) pose.up = 1;
+    return pose;
+  }
+  function updateFriends(dt) {
+    friendCensus -= dt;
+    if (friendCensus <= 0) {
+      friendCensus = 0.8;
+      for (let i = FRIENDS.length - 1; i >= 0; i--) if (Math.hypot(FRIENDS[i].x - bun.x, FRIENDS[i].y - bun.y) > FRIEND_R + 600) FRIENDS.splice(i, 1);   // wandered off
+      const near = FRIENDS.filter(f => Math.hypot(f.x - bun.x, f.y - bun.y) < FRIEND_R).length;
+      if (near < FRIENDS_NEAR) { const s = hiddenFriendSpot(650, FRIEND_R); if (s) FRIENDS.push(newFriend(s.x, s.y, pick(PH_SIZES))); }
+    }
+    FRIENDS.forEach(n => friendStep(n, dt));
+  }
+  // the first friends you meet (spread around her, never in front of her or on the carrots)
+  [[30, 150, 3.3, "caramel"], [400, 170, 1.9, "lavender"], [470, 360, 5, "gray"], [-90, 330, 4, "pink"], [250, -40, 2.1, "spotted"]]
+    .forEach(([x, y, phs, pal]) => { if (!friendBlocked(x, y, null)) FRIENDS.push(newFriend(x, y, phs, pal)); });
+
+  // ---------- v16: the screensaver ----------
+  // After SS_AFTER seconds with nobody touching the game, the camera starts drifting on its own: it circles
+  // slowly around Nee Nee (napping or not), and now and then floats over to visit a bunny friend or a tree,
+  // then comes back to her. The first touch (or key) brings the camera straight back behind her.
+  const SS_AFTER = 20;
+  const ss = { on: false, yaw: 0, spin: 1, focus: { x: 0, y: 0 }, target: null, kind: "nee", dist: CAM_DIST * 1.3, h: CAM_UP + 20, nextPick: 0 };
+  function ssPick() {
+    const r = Math.random();
+    ss.kind = "nee"; ss.target = bun;
+    if (r > 0.5) {
+      const near = FRIENDS.filter(f => Math.hypot(f.x - bun.x, f.y - bun.y) < 650);
+      const trees = []; chunksAround(bun.x, bun.y, 700).forEach(ch => ch.trees.forEach(t => { if (Math.hypot(t.x - bun.x, t.y - bun.y) < 750) trees.push(t); }));
+      if (r < 0.82 && near.length) { ss.kind = "friend"; ss.target = pick(near); }
+      else if (trees.length) { ss.kind = "tree"; ss.target = pick(trees); }
+    }
+    ss.nextPick = rand(16, 26);
+    if (Math.random() < 0.3) ss.spin = -ss.spin;   // sometimes it drifts the other way around
+  }
+  function updateScreensaver(dt) {
+    const idle = time - lastInputAt;
+    const want = idle > SS_AFTER && !running && !ptrHold && bun.mode !== "pull" && bun.mode !== "munch";
+    if (want && !ss.on) {
+      ss.on = true; ss.yaw = camYaw; ss.focus = { x: bun.x, y: bun.y }; ssPick(); ss.kind = "nee"; ss.target = bun;
+    } else if (!want && ss.on) {
+      ss.on = false; camYawTarget = bun.heading;   // back behind her
+      return;
+    }
+    if (!ss.on) return;
+    ss.nextPick -= dt;
+    if (ss.nextPick <= 0) ssPick();
+    let t = ss.target;
+    if (ss.kind === "friend" && !FRIENDS.includes(t)) { ss.kind = "nee"; t = ss.target = bun; }
+    const kf = 1 - Math.exp(-dt * 0.45);
+    ss.focus.x = lerp(ss.focus.x, t.x, kf); ss.focus.y = lerp(ss.focus.y, t.y, kf);
+    // how far back and how high, for what it's looking at
+    const wantD = ss.kind === "tree" ? t.h * 1.35 + 160 : ss.kind === "friend" ? CAM_DIST * clamp(0.7 + t.size / BUN * 0.35, 0.8, 1.3) : CAM_DIST * 1.3;
+    const wantH = ss.kind === "tree" ? t.h * 0.42 : ss.kind === "friend" ? CAM_UP * 0.85 : CAM_UP + 20;
+    ss.dist = lerp(ss.dist, wantD, kf); ss.h = lerp(ss.h, wantH, kf);
+    ss.yaw += ss.spin * (reduceMotion ? 0.02 : 0.055) * dt;   // a slow, gentle circle
+  }
+
+  // ---------- update ----------
+  function update(dt) {
+    time += dt;
+    // keyboard steering
+    // running: speed builds while you hold, and drops quickly when you let go
+    if (running && bun.mode !== "pull" && bun.mode !== "munch") runV = Math.min(1, runV + dt / RUN_RAMP);
+    else { runV = Math.max(0, runV - dt * 1.6); if (runV < 0.9) runPeakSaid = false; }
+    // holding the mouse / trackpad click (or a finger): after a moment she starts running, just like the space bar.
+    // A quick tap still hops her to that spot (or over to munch a carrot).
+    if (ptrHold && !ptrHold.run && bun.mode !== "pull" && bun.mode !== "munch" && time - ptrHold.t0 > HOLD_TO_RUN && (!hopKey || hopKey === "Pointer")) {
+      ptrHold.run = true; hopKey = "Pointer"; startRun(); tapRing = null; wakeUp();
+    }
+    let turn = 0;
+    keys.forEach(k => { turn += TURN[k] || 0; });
+    if (hopKey === "Pointer" && ptrHold) {
+      // steer toward the pointer: the farther left or right of the middle, the sharper she turns
+      const dx = (ptrHold.sx - W / 2) / (W / 2), dead = 0.1;
+      if (Math.abs(dx) > dead) turn += clamp(Math.sign(dx) * (Math.abs(dx) - dead) / (0.6 - dead), -1, 1);
+      wakeUp();
+    }
+    if (turn && (canHop() || running)) {   // steer while standing still or while running
+      bun.heading += turn * 1.7 * dt; camYawTarget = bun.heading; lastTurnAt = time;
+      bun.target = null; claimed = null;
+      if (bun.act) endAct();
+    }
+    // hopping along
+    if (bun.hop) {
+      const h = bun.hop;
+      h.t += dt / h.dur;
+      const t = Math.min(h.t, 1);
+      bun.x = lerp(h.x0, h.x1, t); bun.y = lerp(h.y0, h.y1, t);
+      bun.z = h.peak * 4 * t * (1 - t);
+      bun.stretch = Math.sin(t * Math.PI);
+      if (h.t >= 1) { bun.x = h.x1; bun.y = h.y1; bun.z = 0; land(); }
+    } else {
+      bun.stretch = Math.max(0, bun.stretch - dt * 6);
+      if (bun.mode === "sit" && bun.target) {
+        bun.pause -= dt;
+        if (bun.pause <= 0) startHop();
+      } else if (bun.mode === "sit" && running) {
+        bun.pause -= dt;
+        if (bun.pause <= 0) startRunHop();
+      }
+    }
+    if (bun.mode === "pull" || bun.mode === "munch") updateMunch(dt);
+    else { bun.chew = Math.max(0, bun.chew - dt * 4); }
+    updateIdle(dt);
+    // she faces (on screen) the way she's heading
+    const rel = Math.sin(angDiff(bun.heading, camYaw));
+    if (Math.abs(rel) > 0.15) bun.face = Math.sign(rel);
+    bun.faceS = lerp(bun.faceS, bun.face, 1 - Math.exp(-dt * 12));
+    // which way her body actually points (turns smoothly). She faces where she's going, but when she
+    // munches or peeks at you she turns partway toward the camera so you can see her face.
+    const peeking = bun.mode === "munch" || (bun.act && bun.act.kind === "peek");
+    const wantYaw = peeking ? camYaw + Math.PI - bun.peekSide * 0.7 : bun.heading;
+    bun.visYaw += angDiff(wantYaw, bun.visYaw) * (1 - Math.exp(-dt * (bun.hop || running ? 14 : 5)));
+    bun.squash = Math.max(0, bun.squash - dt * 4);
+    bun.wiggle = Math.max(0, bun.wiggle - dt);
+    bun.happy = Math.max(0, bun.happy - dt);
+    bun.earFlick = Math.max(0, bun.earFlick - dt * 2.2);
+    bun.blink -= dt; if (bun.blink < -0.13) bun.blink = rand(2.2, 5);
+    if (!bun.earFlick && Math.random() < dt * 0.08) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; }
+
+    // camera: swings around behind her, and stays a little above
+    // v16: nobody playing for a while -> the screensaver: the camera drifts slowly around on its own
+    updateScreensaver(dt);
+    if (ss.on) {
+      const fo = ss.focus;
+      camYawTarget = ss.yaw;
+      camYaw += angDiff(camYawTarget, camYaw) * (1 - Math.exp(-dt * 0.8));
+      camC = Math.cos(camYaw); camS = Math.sin(camYaw);
+      const ks = 1 - Math.exp(-dt * 0.7);
+      camX = lerp(camX, fo.x - camC * ss.dist, ks);
+      camY = lerp(camY, fo.y - camS * ss.dist, ks);
+      camH = lerp(camH, ss.h + Math.sin(time * 0.21) * 14, ks);
+    } else {
+    camYaw += angDiff(camYawTarget, camYaw) * (1 - Math.exp(-dt * 2));
+    camC = Math.cos(camYaw); camS = Math.sin(camYaw);
+    const kc = 1 - Math.exp(-dt * (3 + 5 * runV));   // keeps up with her when she runs fast
+    camX = lerp(camX, bun.x - camC * CAM_DIST, kc);
+    camY = lerp(camY, bun.y - camS * CAM_DIST, kc);
+    camH = lerp(camH, CAM_UP + bun.z * 0.2, kc);
+    }
+
+    // v15: her tummy slowly empties (not while she's munching)
+    if (bun.mode !== "pull" && bun.mode !== "munch" && time - lastInputAt < TUMMY_PAUSE_AFTER) {   // v16: pauses when nobody has played for 2 minutes
+      const before = tummy;
+      tummy = Math.max(0, tummy - TUMMY_DRAIN * dt);
+      if (before > 0 && tummy <= 0 && !hungrySaid) {
+        hungrySaid = true; bun.earFlick = 1;
+        popups.push({ x: bun.x, y: bun.y, z: 76, text: pick(["so hungry...", "tummy's empty...", "need a carrot..."]), life: 1.6, big: false });
+        sfx.snore();
+      }
+    }
+    tummyPop = Math.max(0, tummyPop - dt * 2.5);
+    updateCritters(dt);
+    updateFriends(dt);   // v13
+    updateStar(dt);
+    updateFlyers(dt);
+    updateBreeze(dt);
+    updateGardenSound(dt, duskAmount());
+    if (gardenWind && actx) gardenWind.gain.setTargetAtTime(0.06 + 0.07 * breezeAt(bun.x, bun.y), actx.currentTime, 0.4);
+    if (tapRing) { tapRing.t += dt; if (tapRing.t > 0.9) tapRing = null; }
+
+    particles.forEach(p => {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+      if (p.kind === "seed") {
+        p.tw += dt;
+        p.vx = lerp(p.vx, 14 + Math.sin(p.tw * 1.3) * 10, dt * 0.6); p.vy = lerp(p.vy, Math.cos(p.tw) * 10, dt * 0.6);
+        p.vz = lerp(p.vz, 10, dt * 0.5);
+        p.life -= dt * 0.25;
+        return;
+      }
+      if (p.kind === "leaf") {
+        p.tw = (p.tw || 0) + dt;
+        p.vx = Math.sin(p.tw * 3) * 20; p.vz = -26; p.rot += dt * 2.5;
+        if (p.z < 0) { p.z = 0; p.vz = 0; p.vx = 0; p.vy = 0; }
+        p.life -= dt * 0.5;
+        return;
+      }
+      p.vx *= Math.pow(0.25, dt); p.vy *= Math.pow(0.25, dt); p.vz -= 260 * dt;
+      if (p.z < 0) { p.z = 0; p.vz = 0; }
+      p.rot += dt * 3;
+      p.life -= dt * 1.1;
+    });
+    particles = particles.filter(p => p.life > 0);
+    crumbs.forEach(c => { c.x += c.vx * dt; c.y += c.vy * dt; c.vy += 220 * dt; c.life -= dt; });
+    crumbs = crumbs.filter(c => c.life > 0);
+    popups.forEach(p => { p.z += dt * (p.drift ? 18 : 30); p.life -= dt * (p.drift ? 0.6 : 0.9); });
+    popups = popups.filter(p => p.life > 0);
+    pruneChunks();
+  }
+
+  // ---------- the breeze ----------
+  let gust = { start: -99, dur: 4, dx: 1, dy: 0, str: 0 }, nextGust = 7 + Math.random() * 8;
+  function updateBreeze(dt) {
+    nextGust -= dt;
+    if (nextGust <= 0) {
+      const a = Math.random() * Math.PI * 2;
+      gust = { start: time, dur: 3.2 + Math.random() * 2.3, dx: Math.cos(a), dy: Math.sin(a), str: 0.55 + Math.random() * 0.45 };
+      nextGust = 12 + Math.random() * 16;
+    }
+  }
+  function breezeAt(x, y) {
+    const lt = time - gust.start - ((x - bun.x) * gust.dx + (y - bun.y) * gust.dy) / 260 - 1.2;
+    if (lt <= 0 || lt >= gust.dur) return 0;
+    const env = Math.pow(Math.sin(Math.PI * lt / gust.dur), 2);
+    return env * gust.str * (reduceMotion ? 0.3 : 1);
+  }
+  function leanAt(x, y, amount) {
+    const b = breezeAt(x, y); if (!b) return 0;
+    const side = -gust.dx * camS + gust.dy * camC;
+    return b * amount * (side >= 0 ? 1 : -1) * (0.45 + 0.55 * Math.abs(side));
+  }
+
+  // ---------- light: golden afternoon, sunset, dusk and dawn ----------
+  const LIGHT = [[255, 214, 140, 0.04], [255, 150, 165, 0.1], [60, 50, 140, 0.26], [255, 188, 175, 0.07]];
+  const SKY = [
+    ["#8DB6EE", "#B7D2F4", "#FFE6C2", "#FFE2B0"],
+    ["#7B6FD0", "#C79BDB", "#FFB0A0", "#FFD1A1"],
+    ["#3B3474", "#62559F", "#A986BF", "#E2A2AE"],
+    ["#8698DE", "#C3B4E8", "#FFC6C0", "#FFE0B8"]
+  ];
+  const LIGHT_LOOP = 180;
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+  const SKY_RGB = SKY.map(m => m.map(hexToRgb));
+  function cycle() {
+    const pos = ((time / LIGHT_LOOP) % 1) * 4, i = Math.floor(pos), f = pos - i;
+    return { i, j: (i + 1) % 4, t: f * f * (3 - 2 * f) };
+  }
+  function lightNow() { const c = cycle(); return LIGHT[c.i].map((v, j) => lerp(v, LIGHT[c.j][j], c.t)); }
+  function duskAmount() { return clamp((lightNow()[3] - 0.1) / (0.26 - 0.1), 0, 1); }
+  function skyColors() {
+    const c = cycle();
+    return SKY_RGB[c.i].map((a, k) => { const b = SKY_RGB[c.j][k]; return `rgb(${Math.round(lerp(a[0], b[0], c.t))}, ${Math.round(lerp(a[1], b[1], c.t))}, ${Math.round(lerp(a[2], b[2], c.t))})`; });
+  }
+
+  // ---------- drawing: sky and far away ----------
+  const SUN_AZ = -Math.PI / 2 + 0.45;
+  const clouds = Array.from({ length: 9 }, (_, i) => ({ az: (i / 9) * Math.PI * 2 + Math.random() * 0.4, el: 0.18 + Math.random() * 0.5, s: 0.6 + Math.random() * 0.9, a: 0.45 + Math.random() * 0.45 }));
+  const skyStars = Array.from({ length: 40 }, () => ({ az: Math.random() * Math.PI * 2, el: Math.random() * 0.8, p: Math.random() * 6 }));
+  function skyX(az) { const d = angDiff(az, camYaw); return Math.abs(d) < 1.3 ? W / 2 + Math.tan(d) * F : null; }
+  // like Hop Hop: most are regular, some a bit bigger, a few up to twice the size
+  function critterSize() {
+    const r = Math.random();
+    return r < 0.55 ? 1 + Math.random() * 0.3 : r < 0.88 ? 1.3 + Math.random() * 0.4 : 1.7 + Math.random() * 0.3;
+  }
+  // Rare storybook flyers far off in the sky: a flying pig, a unicorn and a bunny (never the same twice in a row)
+  let noticeFlyer = 0;
+  let flyers = [], nextFlyer = rand(12, 20), lastFlyerKind = null;   // the first one comes by fairly soon
+  const FLYER_KINDS = ["pig", "unicorn", "bunny"];
+  function updateFlyers(dt) {
+    nextFlyer -= dt;
+    if (nextFlyer <= 0 && flyers.length === 0) {
+      const options = FLYER_KINDS.filter(k => k !== lastFlyerKind);
+      const kind = options[Math.floor(Math.random() * options.length)];
+      lastFlyerKind = kind;
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      flyers.push({ kind, dir, az: camYaw - dir * 0.75, el: rand(0.3, 0.62), t: rand(0, 5), speed: rand(0.045, 0.065), size: critterSize() * 0.9, life: 0 });
+      nextFlyer = rand(45, 90);
+      noticeFlyer = 2.5;   // Nee Nee spots it a moment after it appears
+    }
+    if (noticeFlyer > 0 && (noticeFlyer -= dt) <= 0 && flyers.length && bun.mode === "sit" && !bun.target && !running) {
+      bun.earFlick = 1; bun.up = Math.max(bun.up, 0.3);
+      popups.push({ x: bun.x, y: bun.y, z: 80, text: pick(["ooh!", "look!", "wow!"]), life: 1.1, big: false });
+    }
+    flyers.forEach(f => { f.t += dt; f.life += dt; f.az += f.dir * f.speed * dt; });
+    flyers = flyers.filter(f => f.life < 45 && Math.abs(angDiff(f.az, camYaw)) < 1.25 + (f.life < 3 ? 1 : 0));
+  }
+  function flyerWing(x, y, t, sw) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-0.5 + Math.sin(t * 7) * 0.55);
+    ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.ellipse(-5 * sw, 0, 7 * sw, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7"; ctx.beginPath(); ctx.ellipse(-8 * sw, 1, 4 * sw, 2, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // The flying pig (Jessica's sketch, Sept 28): far legs tucked behind her tummy, near legs in front,
+  // a curly spiral tail, a soft floppy ear, a three-quarter face with two eyes and a round snout facing us,
+  // and a long wing that sweeps up and back.
+  function pigWing(t) {
+    ctx.save(); ctx.translate(1.5, -6);
+    ctx.rotate(0.32 + Math.sin(t * 7) * 0.22);           // angled up and back, flapping from the shoulder
+    const g = ctx.createLinearGradient(0, 0, -20, 0);
+    g.addColorStop(0, "#FFFFFF"); g.addColorStop(1, "#F1EAFB");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7";                            // a soft inner feather
+    ctx.beginPath(); ctx.ellipse(-8.5, 0.8, 7.5, 1.9, 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(200, 180, 235, 0.8)"; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  function pigLeg(x, far) {
+    ctx.strokeStyle = far ? "#E07B99" : "#F59AB5"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x - 1.1, 8.6); ctx.stroke();
+    ctx.fillStyle = far ? "#C9607F" : "#E27A98";          // little hooves
+    ctx.beginPath(); ctx.ellipse(x - 1.2, 9.1, 0.95, 0.6, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawFlyingPig(t) {
+    // far-side legs, behind her tummy
+    pigLeg(-5.5, true); pigLeg(6, true);
+    // round body, lit from above, a little rosier underneath
+    const bg = ctx.createLinearGradient(0, -7.5, 0, 7.5);
+    bg.addColorStop(0, "#FFCFDC"); bg.addColorStop(0.6, "#FFB6C9"); bg.addColorStop(1, "#F7A0B9");
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.beginPath(); ctx.ellipse(-2, -4.6, 6.5, 1.8, -0.08, 0, Math.PI * 2); ctx.fill();
+    // curly spiral tail
+    ctx.strokeStyle = "#F08FAC"; ctx.lineWidth = 1.1; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    // a little spiral that starts right at her back, loops around and curls in on itself
+    for (let k = 0; k <= 40; k++) {
+      const u = k / 40, a = Math.PI * 0.15 - u * Math.PI * 2.4, r = 2.6 * (1 - u * 0.75);
+      ctx.lineTo(-14.2 + Math.cos(a) * r, -1.2 + Math.sin(a) * r);
+    }
+    ctx.stroke();
+    // near-side legs, in front of her tummy
+    pigLeg(-3, false); pigLeg(9, false);
+    // her far ear peeks up behind her head (a little smaller and darker)
+    ctx.fillStyle = "#F393AE";
+    ctx.beginPath(); ctx.moveTo(11.6, -8.6); ctx.quadraticCurveTo(13.4, -12.6, 15.6, -11.2); ctx.quadraticCurveTo(15.6, -8.8, 14.4, -7.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#E97897";
+    ctx.beginPath(); ctx.moveTo(12.6, -8.8); ctx.quadraticCurveTo(13.8, -11.3, 15, -10.6); ctx.quadraticCurveTo(15, -9.2, 14.2, -8.3); ctx.closePath(); ctx.fill();
+    // head, shaded so it feels round
+    const hg = ctx.createRadialGradient(8.5, -5.5, 0.5, 10, -3, 6.5);
+    hg.addColorStop(0, "#FFD3DF"); hg.addColorStop(1, "#FFAFC4");
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(10, -3, 6.2, 0, Math.PI * 2); ctx.fill();
+    // soft floppy ear with a pink inside
+    ctx.fillStyle = "#FFA7BF";
+    ctx.beginPath(); ctx.moveTo(6.2, -7.2); ctx.quadraticCurveTo(6.8, -12.6, 10.2, -11.4); ctx.quadraticCurveTo(10.8, -9.2, 9.6, -8.2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#FF8FAE";
+    ctx.beginPath(); ctx.moveTo(7.2, -7.8); ctx.quadraticCurveTo(7.6, -11, 9.5, -10.5); ctx.quadraticCurveTo(9.6, -9.2, 8.9, -8.4); ctx.closePath(); ctx.fill();
+    // two eyes (three-quarter view): the far one a touch smaller, each with a sparkle
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.ellipse(10.2, -4.6, 1.05, 1.2, 0, 0, Math.PI * 2); ctx.ellipse(13.5, -5, 0.85, 1.05, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(10.55, -5, 0.38, 0, Math.PI * 2); ctx.arc(13.8, -5.35, 0.3, 0, Math.PI * 2); ctx.fill();
+    // rosy cheek
+    ctx.fillStyle = "rgba(255, 120, 160, 0.45)";
+    ctx.beginPath(); ctx.ellipse(8.6, -1.4, 1.6, 1, 0, 0, Math.PI * 2); ctx.fill();
+    // round snout facing us, with a little depth
+    const sg = ctx.createRadialGradient(13.9, -2.4, 0.2, 14.3, -1.8, 2.25);
+    sg.addColorStop(0, "#FFB3C6"); sg.addColorStop(1, "#F2869F");
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.ellipse(14.3, -1.8, 2.03, 1.65, -0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#B8566F";
+    ctx.beginPath(); ctx.ellipse(13.63, -1.65, 0.38, 0.6, 0.15, 0, Math.PI * 2); ctx.ellipse(14.98, -1.8, 0.38, 0.6, -0.15, 0, Math.PI * 2); ctx.fill();
+    // a small happy smile under the snout
+    ctx.strokeStyle = "#3B2D55"; ctx.lineWidth = 0.45; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(13.1, 0.45); ctx.quadraticCurveTo(13.95, 1.15, 14.8, 0.45); ctx.stroke();
+    pigWing(t);
+  }
+  function drawFlyingBunny(t) {
+    ctx.fillStyle = "#FFF6EF";
+    ctx.save(); ctx.translate(8, -9); ctx.rotate(-0.9 + Math.sin(t * 2) * 0.08);
+    ctx.beginPath(); ctx.ellipse(-2, -6, 2.4, 7, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 2.4, 7, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFC4D6";
+    ctx.beginPath(); ctx.ellipse(-2, -6, 1.1, 4.8, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 1.1, 4.8, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "#FFF6EF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 10, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(9, -4, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4, 5, 5, 2, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(-10.5, -1.5, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FF9AB6"; ctx.beginPath(); ctx.arc(14.2, -3.5, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3B2D55"; ctx.beginPath(); ctx.arc(10.5, -5.5, 1, 0, Math.PI * 2); ctx.fill();
+    flyerWing(-1, -5, t, 0.95);
+  }
+  function drawFlyingUnicorn(t) {
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5"].forEach((c, i) => {
+      ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(-12, -2 + i); ctx.quadraticCurveTo(-18, -2 + i * 2 + Math.sin(t * 3 + i) * 1.5, -22, 2 + i * 2); ctx.stroke();
+    });
+    ctx.strokeStyle = "#E9E1F7"; ctx.lineWidth = 1.8;
+    [[-8, -12], [-4, -8], [6, 10], [9, 13]].forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(a, 4); ctx.lineTo(b, 8); ctx.stroke(); });
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 13, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(6, -4); ctx.lineTo(12, -2); ctx.lineTo(19, -11); ctx.lineTo(13.5, -14); ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.translate(17, -10); ctx.rotate(0.35); ctx.beginPath(); ctx.ellipse(0, 0, 5.5, 3.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    ctx.fillStyle = "#FFD36E";
+    ctx.beginPath(); ctx.moveTo(15, -13); ctx.lineTo(19, -21); ctx.lineTo(17.5, -12.5); ctx.closePath(); ctx.fill();
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5", "#FFB6C9"].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(13 - i * 1.9, -13 + i * 2.6, 2.1, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = "#3B2D55"; ctx.beginPath(); ctx.arc(18, -10.5, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 150, 185, 0.6)"; ctx.beginPath(); ctx.arc(19.5, -8.6, 1.1, 0, Math.PI * 2); ctx.fill();
+    flyerWing(0, -5, t, 1.1);
+  }
+  function drawFlyers() {
+    flyers.forEach(f => {
+      const x = skyX(f.az); if (x === null) return;
+      const y = f.el * HORIZON + Math.sin(f.t * 1.1) * 8;
+      // moving across the sky: face the way it's going on screen
+      const face = angDiff(f.az + f.dir * 0.01, camYaw) > angDiff(f.az, camYaw) ? 1 : -1;
+      ctx.save(); ctx.translate(x, y); ctx.scale(face * f.size, f.size); ctx.rotate(Math.sin(f.t * 1.1 + 1) * 0.06);
+      if (f.kind === "pig") drawFlyingPig(f.t); else if (f.kind === "bunny") drawFlyingBunny(f.t); else drawFlyingUnicorn(f.t);
+      ctx.restore();
+    });
+  }
+  let star = null, nextStar = rand(25, 45), starTrail = [];
+  function updateStar(dt) {
+    nextStar -= dt;
+    if (!star && nextStar <= 0) {
+      const deg = pick([25, 40, 0, 8, -20]) + rand(-6, 6), side = Math.random() < 0.5 ? 1 : -1, speed = rand(250, 320), dur = rand(0.9, 1.3), a = deg * Math.PI / 180;
+      const vx = side * Math.cos(a) * speed, vy = Math.sin(a) * speed;
+      const cx = rand(90, W - 90), cy = rand(40, Math.max(70, HORIZON - 60));
+      star = { x: cx - vx * dur / 2, y: cy - vy * dur / 2, vx, vy, t: 0, dur };
+      sfx.twinkle();
+      if (bun.mode === "sit" && !bun.target) { bun.earFlick = 1; popups.push({ x: bun.x, y: bun.y, z: 80, text: "ooh!", life: 1.1, big: false }); }
+      nextStar = rand(40, 80);
+    }
+    if (star) {
+      star.t += dt; star.x += star.vx * dt; star.y += star.vy * dt;
+      if (Math.random() < 0.6) starTrail.push({ x: star.x + rand(-2, 2), y: star.y + rand(-2, 2), life: 1, r: rand(0.8, 1.8) });
+      if (star.t >= star.dur) star = null;
+    }
+    starTrail.forEach(t => { t.life -= dt * 1.4; t.y += dt * 6; });
+    starTrail = starTrail.filter(t => t.life > 0);
+  }
+  function drawStar() {
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, HORIZON); ctx.clip();
+    starTrail.forEach(t => { ctx.fillStyle = `rgba(255, 250, 225, ${0.8 * t.life})`; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.fill(); });
+    if (star) {
+      const k = star.t / star.dur, fade = Math.min(1, k * 5) * Math.min(1, (1 - k) * 4), len = 0.32;
+      const tx = star.x - star.vx * len, ty = star.y - star.vy * len;
+      const g = ctx.createLinearGradient(tx, ty, star.x, star.y);
+      g.addColorStop(0, "rgba(255, 245, 220, 0)"); g.addColorStop(1, `rgba(255, 250, 230, ${0.9 * fade})`);
+      ctx.strokeStyle = g; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(star.x, star.y); ctx.stroke();
+      ctx.fillStyle = `rgba(255, 255, 255, ${fade})`;
+      ctx.beginPath(); ctx.arc(star.x, star.y, 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function hillLayer(seed, amp, col, ks) {
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(0, HORIZON + 1);
+    for (let sx = 0; sx <= W + 8; sx += 8) {
+      const a = camYaw + Math.atan((sx - W / 2) / F);
+      let h = 0;
+      ks.forEach((k, i) => { h += Math.sin(a * k + seed + i * 1.7) / (i + 1); });
+      ctx.lineTo(sx, HORIZON - (0.55 + 0.3 * h) * amp);
+    }
+    ctx.lineTo(W, HORIZON + 1); ctx.closePath(); ctx.fill();
+  }
+  function drawSky(dusk) {
+    const c = skyColors();
+    const g = ctx.createLinearGradient(0, 0, 0, HORIZON);
+    g.addColorStop(0, c[0]); g.addColorStop(0.45, c[1]); g.addColorStop(0.82, c[2]); g.addColorStop(1, c[3]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, HORIZON + 2);
+    if (dusk > 0.05) {
+      skyStars.forEach(s => {
+        const x = skyX(s.az); if (x === null) return;
+        ctx.fillStyle = `rgba(255, 250, 230, ${dusk * (0.4 + 0.4 * Math.sin(time * 2 + s.p))})`;
+        ctx.beginPath(); ctx.arc(x, s.el * HORIZON * 0.8, 1.2, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+    const sx = skyX(SUN_AZ);
+    if (sx !== null) {
+      const sy = HORIZON - 30;
+      const sg = ctx.createRadialGradient(sx, sy, 20, sx, sy, 120);
+      sg.addColorStop(0, "rgba(255, 244, 214, 0.6)"); sg.addColorStop(1, "rgba(255, 220, 180, 0)");
+      ctx.fillStyle = sg; ctx.fillRect(sx - 120, sy - 120, 240, 240);
+      ctx.fillStyle = "#FFF1D2"; ctx.beginPath(); ctx.arc(sx, sy, 30, 0, Math.PI * 2); ctx.fill();
+    }
+    drawStar();      // shooting stars sit behind the clouds
+    drawFlyers();    // storybook flyers, far away behind the clouds
+    clouds.forEach(cl => {
+      cl.az += 0.0006;
+      const x = skyX(cl.az); if (x === null) return;
+      const y = cl.el * HORIZON, w = 90 * cl.s, s = cl.s;
+      ctx.fillStyle = `rgba(255, 244, 248, ${cl.a})`;
+      ctx.beginPath();
+      ctx.ellipse(x, y, w * 0.5, 12 * s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x + w * 0.04, y - 9 * s); ctx.ellipse(x - w * 0.18, y - 9 * s, w * 0.22, 13 * s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x + w * 0.4, y - 12 * s); ctx.ellipse(x + w * 0.14, y - 12 * s, w * 0.26, 16 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    hillLayer(0.3, 34, "#B3A6DA", [3, 5, 9, 14]);
+    hillLayer(2.1, 18, "#9FCB8F", [4, 7, 11, 17]);
+    hillLayer(4.2, 9, "#8FC585", [19, 29, 41, 57]);
+  }
+  function drawGroundBase() {
+    const g = ctx.createLinearGradient(0, HORIZON, 0, H);
+    g.addColorStop(0, "#C6E4A9"); g.addColorStop(0.22, "#A8D78E"); g.addColorStop(1, "#86C676");
+    ctx.fillStyle = g; ctx.fillRect(0, HORIZON, W, H - HORIZON);
+  }
+  function drawDecals(list) {
+    const items = [];
+    list.forEach(ch => {
+      ch.patches.forEach(p => items.push({ d: Math.hypot(p.x - camX, p.y - camY), p, kind: "patch" }));
+      ch.beds.forEach(b => items.push({ d: Math.hypot(b.x - camX, b.y - camY), p: b, kind: "bed" }));
+      ch.bushes.forEach(b => items.push({ d: Math.hypot(b.x - camX, b.y - camY), p: b, kind: "shade" }));
+      ch.trees.forEach(t => items.push({ d: Math.hypot(t.x - camX, t.y - camY), p: t, kind: "tshade" }));   // v14
+    });
+    items.sort((a, b) => b.d - a.d);
+    items.forEach(it => {
+      if (it.d > 1400) return;
+      const p = it.p;
+      const nearFade = clamp((it.d - 140) / 160, 0, 1);   // soft shapes right under the camera fade away
+      if (it.kind !== "patch" && nearFade <= 0) return;
+      if (it.kind === "patch") softGround(p.x, p.y, p.rx * 1.15, p.ry * 1.15, p.rot, p.rgb, p.a, it.d > 900 ? 3 : 6);
+      else if (it.kind === "tshade") softGround(p.x, p.y, p.w * 2.4, p.w * 2, 0, "60, 110, 60", 0.16 * nearFade, 4);
+      else if (it.kind === "shade") softGround(p.x, p.y, p.r * 1.5, p.r * 1.25, 0, "60, 110, 60", 0.16 * nearFade, 4);
+      else {
+        // a carrot bed: a soft, deep-green clover mound (no dirt, just lush leaves)
+        softGround(p.x, p.y, p.r * 1.35, p.r * 1.15, p.rot, "86, 160, 90", 0.42 * nearFade, 6, 0.3);
+        softGround(p.x, p.y, p.r * 0.9, p.r * 0.75, p.rot, "130, 196, 118", 0.3 * nearFade, 4, 0.4);
+      }
+    });
+  }
+
+  // ---------- drawing: things standing in the garden ----------
+  function drawFlowerHead(x, y, s, col, type) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    if (type === 0) {
+      ctx.fillStyle = col[1];
+      for (let i = 0; i < 10; i++) { ctx.save(); ctx.rotate(i / 10 * Math.PI * 2); ctx.beginPath(); ctx.ellipse(0, -9, 3, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle = col[0];
+      for (let i = 0; i < 10; i++) { ctx.save(); ctx.rotate((i + 0.5) / 10 * Math.PI * 2); ctx.beginPath(); ctx.ellipse(0, -7, 1.8, 4.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle = "#FFD85C"; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+    } else if (type === 1) {
+      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - Math.PI / 2; ctx.fillStyle = col[0]; ctx.beginPath(); ctx.arc(Math.cos(a) * 8, Math.sin(a) * 8, 7.5, 0, Math.PI * 2); ctx.fill(); }
+      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - Math.PI / 2; ctx.fillStyle = col[1]; ctx.beginPath(); ctx.arc(Math.cos(a) * 7, Math.sin(a) * 7, 3.6, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#FFD85C"; ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      for (let i = 0; i < 8; i++) {
+        ctx.save(); ctx.rotate(i / 8 * Math.PI * 2);
+        ctx.fillStyle = i % 2 ? col[0] : col[1];
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(-6, -5, -5, -15, 0, -15); ctx.bezierCurveTo(5, -15, 6, -5, 0, 0); ctx.fill();
+        ctx.restore();
+      }
+      ctx.fillStyle = "#FFE27A"; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawFlower(fl, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    ctx.globalAlpha = a;
+    const k = p.k, h = fl.h * k;
+    const sway = (Math.sin(time * 1.2 + fl.ph) * (reduceMotion ? 0.6 : 2) + leanAt(fl.x, fl.y, 6)) * k;
+    ctx.strokeStyle = "#5FAE68"; ctx.lineWidth = Math.max(1, 2.2 * k); ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.quadraticCurveTo(p.x, p.y - h * 0.6, p.x + sway, p.y - h); ctx.stroke();
+    ctx.fillStyle = "#6CBF74";
+    ctx.beginPath(); ctx.ellipse(p.x - 5 * k, p.y - h * 0.35, 6 * k, 2.2 * k, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(p.x + sway, p.y - h); ctx.scale(1, clamp(camH / p.f * 2.2 + 0.3, 0.35, 0.95));
+    drawFlowerHead(0, 0, fl.s * k, fl.col, fl.type);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+  function drawTuft(t, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    ctx.globalAlpha = a;
+    const k = p.k, h = t.h * k;
+    const sway = (Math.sin(time * 1.5 + t.ph) * (reduceMotion ? 0.5 : 2) + leanAt(t.x, t.y, 7)) * k;
+    ctx.strokeStyle = t.dark ? "#69B065" : "#7FC476"; ctx.lineWidth = Math.max(1, 2.2 * k); ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(p.x - 3 * k, p.y); ctx.quadraticCurveTo(p.x - 4 * k, p.y - h * 0.6, p.x - 7 * k + sway + t.lean * h, p.y - h * 0.8);
+    ctx.moveTo(p.x, p.y); ctx.quadraticCurveTo(p.x, p.y - h * 0.7, p.x + sway + t.lean * h, p.y - h);
+    ctx.moveTo(p.x + 3 * k, p.y); ctx.quadraticCurveTo(p.x + 4 * k, p.y - h * 0.5, p.x + 7 * k + sway + t.lean * h, p.y - h * 0.7);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  function drawClover(c, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    ctx.globalAlpha = a;
+    const k = p.k * c.s, h = 14 * k;
+    ctx.fillStyle = "#5FAE68";
+    ctx.beginPath(); ctx.arc(p.x - 4 * k, p.y - 2 * k, 4 * k, 0, Math.PI * 2); ctx.arc(p.x + 4 * k, p.y - 2 * k, 4 * k, 0, Math.PI * 2); ctx.arc(p.x, p.y - 5 * k, 4 * k, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#6CBF74"; ctx.lineWidth = Math.max(1, 1.4 * k);
+    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y - h); ctx.stroke();
+    ctx.fillStyle = c.pink ? "#FFD0E2" : "#FFFFFF";
+    ctx.beginPath(); ctx.arc(p.x, p.y - h - 4 * k, 5.5 * k, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  function drawRock(r, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    ctx.globalAlpha = a;
+    const rx = r.s * p.k, ry = r.s * 0.62 * p.k;
+    ctx.fillStyle = "rgba(70, 110, 60, 0.22)";
+    ctx.beginPath(); ctx.ellipse(p.x + rx * 0.1, p.y, rx * 1.1, ry * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#D8D2E6";
+    ctx.beginPath(); ctx.ellipse(p.x, p.y - ry * 0.55, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.beginPath(); ctx.ellipse(p.x - rx * 0.3, p.y - ry * 0.95, rx * 0.35, ry * 0.2, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  function drawBush(b, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    const k = p.k;
+    // a bush between the camera and her turns see-through where it would hide her
+    const hide = p.f < bunScreen.f - 5 && Math.abs(bunScreen.x - p.x) < b.r * 1.6 * k + 30 * bunScreen.s && bunScreen.y > p.y - b.h * 1.8 * k;
+    const shades = ["#4F9E5C", "#66B56A", "#82C77E"];
+    const sway = leanAt(b.x, b.y, 4) * k;
+    b.blobs.forEach((bl, i) => {
+      const rr = bl.rr * b.r * k, x = p.x + bl.dx * b.r * k + sway * bl.dz, y = p.y - bl.dz * b.h * k;
+      ctx.globalAlpha = a * (hide ? 0.15 : 1);
+      const g = ctx.createRadialGradient(x - rr * 0.35, y - rr * 0.4, rr * 0.1, x, y, rr);
+      g.addColorStop(0, shades[Math.min(2, bl.shade + 1)]); g.addColorStop(1, shades[bl.shade]);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+      if (b.bloom && i >= b.blobs.length - 3) {
+        const q = seeded(Math.round(b.x * 3 + i * 17));
+        for (let j = 0; j < 3; j++) {
+          ctx.fillStyle = j % 2 ? b.bloom[0] : b.bloom[1];
+          ctx.beginPath(); ctx.arc(x + (q() - 0.5) * rr * 1.2, y + (q() - 0.6) * rr, Math.max(1.2, 2.6 * k), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+  // v14: a tree, drawn exactly like Lily's Playhouse and the bee game draw their trees
+  function leafAlpha(f, x, y, rr) {
+    let a = clamp((f - 130) / 230, 0.1, 1);
+    if (f < bunScreen.f - 0.5 && Math.hypot(x - bunScreen.x, y - bunScreen.y) < rr + 20 * bunScreen.s) a *= 0.06;   // leaves in front of her go see-through
+    return a;
+  }
+  function drawTree(t, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    const k = p.k, w = t.w * k, h = t.h * k;
+    // a trunk between the camera and her turns see-through where it would hide her
+    const trunkA = p.f < bunScreen.f - 8 && Math.abs(bunScreen.x - p.x) < w * 0.6 + 15 * bunScreen.s && bunScreen.y > p.y - h ? 0.1 : 1;
+    ctx.globalAlpha = a * trunkA;
+    ctx.fillStyle = "#9C7A5C";
+    ctx.beginPath();
+    ctx.moveTo(p.x - w * 0.9, p.y);
+    ctx.quadraticCurveTo(p.x - w * 0.45, p.y - h * 0.06, p.x - w * 0.36, p.y - h * 0.3);
+    ctx.lineTo(p.x - w * 0.3, p.y - h * 0.95); ctx.lineTo(p.x + w * 0.3, p.y - h * 0.95); ctx.lineTo(p.x + w * 0.36, p.y - h * 0.3);
+    ctx.quadraticCurveTo(p.x + w * 0.45, p.y - h * 0.06, p.x + w * 0.9, p.y);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(90, 60, 40, 0.28)"; ctx.lineWidth = Math.max(1, 2.5 * k * PH_SCALE);
+    ctx.beginPath();
+    [-0.15, 0.08, 0.2].forEach((o, i) => { ctx.moveTo(p.x + o * w, p.y - h * (0.1 + i * 0.1)); ctx.quadraticCurveTo(p.x + (o + 0.06) * w, p.y - h * 0.5, p.x + o * w, p.y - h * (0.75 - i * 0.08)); });
+    ctx.stroke();
+    const cz = p.y - h;
+    const shades = ["#4F9E5C", "#66B56A", "#82C77E"];
+    const tl = leanAt(t.x, t.y, 5 * PH_SCALE);   // leaves drift a little in the breeze (higher ones more)
+    t.can.forEach(c => {
+      const rr = c.r * t.w * 2.6 * k, x = p.x + c.dx * t.w * 1.6 * k + tl * (0.6 + c.dz) * k, y = cz - c.dz * t.w * 2 * k;
+      ctx.globalAlpha = a * leafAlpha(p.f, x, y, rr);
+      ctx.fillStyle = shades[c.shade];
+      ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+      if (c.shade === 2) { ctx.fillStyle = "rgba(255, 255, 255, 0.12)"; ctx.beginPath(); ctx.arc(x - rr * 0.3, y - rr * 0.35, rr * 0.4, 0, Math.PI * 2); ctx.fill(); }
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawPuff(d, pb, ph) {
+    const a = fadeFor(pb.f); if (a <= 0.01) return;
+    ctx.globalAlpha = a;
+    const k = pb.k, sway = (Math.sin(time * 1.3 + d.ph) * (reduceMotion ? 1 : 2.5) + leanAt(d.x, d.y, 6)) * k;
+    const hx = ph.x + sway, hy = ph.y;
+    ctx.strokeStyle = "#7FB870"; ctx.lineWidth = Math.max(1, 2 * k); ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(pb.x, pb.y); ctx.quadraticCurveTo(pb.x, (pb.y + hy) / 2, hx, hy); ctx.stroke();
+    if (!d.puffed) {
+      const R = 13 * k;
+      const g = ctx.createRadialGradient(hx, hy, R * 0.1, hx, hy, R);
+      g.addColorStop(0, "rgba(255, 255, 255, 0.95)"); g.addColorStop(1, "rgba(255, 255, 255, 0.35)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(hx, hy, R, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = "#E8DFC4"; ctx.beginPath(); ctx.arc(hx, hy, 2.5 * k, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  // A carrot growing in the ground: a feathery green top and a little orange shoulder peeking up.
+  function drawCarrot(c, p) {
+    const a = fadeFor(p.f); if (a <= 0.01) return;
+    const g = carrotGrow(c); if (g <= 0) return;
+    const k = p.k * c.size, grow = g >= 1 ? 1 : easeOutBack(g);
+    ctx.globalAlpha = a;
+    const target = (bun.target && bun.target.carrot === c) || (hungry() && c === hungryCarrot);   // v15: the nearest one wiggles when she's hungry
+    const wig = target ? Math.sin(time * 9) * 2 : 0;   // the one she's heading for gives a little wiggle
+    const sway = (Math.sin(time * 1.3 + c.ph) * (reduceMotion ? 0.6 : 2) + leanAt(c.x, c.y, 6) + wig) * k;
+    // the orange shoulder
+    if (g >= 0.6) {
+      const sh = clamp((g - 0.6) / 0.4, 0, 1);
+      const og = ctx.createLinearGradient(p.x - 4 * k, 0, p.x + 4 * k, 0);
+      og.addColorStop(0, "#FFB46B"); og.addColorStop(1, "#F2803A");
+      ctx.fillStyle = og;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y - 1.5 * k * sh, 4.2 * k, 3.2 * k * sh, 0, Math.PI, 0); ctx.lineTo(p.x + 4.2 * k, p.y); ctx.lineTo(p.x - 4.2 * k, p.y); ctx.fill();
+      ctx.fillStyle = "rgba(255, 240, 220, 0.6)";
+      ctx.beginPath(); ctx.ellipse(p.x - 1.6 * k, p.y - 3 * k * sh, 1.2 * k, 0.7 * k, -0.3, 0, Math.PI * 2); ctx.fill();
+    }
+    // the leafy top: a few feathery fronds
+    const fronds = [[-0.55, 0.85, "#5FAE68"], [0.5, 0.9, "#5FAE68"], [-0.2, 1.1, "#6CBF74"], [0.18, 1.05, "#7CCB78"]];
+    fronds.forEach(([lean, len, col]) => {
+      const h = 22 * k * len * grow, tx = p.x + lean * 14 * k * grow + sway * len, ty = p.y - 2 * k - h;
+      ctx.strokeStyle = col; ctx.lineWidth = Math.max(0.8, 1.5 * k); ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(p.x, p.y - 2 * k); ctx.quadraticCurveTo(p.x + lean * 3 * k, ty + h * 0.4, tx, ty); ctx.stroke();
+      ctx.fillStyle = col;
+      for (let i = 0; i < 3; i++) {
+        const u = 0.55 + i * 0.18, lx = lerp(p.x, tx, u), ly = lerp(p.y - 2 * k, ty, u);
+        ctx.beginPath(); ctx.ellipse(lx - 2.2 * k, ly, 2.8 * k * grow, 1.2 * k * grow, 0.6 + lean, 0, Math.PI * 2); ctx.ellipse(lx + 2.2 * k, ly, 2.8 * k * grow, 1.2 * k * grow, -0.6 + lean, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+    if (g >= 1) carrotHits.push({ c, x: p.x, y: p.y - 10 * k, rad: Math.max(22, 20 * k), f: p.f });
+  }
+
+  function drawButterfly(x, y, s, dir, t, col) {
+    const flap = 0.25 + Math.abs(Math.sin(t * (reduceMotion ? 5 : 11))) * 0.75;
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir * s, s);
+    ctx.save(); ctx.scale(flap, 1);
+    ctx.fillStyle = col[0];
+    ctx.beginPath(); ctx.ellipse(-5, -4, 5.5, 4.5, -0.5, 0, Math.PI * 2); ctx.ellipse(5, -4, 5.5, 4.5, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = col[1];
+    ctx.beginPath(); ctx.ellipse(-3.5, 2.5, 3.5, 3, 0.4, 0, Math.PI * 2); ctx.ellipse(3.5, 2.5, 3.5, 3, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "#4B3A66"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(0, 5); ctx.stroke();
+    ctx.restore();
+  }
+  function drawLightningBug(x, y, s, t) {
+    const glow = (0.35 + 0.65 * Math.max(0, Math.sin(t * 2.6))) * (0.6 + 0.4 * duskAmount());
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    const g = ctx.createRadialGradient(0, 1, 0, 0, 1, 10);
+    g.addColorStop(0, `rgba(255, 244, 150, ${0.85 * glow})`); g.addColorStop(1, "rgba(255, 244, 150, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 1, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(255, 238, 120, ${0.6 + 0.4 * glow})`;
+    ctx.beginPath(); ctx.ellipse(-1.5, 1, 2.2, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#4B3A66"; ctx.beginPath(); ctx.ellipse(1.5, 0, 1.8, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function groundShadow(x, y, w, alpha = 0.22) {
+    const p = proj(x, y, 0); if (!p) return;
+    const rx = w * p.k, ry = rx * clamp(camH / p.f * 1.3 + 0.08, 0.1, 0.6);
+    ctx.fillStyle = `rgba(60, 100, 50, ${alpha})`;
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ---------- drawing: effects and hints ----------
+  const glowBugs = Array.from({ length: 16 }, () => ({ x: Math.random(), y: Math.random(), p: Math.random() * 6.28, s: rand(0.4, 1) }));
+  function drawLight(dusk) {
+    const L = lightNow();
+    ctx.fillStyle = `rgba(${L[0] | 0}, ${L[1] | 0}, ${L[2] | 0}, ${L[3]})`;
+    ctx.fillRect(0, 0, W, H);
+    glowBugs.forEach(f => {
+      f.p += 0.016 * f.s * (reduceMotion ? 0.3 : 1);
+      const x = (((f.x * (W + 80) + Math.sin(f.p) * 24 - camYaw * 260) % (W + 80)) + W + 80) % (W + 80) - 40;
+      const y = HORIZON + 10 + f.y * (H - HORIZON - 20) + Math.cos(f.p * 1.3) * 18;
+      const a = clamp(0.35 + Math.sin(f.p * 3) * 0.35, 0.05, 0.8) * (0.2 + 0.8 * dusk);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 9);
+      g.addColorStop(0, `rgba(255, 246, 170, ${a})`); g.addColorStop(1, "rgba(255, 246, 170, 0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function drawParticles() {
+    particles.forEach(p => {
+      const q = proj(p.x, p.y, p.z); if (!q) return;
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.fillStyle = p.c;
+      ctx.beginPath();
+      if (p.kind === "seed") {
+        ctx.arc(q.x, q.y, Math.max(1, p.r * q.k * 0.6), 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; ctx.lineWidth = 0.8; ctx.beginPath();
+        for (let i = 0; i < 5; i++) { const an = -Math.PI / 2 + (i - 2) * 0.45; ctx.moveTo(q.x, q.y); ctx.lineTo(q.x + Math.cos(an) * p.r * q.k * 2.4, q.y + Math.sin(an) * p.r * q.k * 2.4); }
+        ctx.stroke();
+      } else {
+        ctx.ellipse(q.x, q.y, p.r * 1.4 * q.k, p.r * 0.8 * q.k, p.rot, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+  // carrot crumbs fly from her mouth (these live on the screen, next to her)
+  function drawCrumbs() {
+    if (!crumbs.length) return;
+    const mouth = bunnyMouthScreen();
+    crumbs.forEach(c => {
+      ctx.globalAlpha = clamp(c.life * 2, 0, 1);
+      ctx.fillStyle = c.c;
+      ctx.beginPath(); ctx.arc(mouth.x + c.x * bunScreen.s / 2, mouth.y + c.y * bunScreen.s / 2, c.r * bunScreen.s / 2, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  function bunnyMouthScreen() {
+    const s = bunScreen.s;
+    return bunScreen.mouth || { x: bunScreen.x, y: bunScreen.bottom - 15 * s };
+  }
+  function drawPopups() {
+    popups.forEach(p => {
+      const q = proj(p.x, p.y, p.z); if (!q) return;
+      ctx.globalAlpha = clamp(p.life * 1.4, 0, 1);
+      ctx.font = `800 ${p.big ? 24 : 19}px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(70, 60, 110, 0.45)";
+      const dx = p.drift ? Math.sin(p.life * 4) * 8 : 0;
+      ctx.strokeText(p.text, q.x + dx, q.y);
+      ctx.fillStyle = p.big ? "#FFD79A" : "#FFFFFF";
+      ctx.fillText(p.text, q.x + dx, q.y);
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawTapRing() {
+    if (!tapRing) return;
+    const u = tapRing.t / 0.9, r = 10 + u * 14;
+    if (groundPath(ellipsePts(tapRing.x, tapRing.y, r, r, 0, 22))) {
+      ctx.strokeStyle = tapRing.carrot ? `rgba(255, 190, 120, ${0.9 * (1 - u)})` : `rgba(255, 255, 255, ${0.8 * (1 - u)})`;
+      ctx.lineWidth = 2.4; ctx.stroke();
+    }
+  }
+  function drawTurnArrow() {
+    if (time - lastTurnAt > 1.4 || bun.hop) return;
+    const fade = clamp((1.4 - (time - lastTurnAt)) / 0.4, 0, 1);
+    for (let i = 1; i <= 5; i++) {
+      const q = proj(bun.x + Math.cos(bun.heading) * (26 + i * 22), bun.y + Math.sin(bun.heading) * (26 + i * 22), 2);
+      if (!q) continue;
+      ctx.fillStyle = `rgba(255, 220, 170, ${(0.5 + i * 0.08) * fade})`;
+      ctx.beginPath(); ctx.ellipse(q.x, q.y, clamp(3 * q.k, 2, 5), clamp(1.6 * q.k, 1, 3), 0, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawHint() {
+    if (hops > 0 || ss.on) return;
+    ctx.globalAlpha = 0.75 + Math.sin(time * 3) * 0.25;
+    ctx.font = '800 18px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif';
+    ctx.textAlign = "center";
+    ctx.lineWidth = 5; ctx.strokeStyle = "rgba(70, 60, 110, 0.45)";
+    const t1 = "tap anywhere to hop there";
+    const t2 = hasKeyboard ? "hold space to hop faster and faster!" : "hold hop to go faster and faster!";
+    const y = touchPad.hidden ? H - 64 : H - 128;
+    ctx.strokeText(t1, W / 2, y); ctx.strokeText(t2, W / 2, y + 24);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(t1, W / 2, y); ctx.fillText(t2, W / 2, y + 24);
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- v15: the tummy meter (top right, inside the game) ----------
+  // Five little carrots. They fade one at a time from left to right; an empty spot keeps a faint ghost carrot.
+  function drawTummyIcon(x, y, s, alpha) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-0.55); ctx.scale(s, s); ctx.globalAlpha = alpha;
+    ctx.fillStyle = "#6CBF74";
+    [-0.45, 0, 0.45].forEach(o => { ctx.beginPath(); ctx.ellipse(Math.sin(o) * 3, -9 - Math.cos(o) * 3, 1.7, 4.2, o, 0, Math.PI * 2); ctx.fill(); });
+    const g = ctx.createLinearGradient(-3.5, 0, 3.5, 0);
+    g.addColorStop(0, "#FFB46B"); g.addColorStop(1, "#F2803A");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-3.6, -6); ctx.quadraticCurveTo(0, -8, 3.6, -6); ctx.quadraticCurveTo(2.6, 3, 0, 10); ctx.quadraticCurveTo(-2.6, 3, -3.6, -6); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(200, 90, 40, 0.5)"; ctx.lineWidth = 0.7;
+    ctx.beginPath(); ctx.moveTo(-2.2, -2); ctx.lineTo(0.6, -2.4); ctx.moveTo(-1.4, 2.4); ctx.lineTo(0.8, 2); ctx.stroke();
+    ctx.restore();
+  }
+  function drawTummy() {
+    const n = TUMMY_MAX, gap = 19, s = 0.95, x1 = W - 22, y = 26;
+    const x0 = x1 - (n - 1) * gap;
+    // a soft pill behind them so they're easy to see on any sky
+    ctx.fillStyle = "rgba(255, 255, 255, 0.42)";
+    roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill();
+    const pulse = hungry() && !reduceMotion ? 0.5 + 0.5 * Math.sin(time * 3) : 0;
+    for (let i = 0; i < n; i++) {
+      const j = n - 1 - i;                          // v16: the leftmost carrot fades first, the full ones stay on the right
+      const fill = clamp(tummy - j, 0, 1);
+      const pop = j === Math.ceil(tummy) - 1 ? tummyPop : 0;
+      drawTummyIcon(x0 + i * gap, y + 1, s * (1 + pop * 0.35), 0.1 + pulse * 0.06 + fill * 0.9);   // 0.1 = the faint ghost carrot
+    }
+  }
+  let hungryCarrot = null;
+  function draw() {
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    hungryCarrot = hungry() ? nearestCarrot(700) : null;
+    HORIZON = Math.round(H * 0.34);
+    camC = Math.cos(camYaw); camS = Math.sin(camYaw);
+    const dusk = duskAmount();
+    drawSky(dusk);
+    drawGroundBase();
+    const list = chunksAround(camX + camC * 650, camY + camS * 650, 1000);
+    drawDecals(list);
+    drawTapRing();
+    drawTurnArrow();
+    const items = [];
+    carrotHits = [];
+    const inView = (p, m) => p && p.x > -m && p.x < W + m;
+    list.forEach(ch => {
+      ch.tufts.forEach(t => { const p = proj(t.x, t.y, 0); if (inView(p, 50) && p.f < 900 && p.f > 70) items.push({ f: p.f, d: () => drawTuft(t, p) }); });
+      ch.clovers.forEach(c => { const p = proj(c.x, c.y, 0); if (inView(p, 40) && p.f < 800 && p.f > 60) items.push({ f: p.f, d: () => drawClover(c, p) }); });
+      ch.flowers.forEach(fl => { const p = proj(fl.x, fl.y, 0); if (inView(p, 50) && p.f < 1000 && p.f > 60) items.push({ f: p.f, d: () => drawFlower(fl, p) }); });
+      ch.rocks.forEach(r => { const p = proj(r.x, r.y, 0); if (inView(p, 60)) items.push({ f: p.f, d: () => drawRock(r, p) }); });
+      ch.bushes.forEach(b => { const p = proj(b.x, b.y, 0); if (inView(p, b.r * 2 * (p ? p.k : 1) + 40) && p.f > 60) items.push({ f: p.f, d: () => drawBush(b, p) }); });
+      ch.puffs.forEach(d => { const pb = proj(d.x, d.y, 0), ph = proj(d.x, d.y, d.h); if (pb && ph && pb.f > 60 && inView(pb, 60)) items.push({ f: pb.f, d: () => drawPuff(d, pb, ph) }); });
+      ch.carrots.forEach(c => { const p = proj(c.x, c.y, 0); if (inView(p, 50) && p.f > 50) items.push({ f: p.f, d: () => drawCarrot(c, p) }); });
+      ch.trees.forEach(t => { const p = proj(t.x, t.y, 0); if (p && p.f > 90 && inView(p, t.w * 5 * p.k + 60)) items.push({ f: p.f, d: () => drawTree(t, p) }); });   // v14
+    });
+    critters.forEach(c => {
+      const p = proj(c.x, c.y, c.z); if (!inView(p, 60)) return;
+      const dir = screenDir(Math.cos(c.a), Math.sin(c.a));
+      items.push({ f: p.f, d: () => {
+        ctx.globalAlpha = fadeFor(p.f);
+        if (c.kind === "butterfly") drawButterfly(p.x, p.y, c.size * p.k, dir, c.t, c.col);
+        else drawLightningBug(p.x, p.y, c.size * p.k, c.t);
+        ctx.globalAlpha = 1;
+      } });
+    });
+    if (beeVisit && LC) beeVisit.bees.forEach(b => {
+      const p = proj(b.x, b.y, b.z); if (!inView(p, 80)) return;
+      const yaw = angDiff(b.yaw, camYaw), pitch = Math.atan2(camH - b.z, p.f);
+      items.push({ f: p.f, d: () => {
+        ctx.globalAlpha = fadeFor(p.f);
+        LC.bee.draw(ctx, p.x, p.y, 0.9 * p.k, yaw, pitch, { t: time, ph: b.ph, pal: b.pal, flying: true, lift: 0, speed: Math.hypot(b.vx, b.vy) * 0.4,
+          happy: beeVisit && beeVisit.said && beeVisit.t < beeVisit.stay ? 1 : 0 });
+        ctx.globalAlpha = 1;
+      } });
+    });
+    // v11: Hop Hop the Frog, visiting
+    if (frogVisit && LC && LC.frog) {
+      const fv = frogVisit, fp = proj(fv.x, fv.y, fv.z), fg = proj(fv.x, fv.y, 0);
+      if (fp && fg && inView(fp, 120) && fp.f > 40) {
+        const k = fp.k, dancing = fv.phase === "stay";
+        const lift = dancing && LC.frog.dance ? LC.frog.dance(fv.danceT).lift : 0;
+        items.push({ f: fg.f + 0.3, d: () => groundShadow(fv.x, fv.y, 24 * FROG_SIZE * clamp(1 - (fv.z + lift) / 90, 0.5, 1), 0.22) });
+        const yaw = angDiff(fv.heading, camYaw), pitch = Math.atan2(Math.max(10, camH - fv.z), fp.f);
+        const jump = fv.hop ? Math.sin(Math.PI * fv.hop.t) : 0;
+        items.push({ f: fp.f - 0.4, d: () => {
+          ctx.globalAlpha = fadeFor(fp.f);
+          LC.frog.draw(ctx, fp.x, fp.y, FROG_SIZE * k, yaw, pitch, { t: dancing ? fv.danceT : time, jump, squash: fv.squash, dance: dancing, happy: dancing ? 1 : 0 });
+          ctx.globalAlpha = 1;
+        } });
+      }
+    }
+    // v13: bunny friends
+    if (LC) FRIENDS.forEach(a => {
+      const p = proj(a.x, a.y, a.z), g = proj(a.x, a.y, 0);
+      if (!p || !g || g.f < 60 || !inView(p, 40 * a.size * p.k + 40)) return;
+      const fa = fadeFor(g.f); if (fa <= 0.01) return;
+      items.push({ f: g.f + 0.3, d: () => { ctx.globalAlpha = fa; groundShadow(a.x, a.y, 15 * a.size * a.sx * (1 - clamp(a.z / (30 * a.size), 0, 0.4)), 0.22); ctx.globalAlpha = 1; } });
+      items.push({ f: g.f - 0.5, d: () => {
+        ctx.save(); ctx.globalAlpha = fa;
+        const S = a.size * p.k, yaw = angDiff(a.heading, camYaw), pitch = Math.atan2(Math.max(10, camH - a.z), p.f);
+        ctx.translate(p.x, p.y); ctx.scale(a.sx, 1); ctx.translate(-p.x, -p.y);   // chubbier or slimmer
+        LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(friendPose(a), { pal: a.pal, ears: a.ears }));
+        ctx.restore();
+      } });
+    });
+    // the bunny
+    const bk = binkyOffset();
+    const bp = proj(bun.x, bun.y, bun.z + bk.z), bg = proj(bun.x, bun.y, 0);
+    if (bp && bg) {
+      const s = BUN * bp.k;
+      bunScreen = { x: bp.x, y: bp.y - 12 * s, bottom: bp.y, s, f: bp.f };
+      const carrot = bun.munch ? (bun.mode === "pull" ? 1 : bun.munch.left) : null;
+      items.push({ f: bg.f + 0.3, d: () => groundShadow(bun.x, bun.y, 17 * BUN * clamp(1 - (bun.z + bk.z) / 200, 0.5, 1) * (1 + bun.flop * 0.2), 0.24) });
+      const yaw = angDiff(bun.visYaw + bk.spin * 3, camYaw), pitch = Math.atan2(Math.max(10, camH - bun.z - bk.z), bp.f);
+      if (LC) items.push({ f: bp.f - 0.5, d: () => { bunScreen.mouth = LC.bunny.draw(ctx, bp.x, bp.y, s, yaw, pitch, {
+        t: time,
+        roll: bun.wiggle > 0 && !reduceMotion ? Math.sin(time * 18) * 0.12 * Math.min(1, bun.wiggle) : 0,
+        stretch: bun.stretch, up: bun.up, flop: bun.flop, groom: bun.groom, chew: bun.chew,
+        squash: bun.squash, blink: bun.blink, happy: bun.happy, earFlick: bun.earFlick, earFlickSide: bun.earFlickSide,
+        look: bun.look, carrot
+      }); } });
+    }
+    items.sort((a, b) => b.f - a.f);
+    items.forEach(it => it.d());
+    lastHits = carrotHits;
+    drawParticles();
+    drawCrumbs();
+    drawLight(dusk);
+    drawPopups();
+    drawHint();
+    drawTummy();   // v15
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = clamp((now - last) / 1000, 0, 0.05);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  // the small sound button over the game (home-screen app and full screen) opens the same sound panel
+  const soundBtn2 = document.getElementById("soundBtn2");
+  if (soundBtn2) soundBtn2.addEventListener("click", e => { e.stopPropagation(); soundBtn.click(); });
+  soundBtn2 && soundBtn2.addEventListener("pointerdown", e => e.stopPropagation());
+
+  // ---------- "play it like an app" tip (only in a regular browser on iPhone/iPad) ----------
+  (function homeScreenTip() {
+    const tip = document.getElementById("tip");
+    const standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!tip || standalone || !iOS || store.get("bun-tip-closed", "0") === "1") return;
+    setTimeout(() => { tip.hidden = false; }, 4000);
+    document.getElementById("tipClose").addEventListener("click", () => {
+      tip.hidden = true; store.set("bun-tip-closed", "1");
+      try { canvas.focus({ preventScroll: true }); } catch (_) {}
+    });
+  })();
+
+  // ---------- Lily Studio menu: shows when you get back to the top of the page, hides after 3 quiet seconds ----------
+  (function studioMenu() {
+    const bar = document.getElementById("studioBar");
+    if (!bar) return;
+    const inApp = document.documentElement.classList.contains("app");
+    // from the home-screen app, open the website in the browser so the game is never replaced
+    if (inApp) bar.querySelectorAll("a").forEach(a => { a.target = "_blank"; a.rel = "noopener"; });
+
+    // Home-screen app: the menu lives at the bottom and only opens with the menu button (tap again to lower it)
+    if (inApp) {
+      const btn = document.getElementById("menuBtn");
+      if (!btn) return;
+      const setOpen = open => {
+        document.documentElement.style.setProperty("--sheet-h", bar.offsetHeight + "px");
+        bar.classList.toggle("show", open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.setAttribute("aria-label", open ? "Close Lily Studio menu" : "Lily Studio menu");
+      };
+      btn.addEventListener("click", () => setOpen(btn.getAttribute("aria-expanded") !== "true"));
+      window.addEventListener("keydown", e => { if (e.key === "Escape" && bar.classList.contains("show")) setOpen(false); });
+      bar.addEventListener("click", e => { if (e.target.closest("a")) setOpen(false); });  // tidy up after opening a page
+      window.addEventListener("resize", () => document.documentElement.style.setProperty("--sheet-h", bar.offsetHeight + "px"));
+      return;
+    }
+  })();
+
+  // ---------- tall <-> wide: switch the garden's shape (remembered for next time) ----------
+  (function pondShape() {
+    const btn = document.getElementById("shapeBtn"), wrap = document.querySelector(".wrap");
+    if (!btn || !wrap || document.documentElement.classList.contains("app")) return;
+    function set(wide, save) {
+      wrap.classList.toggle("wide", wide);
+      btn.setAttribute("aria-pressed", wide ? "true" : "false");
+      const label = wide ? "Make the garden tall" : "Make the garden wide";
+      btn.setAttribute("aria-label", label); btn.title = label;
+      if (save) store.set("bun-wide", wide ? "1" : "0");
+      resize(); setTimeout(resize, 60); setTimeout(resize, 300);
+    }
+    set(store.get("bun-wide", "0") === "1", false);
+    btn.addEventListener("click", () => { set(!wrap.classList.contains("wide"), true); try { canvas.focus({ preventScroll: true }); } catch (_) {} });
+  })();
+
+  // ---------- full screen: the garden fills the whole window (and the whole screen where the browser allows it) ----------
+  (function bigScreen() {
+    const root = document.documentElement, bigBtn = document.getElementById("bigBtn"), smallBtn = document.getElementById("smallBtn");
+    if (!bigBtn || !smallBtn || root.classList.contains("app")) return;
+    const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+    let scrollBack = 0;
+    function relayout() { resize(); setTimeout(resize, 80); setTimeout(resize, 400); }
+    function enter() {
+      if (root.classList.contains("full")) return;
+      scrollBack = window.scrollY || 0;
+      root.classList.add("full");
+      bigBtn.setAttribute("aria-pressed", "true");
+      try {   // real full screen where the browser allows it (not on iPhone: there it fills the browser window)
+        const req = root.requestFullscreen || root.webkitRequestFullscreen;
+        if (req && !fsEl()) { const p = req.call(root, { navigationUI: "hide" }); if (p && p.catch) p.catch(() => {}); }
+      } catch (_) {}
+      relayout();
+      try { canvas.focus({ preventScroll: true }); } catch (_) {}
+    }
+    function leave() {
+      if (!root.classList.contains("full")) return;
+      root.classList.remove("full");
+      bigBtn.setAttribute("aria-pressed", "false");
+      try {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (fsEl() && exit) { const p = exit.call(document); if (p && p.catch) p.catch(() => {}); }
+      } catch (_) {}
+      relayout();
+      window.scrollTo(0, scrollBack);
+      try { bigBtn.focus({ preventScroll: true }); } catch (_) {}
+    }
+    bigBtn.addEventListener("click", enter);
+    smallBtn.addEventListener("click", e => { e.stopPropagation(); leave(); });
+    smallBtn.addEventListener("pointerdown", e => e.stopPropagation());
+    window.addEventListener("keydown", e => { if (e.key === "Escape" && root.classList.contains("full")) leave(); });
+    // leaving the browser's own full screen (its Escape key or gesture) brings the page back too
+    const onFs = () => { if (!fsEl() && root.classList.contains("full")) leave(); else relayout(); };
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+  })();
+
+  // ---------- the site menu bar slides away when you scroll down and comes back when you scroll up ----------
+  (function siteMenu() {
+    const header = document.querySelector(".site-header");
+    if (!header) return;
+    let lastY = window.scrollY;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY, menuOpen = header.querySelector(".nav-links.open");
+      if (y < 120 || y < lastY || menuOpen) header.classList.remove("is-hidden");
+      else if (y > lastY + 4) header.classList.add("is-hidden");
+      lastY = y;
+    }, { passive: true });
+  })();
+
+  // ---------- offline support: once loaded, the game works without internet ----------
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+
+  resize();
+  draw();
+  requestAnimationFrame(frame);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  // for testing only: lets a test script peek at the state (harmless for players)
+  window.__bunny = { bun, get flyers() { return flyers; }, flyNow() { nextFlyer = 0; }, get running() { return running; }, get heading() { return bun.heading; }, setCam(y) { camYaw = camYawTarget = y; }, get time() { return time; }, get runV() { return runV; }, visitNow() { nextBeeVisit = 0; }, get beeVisit() { return beeVisit; }, frogNow() { beeVisit = null; nextFrogVisit = 0; }, get frogVisit() { return frogVisit; }, get friends() { return FRIENDS; }, get tummy() { return tummy; }, get ss() { return ss; }, get cam() { return { x: camX, y: camY, h: camH, yaw: camYaw }; }, get lastInputAt() { return lastInputAt; }, set tummy(v) { tummy = v; }, trees(r) { const out = []; chunksAround(bun.x, bun.y, r || 900).forEach(ch => ch.trees.forEach(t => out.push(t))); return out; }, step(n) { for (let i = 0; i < n; i++) update(1 / 60); }, friendBlocked, eaten, tapAt, startRun, stopRun, goCarrot() { const c = nearestCarrot(1500); if (c) setTarget(c.x, c.y, c); return !!c; } };
+})();
+</script>
+<script>
+/* Header guard (update 20): hide the "Est. 2026" badge whenever it would touch the menu,
+   on any screen size and any browser zoom, so it can never sit on top of a menu link. */
+(function () {
+  var badge = document.querySelector('.site-header .nav-badge');
+  var links = document.querySelector('.site-header .nav-links');
+  if (!badge || !links) return;
+  function fit() {
+    badge.classList.remove('is-tight');
+    if (getComputedStyle(badge).display === 'none' || getComputedStyle(links).display === 'none') return;
+    if (badge.getBoundingClientRect().right + 24 > links.getBoundingClientRect().left) badge.classList.add('is-tight');
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(links);
+})();
+</script>
+<script>
+/* Update 21: the Lily's Playhouse dropdown. The little arrow opens and closes it (that's how it works
+   on iPad and phones); a computer can also just hover. It closes when you tap somewhere else, press
+   Escape, scroll, or click into the Playhouse world. */
+(function () {
+  var drop = document.querySelector('.site-header .nav-drop');
+  if (!drop) return;
+  var btn = drop.querySelector('.nav-drop-btn');
+  function set(open) { drop.classList.toggle('open', open); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); set(!drop.classList.contains('open')); });
+  document.addEventListener('click', function (e) { if (!drop.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drop.classList.contains('open')) { set(false); btn.focus(); } });
+  window.addEventListener('scroll', function () { if (drop.classList.contains('open')) set(false); }, { passive: true });
+  window.addEventListener('blur', function () { set(false); });
+  drop.addEventListener('mouseleave', function () { if (window.matchMedia('(hover: hover)').matches) set(false); });
+})();
+</script>
+</body>
+</html>
