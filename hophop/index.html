@@ -242,6 +242,7 @@
     text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; transition: opacity 1.2s ease;
   }
   html.app .app-title span { color: #FFE0EC; }
+  html.app .app-title, html.full .app-title { z-index: 2; }   /* above the game picture (the canvas comes after it in the page) */
   html.app body.playing .app-title { opacity: 0; }
   html.app .app-credit {
     display: block; position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
