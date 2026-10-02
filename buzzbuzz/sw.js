@@ -1,6 +1,6 @@
 // Lily's Buzz Buzz — offline support.
 // Change VERSION whenever you upload a new version of the game so players get the update.
-const VERSION = "buzzbuzz-page-v2";
+const VERSION = "buzzbuzz-page-v3";
 // the page and its icons, plus the shared Lily's Playhouse files it uses (creatures, playhouse design, the hive)
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
   "/playhouse/lily-creatures-v4.js", "/playhouse/lily-playhouse-design.js", "/playhouse/lily-bee-home-v1.js"];
