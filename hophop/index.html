@@ -2486,5 +2486,44 @@
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f1548e5419ec4412b88ccaf521da4438"}'></script><!-- End Cloudflare Web Analytics -->
+<script>
+/* Update 25: on iPhone, Safari can't make a web page truly full screen, so the game fills the browser window and
+   Safari's own bars stay. Safari colors those bars from what sits at the very top and bottom of the page, so in full
+   screen two thin strips there take the game picture's own top and bottom colors, and the bars blend into the game. */
+(function () {
+  var isFull = function () { return document.documentElement.classList.contains('full'); };
+  var getCanvas = function () { try { return document.getElementById('game'); } catch (e) { return null; } };
+  var meta = document.querySelector('meta[name="theme-color"]'), original = meta ? meta.getAttribute('content') : null;
+  function strip(edge) {
+    var d = document.createElement('div');
+    d.setAttribute('aria-hidden', 'true');
+    d.style.cssText = 'position:fixed;left:0;right:0;' + edge + ':0;height:3px;z-index:2147483000;pointer-events:none;display:none;';
+    document.body.appendChild(d); return d;
+  }
+  var top = strip('top'), bottom = strip('bottom');
+  var probe = document.createElement('canvas'); probe.width = 8; probe.height = 1;
+  var pg = probe.getContext('2d', { willReadFrequently: true });
+  function rowColor(c, y) {
+    pg.clearRect(0, 0, 8, 1);
+    pg.drawImage(c, 0, y, c.width, 2, 0, 0, 8, 1);
+    var p = pg.getImageData(0, 0, 8, 1).data, r = 0, g = 0, b = 0, n = 0;
+    for (var i = 0; i < p.length; i += 4) { if (p[i + 3] < 200) continue; r += p[i]; g += p[i + 1]; b += p[i + 2]; n++; }
+    return n ? 'rgb(' + Math.round(r / n) + ',' + Math.round(g / n) + ',' + Math.round(b / n) + ')' : null;
+  }
+  function tick() {
+    if (!isFull()) {
+      if (top.style.display !== 'none') { top.style.display = bottom.style.display = 'none'; if (meta && original) meta.setAttribute('content', original); }
+      return;
+    }
+    var c = getCanvas(); if (!c || !c.width || !c.height) return;
+    var t = null, b = null;
+    try { t = rowColor(c, 0); b = rowColor(c, c.height - 2); } catch (e) { return; }
+    if (t) { top.style.background = t; top.style.display = 'block'; if (meta) meta.setAttribute('content', t); }
+    if (b) { bottom.style.background = b; bottom.style.display = 'block'; }
+  }
+  setInterval(tick, 1000);
+  document.addEventListener('click', function () { setTimeout(tick, 120); setTimeout(tick, 500); }, true);
+})();
+</script>
 </body>
 </html>

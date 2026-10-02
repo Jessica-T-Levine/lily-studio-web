@@ -1118,6 +1118,7 @@
   /* ===== Hero "cards on a table" (Sept 2026) ===== */
   .hero-inner { max-width: 1200px !important; grid-template-columns: 1.1fr 0.9fr !important; gap: 24px !important; }
   .hero-collage { position: relative; height: 410px !important; }
+  @media (max-width: 768px) { .hero-inner { grid-template-columns: 1fr !important; } }   /* update 25: one full-width column on phones, like the rest of the page */
   .hero-collage .sticker { display: none !important; }
   .table { position: relative; width: 100%; max-width: 420px; height: 390px; margin: 0 0 0 -60px; transform: scale(.85); transform-origin: 0 50%; }
   .tcard { position: absolute; left: 0; top: 0; width: 170px; background: #FFFDF8; color: var(--navy);

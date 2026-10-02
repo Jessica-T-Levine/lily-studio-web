@@ -1,6 +1,6 @@
 // Lily's Bun Nee Nee — offline support.
 // Change VERSION whenever you upload a new version of the game so players get the update.
-const VERSION = "neenee-page-v2";
+const VERSION = "neenee-page-v3";
 const FILES = ["./", "index.html", "lily-creatures-v4.js", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", event => {

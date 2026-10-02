@@ -308,6 +308,8 @@
       if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
     } catch (_) {}
     setTimeout(resize, 80); setTimeout(resize, 400);
+    // v40 (update 25): inside the Playhouse page, tell the page too, so on iPhone (no real full screen) the whole page gives the world the screen
+    try { if (window.parent !== window) window.parent.postMessage({ lilyFull: !!on }, location.origin); } catch (_) {}
   }
   fullBtn.addEventListener("click", e => { e.stopPropagation(); setFull(!stage.classList.contains("full")); });
   fullBtn.addEventListener("pointerdown", e => e.stopPropagation());
