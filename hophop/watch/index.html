@@ -1,0 +1,2599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lily's Hop Hop · Live — Lily's Playhouse</title>
+<meta name="description" content="Watch Lily's Hop Hop live: a very round frog living his cozy day on a lily pond, in real time with the real sun and moon. Little friends visit, the mist rises, rain comes and goes, and the lilies close at night. Free, nothing to download.">
+<link rel="canonical" href="https://thelilystudio.com/hophop/watch/">
+<meta property="og:title" content="Lily's Hop Hop · Live">
+<meta property="og:description" content="A very round frog living his cozy day on a lily pond, live in real time. Free, from The Lily Studio.">
+<meta property="og:image" content="https://thelilystudio.com/hophop/icon-512.png">
+<meta property="og:url" content="https://thelilystudio.com/hophop/watch/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#2A2046">
+<link rel="icon" href="/hophop/icon-192.png">
+<link rel="apple-touch-icon" href="/hophop/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@800&family=Nunito:wght@700&display=swap">
+<style>
+  :root { color-scheme: dark; --dusk: #2A2046; --cream: #FFF3E8; }
+  html, body { margin: 0; height: 100%; background: #0B1E3F; overflow: hidden; }
+  body { font-family: "Nunito", ui-rounded, system-ui, sans-serif; color: var(--cream); }
+  canvas { display: block; position: fixed; inset: 0; margin: auto; max-width: 100vw; max-height: 100vh; aspect-ratio: 16 / 9; width: 100vw; height: auto; }
+  @media (min-aspect-ratio: 16/9) { canvas { width: auto; height: 100vh; } }
+  .sound {
+    position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 5;
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    background: rgba(42, 32, 70, 0.55); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 999px;
+    font: 700 14px/1 "Nunito", system-ui, sans-serif; color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition: opacity 0.8s ease;
+  }
+  .sound button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .sound input { width: 110px; accent-color: #FF8FB8; }
+  body.quiet .sound { opacity: 0; }
+  body.render .sound { display: none; }
+  /* website: a way back to the games, tucked away with the sound control after a few quiet seconds */
+  .back {
+    position: fixed; left: max(16px, env(safe-area-inset-left)); top: max(16px, env(safe-area-inset-top)); z-index: 5;
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: rgba(42, 32, 70, 0.55); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 999px;
+    font: 700 14px/1 "Nunito", system-ui, sans-serif; color: #fff; text-decoration: none;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition: opacity 0.8s ease;
+  }
+  .back:focus-visible, .sound button:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
+  body.quiet .back { opacity: 0; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF6F9C; box-shadow: 0 0 8px #FF6F9C; }
+  @media (prefers-reduced-motion: reduce) { .sound, .back { transition: none; } }
+</style>
+</head>
+<body>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily's Hop Hop · Live</h1>
+<canvas id="game" aria-label="Lily's Hop Hop, live: a round frog living his cozy day on a lily pond, in real time"></canvas>
+<a class="back" href="/playhouse/games/"><span aria-hidden="true">←</span> Lily's games <span class="live-dot" aria-hidden="true"></span></a>
+<div class="sound" id="sound">
+  <button type="button" id="soundBtn">Tap for sound</button>
+  <input type="range" id="vol" min="0" max="100" value="70" aria-label="Volume" hidden>
+</div>
+
+<!-- The shared Creature Library v2: the bees from the Hop Hop videos. (v2 has no frog, so Hop Hop stays ORIGINAL.) -->
+<script src="lily-creatures-v2.js"></script>
+<!-- The real sun and moon for the home sky (rounded grid point, Central Time). -->
+<script src="lily-home-sky-v1.js"></script>
+<script>
+  // Website: watch Hop Hop's day LIVE, on the home sky's real clock (Central Time), with the friends and the
+  // weather at their real times. (Add ?hour=7 to the link to start at a set hour instead, for checking.)
+  (function () {
+    if (new URLSearchParams(location.search).has("hour")) return;
+    var HS = window.LilyHomeSky, now = new Date();
+    var h = HS ? HS.centralHour(Date.now()) : now.getHours() + now.getMinutes() / 60;
+    var label = h < 5 ? "Night" : h < 7.5 ? "Sunrise" : h < 11.5 ? "Morning" : h < 16 ? "Afternoon" : h < 18.5 ? "Golden Hour" : h < 20 ? "Sunset" : "Night";
+    window.WATCH_CONFIG = { realClock: true, sky: "home", startHour: h, label: "Live · " + label };
+  })();
+</script>
+<script>
+(() => {
+  "use strict";
+
+  // =====================================================================
+  //  Lily's Hop Hop · WATCH MODE (v8: the real home sky, 5 little friends, morning mist, afternoon rain and rainbow, water lilies that open and close · v7: sun and moon streaks sit on the water, behind pads and reeds · v6: creatures from the shared Creature Library; real-time time of day)
+  //  The frog lives its life on its own: calm pauses, hops, snacks, naps.
+  //  Two ways to run:
+  //   1) LIVE  - open the page and watch (tap once for sound).
+  //   2) RENDER - the video recorder drives it one frame at a time.
+  //  Every random choice comes from a numbered "seed", so the same seed
+  //  always makes the exact same episode (at any video size).
+  // =====================================================================
+
+  const params = new URLSearchParams(location.search);
+  const CFG = Object.assign({
+    seed: parseInt(params.get("seed") || "", 10) || Math.floor(Math.random() * 1e9),
+    scene: params.get("scene") || "sunset",
+    startHour: params.has("hour") ? parseFloat(params.get("hour")) : 18.5,   // clock time the episode starts at (18.5 = 6:30 PM)
+    timeScale: parseFloat(params.get("speed") || "1"),  // 1 = real time (keep 1 for episodes; bigger only for quick tests)
+    moonPhase: params.has("moon") ? parseFloat(params.get("moon")) : 0.5,     // 0 new moon, 0.25 first quarter, 0.5 full, 0.75 last quarter
+    realClock: params.get("clock") === "real",          // live page: follow the viewer's own clock
+    label: params.get("label") || "",                   // words under the title, e.g. "Sunset"
+    showcase: params.get("showcase") === "1",
+    tryFrog: params.get("tryFrog") || "",               // preview an unapproved frog drawing by its name (tests only)           // "look check" reel: every creature and moment appears on a set schedule
+    render: params.get("render") === "1",
+    width: 3840, height: 2160,
+    zoom: parseFloat(params.get("zoom") || "1.3"),   // bigger = closer to the frog (1 = same as the game)
+    words: false,          // little speech words like "yum!" (off for calm videos)
+    title: params.get("title") !== "0",
+    duration: 300,         // seconds (render mode uses this for the fade out)
+    // v8
+    sky: params.get("sky") || "home",                  // "home" = the real sun and moon of the home sky, "legacy" = the v7 sky
+    date: params.get("date") || "",                     // the day the sky follows, "2026-10-01" (empty = today, Central Time)
+    fx: params.get("fx") !== "0"                        // friends, mist, rain, rainbow (0 = off, for story checks)
+  }, window.WATCH_CONFIG || {});
+  const RENDER = CFG.render;
+  if (RENDER) document.body.classList.add("render");
+
+  // ---------- seeded randomness ----------
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  const R = mulberry32(CFG.seed);
+
+  // ---------- canvas + world size (16:9, same world scale as the game) ----------
+  const canvas = document.getElementById("game");
+  const mainCtx = canvas.getContext("2d", { alpha: false });
+  // the foreground (hills, water, pond life) is drawn on its own layer so it can take the light of the moment
+  const layer = document.createElement("canvas");
+  const layerCtx = layer.getContext("2d");
+  let ctx = mainCtx;
+  let W = 1031, H = 580, WATER_Y = 404, FROG_SCREEN_X = 330, scale = 1;
+  function resize() {
+    let pw, ph;
+    if (RENDER) { pw = CFG.width; ph = CFG.height; }
+    else {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const r = canvas.getBoundingClientRect();
+      pw = Math.round(Math.max(320, r.width) * dpr); ph = Math.round(pw * 9 / 16);
+    }
+    canvas.width = pw; canvas.height = ph; layer.width = pw; layer.height = ph;
+    H = 580 / CFG.zoom; W = H * pw / ph;
+    WATER_Y = Math.round(H - Math.max(176 / CFG.zoom, H * 0.32));
+    FROG_SCREEN_X = Math.round(W * 0.32);
+    scale = pw / W;
+    layoutSky();
+  }
+
+  // ---------- helpers ----------
+  const rand = (a, b) => a + R() * (b - a);
+  const pick = arr => arr[Math.floor(R() * arr.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  const PETAL_COLORS = [
+    ["#FF9EC3", "#FFD6E6"], ["#FFB38A", "#FFE1CC"], ["#C9A7F0", "#EBDDFF"],
+    ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"]
+  ];
+
+  // =====================================================================
+  //  SOUND
+  //  Live: plays right away. Render: every sound is written down with its
+  //  exact time, then the whole soundtrack is built afterwards, perfectly
+  //  in sync with the picture.
+  // =====================================================================
+  const MIX = { sfx: 0.42, pond: 0.55 };      // calm mix for watching
+  let actx = null, master = null, sfxBus = null, pondBus = null, pondStarted = false;
+  let schedAt = null;                          // render mode: the time a sound is placed at
+  const soundLog = [];                         // render mode: [{t, name, args}]
+  const nowT = () => schedAt !== null ? schedAt : actx.currentTime;
+
+  function makeBuses(a) {
+    master = a.createGain(); sfxBus = a.createGain(); pondBus = a.createGain();
+    sfxBus.gain.value = MIX.sfx; pondBus.gain.value = MIX.pond;
+    sfxBus.connect(master); pondBus.connect(master); master.connect(a.destination);
+  }
+  function tone(type, f1, f2, dur, vol, delay = 0, bus) {
+    if (!actx) return;
+    const out = bus || sfxBus;
+    const t = nowT() + delay;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(out);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  const sfx = {
+    boing() { tone("sine", 260, 720, 0.18, 0.18); },
+    bloom(perfect) {
+      tone("triangle", 880, 880, 0.16, 0.12);
+      tone("triangle", 1320, 1320, 0.2, 0.1, 0.07);
+      if (perfect) tone("triangle", 1760, 1760, 0.26, 0.09, 0.14);
+    },
+    plop() { tone("sine", 520, 90, 0.32, 0.22); tone("sine", 180, 60, 0.25, 0.12, 0.08); },
+    bloop() { tone("sine", 240, 520, 0.16, 0.14); },
+    twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
+    lick() { tone("sine", 900, 1500, 0.07, 0.06); },
+    gulp() { tone("sine", 520, 260, 0.12, 0.14); tone("sine", 700, 350, 0.1, 0.08, 0.1); },
+    // a soft little songbird far away: two or three gentle chirps
+    bird(v, n) {
+      const base = 2300 + v * 900;
+      for (let i = 0; i < n; i++) {
+        const f = base * (1 + 0.08 * Math.sin(i * 2.1 + v * 5));
+        tone("sine", f, f * 1.35, 0.09, 0.018, i * 0.16, pondBus);
+        tone("sine", f * 1.35, f * 1.1, 0.07, 0.012, i * 0.16 + 0.08, pondBus);
+      }
+    },
+    cricket(f, pulses) { for (let i = 0; i < pulses; i++) tone("sine", f, f * 1.01, 0.035, 0.022, i * 0.055, pondBus); },
+    // v8: the little friends (softer and higher than Hop Hop), used only by the friends
+    fboing(v) { tone("sine", 340 + v * 40, 900 + v * 80, 0.14, 0.09); },
+    fpeep(v) { const f = 1250 + (v || 0) * 90; tone("sine", f, f * 1.25, 0.09, 0.03, 0, pondBus); tone("sine", f * 1.2, f * 1.5, 0.08, 0.025, 0.12, pondBus); },
+    flick() { tone("sine", 1100, 1800, 0.06, 0.04); },
+    fgulp() { tone("sine", 640, 330, 0.1, 0.08); },
+    ribbit() {
+      [0, 0.16].forEach(delay => {
+        const t = nowT() + delay;
+        const o = actx.createOscillator(), f = actx.createBiquadFilter(), g = actx.createGain();
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(120, t + 0.11);
+        f.type = "lowpass"; f.frequency.value = 800;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.05, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+        o.connect(f).connect(g).connect(pondBus);
+        o.start(t); o.stop(t + 0.14);
+      });
+    }
+  };
+  // every sound goes through here
+  function play(name, ...args) {
+    if (RENDER) { soundLog.push({ t: time, name, args }); return; }
+    if (!actx || actx.state !== "running") return;
+    sfx[name](...args);
+  }
+  // pond ambience: soft breeze + lapping water (the noise itself is not seeded; it's just texture)
+  // v8: when a soundtrack is built for a piece of a long day, the breeze and water "sway" (LFOs) are written
+  //     out from the day's own clock, so they carry on smoothly from one 15-minute file to the next.
+  //     The rain sound follows the rain.
+  const RAIN_VOL = 0.024;
+  let rainGain = null;
+  function lfoCurve(param, base, amp, freq, absT0, dur) {
+    const step = 0.05, n = Math.max(2, Math.ceil(dur / step) + 1), c = new Float32Array(n);
+    for (let i = 0; i < n; i++) c[i] = base + amp * Math.sin(2 * Math.PI * freq * (absT0 + i * step));
+    param.setValueCurveAtTime(c, 0, (n - 1) * step);
+  }
+  function startPond(absT0, dur) {
+    if (!actx || pondStarted) return;
+    pondStarted = true;
+    const len = actx.sampleRate * 3, buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const breezeF = actx.createBiquadFilter(); breezeF.type = "lowpass"; breezeF.frequency.value = 420;
+    const breezeG = actx.createGain(); breezeG.gain.value = 0.055;
+    const offline = absT0 !== undefined;
+    let lfo1 = null, lfo2 = null;
+    if (offline) lfoCurve(breezeG.gain, 0.055, 0.035, 0.07, absT0, dur);
+    else {
+      lfo1 = actx.createOscillator(); lfo1.frequency.value = 0.07;
+      const lfo1G = actx.createGain(); lfo1G.gain.value = 0.035;
+      lfo1.connect(lfo1G).connect(breezeG.gain);
+    }
+    src.connect(breezeF).connect(breezeG).connect(pondBus);
+    const lapF = actx.createBiquadFilter(); lapF.type = "bandpass"; lapF.frequency.value = 850; lapF.Q.value = 0.7;
+    const lapG = actx.createGain(); lapG.gain.value = 0.03;
+    if (offline) lfoCurve(lapG.gain, 0.03, 0.022, 0.28, absT0, dur);
+    else {
+      lfo2 = actx.createOscillator(); lfo2.frequency.value = 0.28;
+      const lfo2G = actx.createGain(); lfo2G.gain.value = 0.022;
+      lfo2.connect(lfo2G).connect(lapG.gain);
+    }
+    src.connect(lapF).connect(lapG).connect(pondBus);
+    src.start(0); if (lfo1) lfo1.start(0); if (lfo2) lfo2.start(0);
+    // v8: soft rain (white noise, gently filtered), silent until it rains
+    const rlen = actx.sampleRate * 3, rbuf = actx.createBuffer(1, rlen, actx.sampleRate), rd = rbuf.getChannelData(0);
+    for (let i = 0; i < rlen; i++) rd[i] = Math.random() * 2 - 1;
+    const rsrc = actx.createBufferSource(); rsrc.buffer = rbuf; rsrc.loop = true;
+    const hp = actx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 700;
+    const lp = actx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 5200;
+    rainGain = actx.createGain(); rainGain.gain.value = 0;
+    rsrc.connect(hp).connect(lp).connect(rainGain).connect(pondBus);
+    if (offline && CFG.fx) {
+      const step = 0.5, n = Math.max(2, Math.ceil(dur / step) + 1), c = new Float32Array(n);
+      for (let i = 0; i < n; i++) c[i] = RAIN_VOL * rainAmt(CFG.startHour + (absT0 + i * step) * CFG.timeScale / 3600);
+      rainGain.gain.setValueCurveAtTime(c, 0, (n - 1) * step);
+    }
+    rsrc.start(0);
+  }
+  let nextCricket = 1.5, nextRibbit = 12 + R() * 10;
+  let nextBird = rand(4, 9);
+  function updatePond(dt) {
+    nextCricket -= dt; nextRibbit -= dt; nextBird -= dt;
+    if (nextCricket <= 0) {
+      if (SKY.dusky > 0.3) play("cricket", rand(4100, 4800), 2 + Math.floor(R() * 3));
+      nextCricket = rand(0.7, 2.4);
+    }
+    if (nextRibbit <= 0) { play("ribbit"); nextRibbit = rand(14, 30) * lerp(1, 0.6, SKY.night); }
+    if (nextBird <= 0) {
+      if (isDay() && SKY.dusky < 0.8) play("bird", rand(0, 1), 2 + Math.floor(R() * 3));
+      nextBird = rand(5, 14);
+    }
+  }
+
+  // Render mode: build the full soundtrack after the picture is done.
+  // Returns 16-bit stereo PCM in chunks (base64) so it can be handed to the recorder.
+  // v8: a piece in the middle of a long day starts 2 seconds early (so sounds that began just before the
+  //     cut carry over), and fades only at the very start and the very end of the whole recording.
+  async function renderSoundtrack(fromT, toT, sampleRate = 48000) {
+    const pre = fromT > 0.001 ? 2 : 0, start = fromT - pre, dur = toT - start;
+    const skipN = Math.round(pre * sampleRate), outN = Math.round((toT - fromT) * sampleRate);
+    actx = new OfflineAudioContext(2, skipN + outN, sampleRate);
+    makeBuses(actx); pondStarted = false; startPond(start, dur);
+    const fadeIn = 2.5, fadeOut = 4;
+    master.gain.setValueAtTime(fromT <= 0.001 ? 0 : 1, 0);
+    if (fromT <= 0.001) master.gain.linearRampToValueAtTime(1, Math.min(fadeIn, dur));
+    if (toT >= CFG.duration - 0.001) {
+      master.gain.setValueAtTime(1, Math.max(0, dur - fadeOut));
+      master.gain.linearRampToValueAtTime(0, dur);
+    }
+    soundLog.forEach(e => {
+      if (e.t < start - 1 || e.t >= toT) return;
+      schedAt = Math.max(0, e.t - start);
+      sfx[e.name](...e.args);
+    });
+    schedAt = null;
+    const buf = await actx.startRendering();
+    const L = buf.getChannelData(0), Rt = buf.getChannelData(1);
+    const pcm = new Int16Array(outN * 2);
+    for (let i = 0; i < outN; i++) {
+      pcm[i * 2] = Math.max(-1, Math.min(1, L[skipN + i])) * 32767;
+      pcm[i * 2 + 1] = Math.max(-1, Math.min(1, Rt[skipN + i])) * 32767;
+    }
+    return { sampleRate, bytes: new Uint8Array(pcm.buffer) };
+  }
+
+  // =====================================================================
+  //  THE WORLD (same art as the game)
+  // =====================================================================
+  let pads, frog, camX, camTarget, charge, charging;
+  let particles = [], ripples = [], popups = [], ring = null, zees = [];
+  let time = 0;
+  function say(x, y, text, big) { if (CFG.words) popups.push({ x, y, text, life: 1.1, big: !!big }); }
+
+  function critterSize() {
+    const r = R();
+    return r < 0.55 ? 1 + R() * 0.3 : r < 0.88 ? 1.3 + R() * 0.4 : 1.7 + R() * 0.3;
+  }
+  const reduceMotion = false; // videos always animate fully
+
+  // ---------- THE CAST: which drawing each creature uses ----------
+  // Each creature comes from the shared Creature Library (window.LilyCreatures) when the library has it,
+  // so a new master design shows up here, in the game, and in every re-recorded video automatically.
+  // If the library doesn't have a creature yet, the Watch page uses its own built-in drawing.
+  // Drawings only change the LOOK: they never touch the story, so a seed plays out the same either way.
+  // CFG.tryFrog can name a not-yet-approved frog drawing (for example "HopHop3D") to preview it in a test video.
+  const LIB = () => window.LilyCreatures || null;
+  const castFrog = () => (CFG.tryFrog && window[CFG.tryFrog]) || (LIB() && LIB().frog) || null;
+  const castBee = () => (LIB() && LIB().bee) || null;
+  const beePalName = col => col.name === "Our bee" ? "ours" : col.name.toLowerCase();
+  window.WATCH_CAST = () => ({ library: LIB() ? "v" + LIB().version : "none", frog: castFrog() ? "library" : "built-in", bee: castBee() ? "library" : "built-in" });
+  // ---------- little bees from the bee game ----------
+  // Our bee and her six friends, drawn exactly like the bee game (same shape, face, heart wings and
+  // legs, same approved colors from bee-color-guide-v1). Everything is in "bee units"; draw() scales it.
+  const Bees = (() => {
+    const COLORS = [
+      { name: "Our bee", top: "#FFF371", bot: "#FFC921", stripe: "#E58E00", wingBack: "255, 214, 234", wingFront: "255, 228, 242", cheek: "255, 100, 132" },
+      { name: "Pink", top: "#FFE2F3", bot: "#FFC4E5", stripe: "#E987B3", wingBack: "255, 225, 240", wingFront: "255, 238, 246", cheek: "255, 90, 140" },
+      { name: "Mint", top: "#C8FDF4", bot: "#73DEC7", stripe: "#00B59F", wingBack: "220, 245, 240", wingFront: "236, 252, 248", cheek: "255, 110, 140" },
+      { name: "Lavender", top: "#FCE6FF", bot: "#D6B7FC", stripe: "#A881E3", wingBack: "236, 222, 255", wingFront: "244, 236, 255", cheek: "255, 110, 150" },
+      { name: "Blue", top: "#D7F3FF", bot: "#67AEEF", stripe: "#307BD0", wingBack: "215, 232, 255", wingFront: "232, 243, 255", cheek: "255, 120, 150" },
+      { name: "Peach", top: "#FFE9CB", bot: "#FDAC73", stripe: "#DF7242", wingBack: "255, 222, 210", wingFront: "255, 236, 228", cheek: "255, 100, 120" },
+      { name: "Strawberry", top: "#FFE3DC", bot: "#F87D7C", stripe: "#C6515B", wingBack: "255, 214, 224", wingFront: "255, 232, 238", cheek: "255, 196, 206" }
+    ];
+    // heart wings: both rise from the top of her back and lean backward; the front one is bigger
+    function wingPath(big) {
+      const L = big ? 25.7 : 20.2, w = big ? 4.9 : 3.8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-w * 0.9, -L * 0.2, -w * 1.25, -L * 0.75, -w * 0.55, -L * 0.95);
+      ctx.quadraticCurveTo(0, -L * 1.05, w * 0.55, -L * 0.95);
+      ctx.bezierCurveTo(w * 1.25, -L * 0.75, w * 0.9, -L * 0.2, 0, 0);
+      ctx.closePath();
+    }
+    function wing(back, a, pal) {
+      const big = !back;
+      const hx = back ? -9.3 : -0.9, hy = back ? -10.7 : -6.7, base = back ? -0.46 : -0.42;
+      const one = (ang, alpha) => {
+        ctx.save(); ctx.translate(hx, hy);
+        ctx.scale(1, Math.cos(ang));
+        ctx.rotate(base + Math.sin(ang) * 0.25);
+        ctx.globalAlpha *= alpha;
+        wingPath(big);
+        ctx.fillStyle = back ? `rgba(${pal.wingBack}, 0.5)` : `rgba(${pal.wingFront}, 0.78)`; ctx.fill();
+        ctx.lineCap = "round";
+        ctx.strokeStyle = back ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0.95)"; ctx.lineWidth = 1.5;
+        wingPath(big); ctx.stroke();
+        if (!back) {
+          ctx.strokeStyle = "rgba(230, 150, 190, 0.45)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(0, -2); ctx.quadraticCurveTo(-1.3, -12, 0, -21); ctx.stroke();
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.beginPath(); ctx.ellipse(-2.2, -19, 1.4, 3, -0.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      };
+      if (!reduceMotion) { one(0, 0.16); one(1.32, 0.16); }   // a soft buzz blur at the top and bottom of each beat
+      one(a, 1);
+    }
+    function antenna(bx, by, tx, ty, ball) {
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo(bx + (tx - bx) * 0.35, by + (ty - by) * 0.6, tx, ty);
+      ctx.stroke();
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.beginPath(); ctx.arc(tx, ty, ball, 0, Math.PI * 2); ctx.fill();
+    }
+    // her little legs, tucked back while she flies (three near, three far)
+    const LEG_X = [-10.2, -4.4, 1.6], KNEE = 2.1, LEG_LEN = 3.9, TUCK_BEND = 0.984;
+    function bellyY(x) { const t = (x + 1.4) / 18; return -1 + 12.7 * Math.sqrt(Math.max(0, 1 - t * t)); }
+    function legs(far, ph) {
+      const col = far ? "#3A2C52" : "#4B3A66";
+      ctx.save();
+      ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = 1.4;
+      LEG_X.forEach((lx, i) => {
+        const x = lx + (far ? 1.8 : 0), y = bellyY(x) - (far ? 1.6 : 1.1) - 0.9;
+        const sway = reduceMotion ? 0 : Math.sin(time * 6 + i * 0.9 + (far ? 0.6 : 0) + ph);
+        const a = 0.6 + sway * 0.06, b = TUCK_BEND + sway * 0.065;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+        const lower = LEG_LEN - KNEE, r = 0.5;
+        const ex = -Math.sin(b) * lower, ey = KNEE + Math.cos(b) * lower;
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(0, KNEE - r);
+        ctx.quadraticCurveTo(0, KNEE, -Math.sin(b) * r, KNEE + Math.cos(b) * r);
+        ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.translate(ex, ey); ctx.rotate(b);
+        ctx.beginPath(); ctx.ellipse(0.45, 0.3, 1.3, 0.92, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+    // one flying bee at (x, y): s = size, face = 1 (facing right) or -1, pal = one of COLORS, ph = her own timing
+    function draw(x, y, s, face, pal, ph, look) {
+      const bob = reduceMotion ? 0 : Math.sin(time * 3 + ph) * 3;
+      ctx.save();
+      ctx.translate(x, y + bob * s);
+      ctx.rotate(face * 0.05 - 0.06);
+      ctx.scale(face * s, s);
+      const flap = reduceMotion ? 0.3 : (0.5 - 0.5 * Math.cos(time * 34 + ph)) * 1.32;
+      wing(true, flap * 0.9, pal);
+      legs(true, ph);
+      // round body with a soft top-to-bottom shade
+      const g = ctx.createLinearGradient(0, -14, 0, 12);
+      g.addColorStop(0, pal.top); g.addColorStop(1, pal.bot);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.ellipse(-1.4, -1, 18, 12.7, 0, 0, Math.PI * 2); ctx.fill();
+      // two stripes that curve around her round body
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(-1.4, -1, 18, 12.7, 0, 0, Math.PI * 2); ctx.clip();
+      ctx.fillStyle = pal.stripe;
+      const band = (l, r) => {
+        const top = -14.5, mid = -1, bot = 12.5;
+        const ctrl = e => 2 * e[1] - (e[0] + e[2]) / 2;
+        ctx.beginPath();
+        ctx.moveTo(l[0], top); ctx.quadraticCurveTo(ctrl(l), mid, l[2], bot);
+        ctx.lineTo(r[2], bot); ctx.quadraticCurveTo(ctrl(r), mid, r[0], top);
+        ctx.closePath(); ctx.fill();
+      };
+      band([-14.2, -15.9, -12.9], [-10.1, -11.8, -9.0]);
+      band([-6.6, -7.6, -6.0], [-2.6, -1.6, -2.8]);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.beginPath(); ctx.ellipse(-2, -8.8, 10, 2.9, -0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      legs(false, ph);
+      // face: dark eyes with a sparkle (they glance at whatever she's looking at), rosy cheeks, happy smile
+      const blink = (time + ph) % 3.6 < 0.12;
+      let lx = 0, ly = 0;
+      if (look) { const d = Math.hypot(look.x, look.y) || 1; lx = look.x / d * 1.4 * face; ly = look.y / d * 1.4; }
+      [[5, -2], [11.5, -2.5]].forEach(([ex, ey]) => {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 1.35; ctx.lineCap = "round";
+        if (blink) { ctx.beginPath(); ctx.moveTo(ex - 2.2, ey); ctx.quadraticCurveTo(ex, ey + 1.8, ex + 2.2, ey); ctx.stroke(); }
+        else {
+          const px = ex + lx * 0.6, py = ey + ly * 0.6;
+          ctx.fillStyle = "#2E2440"; ctx.beginPath(); ctx.ellipse(px, py, 2.8, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(px + 1, py - 1.3, 1.1, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      ctx.fillStyle = `rgba(${pal.cheek}, 0.75)`;
+      ctx.beginPath(); ctx.ellipse(2.6, 3.5, 2.95, 1.75, -0.05, 0, Math.PI * 2); ctx.ellipse(12.45, 2.8, 2.5, 1.45, -0.05, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 1.6; ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(7, 5.7); ctx.quadraticCurveTo(8.6, 7.7, 10.2, 5.7); ctx.stroke();
+      wing(false, flap, pal);
+      // antennae last, so they always show in front of her wings
+      ctx.strokeStyle = "#4B3A66"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      const sway = reduceMotion ? 0 : Math.sin(time * 2.4 + ph) * 0.6;
+      antenna(5.5, -9.6, 1.2 + sway, -25.2, 1.7);
+      antenna(10.4, -9.4, 17.6 + sway, -23.6, 1.7);
+      ctx.fillStyle = "#4B3A66";
+      ctx.beginPath(); ctx.arc(5.5, -9.6, 1.1, 0, Math.PI * 2); ctx.arc(10.4, -9.4, 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    return { COLORS, draw };
+  })();
+
+  // ---------- bees, butterflies, dragonflies, lightning bugs ----------
+  let critters = [], nextCritter = rand(3, 6), lastCamX = null;
+  const BUTTERFLY_COLORS = [["#FF9EC3", "#FFD6E6"], ["#C9A7F0", "#EBDDFF"], ["#FFD36E", "#FFF0C2"], ["#8FD3F0", "#D9F2FF"]];
+  function spawnCritter() {
+    let roll = R();
+    if (!isDay()) roll = 0.77 + roll * 0.23;                       // night: only lightning bugs
+    else if (SKY.dusky < 0.35 && roll >= 0.77) roll = roll * 0.77;  // bright midday: no lightning bugs
+    const dir = R() < 0.5 ? 1 : -1;
+    const x0 = dir > 0 ? -24 : W + 24;
+    if (roll < 0.3) {
+      // a few little bees buzz by together, each her own color and size (never two the same color)
+      const n = 1 + Math.floor(R() * 3), y = rand(150, WATER_Y - 50);
+      const cols = Bees.COLORS.slice();
+      for (let i = cols.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [cols[i], cols[j]] = [cols[j], cols[i]]; }
+      for (let i = 0; i < n; i++) {
+        critters.push({ kind: "bee", x: x0 - dir * i * rand(28, 50), baseY: y + rand(-40, 40), y: 0, dir, vx: rand(34, 48), t: rand(0, 10), ph: rand(0, 6), size: critterSize(), col: cols[i] });
+      }
+    } else if (roll < 0.55) {
+      critters.push({ kind: "butterfly", x: x0, baseY: rand(150, WATER_Y - 50), y: 0, dir, vx: rand(26, 38), t: rand(0, 10), size: critterSize(), col: pick(BUTTERFLY_COLORS) });
+    } else if (roll < 0.77) {
+      critters.push({ kind: "dragonfly", x: x0, baseY: rand(170, WATER_Y - 40), y: 0, dir, t: 0, bob: rand(0, 6), size: critterSize() });
+    } else {
+      const y = R() < 0.55 ? WATER_Y - rand(60, 110) : rand(200, WATER_Y - 30);
+      const n = 2 + Math.floor(R() * 3);
+      for (let i = 0; i < n; i++) {
+        critters.push({ kind: "bug", x: x0 - dir * i * rand(20, 40), baseY: y + rand(-30, 30), y: 0, dir, vx: rand(14, 22), t: rand(0, 10), size: critterSize() });
+      }
+    }
+  }
+  function updateCritters(dt) {
+    nextCritter -= dt;
+    if (nextCritter <= 0) {
+      if (critters.length < 5) spawnCritter();
+      nextCritter = rand(5, 12);
+    }
+    const camShift = lastCamX === null ? 0 : (camX - lastCamX) * 0.5;
+    lastCamX = camX;
+    critters.forEach(c => {
+      if (c.caught) return;
+      c.t += dt;
+      c.x -= camShift;
+      if (c.kind === "butterfly") {
+        c.x += c.dir * c.vx * dt;
+        c.y = c.baseY + Math.sin(c.t * 1.8) * 16 + Math.sin(c.t * 5.3) * 4;
+      } else if (c.kind === "bee") {
+        // bumbles along: speeds up and slows down, bobbing and weaving
+        c.x += c.dir * c.vx * (0.55 + 0.45 * Math.sin(c.t * 1.4 + c.ph)) * dt;
+        c.y = c.baseY + Math.sin(c.t * 2.1 + c.ph) * 14 + Math.sin(c.t * 6.3) * 2.5;
+      } else if (c.kind === "dragonfly") {
+        const phase = c.t % 1.7;
+        const speed = phase < 0.45 ? 190 : 6;
+        c.x += c.dir * speed * dt;
+        c.y = c.baseY + Math.sin(c.t * 3 + c.bob) * 6 + (phase >= 0.45 ? Math.sin(c.t * 22) * 0.8 : 0);
+      } else {
+        c.x += c.dir * c.vx * dt;
+        c.y = c.baseY + Math.sin(c.t * 1.3) * 12 + Math.cos(c.t * 2.1) * 5;
+      }
+    });
+    critters = critters.filter(c => !c.eaten && (c.caught || (c.dir > 0 ? c.x < W + 60 : c.x > -60)));
+  }
+  function drawButterfly(c) {
+    const flap = 0.25 + Math.abs(Math.sin(c.t * 11)) * 0.75;
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.dir * (c.size || 1), c.size || 1);
+    ctx.save(); ctx.scale(flap, 1);
+    ctx.fillStyle = c.col[0];
+    ctx.beginPath(); ctx.ellipse(-5, -4, 5.5, 4.5, -0.5, 0, Math.PI * 2); ctx.ellipse(5, -4, 5.5, 4.5, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = c.col[1];
+    ctx.beginPath(); ctx.ellipse(-3.5, 2.5, 3.5, 3, 0.4, 0, Math.PI * 2); ctx.ellipse(3.5, 2.5, 3.5, 3, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "#4B3A66"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(0, 5); ctx.stroke();
+    ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.quadraticCurveTo(1, -9, 3, -10); ctx.moveTo(0, -5); ctx.quadraticCurveTo(-1, -9, -3, -10); ctx.stroke();
+    ctx.restore();
+  }
+  function drawDragonfly(c) {
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.dir * (c.size || 1), c.size || 1);
+    const shimmer = 0.35 + Math.abs(Math.sin(c.t * 40)) * 0.3;
+    ctx.fillStyle = `rgba(255, 255, 255, ${shimmer})`;
+    ctx.beginPath();
+    ctx.ellipse(-1, -3, 7, 2.2, -0.35, 0, Math.PI * 2);
+    ctx.ellipse(-1, 3, 7, 2.2, 0.35, 0, Math.PI * 2);
+    ctx.ellipse(-4, -2.5, 6, 2, -0.6, 0, Math.PI * 2);
+    ctx.ellipse(-4, 2.5, 6, 2, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#4FB8B4"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(3, 0); ctx.lineTo(-13, 0.5); ctx.stroke();
+    ctx.fillStyle = "#3E9C9A";
+    ctx.beginPath(); ctx.arc(4.5, 0, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawBug(c) {
+    const sz = c.size || 1;
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(sz, sz); ctx.translate(-c.x, -c.y);
+    const glow = 0.35 + 0.65 * Math.max(0, Math.sin(c.t * 2.6));
+    const g = ctx.createRadialGradient(c.x, c.y + 1, 0, c.x, c.y + 1, 10);
+    g.addColorStop(0, `rgba(255, 244, 150, ${0.85 * glow})`);
+    g.addColorStop(1, "rgba(255, 244, 150, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y + 1, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(255, 238, 120, ${0.6 + 0.4 * glow})`;
+    ctx.beginPath(); ctx.ellipse(c.x - c.dir * 1.5, c.y + 1, 2.2, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#4B3A66";
+    ctx.beginPath(); ctx.ellipse(c.x + c.dir * 1.5, c.y, 1.8, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.beginPath(); ctx.ellipse(c.x, c.y - 2, 2, 1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawCritters() {
+    critters.forEach(c => {
+      if (c.caught) return;
+      if (c.kind === "butterfly") drawButterfly(c);
+      else if (c.kind === "bee") {
+        const LB = castBee(), s = 0.42 * c.size;
+        if (LB) LB.draw(ctx, c.x, c.y + LB.SEAT * s, s, c.dir > 0 ? Math.PI / 2 + 0.35 : -(Math.PI / 2 + 0.35), 0.12,
+          { t: time, ph: c.ph, flying: true, pal: beePalName(c.col) });
+        else Bees.draw(c.x, c.y, s, c.dir, c.col, c.ph, { x: c.dir, y: 0.15 });
+      }
+      else if (c.kind === "dragonfly") drawDragonfly(c);
+    });
+  }
+  // lightning bugs are drawn after the lighting, so they glow at night
+  function drawGlowBugs() { critters.forEach(c => { if (!c.caught && c.kind === "bug") drawBug(c); }); }
+
+  // ---------- jumping fish ----------
+  let fish = [], nextFish = rand(5, 9);
+  const FISH_KINDS = ["goldfish", "koi", "stripe"];
+  function fishSplash(x) {
+    for (let i = 0; i < 9; i++) {
+      const a = rand(-Math.PI * 0.9, -Math.PI * 0.1), sp = rand(50, 140);
+      particles.push({ x, y: WATER_Y + 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.8, c: i % 2 ? "#E6F7FF" : "#A9DDF0", r: rand(1.4, 2.8), kind: "drop" });
+    }
+    ripples.push({ x, y: WATER_Y + 5, r: 4, life: 0.9 });
+  }
+  function clearWater(wx) { return pads.every(p => Math.abs(wx - p.x) > p.r + 34); }
+  function spawnFish() {
+    const frogScreenX = frog.x - camX;
+    for (let tries = 0; tries < 40; tries++) {
+      const sx = rand(40, W - 40);
+      if (Math.abs(sx - frogScreenX) < 70) continue;
+      const dir = R() < 0.5 ? 1 : -1;
+      const dx = dir * rand(45, 80);
+      const x0 = camX + sx, x1 = x0 + dx;
+      if (!clearWater(x0) || !clearWater(x1)) continue;
+      fish.push({ kind: pick(FISH_KINDS), size: critterSize() * 0.85, x0, dx, h: rand(55, 85), t: 0, dur: rand(0.95, 1.2), dir, x: x0, y: WATER_Y, angle: 0, landed: false });
+      fishSplash(x0);
+      return true;
+    }
+    return false;
+  }
+  function updateFish(dt) {
+    nextFish -= dt;
+    if (nextFish <= 0) {
+      const jumped = fish.length < 2 && spawnFish();
+      nextFish = jumped ? rand(8, 16) : 1.5;
+    }
+    fish.forEach(f => {
+      f.t += dt / f.dur;
+      const t = Math.min(f.t, 1);
+      f.x = f.x0 + f.dx * t;
+      f.y = WATER_Y + 6 - f.h * 4 * t * (1 - t);
+      const vx = f.dx, vy = -f.h * 4 * (1 - 2 * t);
+      f.angle = Math.atan2(vy, Math.abs(vx));
+      if (f.t >= 1 && !f.landed) { f.landed = true; fishSplash(f.x); }
+    });
+    fish = fish.filter(f => f.t < 1.05);
+  }
+  function drawOneFish(f) {
+    ctx.save();
+    ctx.translate(f.x - camX, f.y);
+    ctx.scale(f.dir * 1.3 * (f.size || 1), 1.3 * (f.size || 1));
+    ctx.rotate(f.angle);
+    const wag = Math.sin(time * 18) * 0.25;
+    let body, bodyLight, tail, fin;
+    if (f.kind === "goldfish") { body = "#FF8F52"; bodyLight = "#FFC08A"; tail = "rgba(255, 170, 110, 0.85)"; fin = "#FFB27A"; }
+    else if (f.kind === "koi") { body = "#FFF3EA"; bodyLight = "#FFFFFF"; tail = "rgba(255, 236, 226, 0.9)"; fin = "#FFD9CC"; }
+    else { body = "#7FA8EE"; bodyLight = "#B9D2FA"; tail = "rgba(160, 140, 230, 0.85)"; fin = "#A690E6"; }
+    ctx.save(); ctx.translate(-10, 0); ctx.rotate(wag);
+    ctx.fillStyle = tail;
+    ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-7, -9, -11, -7); ctx.quadraticCurveTo(-7, 0, -11, 7); ctx.quadraticCurveTo(-7, 9, 0, 0);
+    ctx.fill(); ctx.restore();
+    const g = ctx.createLinearGradient(0, -6, 0, 6);
+    g.addColorStop(0, body); g.addColorStop(1, bodyLight);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, Math.PI * 2); ctx.clip();
+    if (f.kind === "koi") {
+      ctx.fillStyle = "#FF7A6B";
+      ctx.beginPath(); ctx.ellipse(2, -3.5, 4.5, 3, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-6, 1, 3.2, 2.6, -0.2, 0, Math.PI * 2); ctx.fill();
+      // a small golden spot (a dark spot here looked like a second eye)
+      ctx.fillStyle = "#FFB15C";
+      ctx.beginPath(); ctx.ellipse(-2.5, 3.8, 1.9, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (f.kind === "stripe") {
+      ctx.strokeStyle = "rgba(190, 160, 240, 0.9)"; ctx.lineWidth = 2;
+      [-5, -1, 3].forEach(sx => { ctx.beginPath(); ctx.moveTo(sx, -7); ctx.quadraticCurveTo(sx + 2, 0, sx, 7); ctx.stroke(); });
+    } else {
+      ctx.fillStyle = "rgba(255, 230, 190, 0.7)";
+      ctx.beginPath(); ctx.ellipse(1, 3, 8, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    ctx.fillStyle = fin;
+    ctx.beginPath(); ctx.moveTo(-4, -5.5); ctx.quadraticCurveTo(-1, -11, 4, -6); ctx.closePath(); ctx.fill();
+    // eye: a soft outline so it shows up even on the white koi, plus a sparkle like the frog's
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(6.6, -1.6, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(59, 45, 85, 0.3)"; ctx.lineWidth = 0.4; ctx.stroke();
+    ctx.fillStyle = "#2E2440";
+    ctx.beginPath(); ctx.arc(7.1, -1.5, 1.45, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(7.6, -2.1, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 130, 170, 0.5)";
+    ctx.beginPath(); ctx.ellipse(5.5, 2, 1.8, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawFish() {
+    if (!fish.length) return;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 4); ctx.clip();
+    fish.forEach(drawOneFish);
+    ctx.restore();
+  }
+
+  // ---------- shooting star ----------
+  let star = null, nextStar = rand(20, 40), starTrail = [];
+  function updateStar(dt) {
+    nextStar -= dt;
+    if (!star && nextStar <= 0 && SKY.alt > 6) nextStar = rand(20, 40);   // daylight: no shooting stars, check again later
+    if (!star && nextStar <= 0) {
+      const DIRECTIONS = [25, 40, 60, 0, 8, -20, -35];
+      const deg = pick(DIRECTIONS) + rand(-6, 6);
+      const side = R() < 0.5 ? 1 : -1;
+      const speed = rand(250, 320), dur = rand(0.9, 1.3);
+      const a = deg * Math.PI / 180;
+      const vx = side * Math.cos(a) * speed, vy = Math.sin(a) * speed;
+      const cx = rand(90, W - 90), cy = rand(70, Math.max(120, WATER_Y - 200));
+      star = { x: cx - vx * dur / 2, y: cy - vy * dur / 2, vx, vy, t: 0, dur };
+      play("twinkle");
+      if (frogIdle() && frog.face !== "sleep") say(frog.x, WATER_Y - 104, "ooh!");
+      nextStar = rand(35, 75);
+    }
+    if (star) {
+      star.t += dt;
+      star.x += star.vx * dt; star.y += star.vy * dt;
+      if (R() < 0.6) starTrail.push({ x: star.x + rand(-2, 2), y: star.y + rand(-2, 2), life: 1, r: rand(0.8, 1.8) });
+      if (star.t >= star.dur) star = null;
+    }
+    starTrail.forEach(t => { t.life -= dt * 1.4; t.y += dt * 6; });
+    starTrail = starTrail.filter(t => t.life > 0);
+  }
+  function drawStar() {
+    starTrail.forEach(t => {
+      ctx.fillStyle = `rgba(255, 250, 225, ${0.8 * t.life})`;
+      ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.fill();
+    });
+    if (!star) return;
+    const k = star.t / star.dur;
+    const fade = Math.min(1, k * 5) * Math.min(1, (1 - k) * 4);
+    const len = 0.32;
+    const tx = star.x - star.vx * len, ty = star.y - star.vy * len;
+    const g = ctx.createLinearGradient(tx, ty, star.x, star.y);
+    g.addColorStop(0, "rgba(255, 245, 220, 0)");
+    g.addColorStop(1, `rgba(255, 250, 230, ${0.9 * fade})`);
+    ctx.strokeStyle = g; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(star.x, star.y); ctx.stroke();
+    const glow = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, 12);
+    glow.addColorStop(0, `rgba(255, 252, 235, ${fade})`);
+    glow.addColorStop(1, "rgba(255, 240, 200, 0)");
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(star.x, star.y, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(star.x, star.y); ctx.rotate(star.t * 4);
+    ctx.fillStyle = `rgba(255, 255, 255, ${fade})`;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) { const r = i % 2 === 0 ? 6 : 1.6, a = (i / 8) * Math.PI * 2; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // ---------- rare storybook flyers far away ----------
+  let flyers = [], nextFlyer = rand(25, 45), flyerCam = null, lastFlyerKind = null;
+  const FLYER_KINDS = ["pig", "unicorn", "bunny"];
+  function updateFlyers(dt) {
+    nextFlyer -= dt;
+    if (nextFlyer <= 0 && flyers.length === 0) {
+      const kind = pick(FLYER_KINDS.filter(k => k !== lastFlyerKind));
+      lastFlyerKind = kind;
+      const dir = R() < 0.5 ? 1 : -1;
+      flyers.push({ kind, dir, x: dir > 0 ? -40 : W + 40, baseY: rand(70, Math.max(120, WATER_Y - 190)), y: 0, t: rand(0, 5), speed: rand(28, 40), size: critterSize() * 0.9 });
+      nextFlyer = rand(45, 90);
+    }
+    const shift = flyerCam === null ? 0 : (camX - flyerCam) * 0.05;
+    flyerCam = camX;
+    flyers.forEach(f => { f.t += dt; f.x += f.dir * f.speed * dt - shift; f.y = f.baseY + Math.sin(f.t * 1.1) * 10; });
+    flyers = flyers.filter(f => f.dir > 0 ? f.x < W + 60 : f.x > -60);
+  }
+  function drawWing(x, y, t, scaleW) {
+    ctx.save(); ctx.translate(x, y);
+    ctx.rotate(-0.5 + Math.sin(t * 7) * 0.55);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.ellipse(-5 * scaleW, 0, 7 * scaleW, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7";
+    ctx.beginPath(); ctx.ellipse(-8 * scaleW, 1, 4 * scaleW, 2, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // The flying pig (Jessica's sketch, Sept 28): far legs tucked behind her tummy, near legs in front,
+  // a curly spiral tail, a soft floppy ear, a three-quarter face with two eyes and a round snout facing us,
+  // and a long wing that sweeps up and back.
+  function pigWing(t) {
+    ctx.save(); ctx.translate(1.5, -6);
+    ctx.rotate(0.32 + Math.sin(t * 7) * 0.22);           // angled up and back, flapping from the shoulder
+    const g = ctx.createLinearGradient(0, 0, -20, 0);
+    g.addColorStop(0, "#FFFFFF"); g.addColorStop(1, "#F1EAFB");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#E4DAF7";                            // a soft inner feather
+    ctx.beginPath(); ctx.ellipse(-8.5, 0.8, 7.5, 1.9, 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(200, 180, 235, 0.8)"; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.ellipse(-10, 0, 11, 3.9, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  function pigLeg(x, far) {
+    ctx.strokeStyle = far ? "#E07B99" : "#F59AB5"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x - 1.1, 8.6); ctx.stroke();
+    ctx.fillStyle = far ? "#C9607F" : "#E27A98";          // little hooves
+    ctx.beginPath(); ctx.ellipse(x - 1.2, 9.1, 0.95, 0.6, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawFlyingPig(t) {
+    // far-side legs, behind her tummy
+    pigLeg(-5.5, true); pigLeg(6, true);
+    // round body, lit from above, a little rosier underneath
+    const bg = ctx.createLinearGradient(0, -7.5, 0, 7.5);
+    bg.addColorStop(0, "#FFCFDC"); bg.addColorStop(0.6, "#FFB6C9"); bg.addColorStop(1, "#F7A0B9");
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.beginPath(); ctx.ellipse(-2, -4.6, 6.5, 1.8, -0.08, 0, Math.PI * 2); ctx.fill();
+    // curly spiral tail
+    ctx.strokeStyle = "#F08FAC"; ctx.lineWidth = 1.1; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    // a little spiral that starts right at her back, loops around and curls in on itself
+    for (let k = 0; k <= 40; k++) {
+      const u = k / 40, a = Math.PI * 0.15 - u * Math.PI * 2.4, r = 2.6 * (1 - u * 0.75);
+      ctx.lineTo(-14.2 + Math.cos(a) * r, -1.2 + Math.sin(a) * r);
+    }
+    ctx.stroke();
+    // near-side legs, in front of her tummy
+    pigLeg(-3, false); pigLeg(9, false);
+    // her far ear peeks up behind her head (a little smaller and darker)
+    ctx.fillStyle = "#F393AE";
+    ctx.beginPath(); ctx.moveTo(11.6, -8.6); ctx.quadraticCurveTo(13.4, -12.6, 15.6, -11.2); ctx.quadraticCurveTo(15.6, -8.8, 14.4, -7.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#E97897";
+    ctx.beginPath(); ctx.moveTo(12.6, -8.8); ctx.quadraticCurveTo(13.8, -11.3, 15, -10.6); ctx.quadraticCurveTo(15, -9.2, 14.2, -8.3); ctx.closePath(); ctx.fill();
+    // head, shaded so it feels round
+    const hg = ctx.createRadialGradient(8.5, -5.5, 0.5, 10, -3, 6.5);
+    hg.addColorStop(0, "#FFD3DF"); hg.addColorStop(1, "#FFAFC4");
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(10, -3, 6.2, 0, Math.PI * 2); ctx.fill();
+    // soft floppy ear with a pink inside
+    ctx.fillStyle = "#FFA7BF";
+    ctx.beginPath(); ctx.moveTo(6.2, -7.2); ctx.quadraticCurveTo(6.8, -12.6, 10.2, -11.4); ctx.quadraticCurveTo(10.8, -9.2, 9.6, -8.2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#FF8FAE";
+    ctx.beginPath(); ctx.moveTo(7.2, -7.8); ctx.quadraticCurveTo(7.6, -11, 9.5, -10.5); ctx.quadraticCurveTo(9.6, -9.2, 8.9, -8.4); ctx.closePath(); ctx.fill();
+    // two eyes (three-quarter view): the far one a touch smaller, each with a sparkle
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.ellipse(10.2, -4.6, 1.05, 1.2, 0, 0, Math.PI * 2); ctx.ellipse(13.5, -5, 0.85, 1.05, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(10.55, -5, 0.38, 0, Math.PI * 2); ctx.arc(13.8, -5.35, 0.3, 0, Math.PI * 2); ctx.fill();
+    // rosy cheek
+    ctx.fillStyle = "rgba(255, 120, 160, 0.45)";
+    ctx.beginPath(); ctx.ellipse(8.6, -1.4, 1.6, 1, 0, 0, Math.PI * 2); ctx.fill();
+    // round snout facing us, with a little depth
+    const sg = ctx.createRadialGradient(13.9, -2.4, 0.2, 14.3, -1.8, 2.25);
+    sg.addColorStop(0, "#FFB3C6"); sg.addColorStop(1, "#F2869F");
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.ellipse(14.3, -1.8, 2.03, 1.65, -0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#B8566F";
+    ctx.beginPath(); ctx.ellipse(13.63, -1.65, 0.38, 0.6, 0.15, 0, Math.PI * 2); ctx.ellipse(14.98, -1.8, 0.38, 0.6, -0.15, 0, Math.PI * 2); ctx.fill();
+    // a small happy smile under the snout
+    ctx.strokeStyle = "#3B2D55"; ctx.lineWidth = 0.45; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(13.1, 0.45); ctx.quadraticCurveTo(13.95, 1.15, 14.8, 0.45); ctx.stroke();
+    pigWing(t);
+  }
+  function drawFlyingBunny(t) {
+    ctx.fillStyle = "#FFF6EF";
+    ctx.save(); ctx.translate(8, -9); ctx.rotate(-0.9 + Math.sin(t * 2) * 0.08);
+    ctx.beginPath(); ctx.ellipse(-2, -6, 2.4, 7, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 2.4, 7, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFC4D6";
+    ctx.beginPath(); ctx.ellipse(-2, -6, 1.1, 4.8, -0.1, 0, Math.PI * 2); ctx.ellipse(2, -6, 1.1, 4.8, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "#FFF6EF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 10, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(9, -4, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4, 5, 5, 2, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.arc(-10.5, -1.5, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FF9AB6";
+    ctx.beginPath(); ctx.arc(14.2, -3.5, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.arc(10.5, -5.5, 1, 0, Math.PI * 2); ctx.fill();
+    drawWing(-1, -5, t, 0.95);
+  }
+  function drawFlyingUnicorn(t) {
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5"].forEach((c, i) => {
+      ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(-12, -2 + i); ctx.quadraticCurveTo(-18, -2 + i * 2 + Math.sin(t * 3 + i) * 1.5, -22, 2 + i * 2); ctx.stroke();
+    });
+    ctx.strokeStyle = "#E9E1F7"; ctx.lineWidth = 1.8;
+    [[-8, -12], [-4, -8], [6, 10], [9, 13]].forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(a, 4); ctx.lineTo(b, 8); ctx.stroke(); });
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath(); ctx.ellipse(0, 0, 13, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(6, -4); ctx.lineTo(12, -2); ctx.lineTo(19, -11); ctx.lineTo(13.5, -14); ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.translate(17, -10); ctx.rotate(0.35);
+    ctx.beginPath(); ctx.ellipse(0, 0, 5.5, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "#FFD36E";
+    ctx.beginPath(); ctx.moveTo(15, -13); ctx.lineTo(19, -21); ctx.lineTo(17.5, -12.5); ctx.closePath(); ctx.fill();
+    ["#FFB6C9", "#C9A7F0", "#9FD3F5", "#FFB6C9"].forEach((c, i) => {
+      ctx.fillStyle = c;
+      ctx.beginPath(); ctx.arc(13 - i * 1.9, -13 + i * 2.6, 2.1, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.fillStyle = "#3B2D55";
+    ctx.beginPath(); ctx.arc(18, -10.5, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 150, 185, 0.6)";
+    ctx.beginPath(); ctx.arc(19.5, -8.6, 1.1, 0, Math.PI * 2); ctx.fill();
+    drawWing(0, -5, t, 1.1);
+  }
+  function drawFlyers() {
+    flyers.forEach(f => {
+      ctx.save();
+      ctx.translate(f.x, f.y); ctx.scale(f.dir * f.size, f.size);
+      ctx.rotate(Math.sin(f.t * 1.1 + 1) * 0.06);
+      if (f.kind === "pig") drawFlyingPig(f.t);
+      else if (f.kind === "bunny") drawFlyingBunny(f.t);
+      else drawFlyingUnicorn(f.t);
+      ctx.restore();
+    });
+  }
+
+  // ---------- turtles ----------
+  let turtle = null, nextTurtle = rand(12, 20);
+  const SHELLS = [
+    { shell: "#7FBF7A", plate: "#5E9E62", rim: "#4E8A58", skin: "#A8D98A" },
+    { shell: "#6FB9B0", plate: "#4F9990", rim: "#3F7F78", skin: "#A6DCC9" },
+    { shell: "#C9A77A", plate: "#A9875C", rim: "#8C6E48", skin: "#B8DB94" }
+  ];
+  function pathClearOfPads(xa, xb, y, size) {
+    const top = y - 16 * size;
+    if (top > WATER_Y + 34) return true;
+    const lo = Math.min(xa, xb) - 22 * size, hi = Math.max(xa, xb) + 22 * size;
+    return pads.every(p => p.x + p.r + 18 < lo || p.x - p.r - 18 > hi);
+  }
+  function spawnTurtle() {
+    if (frog.state !== "play") return false;
+    for (let tries = 0; tries < 30; tries++) {
+      const y = rand(WATER_Y + 24, H - 42);
+      const depth = (y - (WATER_Y + 24)) / (H - 42 - (WATER_Y + 24));
+      const size = lerp(0.65, 1.35, depth) * rand(0.8, 1.35);
+      const dir = R() < 0.5 ? 1 : -1;
+      const swim = rand(50, 110) * size;
+      const sx = rand(40, W - 40);
+      const x0 = camX + sx, x1 = x0 + dir * swim;
+      if (x1 - camX < 20 || x1 - camX > W - 20) continue;
+      if (!pathClearOfPads(x0, x1, y, size)) continue;
+      turtle = { x0, x1, x: x0, y, size, dir, t: 0, total: rand(7, 10), look: pick(SHELLS) };
+      ripples.push({ x: x0, y: y + 2, r: 8 * size, life: 1 });
+      return true;
+    }
+    return false;
+  }
+  function updateTurtle(dt) {
+    if (!turtle) {
+      nextTurtle -= dt;
+      if (nextTurtle <= 0) nextTurtle = spawnTurtle() ? rand(20, 40) : 2;
+      return;
+    }
+    const T = turtle;
+    T.t += dt;
+    const swimStart = 1.1, swimEnd = T.total - 1.1;
+    const k = clamp((T.t - swimStart) / (swimEnd - swimStart), 0, 1);
+    T.x = lerp(T.x0, T.x1, k * k * (3 - 2 * k));
+    if (T.t >= swimEnd && !T.dove) { T.dove = true; ripples.push({ x: T.x, y: T.y + 2, r: 10 * T.size, life: 1 }); }
+    if (R() < dt * 1.2 && T.t > swimStart && T.t < swimEnd) ripples.push({ x: T.x - T.dir * 14 * T.size, y: T.y + 3, r: 6 * T.size, life: 0.6 });
+    if (T.t >= T.total) turtle = null;
+  }
+  function drawTurtle() {
+    const T = turtle; if (!T) return;
+    const up = T.t < 1.1 ? T.t / 1.1 : T.t > T.total - 1.1 ? (T.total - T.t) / 1.1 : 1;
+    const e = up * up * (3 - 2 * up);
+    const c = T.look;
+    const x = T.x - camX, y = T.y;
+    const paddle = Math.sin(T.t * 4);
+    ctx.save();
+    ctx.translate(x, y); ctx.scale(T.dir * T.size, T.size);
+    const lift = (1 - e) * 12;
+    ctx.fillStyle = `rgba(40, 50, 110, ${0.22 * e})`;
+    ctx.beginPath(); ctx.ellipse(0, 4, 20, 6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(150, 200, 150, ${0.45 * e})`;
+    ctx.beginPath(); ctx.ellipse(10, 5 + paddle, 6, 2.2, 0.5 + paddle * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-10, 5 - paddle, 5, 2, -0.5 - paddle * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-40, -40, 80, 42); ctx.clip();
+    ctx.globalAlpha = e;
+    ctx.translate(0, lift);
+    ctx.fillStyle = c.skin;
+    ctx.beginPath(); ctx.ellipse(19, -4, 6, 5, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2E2440";
+    ctx.beginPath(); ctx.arc(21.5, -5.5, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255, 130, 170, 0.55)";
+    ctx.beginPath(); ctx.ellipse(21, -2.5, 1.6, 1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 0.9; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(22, -2); ctx.quadraticCurveTo(23.5, -1, 24.5, -2.5); ctx.stroke();
+    ctx.fillStyle = c.rim;
+    ctx.beginPath(); ctx.ellipse(0, 0, 18, 11, 0, Math.PI, 0); ctx.fill();
+    const g = ctx.createLinearGradient(0, -12, 0, 0);
+    g.addColorStop(0, c.shell); g.addColorStop(1, c.plate);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(0, -1, 16, 10, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = c.plate;
+    [[-8, -4, 4, 3], [0, -6.5, 4.5, 3.2], [8, -4, 4, 3]].forEach(([px, py, rx, ry]) => { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath(); ctx.ellipse(-4, -8, 6, 1.6, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = `rgba(255, 255, 255, ${0.45 * e})`; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.ellipse(0, 1, 21, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ---------- sky dressing ----------
+  const fireflies = Array.from({ length: 30 }, () => ({ x: R() * 400, yf: R(), y: 0, p: R() * Math.PI * 2, s: rand(0.4, 1) }));
+  const clouds = Array.from({ length: 9 }, (_, i) => {
+    const s = [0.55, 1.35, 0.8, 1.1, 0.65, 1.5, 0.9, 1.2, 0.7][i];
+    return { xf: (i + R() * 0.4) / 9, x: 0, yf: R(), y: 0, w: 90 * s, s, a: [0.35, 0.85, 0.5, 0.7, 0.4, 0.9, 0.55, 0.75, 0.45][i] };
+  });
+  function layoutSky() {
+    const skyBottom = Math.max(160, WATER_Y - 200);
+    clouds.forEach(c => { c.y = 55 + c.yf * (skyBottom - 55); });
+    fireflies.forEach(f => { f.y = 40 + f.yf * (WATER_Y - 70); });
+  }
+
+  // ---------- lily pads ----------
+  function newPad(x, r) {
+    return { x, r, bloom: 0, bloomed: false, perfect: false, phase: R() * Math.PI * 2, color: pick(PETAL_COLORS), notch: rand(-0.6, 0.6), flowerSide: R() < 0.5 ? -1 : 1 };
+  }
+  let lastGapKind = null;
+  function extendPads() {
+    let last = pads[pads.length - 1];
+    while (last.x < camX + W + 360) {
+      const sizeRoll = R();
+      const r = sizeRoll < 0.3 ? rand(27, 34) : sizeRoll < 0.75 ? rand(40, 50) : rand(54, 64);
+      const kinds = ["short", "medium", "long"].filter(k => k !== lastGapKind);
+      const roll = R();
+      const kind = kinds.length === 3 ? (roll < 0.3 ? "short" : roll < 0.7 ? "medium" : "long") : kinds[roll < 0.5 ? 0 : 1];
+      lastGapKind = kind;
+      let gap = kind === "short" ? rand(22, 55) : kind === "medium" ? rand(70, 120) : rand(135, 185);
+      gap = Math.min(gap, 312 - last.r - r);
+      last = newPad(last.x + last.r + gap + r, r);
+      pads.push(last);
+    }
+    while (pads.length && pads[0].x + pads[0].r < camX - 200) pads.shift();
+  }
+
+  // =====================================================================
+  //  THE FROG'S LITTLE LIFE (autopilot)
+  // =====================================================================
+  function reset() {
+    pads = [newPad(160, 52)];
+    pads[0].bloomed = true; pads[0].bloom = 1; pads[0].flowerSide = -1;
+    frog = { x: 160, y: WATER_Y, pad: pads[0], jump: null, glide: null, squash: 0, sink: 0, blink: 0, face: "happy", fromPad: null, wiggle: 0, gulp: 0, lick: null, lookAt: null, state: "play", breathe: 0 };
+    ring = null;
+    camX = frog.x - FROG_SCREEN_X; camTarget = camX;
+    charge = 0; charging = false;
+    extendPads();
+  }
+  function frogIdle() { return frog.state === "play" && !frog.jump && !charging && !frog.glide; }
+
+  // what the frog does next; weighted so it feels alive, never looped
+  const brain = { rest: rand(3, 5), plan: null, naps: 0, hopsSinceNap: 0, oopsDue: false };
+  function restLength() {
+    const r = R();
+    return (r < 0.45 ? rand(2.5, 6) : r < 0.85 ? rand(6, 12) : rand(12, 20)) * lerp(1, 1.6, SKY.night);  // calmer at night
+  }
+  function chooseHop() {
+    const ahead = pads.filter(p => p.x > frog.x + 5);
+    if (!ahead.length) return null;
+    let target = ahead[0];
+    // now and then, a big brave hop over a small pad
+    if (ahead[1] && R() < 0.14 && ahead[1].x - frog.x <= 318) target = ahead[1];
+    if (brain.bigDue && ahead[1] && ahead[1].x - frog.x <= 318) { target = ahead[1]; brain.bigDue = false; }
+    let d = target.x - frog.x;
+    const r = R();
+    let willMiss = false;
+    // a rare little oops: somewhere between 1 in 20 and 1 in 10 hops, different every time, so it feels random
+    const missChance = rand(0.05, 0.10);
+    if (R() < missChance) brain.oopsDue = true;
+    if (brain.oopsDue) {
+      // a rare little oops: lands in open water between the pads, floats, hops back
+      // (if the pads are too close together this time, it waits for a wider gap)
+      const edgeA = frog.pad ? frog.pad.x + frog.pad.r * 1.3 + 16 : frog.x + 40;
+      const edgeB = target.x - target.r * 1.3 - 16;
+      if (edgeB - edgeA > 26) { d = (edgeA + edgeB) / 2 - frog.x; willMiss = true; brain.oopsDue = false; }
+    }
+    if (!willMiss) d += r < 0.35 ? rand(-4, 4) : rand(-0.6, 0.6) * target.r; // sometimes a perfect center landing
+    d = clamp(d, 30, 330);
+    return { kind: "hop", charge: (d - 30) / 300 };
+  }
+  function think(dt) {
+    if (!frogIdle()) return;
+    if (CFG.title && time < 9.5) return;   // waits politely until the title has faded before the first hop
+    if (frog.face === "sleep") {
+      brain.rest -= dt;
+      if (brain.rest <= 0) { frog.face = "happy"; frog.wiggle = 0.6; frog.squash = 0.5; brain.rest = rand(1.5, 3.5); }
+      return;
+    }
+    if (frog.lick) return;
+    brain.rest -= dt;
+    if (brain.wiggleDue) { brain.wiggleDue = false; frog.wiggle = 1.1; frog.squash = 0.4; brain.rest = Math.max(brain.rest, 2); return; }
+    if (brain.napDue) { brain.napDue = false; frog.face = "sleep"; brain.rest = brain.napLength || 30; brain.hopsSinceNap = 0; return; }
+    if (brain.rest > 0) return;
+    const r = R();
+    // sleepier at night: naps come sooner, happen more often and last longer
+    const n = SKY.night;
+    if (brain.hopsSinceNap >= Math.round(lerp(6, 2, n)) && r < lerp(0.22, 0.55, n)) {
+      frog.face = "sleep"; brain.rest = rand(14, 28) * lerp(1, 2.2, n); brain.hopsSinceNap = 0; return;
+    }
+    if (r > 0.9) { frog.wiggle = 1.1; frog.squash = 0.4; brain.rest = rand(2, 5); return; } // a happy little wiggle
+    const plan = chooseHop();
+    if (!plan) { brain.rest = 1; return; }
+    brain.plan = plan;
+    charging = true; charge = 0;
+  }
+  function release() {
+    charging = false;
+    if (frog.glide) { frog.x = frog.glide.to; frog.glide = null; }
+    const d = 30 + charge * 300;
+    const dur = 0.46 + d / 950;
+    frog.jump = { x0: frog.x, d, t: 0, dur, h: 46 + d * 0.32, y0: 0 };
+    frog.fromPad = frog.pad;
+    frog.pad = null;
+    brain.plan = null;
+    brain.hopsSinceNap++;
+    play("boing");
+  }
+
+  // ---------- events ----------
+  function burst(x, y, colors, n, spread) {
+    for (let i = 0; i < n; i++) {
+      const a = rand(-Math.PI, 0), s = rand(60, spread);
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: colors[i % colors.length], r: rand(2.5, 5), kind: "petal" });
+    }
+  }
+  function splash(x) {
+    for (let i = 0; i < 22; i++) {
+      const a = rand(-Math.PI * 0.95, -Math.PI * 0.05), s = rand(80, 240);
+      particles.push({ x, y: WATER_Y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: i % 2 ? "#E6F7FF" : "#A9DDF0", r: rand(2, 4.5), kind: "drop" });
+    }
+    ripples.push({ x, y: WATER_Y + 4, r: 6, life: 1 });
+    ripples.push({ x, y: WATER_Y + 4, r: 2, life: 1.25 });
+  }
+  function land(wasReturn) {
+    if (wasReturn) {
+      const pad = frog.fromPad;
+      frog.pad = pad;
+      frog.glide = { from: frog.x, to: pad.x, t: 0 };
+      frog.squash = 1; frog.face = "happy"; frog.sink = 0;
+      frog.state = "play";
+      ripples.push({ x: frog.x, y: WATER_Y + 6, r: 10, life: 0.9 });
+      brain.rest = rand(3, 6);
+      return;
+    }
+    const lx = frog.x;
+    let pad = pads.find(p => Math.abs(lx - p.x) <= p.r);
+    let caught = false;
+    if (!pad) {
+      pad = pads.find(p => Math.abs(lx - p.x) <= p.r + 14 + p.r * 0.3);
+      if (pad) { caught = true; frog.x = pad.x + Math.sign(lx - pad.x) * pad.r * 0.8; }
+    }
+    ripples.push({ x: lx, y: WATER_Y + 6, r: 10, life: 0.9 });
+    if (!pad) {
+      frog.state = "sinking";
+      if (turtle && Math.abs(turtle.x - lx) < 70 * turtle.size + 30 && turtle.t < turtle.total - 1.1) turtle.t = turtle.total - 1.1;
+      frog.face = "oops"; frog.sink = 0;
+      splash(lx);
+      play("plop");
+      return;
+    }
+    frog.pad = pad;
+    frog.glide = { from: frog.x, to: pad.x, t: 0 };
+    frog.squash = 1;
+    brain.rest = restLength();
+    if (!pad.bloomed) {
+      const perfect = !caught && Math.abs(lx - pad.x) <= pad.r * 0.38;
+      pad.bloomed = true; pad.perfect = perfect;
+      pad.flowerSide = frog.x > pad.x ? -1 : 1;
+      burst(pad.x, WATER_Y - 20, pad.color, perfect ? 18 : 10, perfect ? 200 : 140);
+      play("bloom", perfect);
+    }
+    camTarget = pad.x - FROG_SCREEN_X;
+  }
+
+  // ---------- frog feelings: looking around, catching bugs ----------
+  let lickCooldown = 3;
+  function frogMouth() { return { x: frog.x - camX + 5, y: frog.y - 33 }; }   // used for the catching rules (never changes, so the story stays the same)
+  // where the tongue comes out of the frog that is actually drawn
+  function mouthPoint() { return castFrog() ? { x: frog.x - camX + 2, y: frog.y - 22 } : frogMouth(); }
+  function updateFeelings(dt) {
+    frog.wiggle = Math.max(0, (frog.wiggle || 0) - dt);
+    frog.gulp = Math.max(0, (frog.gulp || 0) - dt);
+    lickCooldown -= dt;
+    frog.lookAt = null;
+    if (frog.face === "sleep") return;
+    if (star) frog.lookAt = { x: star.x, y: star.y };
+    else if (frog.lick) frog.lookAt = { x: frog.lick.bug.x, y: frog.lick.bug.y };
+    else {
+      const m = frogMouth(); let bestD = 230;
+      critters.forEach(c => { const d = Math.hypot(c.x - m.x, c.y - m.y); if (d < bestD) { bestD = d; frog.lookAt = { x: c.x, y: c.y }; } });
+      fish.forEach(f => { const fx = f.x - camX, d = Math.hypot(fx - m.x, f.y - m.y); if (d < 260 && d < bestD) { bestD = d; frog.lookAt = { x: fx, y: f.y }; } });
+      if (!frog.lookAt && turtle) frog.lookAt = { x: turtle.x - camX, y: turtle.y };
+      if (!frog.lookAt && flyers.length) frog.lookAt = { x: flyers[0].x, y: flyers[0].y };
+    }
+    if (!frog.lick && frogIdle() && lickCooldown <= 0 && frog.face === "happy") {
+      const m = frogMouth();
+      const bug = critters.find(c => c.kind === "bug" && !c.caught && Math.hypot(c.x - m.x, c.y - m.y) < 105 && c.y < WATER_Y - 12);
+      if (bug) { bug.caught = true; frog.lick = { bug, t: 0, from: { x: bug.x, y: bug.y } }; play("lick"); }
+    }
+    if (frog.lick) {
+      const L = frog.lick, m = mouthPoint();
+      L.t += dt / 0.42;
+      if (L.t < 0.5) { const e = L.t / 0.5; L.tip = { x: lerp(m.x, L.from.x, e), y: lerp(m.y, L.from.y, e) }; }
+      else { const e = (L.t - 0.5) / 0.5; const k = e * e; L.tip = { x: lerp(L.from.x, m.x, k), y: lerp(L.from.y, m.y, k) }; L.bug.x = L.tip.x; L.bug.y = L.tip.y; }
+      if (L.t >= 1) {
+        L.bug.eaten = true;
+        frog.lick = null;
+        frog.gulp = 0.7; frog.squash = 0.6;
+        say(frog.x, WATER_Y - 100, "yum!");
+        play("gulp");
+        lickCooldown = rand(2.5, 5);
+        brain.rest = Math.max(brain.rest, rand(1.5, 3));
+      }
+    }
+  }
+  function drawTongue() {
+    const L = frog.lick; if (!L || !L.tip) return;
+    const m = mouthPoint();
+    ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = 3.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(L.tip.x, L.tip.y); ctx.stroke();
+    ctx.fillStyle = "#FF6F9C";
+    ctx.beginPath(); ctx.arc(L.tip.x, L.tip.y, 3.8, 0, Math.PI * 2); ctx.fill();
+    if (L.t >= 0.5) drawBug(L.bug);
+  }
+  // sleepy little z's drifting up
+  let nextZ = 0;
+  function updateZees(dt) {
+    if (frog.face === "sleep" && frogIdle()) {
+      nextZ -= dt;
+      if (nextZ <= 0) { zees.push({ x: frog.x + 22, y: frog.y - 58, t: 0, s: rand(0.8, 1.15) }); nextZ = rand(1.6, 2.4); }
+    } else nextZ = 0.6;
+    zees.forEach(z => { z.t += dt; z.x += dt * 9; z.y -= dt * 14; });
+    zees = zees.filter(z => z.t < 3.2);
+  }
+  function drawZees() {
+    zees.forEach(z => {
+      const a = Math.min(1, z.t / 0.5) * Math.min(1, (3.2 - z.t) / 1);
+      const s = 5 * z.s * (0.7 + Math.min(z.t, 2) * 0.2);
+      const x = z.x - camX + Math.sin(z.t * 2) * 3, y = z.y;
+      ctx.save();
+      ctx.globalAlpha = a * 0.9;
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(90, 60, 130, 0.35)"; ctx.lineWidth = 4.2;
+      ctx.beginPath(); ctx.moveTo(x - s, y - s); ctx.lineTo(x + s, y - s); ctx.lineTo(x - s, y + s); ctx.lineTo(x + s, y + s); ctx.stroke();
+      ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(x - s, y - s); ctx.lineTo(x + s, y - s); ctx.lineTo(x - s, y + s); ctx.lineTo(x + s, y + s); ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  // ---------- LOOK CHECK director ----------
+  // For review reels only: every creature and every frog moment shows up at least once, on a set
+  // schedule, so the whole cast can be judged in one short video. Normal episodes stay fully random.
+  const SHOW_BUG_Y = () => WATER_Y - 82;
+  function showBees(idx, y) {
+    const dir = 1;
+    idx.forEach((ci, i) => critters.push({ kind: "bee", x: -24 - i * rand(34, 50), baseY: y + rand(-30, 30), y: 0, dir, vx: rand(38, 46), t: rand(0, 10), ph: rand(0, 6), size: [1.1, 1.35, 1.6][i % 3], col: Bees.COLORS[ci] }));
+    return true;
+  }
+  function showOne(kind) {
+    const dir = kind === "dragonfly" ? -1 : 1, x0 = dir > 0 ? -24 : W + 24;
+    if (kind === "butterfly") critters.push({ kind, x: x0, baseY: rand(170, WATER_Y - 60), y: 0, dir, vx: 32, t: 0, size: 1.4, col: pick(BUTTERFLY_COLORS) });
+    else critters.push({ kind, x: x0, baseY: rand(180, WATER_Y - 50), y: 0, dir, t: 0, bob: 0, size: 1.4 });
+    return true;
+  }
+  function showBugs() {   // lightning bugs drifting right past the frog at tongue height
+    for (let i = 0; i < 3; i++) critters.push({ kind: "bug", x: -20 - i * 30, baseY: SHOW_BUG_Y() + rand(-12, 12), y: 0, dir: 1, vx: 20, t: rand(0, 10), size: 1.3 });
+    return true;
+  }
+  function showFish(kind) { if (fish.length) return false; if (!spawnFish()) return false; fish[fish.length - 1].kind = kind; return true; }
+  function showTurtle(i) { if (turtle || !spawnTurtle()) return false; turtle.look = SHELLS[i]; return true; }
+  function showFlyer(kind) {
+    if (flyers.length) return false;
+    flyers.push({ kind, dir: 1, x: -40, baseY: rand(80, Math.max(130, WATER_Y - 200)), y: 0, t: 0, speed: 40, size: 1.35 });
+    return true;
+  }
+  const CUES = [
+    [11, () => showBees([0, 1, 2], 200)],        // our bee, pink, mint
+    [16, () => showFish("goldfish")],
+    [22, () => showOne("butterfly")],
+    [28, () => showTurtle(0)],
+    [34, () => showBees([3, 4], 240)],           // lavender, blue
+    [40, () => showFlyer("pig")],
+    [46, () => showFish("koi")],
+    [52, () => showOne("dragonfly")],
+    [58, () => { brain.oopsDue = true; return true; }],   // a ring float
+    [66, () => showBees([5, 6], 190)],           // peach, strawberry
+    [74, () => showFish("stripe")],
+    [84, () => showTurtle(1)],
+    [92, () => { brain.bigDue = true; return true; }],    // a big brave hop
+    [104, () => showFlyer("unicorn")],
+    [112, () => showOne("butterfly")],
+    [126, () => { brain.wiggleDue = true; return true; }],
+    [140, () => showBugs()],                      // the frog catches one with its tongue
+    [150, () => showTurtle(2)],
+    [165, () => showFlyer("bunny")],
+    [178, () => showFish("koi")],
+    [190, () => { brain.oopsDue = true; return true; }],  // one more float, in the dusk light
+    [205, () => showBugs()],
+    [222, () => { nextStar = 0; return true; }], // a shooting star
+    [236, () => { brain.napDue = true; brain.napLength = 90; return true; }],  // sleepy under the stars
+    [262, () => { nextStar = 0; return true; }]
+  ].map(([t, fn]) => ({ t, fn, done: false }));
+  function director() {
+    nextCritter = nextFish = nextTurtle = nextFlyer = 1e9;           // nothing random, only the schedule
+    if (nextStar > 0 && nextStar < 1e8) nextStar = 1e9;
+    CUES.forEach(c => { if (!c.done && time >= c.t) c.done = !!c.fn(); });
+  }
+
+  // ---------- update ----------
+  function update(dt) {
+    time += dt;
+    computeSky();
+    think(dt);
+    if (charging) {
+      charge += dt * 0.8;
+      if (brain.plan && charge >= brain.plan.charge) { charge = brain.plan.charge; release(); }
+    }
+    if (frog.glide) {
+      const gl = frog.glide;
+      gl.t = Math.min(1, gl.t + dt / 0.24);
+      const e = 1 - Math.pow(1 - gl.t, 3);
+      frog.x = lerp(gl.from, gl.to, e);
+      if (gl.t >= 1) frog.glide = null;
+    }
+    if (frog.jump) {
+      const j = frog.jump;
+      j.t += dt / j.dur;
+      const t = Math.min(j.t, 1);
+      frog.x = j.x0 + j.d * t;
+      frog.y = WATER_Y + j.y0 * (1 - t) - j.h * 4 * t * (1 - t);
+      if (!j.returning) camTarget = Math.max(camTarget, frog.x - FROG_SCREEN_X - 40);
+      if (j.t >= 1) { const wasReturn = !!j.returning; frog.jump = null; frog.y = WATER_Y; land(wasReturn); }
+    }
+    if (frog.state === "sinking") {
+      const before = frog.sink;
+      frog.sink += dt;
+      if (before < 0.32 && frog.sink >= 0.32) { frog.face = "float"; play("bloop"); ripples.push({ x: frog.x, y: WATER_Y + 4, r: 8, life: 1 }); }
+      if (before < 1.1 && frog.sink >= 1.1) ripples.push({ x: frog.x, y: WATER_Y + 4, r: 20, life: 0.8 });
+      if (frog.sink >= 2.6) { // floats a little longer than in the game: it's relaxing
+        const back = frog.fromPad;
+        ring = { x: frog.x, life: 1 };
+        frog.state = "returning";
+        frog.face = "happy";
+        frog.jump = { x0: frog.x, d: back.x - frog.x, t: 0, dur: 0.62, h: 78, y0: 18, returning: true };
+        camTarget = back.x - FROG_SCREEN_X;
+        ripples.push({ x: frog.x, y: WATER_Y + 4, r: 12, life: 1 });
+        play("boing");
+      }
+    }
+    if (ring) { ring.life -= dt * 0.8; if (ring.life <= 0) ring = null; }
+    updateCritters(dt); updateFish(dt); updateFlyers(dt); updateTurtle(dt);
+    updateFeelings(dt); updatePond(dt); updateStar(dt); updateZees(dt);
+    if (CFG.showcase) director();
+    frog.squash = Math.max(0, frog.squash - dt * 4);
+    frog.blink = (time % 3.4) < 0.12 ? 1 : 0;
+    camX = lerp(camX, camTarget, 1 - Math.pow(0.05, dt)); // a slightly softer camera glide than the game
+    extendPads();
+    pads.forEach(p => { if (p.bloomed && p.bloom < 1) p.bloom = Math.min(1, p.bloom + dt * 2.2); });
+    particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; p.life -= dt * 1.1; });
+    particles = particles.filter(p => p.life > 0 && p.y < WATER_Y + 20);
+    ripples.forEach(r => { r.r += dt * 55; r.life -= dt * 0.9; });
+    ripples = ripples.filter(r => r.life > 0);
+    popups.forEach(p => { p.y -= dt * 34; p.life -= dt * 0.9; });
+    popups = popups.filter(p => p.life > 0);
+    fireflies.forEach(f => { f.p += dt * f.s; });
+    // v8: remember when each flower popped open (for the water-lily open/close), then the friends
+    pads.forEach(p => { if (p.bloomed && p.openAt === undefined) p.openAt = time; });
+    updateFX(dt);
+  }
+
+  // =====================================================================
+  //  DRAWING
+  // =====================================================================
+  // =====================================================================
+  //  TIME OF DAY (real time: one minute of video = one real minute of sky)
+  //  The clock starts at CFG.startHour and moves at real speed, so a 1-hour
+  //  episode shows one real hour. The sun rises on the left and sets on the
+  //  right; the moon (with its phase) and the stars come out at night.
+  //  Live watching on the website can follow the viewer's own clock.
+  // =====================================================================
+  const DAY = { rise: 6.75, set: 19.25, sunTop: 58, moonTop: 50 };   // the v7 "legacy" sky (kept for story checks)
+  // v8: the HOME SKY. The real sun and moon for a named date, from lily-home-sky-v1.js
+  // (rounded grid point, Central Time). Time 0 of the video = CFG.startHour on CFG.date, Central clock.
+  const HS = window.LilyHomeSky || null;
+  const HOME = CFG.sky === "home" && !!HS;
+  const DATE = (() => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(CFG.date || "");
+    if (m) return { y: +m[1], m: +m[2], d: +m[3] };
+    return HS ? HS.centralDate(Date.now()) : { y: 2026, m: 10, d: 1 };
+  })();
+  const T0_UTC = HOME ? HS.centralToUTC(DATE.y, DATE.m, DATE.d, CFG.startHour) : 0;
+  const EVENTS = HOME ? HS.events(DATE.y, DATE.m, DATE.d) : { sunrise: DAY.rise, sunset: DAY.set, moonrise: null, moonset: null };
+  const nowUTC = () => (!RENDER && CFG.realClock) ? Date.now() : T0_UTC + time * CFG.timeScale * 1000;
+  function clockHour() {
+    if (HOME) return HS.centralHour(nowUTC());
+    if (!RENDER && CFG.realClock) { const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600; }
+    return ((CFG.startHour + time * CFG.timeScale / 3600) % 24 + 24) % 24;
+  }
+  // hours since the day began (6 AM start = 0), used by the friends and the weather. Never wraps.
+  const dayClock = () => CFG.startHour + time * CFG.timeScale / 3600;
+  // the real sun and moon, worked out once per second of the world (they move far less than a pixel in a second)
+  let astroKey = null, astro = null;
+  function homeAstro() {
+    const ms = nowUTC(), key = Math.floor(ms / 1000);
+    if (key !== astroKey) { astroKey = key; astro = HS.at(key * 1000); }
+    return astro;
+  }
+  // where a real body sits on screen: we face south over the pond, so east (rising) is on the left
+  // and west (setting) is on the right; its height above the horizon sets how high it is
+  function homePos(az, alt, top) {
+    const u = (az - 90) / 180;
+    const x = W * (0.12 + 0.76 * clamp(u, -0.1, 1.1));
+    const horizon = WATER_Y - 26, highest = 64;
+    return { x, y: Math.max(34, horizon - (alt / top) * (horizon - highest)) };
+  }
+  const wrap24 = h => ((h % 24) + 24) % 24;
+  // how high a body is (degrees) given the hour, when it rises, and how long it stays up
+  function arcAlt(h, rise, up, top, below) {
+    const u = wrap24(h - rise) / up;
+    if (u <= 1) return top * Math.sin(Math.PI * u);
+    return -below * Math.sin(Math.PI * (wrap24(h - rise) - up) / (24 - up));
+  }
+  const SUN_UP = DAY.set - DAY.rise;
+  function sunAlt(h) { return arcAlt(h, DAY.rise, SUN_UP, DAY.sunTop, 40); }
+  const moonRise = () => wrap24(DAY.rise + CFG.moonPhase * 24);
+  function moonAlt(h) { return arcAlt(h, moonRise(), 12.5, DAY.moonTop, 30); }
+  // where a body sits on screen: it travels from low left, over the top, to low right
+  function bodyPos(h, rise, up, alt, top) {
+    const u = wrap24(h - rise) / up;
+    const x = W * (0.12 + 0.76 * clamp(u, -0.1, 1.1));
+    const horizon = WATER_Y - 26, highest = 64;
+    return { x, y: horizon - (alt / top) * (horizon - highest) };
+  }
+
+  // colors by sun height: [alt, sky4, cloud rgb, foreground light (color, strength)]
+  const LIGHT = [
+    { alt: -18, sky: ["#0A0D29", "#121842", "#1C2257", "#262A63"], cloud: [62, 66, 112], cloudA: 0.55, tint: "#0E1238", tintA: 0.5 },
+    { alt: -8,  sky: ["#1D2154", "#3A3978", "#6A4F8E", "#9A6B9A"], cloud: [120, 104, 160], cloudA: 0.8, tint: "#272664", tintA: 0.42 },
+    { alt: -2,  sky: ["#5E5AB8", "#A585C8", "#F4A0A0", "#FFC39A"], cloud: [236, 190, 214], cloudA: 1, tint: "#6A4A8A", tintA: 0.12 },
+    { alt: 2,   sky: ["#7B6FD0", "#C79BDB", "#FFB0A0", "#FFD1A1"], cloud: [255, 238, 245], cloudA: 1, tint: "#FFFFFF", tintA: 0 },
+    { alt: 8,   sky: ["#8A98DC", "#C9B4E2", "#FFCBA0", "#FFE0B0"], cloud: [255, 240, 228], cloudA: 1, tint: "#FFD49C", tintA: 0.13 },
+    { alt: 20,  sky: ["#6FA8EE", "#9CC8F6", "#CBE5FB", "#EAF6FF"], cloud: [255, 255, 255], cloudA: 1, tint: "#DDF0FF", tintA: 0.14 },
+    { alt: 60,  sky: ["#5B9BEA", "#8DC0F4", "#C0DFFA", "#E4F3FF"], cloud: [255, 255, 255], cloudA: 1, tint: "#E4F4FF", tintA: 0.16 }
+  ];
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+  LIGHT.forEach(k => { k.skyRgb = k.sky.map(hexToRgb); k.tintRgb = hexToRgb(k.tint); });
+  const mix = (a, b, t) => a.map((v, i) => Math.round(lerp(v, b[i], t)));
+  const rgb = c => `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+  // everything the picture needs for this moment, worked out once per frame
+  let SKY = null;
+  function computeSky() {
+    const h = clockHour();
+    let alt, sunP, moonP, mAlt, moonPhase;
+    if (HOME) {
+      const a = homeAstro();
+      alt = a.sun.alt; mAlt = a.moon.alt; moonPhase = a.moon.phase;
+      sunP = homePos(a.sun.az, alt, DAY.sunTop); moonP = homePos(a.moon.az, mAlt, DAY.sunTop);
+    } else {
+      alt = sunAlt(h); mAlt = moonAlt(h); moonPhase = CFG.moonPhase;
+      sunP = bodyPos(h, DAY.rise, SUN_UP, alt, DAY.sunTop); moonP = bodyPos(h, moonRise(), 12.5, mAlt, DAY.moonTop);
+    }
+    let i = 0;
+    while (i < LIGHT.length - 2 && alt > LIGHT[i + 1].alt) i++;
+    const A = LIGHT[i], B = LIGHT[i + 1];
+    let t = clamp((alt - A.alt) / (B.alt - A.alt), 0, 1); t = t * t * (3 - 2 * t);
+    SKY = {
+      h, alt,
+      sky: A.skyRgb.map((c, k) => rgb(mix(c, B.skyRgb[k], t))),
+      cloud: mix(A.cloud, B.cloud, t), cloudA: lerp(A.cloudA, B.cloudA, t),
+      tint: mix(A.tintRgb, B.tintRgb, t), tintA: lerp(A.tintA, B.tintA, t),
+      night: clamp((-alt - 3) / 12, 0, 1),                 // 0 = daylight, 1 = full night
+      dusky: clamp((12 - alt) / 14, 0, 1),                 // golden hour, dusk and night
+      sun: Object.assign(sunP, { alt }),
+      moon: Object.assign(moonP, { alt: mAlt }),
+      moonPhase
+    };
+  }
+  const isDay = () => SKY.alt > -3;
+
+  // =====================================================================
+  //  v8: HOP HOP'S LITTLE FRIENDS + THE DAY'S MOMENTS
+  //  (morning mist, one gentle afternoon rain, a rainbow, water lilies that open and close)
+  //  Everything here uses its OWN random numbers (FXR), never the story's (R), and it never
+  //  changes anything Hop Hop does: it only LOOKS at where he is. Hop Hop's hops, floats, naps
+  //  and snacks for a seed are exactly the same with it on or off (fx=0).
+  //  Times are in "day hours": 6 = 6 AM when the day starts, 24 = midnight, 29.5 = 5:30 AM next day.
+  // =====================================================================
+  const FXR = mulberry32(((CFG.seed * 2654435761) ^ (DATE.y * 10000 + DATE.m * 100 + DATE.d) ^ 0x51F15EED) >>> 0);
+  const frand = (a, b) => a + FXR() * (b - a);
+  const smooth01 = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+  const frac = x => x - Math.floor(x);
+  const SUNRISE = EVENTS.sunrise != null ? EVENTS.sunrise : 7, SUNSET = EVENTS.sunset != null ? EVENTS.sunset : 19;
+  function dayHour() {
+    if (!RENDER && CFG.realClock) { const h = clockHour(); return h < 6 ? h + 24 : h; }
+    return dayClock();
+  }
+  const inDay = H => ((H - 6) % 24 + 24) % 24 + 6;      // any hour -> the same moment inside 6..30
+
+  // ---------- the day's plan (fixed for a seed + date, drawn in this exact order) ----------
+  const PLAN = (() => {
+    const p = {};
+    p.follow = frand(SUNRISE + 0.55, Math.max(SUNRISE + 0.65, 9.4));
+    p.snack = frand(10.3, 11.7);
+    p.sit = frand(12.8, 13.9);
+    p.rainStart = frand(14.6, 16.2);
+    p.rainEnd = p.rainStart + frand(20, 30) / 60;
+    p.rainbowHold = frand(8, 12) / 60;
+    p.sky = frand(SUNSET - 0.8, SUNSET - 0.45);
+    p.wiggle = frand(SUNSET + 0.5, Math.max(SUNSET + 0.6, Math.min(21.3, SUNSET + 1.8)));
+    return p;
+  })();
+  const QUIET_FROM = 22;                                 // no visits from about 10 PM until sunrise
+
+  // ---------- weather: how much of each moment right now (pure math of the hour, 0..1) ----------
+  function rainAmt(H) { return smooth01((H - PLAN.rainStart) / (4 / 60)) * (1 - smooth01((H - (PLAN.rainEnd - 5 / 60)) / (5 / 60))); }
+  function overcastAmt(H) { return smooth01((H - (PLAN.rainStart - 10 / 60)) / (12 / 60)) * (1 - smooth01((H - PLAN.rainEnd) / (9 / 60))); }
+  function rainbowAmt(H) {
+    const a = PLAN.rainEnd - 1 / 60, b = a + 4 / 60 + PLAN.rainbowHold;
+    return smooth01((H - a) / (4 / 60)) * (1 - smooth01((H - b) / (5 / 60)));
+  }
+  function mistAmt(H) {
+    const h = inDay(H);
+    // thick at dawn, thinning from a little after sunrise, gone by about 9 AM;
+    // it gathers again in the last hours before 6 AM, so the end of the day meets its start
+    return Math.max(1 - smooth01((h - (SUNRISE + 0.2)) / Math.max(0.5, 9 - (SUNRISE + 0.2))), smooth01((h - 28) / 2));
+  }
+  function lilyOpenAmt(H) {
+    const h = inDay(H) % 24;
+    return smooth01((h - SUNRISE) / 1.25) * (1 - smooth01((h - (SUNSET - 0.9)) / 1.4));
+  }
+  let WXNOW = { rain: 0, over: 0, bow: 0, mist: 0, open: 1 };
+  function computeWeather() {
+    const H = dayHour();
+    WXNOW = CFG.fx
+      ? { rain: rainAmt(H), over: overcastAmt(H), bow: rainbowAmt(H), mist: mistAmt(H), open: lilyOpenAmt(H) }
+      : { rain: 0, over: 0, bow: 0, mist: 0, open: HOME ? lilyOpenAmt(H) : 1 };
+  }
+
+  // ---------- the five friends ----------
+  // The exact ORIGINAL Hop Hop shapes, about half his size; only the colors and little details change.
+  const FRIEND_LOOKS = {
+    sprout:   { name: "Soft green", top: "#B6EBAE", body: "#90D98B", dark: "#6DB96F", belly: "#E6FADF", bump: "#A3E19C" },
+    blue:     { name: "Blue", top: "#AFD9F8", body: "#7BB9EA", dark: "#4E8FCB", belly: "#E3F2FF", bump: "#96CBF1" },
+    yellow:   { name: "Yellow", top: "#FFE696", body: "#F6CD5A", dark: "#D6A437", belly: "#FFF4D6", bump: "#FADB79" },
+    pink:     { name: "Pink", top: "#FFC8DB", body: "#F5A2C1", dark: "#CD7399", belly: "#FFE7F0", bump: "#F9B6CE" },
+    freckles: { name: "Freckles", top: "#72C381", body: "#57B06C", dark: "#3E8A55", belly: "#CDEFC5", bump: "#66BC78", freckles: true, flower: true }
+  };
+  const VISITS = [
+    { kind: "follow", look: "sprout", at: PLAN.follow },
+    { kind: "snack", look: "blue", at: PLAN.snack },
+    { kind: "sit", look: "freckles", at: PLAN.sit },
+    { kind: "sky", look: "yellow", at: PLAN.sky },
+    { kind: "wiggle", look: "pink", at: PLAN.wiggle }
+  ].map(v => Object.assign(v, { started: null, ended: null, skipped: false }));
+  const FRIEND_S = 1.38 * 0.5;                          // half of Hop Hop
+  let buddy = null, fxRipples = [], fxBug = null;
+  // Hop Hop's "extras" for a visit: they only change how he is DRAWN (where he looks, a smile, a wiggle)
+  const OV = { look: null, smile: 0, wiggle: 0, tongue: null };
+
+  // --- reading Hop Hop (never changing him) ---
+  function padNear(x) { return pads.find(p => Math.abs(x - p.x) <= p.r + 14 + p.r * 0.3) || null; }
+  function hhLandX() {
+    if (charging && brain.plan) return (frog.glide ? frog.glide.to : frog.x) + 30 + brain.plan.charge * 300;
+    if (frog.jump) return frog.jump.x0 + frog.jump.d;
+    return null;
+  }
+  function hhBusy() {                                    // pads Hop Hop is on, left, or is about to land on
+    const s = new Set();
+    if (frog.pad) s.add(frog.pad);
+    if (frog.fromPad && frog.state !== "play") s.add(frog.fromPad);
+    const lx = hhLandX(); if (lx != null) { const p = padNear(lx); if (p) s.add(p); }
+    return s;
+  }
+  function hhAnchor() {                                  // the pad Hop Hop is on, or about to land on
+    const lx = hhLandX();
+    if (lx != null) return padNear(lx);                  // null = he's heading for a little float
+    return frog.state === "play" ? frog.pad : null;
+  }
+  const hhAwake = () => frog.face !== "sleep";
+  const sx = wx => wx - camX;
+
+  function startVisit(v) {
+    const H = dayHour();
+    v.started = H;
+    const anchor = frog.pad;
+    // the friend sits on the pad just ahead of him (always in view, since the camera follows Hop Hop forward)
+    const side = 1;
+    buddy = {
+      v, look: FRIEND_LOOKS[v.look], side, phase: "enter",
+      x: camX + (side > 0 ? W + 50 : -50), pad: null, hop: null, face: -side, rest: frand(0.3, 0.8),
+      squash: 0, happy: 0, wig: 0, lick: null, gulp: 0, blinkAt: frand(1, 3), blink: 0,
+      stay: 0, hopsSeen: 0, lastJump: null, did: false, waited: 0, bob: frand(0, 6)
+    };
+    if (v.kind === "follow") play("fpeep", 0);
+  }
+  function padBehind(p) { if (!p) return null; let best = null; pads.forEach(q => { if (q.x < p.x - 1 && (!best || q.x > best.x)) best = q; }); return best; }
+  function padAhead(p) { if (!p) return null; return pads.find(q => q.x > p.x + 1) || null; }
+  function seatPad() {
+    const a = hhAnchor();
+    if (!a) return buddy.pad;                            // he's floating: stay put
+    const busy = hhBusy();
+    let p = buddy.side > 0 ? padAhead(a) : padBehind(a);
+    while (p && busy.has(p)) p = buddy.side > 0 ? padAhead(p) : padBehind(p);
+    return p;
+  }
+  // the next pad on the way to a target x (one pad at a time, hopping over any pad Hop Hop needs)
+  function nextPadToward(tx) {
+    const dir = Math.sign(tx - buddy.x); if (!dir) return null;
+    const busy = hhBusy();
+    const list = pads.filter(p => (dir > 0 ? p.x > buddy.x + 1 && p.x <= tx + 1 : p.x < buddy.x - 1 && p.x >= tx - 1) && !busy.has(p));
+    if (!list.length) return null;
+    list.sort((a, b) => dir > 0 ? a.x - b.x : b.x - a.x);
+    return list[0];
+  }
+  function buddyHop(toX, pad) {
+    const d = toX - buddy.x;
+    buddy.hop = { x0: buddy.x, d, t: 0, dur: 0.42 + Math.abs(d) / 1050, h: 24 + Math.abs(d) * 0.2, pad };
+    buddy.face = Math.sign(d) || buddy.face;
+    buddy.pad = null;
+    if (sx(buddy.x) > -30 && sx(buddy.x) < W + 30) play("fboing", FXR());
+  }
+  function buddyLanded() {
+    const h = buddy.hop;
+    buddy.x = h.x0 + h.d; buddy.pad = h.pad; buddy.hop = null; buddy.squash = 1;
+    buddy.rest = frand(0.5, 1.1);
+    if (buddy.pad) fxRipples.push({ x: buddy.x, y: WATER_Y + 5, r: 5, life: 0.8 });
+  }
+  function faceHopHop() { buddy.face = frog.x > buddy.x ? 1 : -1; }
+
+  function updateBuddy(dt) {
+    const b = buddy, H = dayHour();
+    b.squash = Math.max(0, b.squash - dt * 4);
+    b.happy = Math.max(0, b.happy - dt); b.wig = Math.max(0, b.wig - dt); b.gulp = Math.max(0, b.gulp - dt);
+    b.blinkAt -= dt; if (b.blinkAt <= 0) { b.blink = 0.13; b.blinkAt = frand(2.2, 5.5); } b.blink = Math.max(0, b.blink - dt);
+    if (b.hop) {
+      b.hop.t += dt / b.hop.dur;
+      if (b.hop.t >= 1) buddyLanded();
+      return;
+    }
+    if (b.lick) { updateSnack(dt); return; }
+    // never sit where Hop Hop is about to land: hop out of his way first (he "follows")
+    if (b.pad && hhBusy().has(b.pad)) {
+      const busy = hhBusy();
+      let p = b.pad; do { p = b.side > 0 ? padAhead(p) : padBehind(p); } while (p && busy.has(p));
+      if (p) { buddyHop(p.x, p); return; }
+    }
+    b.rest -= dt;
+    if (b.phase === "enter") {
+      const seat = seatPad();
+      if (!seat) { b.phase = "leave"; return; }
+      if (b.pad === seat) { b.phase = "stay"; b.stay = 0; faceHopHop(); OV.smile = Math.max(OV.smile, 1.5); b.happy = 1.2; if (b.v.kind !== "follow") play("fpeep", 1); return; }
+      if (b.rest > 0) return;
+      const n = nextPadToward(seat.x);
+      if (n) buddyHop(n.x, n); else { b.phase = "leave"; }
+      return;
+    }
+    if (b.phase === "stay") {
+      b.stay += dt;
+      const seat = seatPad();
+      // count Hop Hop's hops while they're together
+      if (frog.jump && frog.jump !== b.lastJump && !frog.jump.returning) { b.lastJump = frog.jump; b.hopsSeen++; }
+      if (seat && seat !== b.pad && b.rest <= 0 && !b.lick) {
+        // keep beside him: the leader hops on as he gets ready (follow), the others tag along a moment after he lands
+        b.lag = (b.lag || 0) + dt;
+        const now = b.v.kind === "follow" || (!frog.jump && !charging && b.lag > 0.9);
+        if (now) { const n = nextPadToward(seat.x); if (n) { b.lag = 0; buddyHop(n.x, n); return; } }
+      } else b.lag = 0;
+      if (!b.hop && b.pad) faceHopHop();
+      const k = b.v.kind;
+      if (k === "follow") { if ((b.hopsSeen >= 5 && b.stay > 120) || b.stay > 300) leave(); }
+      else if (k === "snack") updateSnack(dt);
+      else if (k === "sit") { if (b.stay > b.v.len) leave(); else if (FXR() < dt / 18) b.happy = 1.4; }
+      else if (k === "sky") { if (b.stay > b.v.len) leave(); else if (FXR() < dt / 14) { b.happy = 2; if (hhAwake()) OV.smile = Math.max(OV.smile, 2); } }
+      else if (k === "wiggle") {
+        if (!b.did) {
+          b.waited += dt;
+          const ready = frogIdle() && hhAwake() && brain.rest > 1.4 && b.stay > 2;
+          if (ready || b.waited > 90) {
+            b.did = true; b.wig = 1.2; b.happy = 2; play("fpeep", 2);
+            if (ready) { OV.wiggle = 1.1; OV.smile = 2.2; }
+            b.stay = 0;
+          }
+        } else if (b.stay > 30) leave();
+      }
+      return;
+    }
+    if (b.phase === "leave") {
+      if (sx(b.x) < -40 || sx(b.x) > W + 40) { b.v.ended = H; buddy = null; return; }
+      if (b.rest > 0) return;
+      const tx = camX + (b.side > 0 ? W + 60 : -60);
+      const n = nextPadToward(tx);
+      if (n && Math.abs(n.x - b.x) < 340) buddyHop(n.x, n);
+      else buddyHop(tx, null);                          // one last hop, out of sight
+    }
+  }
+  function leave() { buddy.phase = "leave"; buddy.rest = frand(0.6, 1.4); buddy.happy = 1; }
+
+  // snack time: a little bug flies between them, they both try, the friend catches it, Hop Hop smiles
+  function updateSnack(dt) {
+    const b = buddy;
+    if (!b.v.bugDone && !fxBug && b.stay > 5) {
+      const dir = b.x > frog.x ? -1 : 1;                 // flies in from the friend's far side
+      fxBug = { t: 0, dir, x0: sx(b.x) + (b.x > frog.x ? 1 : -1) * 260, y0: WATER_Y - 150, tried: false, caught: false };
+    }
+    if (fxBug && !fxBug.caught) {
+      const B = fxBug; B.t += dt;
+      const bx = sx(b.x), by = WATER_Y - 40;
+      const k = smooth01(B.t / 5.2);
+      B.x = lerp(B.x0, bx + (frog.x > b.x ? 26 : -26), k) + Math.sin(B.t * 3.1) * 10 * (1 - k * 0.6);
+      B.y = lerp(B.y0, by - 18, k) + Math.sin(B.t * 4.7) * 8 * (1 - k * 0.6);
+      // Hop Hop tries first (only if he's sitting calmly for a moment), and just misses
+      if (!B.tried && B.t > 3.3) {
+        B.tried = true;
+        if (frogIdle() && hhAwake() && !frog.lick && brain.rest > 1) OV.tongue = { t: 0, x: B.x, y: B.y };
+      }
+      if (B.t > 4.4 && b.pad && !b.hop) {
+        B.caught = true;
+        b.lick = { t: 0, x: B.x, y: B.y }; play("flick", 0);
+      }
+    }
+    if (b.lick) {
+      b.lick.t += dt / 0.4;
+      if (b.lick.t >= 0.5 && fxBug) { const m = buddyMouth(); fxBug.x = lerp(b.lick.x, m.x, (b.lick.t - 0.5) * 2); fxBug.y = lerp(b.lick.y, m.y, (b.lick.t - 0.5) * 2); }
+      if (b.lick.t >= 1) {
+        b.lick = null; fxBug = null; b.v.bugDone = true; b.gulp = 0.7; b.squash = 0.6; b.happy = 1.6;
+        play("fgulp", 0);
+        if (hhAwake()) OV.smile = Math.max(OV.smile, 2.6);
+        b.stay = 0; b.v.after = true;
+      }
+    }
+    if (b.v.after && b.stay > 40) leave();
+    if (!b.v.bugDone && b.stay > 90) leave();
+  }
+
+  function updateFX(dt) {
+    const H = dayHour();
+    OV.smile = Math.max(0, OV.smile - dt); OV.wiggle = Math.max(0, OV.wiggle - dt);
+    if (OV.tongue) { OV.tongue.t += dt / 0.36; if (OV.tongue.t >= 1 || !frogIdle()) OV.tongue = null; }
+    fxRipples.forEach(r => { r.r += dt * 40; r.life -= dt * 0.9; });
+    fxRipples = fxRipples.filter(r => r.life > 0);
+    if (!CFG.fx) return;
+    if (!buddy) {
+      const v = VISITS.find(v => v.started === null && !v.skipped && H >= v.at);
+      if (v) {
+        if (H >= QUIET_FROM || H - v.at > 0.5) v.skipped = true;          // missed its moment (or it's the quiet night)
+        else if (frog.state === "play" && !frog.jump && !charging && frog.pad && (hhAwake() || v.kind === "sit" || v.kind === "sky" || v.kind === "wiggle")) {
+          v.len = v.kind === "sit" ? frand(100, 150) : v.kind === "sky" ? frand(150, 210) : 0;
+          startVisit(v);
+        }
+      }
+    } else updateBuddy(dt);
+    // Hop Hop looks at his friend (or at the sunset with his friend) while he's sitting
+    OV.look = null;
+    if (buddy && buddy.phase !== "enter" || buddy && sx(buddy.x) > 0 && sx(buddy.x) < W) {
+      if (buddy.v.kind === "sky" && buddy.phase === "stay") OV.look = { x: SKY.sun.x, y: SKY.sun.y };
+      else if (fxBug && !fxBug.caught) OV.look = { x: fxBug.x, y: fxBug.y };
+      else OV.look = { x: sx(buddy.x), y: WATER_Y - 20 };
+    }
+  }
+
+  // ---------- drawing the friend (ORIGINAL shapes, friend colors) ----------
+  function buddyScreen() {
+    const b = buddy;
+    let x = sx(b.x), y = WATER_Y;
+    if (b.hop) { const t = Math.min(b.hop.t, 1); x = sx(b.hop.x0 + b.hop.d * t); y = WATER_Y - b.hop.h * 4 * t * (1 - t); }
+    else if (b.pad) y += Math.sin(time * 1.6 + b.pad.phase) * 1.4;
+    return { x, y };
+  }
+  function buddyMouth() { const p = buddyScreen(); return { x: p.x + buddy.face * 3 * FRIEND_S, y: p.y - 25 * FRIEND_S }; }
+  function drawBuddy() {
+    if (!buddy) return;
+    const b = buddy, L = b.look, P = buddyScreen();
+    if (P.x < -60 || P.x > W + 60) return;
+    let sxx = 1, syy = 1;
+    if (b.hop) { syy = 1.1; sxx = 0.92; }
+    else if (b.squash > 0) { syy = 1 - b.squash * 0.2; sxx = 1 + b.squash * 0.15; }
+    ctx.save();
+    ctx.translate(P.x, P.y);
+    if (b.wig > 0) ctx.rotate(Math.sin(time * 24) * 0.14 * Math.min(1, b.wig));
+    ctx.scale(sxx * FRIEND_S * b.face, syy * FRIEND_S);
+    const jumping = !!b.hop;
+    ctx.fillStyle = L.dark;
+    if (jumping) {
+      ctx.beginPath(); ctx.ellipse(-20, -6, 14, 5, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(18, -6, 12, 5, 0.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.ellipse(-17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    const bg = ctx.createLinearGradient(0, -44, 0, 0);
+    bg.addColorStop(0, L.top); bg.addColorStop(1, L.body);
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, -20, 23, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L.belly;
+    ctx.beginPath(); ctx.ellipse(3, -13, 14, 11, 0, 0, Math.PI * 2); ctx.fill();
+    if (L.freckles) {
+      ctx.fillStyle = "rgba(46, 110, 64, 0.55)";
+      [[-19, -17], [-16, -13], [-20, -11], [21, -17], [18, -13], [22, -11]].forEach(([fx, fy]) => { ctx.beginPath(); ctx.arc(fx, fy, 1.3, 0, Math.PI * 2); ctx.fill(); });
+    }
+    ctx.fillStyle = L.bump;
+    ctx.beginPath(); ctx.arc(-9, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    if (L.flower) {                                      // a little pink flower on top of her head
+      ctx.save(); ctx.translate(2, -47);
+      ctx.fillStyle = "#FFB3CF";
+      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - Math.PI / 2; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 3.2, Math.sin(a) * 3.2, 2.6, 1.9, a, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = "#FFE27A"; ctx.beginPath(); ctx.arc(0, 0, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    // eyes: look at Hop Hop (or the sky, or the bug)
+    let tx = frog.x - camX, ty = frog.y - 40;
+    if (b.v.kind === "sky" && b.phase === "stay") { tx = SKY.sun.x; ty = SKY.sun.y; }
+    if (fxBug && !fxBug.caught) { tx = fxBug.x; ty = fxBug.y; }
+    const happyEyes = b.happy > 0 || b.wig > 0 || b.gulp > 0;
+    [[-9, -38], [11, -38]].forEach(([ex, ey]) => {
+      ctx.strokeStyle = "#2E2440"; ctx.lineCap = "round";
+      if (happyEyes && !b.hop) {
+        ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(ex - 4.5, ey + 1.5); ctx.quadraticCurveTo(ex, ey - 4, ex + 4.5, ey + 1.5); ctx.stroke();
+      } else if (b.blink > 0) {
+        ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(ex - 4.5, ey); ctx.quadraticCurveTo(ex, ey + 3, ex + 4.5, ey); ctx.stroke();
+      } else {
+        ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(ex, ey, 6.5, 0, Math.PI * 2); ctx.fill();
+        const wx = P.x + ex * FRIEND_S * b.face, wy = P.y + ey * FRIEND_S;
+        const dx = (tx - wx) * b.face, dy = ty - wy, d = Math.hypot(dx, dy) || 1;
+        const lx = dx / d * 2.6, ly = dy / d * 2.6;
+        ctx.fillStyle = "#2E2440"; ctx.beginPath(); ctx.arc(ex + lx, ey + ly, 3.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(ex + lx + 1.2, ey + ly - 1.3, 1.1, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.fillStyle = "rgba(255, 130, 170, 0.55)";
+    ctx.beginPath(); ctx.ellipse(-14, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(18, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.beginPath();
+    if (b.lick) { ctx.ellipse(4, -25, 3.6, 2.8, 0, 0, Math.PI * 2); ctx.fillStyle = "#6B2E4A"; ctx.fill(); }
+    else if (happyEyes) { ctx.moveTo(-5, -28); ctx.quadraticCurveTo(3, -19, 11, -28); }
+    else { ctx.moveTo(-4, -28); ctx.quadraticCurveTo(3, -22, 10, -28); }
+    ctx.stroke();
+    if (!jumping) {
+      ctx.fillStyle = L.dark;
+      ctx.beginPath(); ctx.ellipse(-6, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    // the friend's tongue
+    if (b.lick) {
+      const m = buddyMouth(), k = b.lick.t < 0.5 ? b.lick.t * 2 : 1 - (b.lick.t - 0.5) * 2;
+      const tipX = lerp(m.x, b.lick.x, k), tipY = lerp(m.y, b.lick.y, k);
+      ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tipX, tipY); ctx.stroke();
+      ctx.fillStyle = "#FF6F9C"; ctx.beginPath(); ctx.arc(tipX, tipY, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // Hop Hop's try for the bug: a quick tongue that falls just short (drawing only)
+  function drawHopHopTry() {
+    if (!OV.tongue) return;
+    const m = mouthPoint(), T = OV.tongue, k = (T.t < 0.5 ? T.t * 2 : 1 - (T.t - 0.5) * 2) * 0.62;
+    const tipX = lerp(m.x, T.x, k), tipY = lerp(m.y, T.y, k);
+    ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = 3.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tipX, tipY); ctx.stroke();
+    ctx.fillStyle = "#FF6F9C"; ctx.beginPath(); ctx.arc(tipX, tipY, 3.8, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawFxBug() {                                  // a tiny daytime fly
+    if (!fxBug) return;
+    const B = fxBug; if (B.x === undefined) return;
+    ctx.save(); ctx.translate(B.x, B.y);
+    const flap = 0.5 + 0.5 * Math.abs(Math.sin(time * 40));
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.55 + 0.25 * flap})`;
+    ctx.beginPath(); ctx.ellipse(-1.2, -2.6 * flap, 2.6, 1.5, -0.5, 0, Math.PI * 2); ctx.ellipse(1.2, -2.6 * flap, 2.6, 1.5, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#4B3A66"; ctx.beginPath(); ctx.ellipse(0, 0, 2.6, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawFxRipples() {
+    fxRipples.forEach(r => {
+      ctx.strokeStyle = `rgba(255,255,255,${0.5 * clamp(r.life, 0, 1)})`; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, r.r, r.r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
+    });
+  }
+
+  // ---------- rain, rainbow and mist (drawing only) ----------
+  function weatherSky() {                                 // soften the sky toward a gentle gray while it rains
+    const o = WXNOW.over; if (o <= 0.001) return;
+    const GRAY = [[104, 130, 176], [130, 154, 194], [158, 178, 206], [176, 192, 214]];
+    SKY.sky = SKY.sky.map((c, k) => { const m = c.match(/\d+/g).map(Number); return rgb(mix(m, GRAY[k], 0.62 * o)); });
+    SKY.cloud = mix(SKY.cloud, [178, 186, 204], 0.8 * o);
+    SKY.tint = mix(SKY.tint, [118, 130, 164], o); SKY.tintA = lerp(SKY.tintA, 0.2, o);
+  }
+  function drawRainClouds() {
+    const o = WXNOW.over; if (o <= 0.01) return;
+    const c = [168, 176, 196];
+    for (let i = 0; i < 7; i++) {
+      const w = W * (0.26 + (i % 3) * 0.05), y = 34 + (i % 4) * 24 + (i % 2) * 10;
+      const x = ((i * W * 0.21 + time * (1.2 + (i % 3) * 0.4)) % (W + w)) - w * 0.5;
+      ctx.fillStyle = `rgba(${c[0] + (i % 2) * 10}, ${c[1] + (i % 2) * 10}, ${c[2] + (i % 2) * 8}, ${0.62 * o})`;
+      ctx.beginPath();
+      ctx.ellipse(x, y + 18, w * 0.5, 26, 0, 0, Math.PI * 2);
+      ctx.ellipse(x - w * 0.18, y, w * 0.24, 28, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w * 0.12, y - 6, w * 0.28, 34, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  function drawRainbow() {
+    const a = WXNOW.bow; if (a <= 0.005) return;
+    const cx = W * 0.34, cy = WATER_Y + 30, r = Math.min(W * 0.36, (WATER_Y + 30) - 70);
+    const band = 34;
+    const g = ctx.createRadialGradient(cx, cy, r - band, cx, cy, r + band);
+    const stops = [[0, "rgba(190, 160, 255, 0)"], [0.14, "rgba(186, 156, 250, 0.9)"], [0.28, "rgba(150, 180, 255, 0.9)"], [0.42, "rgba(140, 220, 230, 0.9)"],
+      [0.56, "rgba(170, 232, 160, 0.9)"], [0.7, "rgba(255, 238, 150, 0.9)"], [0.84, "rgba(255, 196, 160, 0.9)"], [0.93, "rgba(255, 160, 180, 0.85)"], [1, "rgba(255, 160, 180, 0)"]];
+    stops.forEach(([o, c]) => g.addColorStop(o, c));
+    ctx.save();
+    ctx.globalAlpha = 0.42 * a;
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, r + band, Math.PI, 0); ctx.arc(cx, cy, r - band, 0, Math.PI, true); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function drawRainRings() {                               // little rings on the water where drops land
+    const a = WXNOW.rain; if (a <= 0.01) return;
+    const n = Math.round(46 * a);
+    ctx.lineWidth = 1.2;
+    for (let j = 0; j < n; j++) {
+      const per = 1.1 + (j % 5) * 0.13, u = (time + j * 0.377) / per, k = Math.floor(u), age = u - k;
+      const hx = frac(Math.sin(j * 127.1 + k * 311.7) * 43758.5453), hy = frac(Math.sin(j * 269.5 + k * 183.3) * 43758.5453);
+      const x = hx * W, y = WATER_Y + 10 + hy * (H - WATER_Y - 14);
+      const rr = 1.5 + age * (5 + (y - WATER_Y) / 30);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.5 * (1 - age) * a})`;
+      ctx.beginPath(); ctx.ellipse(x, y, rr, rr * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  function drawRain() {                                    // thin, gently slanted drops
+    const a = WXNOW.rain; if (a <= 0.01) return;
+    const n = Math.round(170 * a);
+    ctx.lineCap = "round";
+    for (let i = 0; i < n; i++) {
+      const speed = 330 + (i % 7) * 22, span = H + 60, per = span / speed;
+      const u = time / per + frac(i * 0.7548776662), k = Math.floor(u), f = u - k;
+      const x = frac(i * 0.5698402910 + k * 0.3719) * (W + 80) - 40 + f * 20;
+      const y = f * span - 40, len = 9 + (i % 3) * 3;
+      ctx.strokeStyle = `rgba(228, 236, 255, ${(0.22 + (i % 4) * 0.05) * a})`; ctx.lineWidth = 1 + (i % 2) * 0.3;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - len * 0.2, y + len); ctx.stroke();
+    }
+  }
+  function mistColor() {
+    const bright = lerp(1, 0.42, SKY.night);
+    const warm = clamp(1 - Math.abs(SKY.alt - 2) / 10, 0, 1);  // a little rosy right around sunrise
+    const c = mix([232, 232, 252], [255, 226, 232], warm * 0.6);
+    return c.map(v => Math.round(v * bright));
+  }
+  function drawMist(front) {
+    const a = WXNOW.mist; if (a <= 0.01) return;
+    const c = mistColor();
+    if (!front) {
+      // a soft band of haze lying on the water and the foot of the hills
+      const g = ctx.createLinearGradient(0, WATER_Y - 46, 0, H);
+      g.addColorStop(0, `rgba(${c}, 0)`); g.addColorStop(0.2, `rgba(${c}, ${0.5 * a})`); g.addColorStop(0.45, `rgba(${c}, ${0.4 * a})`); g.addColorStop(1, `rgba(${c}, ${0.18 * a})`);
+      ctx.fillStyle = g; ctx.fillRect(0, WATER_Y - 46, W, H - WATER_Y + 46);
+    }
+    // slow drifting wisps
+    const count = front ? 4 : 7;
+    for (let i = 0; i < count; i++) {
+      const sp = 3 + (i % 3) * 1.6, wid = 170 + (i % 4) * 60;
+      const x = ((i * 263 + time * sp - camX * (front ? 0.5 : 0.2)) % (W + wid * 2) + (W + wid * 2)) % (W + wid * 2) - wid;
+      const y = front ? H - 36 - (i % 2) * 22 : WATER_Y - 10 + (i % 3) * 16;
+      const g = ctx.createRadialGradient(x, y, 4, x, y, wid * 0.5);
+      g.addColorStop(0, `rgba(${c}, ${(front ? 0.22 : 0.32) * a})`); g.addColorStop(1, `rgba(${c}, 0)`);
+      ctx.fillStyle = g;
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, 0.22); ctx.translate(-x, -y);
+      ctx.beginPath(); ctx.arc(x, y, wid * 0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // ---------- water lilies that open in daylight and fold into buds at night ----------
+  const LILY_COLORS = [["#FFC3A6", "#FFF0E6"], ["#EFE4FF", "#FFFFFF"], ["#F9B7D0", "#FFEAF2"]];
+  function padLily(p) { const h = frac(Math.sin(p.phase * 91.7) * 43758.5453); return h < 0.6 ? LILY_COLORS[Math.floor(h / 0.2)] : null; }
+  function flowerOpen(p) {                                 // Hop Hop's flower: pops open when he lands, then follows the day
+    let o = WXNOW.open;
+    if (p.openAt !== undefined) { const since = time - p.openAt; o = Math.max(o, since < 10 ? 1 : 1 - smooth01((since - 10) / 25)); }
+    return o;
+  }
+  function drawWaterLily(x, y, s, open, col) {
+    if (s <= 0) return;
+    const o = lerp(0.12, 1, open);
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    const petal = (ang, len, wid, c1, c2) => {
+      ctx.save(); ctx.rotate(ang);
+      const g = ctx.createLinearGradient(0, 0, 0, -len); g.addColorStop(0, c1); g.addColorStop(1, c2);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-wid, -len * 0.45, 0, -len); ctx.quadraticCurveTo(wid, -len * 0.45, 0, 0); ctx.fill();
+      ctx.restore();
+    };
+    [-1.35, -0.95, -0.55, 0.55, 0.95, 1.35].forEach(a => petal(a * o, lerp(20, 30, open), lerp(5, 8, open), col[0], col[1]));
+    [-0.7, -0.35, 0, 0.35, 0.7].forEach(a => petal(a * o, lerp(19, 25, open), lerp(5, 7, open), col[0], col[1]));
+    if (open > 0.35) { ctx.fillStyle = `rgba(255, 216, 92, ${smooth01((open - 0.35) / 0.4)})`; ctx.beginPath(); ctx.ellipse(0, -9, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill(); }
+    [-0.25, 0.25].forEach(a => petal(a * o * 0.8, lerp(15, 17, open), lerp(4.5, 6, open), col[1], "#FFFFFF"));
+    ctx.restore();
+  }
+
+
+  // ---------- stars (fixed in the far sky, twinkling) ----------
+  const skyStars = Array.from({ length: 170 }, () => ({ xf: R(), yf: Math.pow(R(), 1.3), r: rand(0.5, 1.6), p: R() * 6.3, s: rand(0.6, 1.8) }));
+  function drawSkyStars() {
+    const vis = clamp((-SKY.alt - 4) / 10, 0, 1);
+    if (vis <= 0) return;
+    const top = WATER_Y - 40;
+    skyStars.forEach(s => {
+      const tw = 0.55 + 0.45 * Math.sin(time * s.s + s.p);
+      ctx.fillStyle = `rgba(255, 250, 230, ${vis * tw * 0.9})`;
+      ctx.beginPath(); ctx.arc(s.xf * W, 8 + s.yf * top, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  // ---------- the moon, with its phase (0 = new, 0.5 = full) ----------
+  function drawMoon() {
+    const m = SKY.moon;
+    if (m.alt < -6) return;
+    const phase = SKY.moonPhase, r = 26;
+    // the moon only shows once the sun is low, so it never looks like a second sun
+    const fade = clamp((-2 - SKY.alt) / 8, 0, 1) * clamp(0.45 + SKY.night * 0.55, 0, 1);
+    if (fade <= 0.01) return;
+    ctx.save(); ctx.translate(m.x, m.y);
+    const g = ctx.createRadialGradient(0, 0, r * 0.6, 0, 0, r * 4);
+    g.addColorStop(0, `rgba(255, 246, 214, ${0.32 * SKY.night})`); g.addColorStop(1, "rgba(255, 246, 214, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(210, 205, 235, ${0.18 * fade})`;   // the dark part, very faintly
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+    const k = Math.cos(phase * Math.PI * 2), side = phase < 0.5 ? 1 : -1;
+    ctx.beginPath();
+    for (let i = 0; i <= 32; i++) { const a = -Math.PI / 2 + Math.PI * i / 32; ctx.lineTo(side * r * Math.cos(a), r * Math.sin(a)); }
+    for (let i = 0; i <= 32; i++) { const a = Math.PI / 2 - Math.PI * i / 32; ctx.lineTo(side * k * r * Math.cos(a), r * Math.sin(a)); }
+    ctx.closePath();
+    ctx.fillStyle = `rgba(255, 248, 225, ${fade})`; ctx.fill();
+    ctx.save(); ctx.clip();                                   // soft little craters inside the lit part
+    ctx.fillStyle = `rgba(226, 214, 190, ${0.45 * fade})`;
+    [[-8, -6, 5], [7, 5, 6.5], [-3, 11, 3.5], [10, -10, 3]].forEach(([x, y, cr]) => { ctx.beginPath(); ctx.arc(x, y, cr, 0, Math.PI * 2); ctx.fill(); });
+    ctx.restore();
+    ctx.restore();
+  }
+  // ---------- the sun: warm and big near the horizon, bright and small up high ----------
+  function drawSun() {
+    const s = SKY.sun;
+    if (s.alt < -5) return;
+    const low = clamp(1 - s.alt / 25, 0, 1);
+    const g = ctx.createRadialGradient(s.x, s.y, 20, s.x, s.y, 120 + 60 * low);
+    g.addColorStop(0, `rgba(255, 244, 214, ${0.35 + 0.25 * low})`); g.addColorStop(1, "rgba(255, 220, 180, 0)");
+    ctx.fillStyle = g; ctx.fillRect(s.x - 200, s.y - 200, 400, 400);
+    ctx.fillStyle = rgb(mix([255, 250, 232], [255, 236, 200], low));
+    ctx.beginPath(); ctx.arc(s.x, s.y, lerp(34, 44, low), 0, Math.PI * 2); ctx.fill();
+  }
+  function sky() {
+    const c = SKY.sky;
+    const g = ctx.createLinearGradient(0, 0, 0, WATER_Y);
+    g.addColorStop(0, c[0]); g.addColorStop(0.42, c[1]); g.addColorStop(0.75, c[2]); g.addColorStop(1, c[3]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, WATER_Y);
+    // warm glow along the horizon under a low sun
+    const s = SKY.sun, glow = clamp(1 - Math.abs(s.alt - 1) / 12, 0, 1);
+    if (glow > 0) {
+      const sg = ctx.createRadialGradient(s.x, WATER_Y - 10, 10, s.x, WATER_Y - 10, 220);
+      sg.addColorStop(0, `rgba(255, 234, 200, ${0.8 * glow})`); sg.addColorStop(1, "rgba(255, 210, 170, 0)");
+      ctx.fillStyle = sg; ctx.fillRect(0, WATER_Y - 240, W, 240);
+    }
+    drawSkyStars();
+    drawMoon();
+    ctx.save(); ctx.globalAlpha = 1 - 0.7 * WXNOW.over * (0.8 + 0.2 * Math.sin(time * 0.07));   // v8: the sun peeks through the rain clouds
+    drawSun();
+    ctx.restore();
+    if (SKY.alt < 6) drawStar();   // shooting stars only when the sky is getting dark
+    drawRainbow();                 // v8: behind the clouds and the hills
+    const cc = SKY.cloud;
+    clouds.forEach(cl => {
+      const x = ((cl.xf * (W + 200) - camX * 0.06 * cl.s - time * 3 * cl.s) % (W + 200) + W + 200) % (W + 200) - 100;
+      ctx.fillStyle = `rgba(${cc[0]}, ${cc[1]}, ${cc[2]}, ${cl.a * SKY.cloudA})`;
+      ctx.beginPath();
+      ctx.ellipse(x, cl.y, cl.w * 0.5, 12 * cl.s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x - cl.w * 0.18 + cl.w * 0.22, cl.y - 9 * cl.s);
+      ctx.ellipse(x - cl.w * 0.18, cl.y - 9 * cl.s, cl.w * 0.22, 13 * cl.s, 0, 0, Math.PI * 2);
+      ctx.moveTo(x + cl.w * 0.14 + cl.w * 0.26, cl.y - 12 * cl.s);
+      ctx.ellipse(x + cl.w * 0.14, cl.y - 12 * cl.s, cl.w * 0.26, 16 * cl.s, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    drawRainClouds();   // v8: fuller gray clouds while it rains
+  }
+  function hills() {
+    const layers = [
+      { par: 0.12, base: WATER_Y - 30, amp: 36, col: "#A98AD0", f: 0.011 },
+      { par: 0.25, base: WATER_Y - 8, amp: 22, col: "#8E74C2", f: 0.018 }
+    ];
+    layers.forEach(L => {
+      ctx.fillStyle = L.col;
+      ctx.beginPath(); ctx.moveTo(0, WATER_Y);
+      for (let x = 0; x <= W + 10; x += 8) {
+        const wx = x + camX * L.par;
+        const y = L.base - (Math.sin(wx * L.f) * 0.6 + Math.sin(wx * L.f * 2.3 + 1.7) * 0.4 + 1) * L.amp * 0.5;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W + 10, WATER_Y); ctx.closePath(); ctx.fill();
+    });
+  }
+  function water() {
+    const g = ctx.createLinearGradient(0, WATER_Y, 0, H);
+    g.addColorStop(0, "#8FA6E0"); g.addColorStop(0.35, "#7B8FD6"); g.addColorStop(1, "#4E5DA8");
+    ctx.fillStyle = g; ctx.fillRect(0, WATER_Y, W, H - WATER_Y);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.144)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    for (let i = 0; i < 22; i++) {
+      const wx = i * 97;
+      const x = ((wx - camX * 0.9) % (W + 120) + W + 120) % (W + 120) - 60;
+      const y = WATER_Y + 26 + (i * 37) % (H - WATER_Y - 40);
+      const w = 18 + (i % 4) * 8 + Math.sin(time * 1.5 + i) * 4;
+      ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke();
+    }
+  }
+  // shimmering streaks on the water under a low sun or the moon (drawn after the water is lit, so they glow,
+  // and before the pads, reeds, frog and friends, so they stay on the water surface)
+  function waterGlow() {
+    const streaks = (x, color, strength) => {
+      if (strength <= 0.02) return;
+      ctx.strokeStyle = `rgba(${color}, ${0.42 * strength})`; ctx.lineWidth = 3; ctx.lineCap = "round";
+      for (let i = 0; i < 7; i++) {
+        const y = WATER_Y + 9.5 + i * 13;
+        const w = 70 - i * 8 + Math.sin(time * 2 + i) * 6;
+        ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke();
+      }
+    };
+    const s = SKY.sun, m = SKY.moon;
+    streaks(s.x, "255, 236, 200", s.alt > -3 ? clamp(1 - s.alt / 30, 0.25, 1) : 0);
+    streaks(m.x, "235, 235, 255", m.alt > 0 ? SKY.night * 0.8 : 0);
+  }
+  // the foreground gets the light of the moment (warm, bright, or moonlit blue)
+  function applyLight() {
+    if (SKY.tintA <= 0.001) return;
+    const t = SKY.tint;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "source-atop";
+    ctx.fillStyle = `rgba(${t[0]}, ${t[1]}, ${t[2]}, ${SKY.tintA})`;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
+  }
+  function drawRipples() {
+    ripples.forEach(r => {
+      ctx.strokeStyle = `rgba(255,255,255,${0.55 * clamp(r.life, 0, 1)})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, r.r, r.r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
+    });
+  }
+  function drawPad(p) {
+    const x = p.x - camX, bob = Math.sin(time * 1.6 + p.phase) * 1.4;
+    const y = WATER_Y + 4 + bob, ry = p.r * 0.32;
+    ctx.fillStyle = "rgba(40, 40, 110, 0.25)";
+    ctx.beginPath(); ctx.ellipse(x + 3, y + 5, p.r * 1.02, ry, 0, 0, Math.PI * 2); ctx.fill();
+    const g = ctx.createLinearGradient(0, y - ry, 0, y + ry);
+    g.addColorStop(0, "#A6E08F"); g.addColorStop(1, "#5FAE6E");
+    ctx.fillStyle = g;
+    const a0 = Math.PI * 0.5 + p.notch - 0.28, a1 = Math.PI * 0.5 + p.notch + 0.28;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.ellipse(x, y, p.r, ry, 0, a1, a0 + Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(x, y - 1, p.r * 0.92, ry * 0.8, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    ctx.strokeStyle = "rgba(60, 120, 70, 0.28)"; ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const a = Math.PI * 0.5 + p.notch + 0.9 + i * 1.05;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * p.r * 0.8, y + Math.sin(a) * ry * 0.8); ctx.stroke();
+    }
+    // v8: a water lily on some pads, open in daylight and a sleepy bud at night (it gives way to Hop Hop's flower)
+    const lily = padLily(p);
+    if (lily && p.bloom < 1) { ctx.save(); ctx.globalAlpha *= 1 - p.bloom; drawWaterLily(x + p.r * 0.1, y - 1, 0.95 * clamp(p.r / 50, 0.7, 1.1), WXNOW.open, lily); ctx.restore(); }
+    if (p.bloom > 0) drawFlowerBack(x, y - 2, flowerScale(p), p.color, flowerOpen(p));
+  }
+  function lotusPetal(ang, len, wid, c1, c2) {
+    ctx.save(); ctx.translate(Math.sin(ang) * 7, 0); ctx.rotate(ang);
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-wid, -len * 0.5, 0, -len); ctx.quadraticCurveTo(wid, -len * 0.5, 0, 0);
+    ctx.fill(); ctx.restore();
+  }
+  function flowerScale(p) { return p.bloom > 0 ? easeOutBack(p.bloom) * (p.perfect ? 1.12 : 1) * 1.15 * clamp(p.r / 50, 0.85, 1.1) : 0; }
+  // v8: open = 1 wide open (day), 0 = folded into a sleepy bud (night)
+  function drawFlowerBack(x, y, s, col, open = 1) {
+    if (s <= 0) return;
+    const o = lerp(0.2, 1, open), L = lerp(0.78, 1, open);
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    [-1.45, -1.0, -0.55, -0.18, 0.18, 0.55, 1.0, 1.45].forEach(a => lotusPetal(a * o, 50 * L, 16 * lerp(0.7, 1, open), col[0], col[1]));
+    if (open > 0.3) {
+      ctx.globalAlpha *= smooth01((open - 0.3) / 0.4);
+      ctx.fillStyle = "#FFD85C";
+      ctx.beginPath(); ctx.ellipse(0, -12, 9, 5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawFlowerFront(x, y, s, col, open = 1) {
+    if (s <= 0) return;
+    const o = lerp(0.2, 1, open), L = lerp(0.85, 1, open);
+    ctx.save(); ctx.translate(x, y + 5); ctx.scale(s, s);
+    [-1.3, -0.85, 0.85, 1.3].forEach(a => lotusPetal(a * o, 32 * L, 13 * lerp(0.7, 1, open), col[0], col[1]));
+    [-0.4, 0, 0.4].forEach(a => lotusPetal(a * o, 22 * L, 11, col[1], "#FFFFFF"));
+    ctx.restore();
+  }
+  function drawFrog() {
+    // v8: a visiting friend can add a smile, a wiggle, or where he looks. Drawing only: his story never changes.
+    const WIG = Math.max(frog.wiggle || 0, OV.wiggle);
+    const GLAD = frog.face === "float" || WIG > 0 || frog.gulp > 0 || (OV.smile > 0 && frog.state === "play" && !frog.jump && !charging);
+    const LOOK = OV.look && !star && !frog.lick ? OV.look : frog.lookAt;
+    let x = frog.x - camX, y = frog.y;
+    let sx = 1, sy = 1;
+    if (charging) { sy = 1 - charge * 0.28; sx = 1 + charge * 0.18; }
+    else if (frog.squash > 0) { sy = 1 - frog.squash * 0.2; sx = 1 + frog.squash * 0.15; }
+    else if (frog.jump) { sy = 1.1; sx = 0.92; }
+    else if (frog.face === "sleep") { const b = Math.sin(time * 1.3) * 0.025; sy = 1 - 0.03 + b; sx = 1 + 0.02 - b * 0.6; } // slow sleepy breathing
+    if (!frog.jump && frog.state === "play") y += Math.sin(time * 1.6 + (frog.pad ? frog.pad.phase : 0)) * 1.4;
+    let sinkOff = 0, floatAmt = 0;
+    if (frog.state === "sinking") {
+      const s = frog.sink;
+      if (s < 0.32) sinkOff = (s / 0.32) * 36;
+      else {
+        floatAmt = Math.min((s - 0.32) / 0.45, 1);
+        const rise = 1 - Math.pow(1 - floatAmt, 3);
+        sinkOff = lerp(36, 18, rise) + Math.sin(time * 2.2) * 2;
+      }
+      sinkOff = Math.max(sinkOff, 0.01);
+    }
+    // the swim ring goes all the way around: far half behind the frog, near half in front
+    if (ring) {
+      ctx.save(); ctx.globalAlpha = clamp(ring.life, 0, 1);
+      drawFloatie(ring.x - camX, WATER_Y + 1 + Math.sin(time * 2.2) * 2, 1.38, "all");
+      ctx.restore();
+    }
+    const floatieY = WATER_Y + 1 + Math.sin(time * 2.2) * 2, floatieS = floatAmt > 0 ? easeOutBack(floatAmt) * 1.38 : 0;
+    if (floatAmt > 0) drawFloatie(x, floatieY, floatieS, "back");
+    ctx.save();
+    if (sinkOff > 0) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
+    ctx.translate(x, y + sinkOff);
+    if (floatAmt > 0) ctx.rotate(Math.sin(time * 1.6) * 0.07);
+    if (WIG > 0) ctx.rotate(Math.sin(time * 24) * 0.13 * Math.min(1, WIG));
+    const CF = castFrog();
+    if (CF) {
+      // the library frog: faces you, turned a little toward the way he hops
+      let lookX = 0, lookY = 0;
+      if (LOOK && frog.state === "play" && !frog.jump) {
+        const dx = LOOK.x - x, dy = LOOK.y - (y - 50), d = Math.hypot(dx, dy) || 1;
+        lookX = dx / d; lookY = -dy / d;
+      }
+      CF.draw(ctx, 0, 0, 1.38, Math.PI - 0.4, 0.18, {
+        t: time,
+        jump: frog.jump ? 1 : 0,
+        squash: charging ? charge * 0.9 : frog.squash,
+        happy: GLAD ? 1 : 0,
+        blink: frog.face === "sleep" || (frog.blink && frog.state === "play") ? true : undefined,
+        lookX, lookY, lick: !!frog.lick, oops: frog.face === "oops"
+      });
+      ctx.restore();
+      if (floatAmt > 0) drawFloatie(x, floatieY, floatieS, "front");
+      return;
+    }
+    ctx.scale(sx * 1.38, sy * 1.38);
+    const green = "#4FAE68", dark = "#3A8A52";
+    ctx.fillStyle = dark;
+    if (frog.jump) {
+      ctx.beginPath(); ctx.ellipse(-20, -6, 14, 5, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(18, -6, 12, 5, 0.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.ellipse(-17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(17, -7, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    const bg = ctx.createLinearGradient(0, -44, 0, 0);
+    bg.addColorStop(0, "#6CC47E"); bg.addColorStop(1, green);
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(0, -20, 23, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#C9F2C2";
+    ctx.beginPath(); ctx.ellipse(3, -13, 14, 11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#62BC76";
+    ctx.beginPath(); ctx.arc(-9, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, -38, 9.5, 0, Math.PI * 2); ctx.fill();
+    const lookX = frog.jump ? 2.5 : 1.5;
+    const lookY = frog.state === "sinking" ? -2 : 0;
+    [[-9, -38], [11, -38]].forEach(([ex, ey]) => {
+      if (frog.face === "sleep") {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(ex - 4.5, ey + 0.5); ctx.quadraticCurveTo(ex, ey + 3.5, ex + 4.5, ey + 0.5); ctx.stroke();
+      } else if (GLAD) {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(ex - 4.5, ey + 1.5); ctx.quadraticCurveTo(ex, ey - 4, ex + 4.5, ey + 1.5); ctx.stroke();
+      } else if (frog.blink && frog.state === "play") {
+        ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(ex - 4.5, ey); ctx.quadraticCurveTo(ex, ey + 3, ex + 4.5, ey); ctx.stroke();
+      } else {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath(); ctx.arc(ex, ey, 6.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#2E2440";
+        const pr = charging ? 3.2 + charge * 1.2 : 3.4;
+        let lx = lookX, ly = lookY;
+        if (LOOK && frog.state === "play" && !frog.jump) {
+          const dx = LOOK.x - (x + ex * 1.38), dy = LOOK.y - (y + ey * 1.38);
+          const dist = Math.hypot(dx, dy) || 1;
+          lx = (dx / dist) * 2.6; ly = (dy / dist) * 2.6;
+        }
+        ctx.beginPath(); ctx.arc(ex + lx, ey + ly, pr, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath(); ctx.arc(ex + lx + 1.2, ey + ly - 1.3, 1.1, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.fillStyle = "rgba(255, 130, 170, 0.55)";
+    ctx.beginPath(); ctx.ellipse(-14, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(18, -24, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#2E2440"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.beginPath();
+    if (frog.lick) { ctx.ellipse(4, -25, 3.6, 2.8, 0, 0, Math.PI * 2); ctx.fillStyle = "#6B2E4A"; ctx.fill(); }
+    else if (frog.face === "oops") { ctx.arc(3, -23, 3.2, 0, Math.PI * 2); }
+    else if (frog.face === "sleep") { ctx.moveTo(0, -26.5); ctx.quadraticCurveTo(3, -24, 6, -26.5); }
+    else if (GLAD) { ctx.moveTo(-5, -28); ctx.quadraticCurveTo(3, -19, 11, -28); }
+    else if (charging) { ctx.moveTo(-3, -26); ctx.lineTo(9, -26); }
+    else { ctx.moveTo(-4, -28); ctx.quadraticCurveTo(3, -22, 10, -28); }
+    ctx.stroke();
+    if (!frog.jump) {
+      ctx.fillStyle = dark;
+      ctx.beginPath(); ctx.ellipse(-6, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(10, -1, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    if (floatAmt > 0) drawFloatie(x, floatieY, floatieS, "front");
+  }
+  // The original candy-striped swim ring, drawn all the way around.
+  // part: "back" = far half (behind the frog), "front" = near half (in front), "all" = whole ring
+  function drawFloatie(x, y, s, part = "all") {
+    if (s <= 0) return;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.lineWidth = 10;
+    const stripes = ["#FF8FB8", "#FFFFFF"], n = 16;
+    // far half first, then the near half, so the near stripes sit on top where they meet
+    for (let k = 0; k < n; k++) {
+      const i = (k + n / 2) % n;
+      const a0 = (i / n) * Math.PI * 2, a1 = ((i + 1) / n) * Math.PI * 2;
+      const front = a0 < Math.PI;
+      if ((part === "back" && front) || (part === "front" && !front)) continue;
+      ctx.strokeStyle = stripes[i % 2];
+      ctx.beginPath(); ctx.ellipse(0, 0, 29, 8, 0, a0, a1 + 0.02); ctx.stroke();
+    }
+    if (part !== "back") {
+      ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, -2, 27, 6, 0, Math.PI * 0.2, Math.PI * 0.45); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawFireflies() {
+    fireflies.forEach(f => {
+      const x = ((f.x / 400 * W + Math.sin(f.p) * 20 - camX * 0.15) % W + W) % W;
+      const y = f.y + Math.cos(f.p * 1.3) * 10;
+      const a = 0.35 + Math.sin(f.p * 3) * 0.3;
+      ctx.fillStyle = `rgba(255, 246, 190, ${clamp(a, 0.05, 0.8) * SKY.dusky})`;
+      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function drawParticles() {
+    particles.forEach(p => {
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.fillStyle = p.c;
+      ctx.beginPath();
+      if (p.kind === "petal") ctx.ellipse(p.x - camX, p.y, p.r * 1.4, p.r * 0.8, p.vx * 0.01, 0, Math.PI * 2);
+      else ctx.arc(p.x - camX, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawPopups() {
+    popups.forEach(p => {
+      ctx.globalAlpha = clamp(p.life * 1.4, 0, 1);
+      ctx.font = `800 ${p.big ? 26 : 21}px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(90, 60, 130, 0.45)";
+      ctx.strokeText(p.text, p.x - camX, p.y);
+      ctx.fillStyle = p.big ? "#FFE27A" : "#FFFFFF";
+      ctx.fillText(p.text, p.x - camX, p.y);
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawReeds() {
+    ctx.lineCap = "round";
+    const reedCount = Math.ceil((W + 160) / 140), reedWrap = reedCount * 140;
+    for (let i = 0; i < reedCount; i++) {
+      const wx = i * 140 + 110;
+      const x = ((wx - camX * 1.25) % reedWrap + reedWrap) % reedWrap - 80;
+      const sway = Math.sin(time * 1.4 + i * 1.7) * 2.5;
+      const h = 44 + (i % 3) * 9;
+      ctx.strokeStyle = "#4757A0"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x, H); ctx.quadraticCurveTo(x + 2, H - h * 0.55, x + sway, H - h); ctx.stroke();
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x + 7, H); ctx.quadraticCurveTo(x + 10, H - h * 0.4, x + 13 + sway, H - h * 0.7); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - 6, H); ctx.quadraticCurveTo(x - 8, H - h * 0.35, x - 12 + sway, H - h * 0.6); ctx.stroke();
+      if (i % 2 === 1) { ctx.fillStyle = "#6A4E86"; ctx.beginPath(); ctx.ellipse(x + sway, H - h - 6, 3, 8, 0, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.strokeStyle = "#3F4E96";
+    for (let i = 0; i < reedCount; i++) {
+      const wx = i * 140 + 40;
+      const x = ((wx - camX * 1.25) % reedWrap + reedWrap) % reedWrap - 80;
+      const sway = Math.sin(time * 1.2 + i) * 4;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x, H); ctx.quadraticCurveTo(x + 4, H - 60, x + sway, H - 104 - (i % 3) * 18); ctx.stroke();
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x + 10, H); ctx.quadraticCurveTo(x + 14, H - 40, x + 18 + sway, H - 70); ctx.stroke();
+      if (i % 2 === 0) { ctx.fillStyle = "#6A4E86"; ctx.beginPath(); ctx.ellipse(x + sway, H - 112 - (i % 3) * 18, 4, 11, 0, 0, Math.PI * 2); ctx.fill(); }
+    }
+  }
+  // opening title: fades in softly, then away
+  function drawTitle() {
+    if (!CFG.title) return;
+    const a = clamp((time - 1.5) / 1.5, 0, 1) * clamp((9 - time) / 2, 0, 1);
+    if (a <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = '800 58px Grandstander, "Chalkboard SE", sans-serif';
+    const ty = 118;
+    const t1 = "Lily's Hop ", t2 = "Hop";
+    const w1 = ctx.measureText(t1).width, w2 = ctx.measureText(t2).width;
+    const x0 = W / 2 - (w1 + w2) / 2;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(90, 50, 110, 0.28)";
+    ctx.fillText(t1 + t2, x0, ty + 4);
+    ctx.fillStyle = "#FFFFFF"; ctx.fillText(t1, x0, ty);
+    ctx.fillStyle = "#FFE0EC"; ctx.fillText(t2, x0 + w1, ty);
+    ctx.textAlign = "center";
+    ctx.font = '700 20px Nunito, system-ui, sans-serif';
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fillText(TITLE_LABEL, W / 2, ty + 50);
+    ctx.restore();
+  }
+  // words under the title: given by the episode, or named from the starting hour
+  const TITLE_LABEL = CFG.label || (h => h < 5 ? "Night" : h < 7.5 ? "Sunrise" : h < 11.5 ? "Morning" : h < 16 ? "Afternoon" : h < 18.5 ? "Golden Hour" : h < 20 ? "Sunset" : "Night")(CFG.startHour);
+  function drawFade() {
+    let a = 0;
+    if (RENDER) {
+      a = Math.max(clamp(1 - time / 2.5, 0, 1), clamp(1 - (CFG.duration - time) / 4, 0, 1));
+    } else a = clamp(1 - time / 1.5, 0, 1);
+    if (a <= 0) return;
+    ctx.fillStyle = `rgba(0, 0, 0, ${a})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  function draw() {
+    computeSky();
+    computeWeather(); weatherSky();   // v8: rain softens the sky (drawing only)
+    // 1) the far sky: colors of the hour, stars, moon, sun, clouds
+    ctx = mainCtx;
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    sky();
+    // 2) the foreground on its own layer, then lit by the light of the moment
+    ctx = layerCtx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, layer.width, layer.height);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    drawFlyers(); hills(); water(); drawRipples(); drawFxRipples(); drawRainRings();
+    applyLight();
+    ctx = mainCtx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer, 0, 0);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    // v7: the sun/moon streaks lie ON the water, behind everything that sits in or on it
+    waterGlow();
+    drawMist(false);   // v8: morning mist lying on the water
+    // 2b) everything in or on the water on the same layer again, lit the same way
+    ctx = layerCtx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, layer.width, layer.height);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    drawTurtle();
+    pads.forEach(p => { if (p.x - camX > -80 && p.x - camX < W + 80) drawPad(p); });
+    drawFish(); drawCritters(); drawFrog(); drawTongue(); drawHopHopTry(); drawBuddy(); drawFxBug();
+    pads.forEach(p => {
+      if (p.bloom > 0 && p.x - camX > -80 && p.x - camX < W + 80) {
+        drawFlowerFront(p.x - camX, WATER_Y + 2 + Math.sin(time * 1.6 + p.phase) * 1.4, flowerScale(p), p.color, flowerOpen(p));
+      }
+    });
+    drawParticles(); drawZees(); drawReeds();
+    applyLight();
+    ctx = mainCtx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer, 0, 0);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    drawMist(true); drawRain();   // v8: a faint wisp of mist in front, and the raindrops
+    // 3) things that glow on top: fireflies, lightning bugs
+    drawFireflies(); drawGlowBugs();
+    drawPopups(); drawTitle(); drawFade();
+  }
+
+  // =====================================================================
+  //  RUN
+  // =====================================================================
+  resize();
+  computeSky();
+  reset();
+  pads[0].openAt = -1e9;   // v8: the first flower follows the time of day from the start
+
+  if (RENDER) {
+    // The recorder calls these. Each frame moves time forward by exactly 1/fps.
+    window.WATCH = {
+      config: CFG,
+      frame(fps, quality) {
+        const steps = 2, dt = 1 / fps / steps;
+        for (let i = 0; i < steps; i++) update(dt);
+        draw();
+        return canvas.toDataURL("image/jpeg", quality);
+      },
+      // move time forward without drawing (used to resume a recording part-way through)
+      skip(fps, frames) {
+        const steps = 2, dt = 1 / fps / steps;
+        for (let f = 0; f < frames; f++) for (let i = 0; i < steps; i++) update(dt);
+        return time;
+      },
+      async soundtrack(fromT, toT) {
+        const { sampleRate, bytes } = await renderSoundtrack(fromT, toT);
+        window.__pcm = bytes; // handed over in chunks
+        return { sampleRate, length: bytes.length };
+      },
+      pcmChunk(start, len) {
+        const b = window.__pcm.subarray(start, start + len);
+        let s = ""; const CH = 0x8000;
+        for (let i = 0; i < b.length; i += CH) s += String.fromCharCode.apply(null, b.subarray(i, i + CH));
+        return btoa(s);
+      },
+      stats() { return { cast: window.WATCH_CAST(), time, sounds: soundLog.length, x: frog.x, floats: soundLog.filter(e => e.name === "plop").map(e => Math.round(e.t)), hops: soundLog.filter(e => e.name === "boing").length, gulps: soundLog.filter(e => e.name === "gulp").map(e => Math.round(e.t)), stars: soundLog.filter(e => e.name === "twinkle").map(e => Math.round(e.t)), cuesMissed: CFG.showcase ? CUES.filter(c => !c.done).map(c => c.t) : [],
+        // v8
+        sky: HOME ? "home" : "legacy", date: `${DATE.y}-${String(DATE.m).padStart(2, "0")}-${String(DATE.d).padStart(2, "0")}`, events: EVENTS,
+        fx: CFG.fx, plan: PLAN, visits: VISITS.map(v => ({ kind: v.kind, friend: FRIEND_LOOKS[v.look].name, planned: v.at, started: v.started, ended: v.ended, skipped: v.skipped })),
+        clock: clockHour(), moon: SKY ? { phase: SKY.moonPhase } : null }; },
+      // v8: drop sounds that are long done, so a 24-hour day doesn't keep every chirp in memory
+      forgetSoundsBefore(t) { let k = 0; while (k < soundLog.length && soundLog[k].t < t) k++; if (k) soundLog.splice(0, k); return soundLog.length; },
+      fxState() { return buddy ? { kind: buddy.v.kind, phase: buddy.phase, x: Math.round(buddy.x - camX), pad: !!buddy.pad, hop: !!buddy.hop, lick: !!buddy.lick, stay: +buddy.stay.toFixed(1), hopsSeen: buddy.hopsSeen, bug: fxBug ? { t: +fxBug.t.toFixed(1), caught: fxBug.caught } : null, frogX: Math.round(frog.x - camX), face: frog.face, state: frog.state } : null; },
+      // v8: what happened between two moments (for the recipe card of each 15-minute file)
+      between(a, b) { const L = soundLog.filter(e => e.t >= a && e.t < b); const n = k => L.filter(e => e.name === k).length; return { hops: n("boing"), floats: n("plop"), snacks: n("gulp"), stars: n("twinkle"), friendHops: n("fboing") }; },
+      counts() { return { hops: soundLog.filter(e => e.name === "boing").length }; }
+    };
+    window.WATCH_READY = true;
+  } else {
+    // Live watching: sound starts on the first tap (a browser rule)
+    const soundBtn = document.getElementById("soundBtn"), vol = document.getElementById("vol");
+    function startSound() {
+      if (actx) return;
+      try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        makeBuses(actx); startPond();
+        master.gain.value = Math.pow(vol.value / 100, 2) * 1.4;
+        soundBtn.textContent = "Volume"; vol.hidden = false;
+      } catch (e) { actx = null; }
+    }
+    soundBtn.addEventListener("click", startSound);
+    document.addEventListener("pointerdown", e => { if (!e.target.closest(".sound")) startSound(); }, { once: true });
+    vol.addEventListener("input", () => { if (master) master.gain.setTargetAtTime(Math.pow(vol.value / 100, 2) * 1.4, actx.currentTime, 0.05); });
+    document.addEventListener("visibilitychange", () => { if (!actx) return; if (document.hidden) actx.suspend(); else actx.resume(); });
+    // tuck the sound control away after a few quiet seconds
+    let quietTimer = 0;
+    const wake = () => { document.body.classList.remove("quiet"); clearTimeout(quietTimer); quietTimer = setTimeout(() => document.body.classList.add("quiet"), 4000); };
+    ["pointermove", "pointerdown", "keydown"].forEach(ev => document.addEventListener(ev, wake, { passive: true }));
+    wake();
+    // keep the screen awake while watching (where supported)
+    async function stayAwake() { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (_) {} }
+    stayAwake();
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) stayAwake(); });
+    window.addEventListener("resize", resize);
+    let last = performance.now();
+    function frame(now) {
+      const dt = clamp((now - last) / 1000, 0, 0.05);
+      last = now;
+      update(dt); draw();
+      if (rainGain && actx) rainGain.gain.setTargetAtTime(RAIN_VOL * WXNOW.rain, actx.currentTime, 0.5);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f1548e5419ec4412b88ccaf521da4438"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

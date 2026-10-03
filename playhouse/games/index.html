@@ -316,6 +316,9 @@
     a.game-btn.play { background: #2563EB; color: #FFFFFF; box-shadow: 0 0 16px rgba(37, 99, 235, 0.45); transition: background 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
     a.game-btn.play:hover { background: #1950CA; transform: translateY(-2px); box-shadow: 0 0 24px rgba(37, 99, 235, 0.6); }
     a.game-btn:focus-visible { outline: 2px solid #F966BC; outline-offset: 3px; }
+    a.game-btn.watch { border: 1px solid rgba(249, 102, 188, 0.7); color: #FDFBF7; transition: background 0.25s var(--ease), transform 0.25s var(--ease); }
+    a.game-btn.watch:hover { background: rgba(249, 102, 188, 0.14); transform: translateY(-2px); }
+    .game-btn .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #F966BC; box-shadow: 0 0 8px #F966BC; }
     .game-btn.soon { border: 1px solid var(--gray-mid); color: #A2A9B6; cursor: default; }
     .games-back { text-align: center; margin-top: 48px; }
     .games-back a { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pink); }
@@ -367,7 +370,7 @@
           <p>Help Hop Hop, a very round frog, make the pond bloom.</p>
           <div class="game-actions">
             <a class="game-btn play" href="/hophop/">Play</a>
-            <span class="game-btn soon">Watch · Soon</span>
+            <a class="game-btn watch" href="/hophop/watch/"><span class="live-dot" aria-hidden="true"></span>Watch live</a>
           </div>
         </div>
       </article>
