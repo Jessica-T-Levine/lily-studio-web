@@ -520,7 +520,15 @@
       .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
     }
     @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
-  </style>
+    /* Update 27: a link to Lily's Hop Hop · Live (his day, in real time) */
+  .watch-live { display: flex; justify-content: center; margin: 2px 0 14px; }
+  .watch-live a { display: inline-flex; align-items: center; gap: 9px; padding: 11px 20px; border-radius: 999px; border: 1.5px solid rgba(255, 143, 184, 0.75); color: var(--cream); font-weight: 800; text-decoration: none; transition: background 0.25s ease, transform 0.25s ease; }
+  .watch-live a:hover { background: rgba(255, 143, 184, 0.16); transform: translateY(-2px); }
+  .watch-live a:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
+  .watch-live .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF6F9C; box-shadow: 0 0 8px #FF6F9C; }
+  html.app .watch-live, html.full .watch-live { display: none; }
+  @media (prefers-reduced-motion: reduce) { .watch-live a { transition: none; } }
+</style>
 </head>
 <body>
 <div class="studio-bar" id="studioBar">
@@ -613,6 +621,8 @@
   </div>
 
   <p class="how"><b>Press and hold</b> (tap, click, or the space bar) to wind up, <b>let go</b> to hop. Miss a pad and your frog floats, then hops back on. Land in the middle for a double bloom.</p>
+
+  <p class="watch-live"><a href="/hophop/watch/"><span class="live-dot" aria-hidden="true"></span>Watch Hop Hop live</a></p>
 
   <footer>
     <span>A tiny free game by Lily Studio</span>
