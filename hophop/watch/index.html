@@ -48,12 +48,29 @@
   body.quiet .back { opacity: 0; }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF6F9C; box-shadow: 0 0 8px #FF6F9C; }
   @media (prefers-reduced-motion: reduce) { .sound, .back { transition: none; } }
+  /* website: full screen button, top-right. Mouse: appears when the pointer reaches the corner.
+     Touch: appears with the other controls after a tap. Hidden where full screen isn't supported (iPhone). */
+  .full-btn {
+    position: fixed; right: max(16px, env(safe-area-inset-right)); top: max(16px, env(safe-area-inset-top)); z-index: 6;
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; cursor: pointer;
+    background: rgba(42, 32, 70, 0.55); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 999px;
+    font: 700 14px/1 "Nunito", system-ui, sans-serif; color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+  }
+  .full-btn svg { width: 16px; height: 16px; }
+  .full-btn[hidden], body.render .full-btn { display: none; }
+  .full-btn:focus-visible { opacity: 1; pointer-events: auto; outline: 3px solid #FF8FB8; outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) { body.corner .full-btn { opacity: 1; pointer-events: auto; } }
+  @media (hover: none), (pointer: coarse) { body:not(.quiet) .full-btn { opacity: 1; pointer-events: auto; } }
+  @media (prefers-reduced-motion: reduce) { .full-btn { transition: none; } }
 </style>
 </head>
 <body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily's Hop Hop · Live</h1>
 <canvas id="game" aria-label="Lily's Hop Hop, live: a round frog living his cozy day on a lily pond, in real time"></canvas>
 <a class="back" href="/playhouse/games/"><span aria-hidden="true">←</span> Lily's games <span class="live-dot" aria-hidden="true"></span></a>
+<button type="button" class="full-btn" id="fullBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fullIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fullLabel">Full screen</span></button>
 <div class="sound" id="sound">
   <button type="button" id="soundBtn">Tap for sound</button>
   <input type="range" id="vol" min="0" max="100" value="70" aria-label="Volume" hidden>
@@ -2592,6 +2609,38 @@
     }
     requestAnimationFrame(frame);
   }
+})();
+</script>
+<script>
+/* website: the full screen button in the top-right corner */
+(() => {
+  const btn = document.getElementById("fullBtn"), label = document.getElementById("fullLabel"), icon = document.getElementById("fullIcon");
+  const root = document.documentElement;
+  const can = !!(root.requestFullscreen || root.webkitRequestFullscreen) && (document.fullscreenEnabled !== false || document.webkitFullscreenEnabled);
+  if (!can || document.body.classList.contains("render")) return;   // e.g. iPhone Safari: the page already fills the screen
+  btn.hidden = false;
+  const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  function sync() {
+    const on = isFull();
+    label.textContent = on ? "Exit full screen" : "Full screen";
+    icon.setAttribute("d", on ? "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" : "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5");
+  }
+  btn.addEventListener("click", () => {
+    try {
+      if (isFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else { const r = (root.requestFullscreen || root.webkitRequestFullscreen).call(root); if (r && r.catch) r.catch(() => {}); }
+    } catch (_) {}
+  });
+  document.addEventListener("fullscreenchange", sync);
+  document.addEventListener("webkitfullscreenchange", sync);
+  // show the button when the mouse reaches the top-right corner
+  const ZONE_W = 220, ZONE_H = 140;
+  document.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    document.body.classList.toggle("corner", e.clientX > innerWidth - ZONE_W && e.clientY < ZONE_H);
+  }, { passive: true });
+  document.documentElement.addEventListener("mouseleave", () => document.body.classList.remove("corner"));
+  sync();
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f1548e5419ec4412b88ccaf521da4438"}'></script><!-- End Cloudflare Web Analytics -->
