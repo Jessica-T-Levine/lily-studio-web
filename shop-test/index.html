@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0B1E3F">
+  <title>Checkout Test — The Lily Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=JetBrains+Mono:wght@500;600&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0B1E3F; --navy-deep:#06122A; --cream:#FDFBF7; --pink:#F966BC; --pink-glow:rgba(249,102,188,0.35); --green:#A3D977; --gray-light:#CCCFD4; --gray-mid:#233554; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--navy-deep); color: var(--cream); font-family: "Montserrat", system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 16px; -webkit-font-smoothing: antialiased; }
+    .note { max-width: 520px; width: 100%; border: 1px dashed var(--pink); border-radius: 8px; padding: 14px 16px; font-size: 0.85rem; line-height: 1.55; color: var(--gray-light); margin-bottom: 28px; }
+    .note strong { color: var(--pink); }
+    .card { max-width: 520px; width: 100%; background: var(--navy); border: 1px solid var(--gray-mid); border-radius: 10px; overflow: hidden; }
+    .card-glow { height: 2px; background: var(--green); }
+    .card-body { padding: 22px 22px 24px; }
+    .badge { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; background: rgba(163,217,119,0.12); color: var(--green); }
+    h1 { font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.6rem; margin: 12px 0 8px; }
+    p.desc { font-size: 0.92rem; line-height: 1.6; color: var(--gray-light); }
+    .footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .price { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 1.2rem; color: var(--green); }
+    .buy { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: var(--pink); color: var(--navy-deep); font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: box-shadow .25s ease, transform .25s ease; }
+    .buy:hover { box-shadow: 0 0 16px var(--pink-glow); transform: translateY(-1px); }
+    .buy:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) { .buy { transition: none; } .buy:hover { transform: none; } }
+  </style>
+</head>
+<body>
+  <div class="note"><strong>Private test page.</strong> This page isn't linked anywhere and search engines are told to skip it. The store is in test mode, so use the test card <strong>4242 4242 4242 4242</strong>, any future date, and any 3-digit code. No real money moves.</div>
+  <div class="card">
+    <div class="card-glow"></div>
+    <div class="card-body">
+      <span class="badge">Pro Skill · Marketing</span>
+      <h1>Ad Copy Generator</h1>
+      <p class="desc">Writes conversion-focused ad copy for any platform — Google, Meta, LinkedIn, TikTok — with headline variations, body copy, and CTA options.</p>
+      <div class="footer">
+        <span class="price">$5</span>
+        <a class="buy lemonsqueezy-button" href="https://thelilystudio.lemonsqueezy.com/checkout/buy/88b9964b-faf7-4111-b62d-557cc848cfce?embed=1">Buy now</a>
+      </div>
+    </div>
+  </div>
+  <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+</body>
+</html>
