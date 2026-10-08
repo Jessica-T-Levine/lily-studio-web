@@ -21,6 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Product", "name": "Teacher's Toolkit", "description": "Five Claude AI skills for teachers: lesson plans, rubrics, quizzes, student feedback and differentiated instruction. Plan, grade and give feedback faster.", "image": ["https://thelilystudio.com/skills/teachers-toolkit/product.webp", "https://thelilystudio.com/skills/teachers-toolkit/share.png"], "sku": "teachers-toolkit", "category": "Claude AI skills > Education", "brand": {"@type": "Brand", "name": "The Lily Studio"}, "offers": {"@type": "Offer", "url": "https://thelilystudio.com/skills/teachers-toolkit/", "price": "9.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "The Lily Studio", "url": "https://thelilystudio.com/"}}}</script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thelilystudio.com/"}, {"@type": "ListItem", "position": 2, "name": "Skills", "item": "https://thelilystudio.com/skills.html"}, {"@type": "ListItem", "position": 3, "name": "Teacher's Toolkit", "item": "https://thelilystudio.com/skills/teachers-toolkit/"}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Do I need a paid Claude plan?", "acceptedAnswer": {"@type": "Answer", "text": "No. Skills work on every Claude plan, so you don’t need to upgrade. You just need Code execution turned on in Settings → Capabilities. On a Team or Enterprise plan, your admin turns it on."}}, {"@type": "Question", "name": "Is it good for beginners?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. No tech skills needed. Each skill comes with a step-by-step install guide and sample prompts, and you talk to Claude in plain English."}}, {"@type": "Question", "name": "Can I use it on my phone or tablet?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. You add the skill once on claude.ai or in the Claude desktop app. After that it’s part of your Claude account and ready in your chats, including on your phone or tablet."}}, {"@type": "Question", "name": "How do I get my files?", "acceptedAnswer": {"@type": "Answer", "text": "Your download is ready right after checkout, and the store emails you the link too."}}, {"@type": "Question", "name": "Can I buy the skills one at a time?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Each skill is also sold on its own on the skills page. The bundle costs less than buying them separately."}}]}</script>
   <style>
     :root {
       --navy: #0B1E3F;
@@ -141,6 +142,9 @@
     .buy-agensi { color: var(--blue); border-color: var(--blue); }
     .buy-agensi:hover { background: var(--blue); color: var(--navy); box-shadow: 0 0 10px var(--blue-glow); }
     /* Buy directly on thelilystudio.com (Lemon Squeezy pop-up). Shown only for products listed in /shop/links.json */
+    .card-title a.card-page { border-bottom: 1px solid rgba(249,102,188,0.45); transition: color 0.25s var(--ease); }
+    .card-title a.card-page:hover { color: var(--pink); }
+    .card-title a.card-page:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
     .buy-direct { color: var(--navy); background: var(--pink); border-color: var(--pink); }
     .buy-direct:hover { box-shadow: 0 0 12px var(--pink-glow); }
     .buy-direct:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
@@ -387,6 +391,10 @@
     .pp-also { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; background: linear-gradient(120deg, rgba(37,99,235,0.18), rgba(249,102,188,0.12)); border: 1px solid var(--gray-mid); border-radius: 16px; padding: 24px 28px; }
     .pp-also p { font-size: 1rem; line-height: 1.6; color: var(--cream); max-width: 640px; }
     .pp-also p b { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; }
+    .pp-faq { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .pp-faq div { background: var(--navy-light); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 22px 24px; }
+    .pp-faq h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--cream); line-height: 1.4; margin-bottom: 8px; }
+    .pp-faq p { font-size: 0.93rem; line-height: 1.65; color: var(--gray-light); }
     .pp-help { text-align: center; color: var(--gray-light); font-size: 0.98rem; line-height: 1.7; }
     .pp-help a { color: var(--pink); border-bottom: 1px solid rgba(249,102,188,0.45); }
     .pp-back { margin-top: 26px; text-align: center; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -395,7 +403,7 @@
     @media (max-width: 900px) {
       .pp-hero { grid-template-columns: minmax(0, 1fr); gap: 34px; }
       .pp-art { max-width: 340px; width: 100%; margin: 0 auto; }
-      .pp-steps, .pp-two { grid-template-columns: minmax(0, 1fr); }
+      .pp-steps, .pp-two, .pp-faq { grid-template-columns: minmax(0, 1fr); }
       .pp-sec { margin-top: 64px; }
       .pp { padding-top: 72px; }
     }
@@ -480,14 +488,26 @@
         <p class="pp-lede">No tech skills needed. It takes about two minutes.</p>
         <ol class="pp-steps">
           <li><b>Unzip your download.</b> Inside you’ll find the skill file and its own install guide with sample prompts.</li>
-          <li><b>Add it to Claude.</b> Open <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, click <b>Customize</b>, then <b>Skills</b>. Click <b>+</b>, choose <b>Upload skill</b>, pick the file and make sure its toggle is on.</li>
+          <li><b>Add it to Claude.</b> Open <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, click <b>Customize</b>, then <b>Skills</b>. Click <b>+</b>, then <b>Create skill</b>, then <b>Upload a skill</b>. Pick the file and make sure its toggle is on.</li>
           <li><b>Try it.</b> Start a new chat and paste the first sample prompt from your guide. Swap in your own details and go.</li>
         </ol>
         <p class="pp-note"><b>You’ll need:</b> a Claude.ai account with <b>Code execution</b> turned on in Settings → Capabilities. Skills need this switch.</p>
       </section>
 
+      <section class="pp-sec">
+        <h2>Questions</h2>
+        <p class="pp-lede">The things people ask most before they buy.</p>
+        <div class="pp-faq">
+          <div><h3>Do I need a paid Claude plan?</h3><p>No. Skills work on every Claude plan, so you don’t need to upgrade. You just need Code execution turned on in Settings → Capabilities. On a Team or Enterprise plan, your admin turns it on.</p></div>
+          <div><h3>Is it good for beginners?</h3><p>Yes. No tech skills needed. Each skill comes with a step-by-step install guide and sample prompts, and you talk to Claude in plain English.</p></div>
+          <div><h3>Can I use it on my phone or tablet?</h3><p>Yes. You add the skill once on claude.ai or in the Claude desktop app. After that it’s part of your Claude account and ready in your chats, including on your phone or tablet.</p></div>
+          <div><h3>How do I get my files?</h3><p>Your download is ready right after checkout, and the store emails you the link too.</p></div>
+          <div><h3>Can I buy the skills one at a time?</h3><p>Yes. Each skill is also sold on its own on the skills page. The bundle costs less than buying them separately.</p></div>
+        </div>
+      </section>
+
       <section class="pp-sec pp-help">
-        <p>Questions before you buy? Email <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a> and Jessica will help.</p>
+        <p>Questions about your order? Email <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a>.</p>
         <p class="pp-back"><a href="/skills.html#teachers-toolkit">← All skills</a></p>
       </section>
     </div>
