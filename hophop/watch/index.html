@@ -46,6 +46,7 @@
   }
   .back:focus-visible, .sound button:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
   body.quiet .back { opacity: 0; }
+  html.embed .back { display: none; }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF6F9C; box-shadow: 0 0 8px #FF6F9C; }
   @media (prefers-reduced-motion: reduce) { .sound, .back { transition: none; } }
   /* website: full screen button, top-right. Mouse: appears when the pointer reaches the corner.
@@ -69,6 +70,7 @@
 <body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily's Hop Hop · Live</h1>
 <canvas id="game" aria-label="Lily's Hop Hop, live: a round frog living his cozy day on a lily pond, in real time"></canvas>
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("embed");</script>
 <a class="back" href="/playhouse/games/"><span aria-hidden="true">←</span> Lily's games <span class="live-dot" aria-hidden="true"></span></a>
 <button type="button" class="full-btn" id="fullBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fullIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fullLabel">Full screen</span></button>
 <div class="sound" id="sound">
