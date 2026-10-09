@@ -47,6 +47,20 @@
   .back:focus-visible, .sound button:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
   body.quiet .back { opacity: 0; }
   html.embed .back { display: none; }
+  /* website: a quiet link to the channel, bottom-left. Same look as the back link; never shown while recording, embedded, or full screen. */
+  .yt-link {
+    position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 5;
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: rgba(42, 32, 70, 0.55); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 999px;
+    font: 700 14px/1 "Nunito", system-ui, sans-serif; color: #fff; text-decoration: none;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition: opacity 0.8s ease;
+  }
+  .yt-link:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
+  body.quiet .yt-link { opacity: 0; }
+  html.embed .yt-link, html.render .yt-link, body.render .yt-link, html.is-full .yt-link { display: none; }
+  .yt-link:fullscreen, :fullscreen .yt-link, :-webkit-full-screen .yt-link { display: none; }
+  @media (prefers-reduced-motion: reduce) { .yt-link { transition: none; } }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF6F9C; box-shadow: 0 0 8px #FF6F9C; }
   @media (prefers-reduced-motion: reduce) { .sound, .back { transition: none; } }
   /* website: full screen button, top-right. Mouse: appears when the pointer reaches the corner.
@@ -70,8 +84,10 @@
 <body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily's Hop Hop · Live</h1>
 <canvas id="game" aria-label="Lily's Hop Hop, live: a round frog living his cozy day on a lily pond, in real time"></canvas>
-<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("embed");</script>
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("embed");
+if (/[?&]render=1(&|$)/.test(location.search) || (window.WATCH_CONFIG && window.WATCH_CONFIG.render)) document.documentElement.classList.add("render");</script>
 <a class="back" href="/playhouse/games/"><span aria-hidden="true">←</span> Lily's games <span class="live-dot" aria-hidden="true"></span></a>
+<a class="yt-link" href="https://www.youtube.com/@Thelilystudio" target="_blank" rel="noopener">Watch whole days on YouTube</a>
 <button type="button" class="full-btn" id="fullBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fullIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fullLabel">Full screen</span></button>
 <div class="sound" id="sound">
   <button type="button" id="soundBtn">Tap for sound</button>
@@ -2625,6 +2641,7 @@
   function sync() {
     const on = isFull();
     label.textContent = on ? "Exit full screen" : "Full screen";
+    root.classList.toggle("is-full", on);
     icon.setAttribute("d", on ? "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" : "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5");
   }
   btn.addEventListener("click", () => {
