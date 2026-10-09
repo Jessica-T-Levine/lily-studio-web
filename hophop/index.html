@@ -633,6 +633,7 @@
   </footer>
 </div>
 
+<script src="../playhouse/lily-halloween-v1.js"></script>
 <script>
 (() => {
   "use strict";
@@ -1501,10 +1502,89 @@
       ctx.rotate(Math.sin(f.t * 1.1 + 1) * 0.06);
       if (f.kind === "pig") drawFlyingPig(f.t);
       else if (f.kind === "bunny") drawFlyingBunny(f.t);
+      else if (f.kind === "bat") drawHwBat(f.t);
+      else if (f.kind === "ghost") drawHwGhost(f.t);
       else drawFlyingUnicorn(f.t);
       ctx.restore();
     });
   }
+  // ---------- Halloween (Oct 2026): the same few friends as Lily's Playhouse ----------
+  // One lit pumpkin floats by every so often, a bat now and then (never more than 2 a minute) and one ghost every 3+ minutes.
+  // It ramps up through October: a few on Oct 1, the full set by Oct 31, then it all goes away after Nov 2.
+  // Try it any time with #hw1 (full) or #hw0.3 on the end of the address.
+  const LH = window.LilyHalloween || null;
+  let HW_TEST = null;
+  try { const m = /[#&]hw(\d(\.\d+)?)/.exec(location.hash); if (m) HW_TEST = Math.max(0, Math.min(1, parseFloat(m[1]))); } catch (_) {}
+  function halloweenLevel() {
+    if (!LH) return 0;
+    if (HW_TEST !== null) return HW_TEST;
+    const d = new Date(), mo = d.getMonth(), day = d.getDate();
+    if (mo === 9) return Math.min(1, 0.08 + 0.92 * (day - 1) / 30);
+    if (mo === 10 && day <= 2) return 1;
+    return 0;
+  }
+  const HW_LEVEL = halloweenLevel();
+  let nextHwBat = rand(12, 30), nextHwGhost = rand(25, 60);
+  function hwHash(a, b) { let h = (Math.imul(a, 374761393) + Math.imul(b, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+  function updateHalloween(dt) {
+    if (HW_LEVEL <= 0) return;
+    nextHwBat -= dt; nextHwGhost -= dt;
+    const busy = flyers.some(f => f.kind === "bat" || f.kind === "ghost");
+    if (busy) return;
+    const dir = Math.random() < 0.5 ? 1 : -1, y = rand(70, Math.max(120, WATER_Y - 190));
+    if (nextHwGhost <= 0) {
+      flyers.push({ kind: "ghost", dir, x: dir > 0 ? -40 : W + 40, baseY: y, y, t: rand(0, 5), speed: rand(16, 22), size: 1 });
+      nextHwGhost = rand(180, 240); nextHwBat = Math.max(nextHwBat, 20);
+    } else if (nextHwBat <= 0) {
+      flyers.push({ kind: "bat", dir, x: dir > 0 ? -40 : W + 40, baseY: y, y, t: rand(0, 5), speed: rand(46, 62), size: 1 });
+      nextHwBat = rand(30, 55);
+    }
+  }
+  // lit pumpkins bob on the water. Each long stretch of pond has a (hashed) chance of one.
+  const HW_CELL = 2400, HW_PICS = {};
+  const HW_SHAPES = LH ? [LH.SHAPES[0], LH.SHAPES[2], LH.SHAPES[3], LH.SHAPES[1]] : [];
+  function hwPic(shape, face) {
+    const key = shape.name + face;
+    if (HW_PICS[key]) return HW_PICS[key];
+    const PSP = 3, c = document.createElement("canvas"); c.width = 140 * PSP; c.height = 100 * PSP;
+    LH.pumpkin(c.getContext("2d"), 70 * PSP, 90 * PSP, PSP, "glow", { shape: Object.assign({}, shape, { face }), halo: false });
+    return (HW_PICS[key] = c);
+  }
+  function hwPumpkins() {
+    const list = [];
+    if (HW_LEVEL <= 0) return list;
+    const lo = Math.floor((camX - 80) / HW_CELL), hi = Math.floor((camX + W + 80) / HW_CELL);
+    for (let c = lo; c <= hi; c++) {
+      if (hwHash(c, 71) > 0.3 + 0.4 * HW_LEVEL) continue;   // sparse: one every so often, never two on the screen
+      const x = c * HW_CELL + 200 + hwHash(c, 72) * (HW_CELL - 400), depth = hwHash(c, 73);
+      list.push({ x, depth, shape: HW_SHAPES[Math.floor(hwHash(c, 74) * HW_SHAPES.length)], face: [2, 3, 4][Math.floor(hwHash(c, 75) * 3)], ph: hwHash(c, 76) * 6.28 });
+    }
+    return list;
+  }
+  function drawHwPumpkins() {
+    hwPumpkins().forEach(m => {
+      const top = WATER_Y + 62, bot = H - 36;
+      if (bot <= top) return;
+      const sc = lerp(0.42, 0.8, m.depth), by = top + m.depth * (bot - top) + Math.sin(time * 1.3 + m.ph) * 2.2;
+      const x = m.x - camX; if (x < -80 || x > W + 80) return;
+      const fl = reduceMotion ? 1 : 1 + 0.07 * Math.sin(time * 7 + m.ph * 3) + 0.05 * Math.sin(time * 12.7 + m.ph);
+      // shadow and soft ripple on the water, then the pumpkin and its candle glow
+      ctx.fillStyle = "rgba(40, 40, 110, 0.22)"; ctx.beginPath(); ctx.ellipse(x, by + 2, 26 * sc, 6 * sc, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.28)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, by + 3, 32 * sc + Math.sin(time * 1.3 + m.ph) * 1.5, 8 * sc, 0, 0, Math.PI * 2); ctx.stroke();
+      const pic = hwPic(m.shape, m.face);
+      ctx.drawImage(pic, x - 70 * sc, by - 90 * sc, 140 * sc, 100 * sc);
+      const gy = by - 24 * sc * m.shape.h, gr = ctx.createRadialGradient(x, gy, 3, x, gy, 100 * sc * m.shape.w);
+      gr.addColorStop(0, `rgba(255, 200, 90, ${0.38 * fl})`); gr.addColorStop(0.5, `rgba(255, 170, 70, ${0.14 * fl})`); gr.addColorStop(1, "rgba(255, 150, 60, 0)");
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, gy, 100 * sc * m.shape.w, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function drawHwBat(t) {
+    const g = ctx.createRadialGradient(0, -2, 4, 0, -2, 46); g.addColorStop(0, "rgba(200, 185, 255, 0.28)"); g.addColorStop(1, "rgba(200, 185, 255, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -2, 46, 0, Math.PI * 2); ctx.fill();
+    LH.bat(ctx, 0, 0, 0.5, reduceMotion ? 0 : Math.sin(t * 9) * 0.9, true);
+  }
+  function drawHwGhost(t) { LH.ghost(ctx, 0, 0, 0.62, t, 1, true); }
+
   // ---------- turtles: surface now and then, paddle a bit, dive back down ----------
   // Closer to the bottom of the screen = closer to you = bigger. They never surface
   // on, or swim through, a lily pad (or where the frog is floating).
@@ -1896,6 +1976,7 @@
     updateCritters(dt);
     updateFish(dt);
     updateFlyers(dt);
+    updateHalloween(dt);
     updateTurtle(dt);
     updateFeelings(dt);
     updatePond(dt);
@@ -2317,6 +2398,7 @@
     sky(); sun(); hills(); drawFireflies(); water(); drawRipples(); drawTurtle();
     pads.forEach(p => { if (p.x - camX > -80 && p.x - camX < W + 80) drawPad(p); });
     drawFish();
+    drawHwPumpkins();
     drawCritters();
     drawFrog();
     drawTongue();
