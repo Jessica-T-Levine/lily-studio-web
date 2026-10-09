@@ -4311,6 +4311,15 @@
             const m = frogMouth(F);
             obj = critters.find(c => c.kind === "bug" && !c.caught && Math.hypot(c.x - m.x, c.y - m.y, c.z - m.z) < 130 * reach) || null;
           }
+          // v32: he turns to face the snack first, so his tongue only ever comes out of his mouth
+          if (obj) {
+            const dd = Math.abs(angDiff(Math.atan2(obj.y - F.y, obj.x - F.x), F.heading == null ? 0 : F.heading));
+            if (F.heading != null && dd > 0.3 && Math.hypot(obj.x - F.x, obj.y - F.y) > 8) {
+              F.aim = { x: obj.x, y: obj.y, z: obj.z }; F.aimT = (F.aimT || 0) + dt;
+              if (F.aimT > 1.6) { F.aim = null; F.aimT = 0; F.lickCd = rand(1.5, 3); }
+              obj = null;
+            } else { F.aim = null; F.aimT = 0; }
+          } else { F.aim = null; F.aimT = 0; }
           if (obj) { obj.caught = true; F.lick = { obj, isFly, t: 0, from: { x: obj.x, y: obj.y, z: obj.z }, tip: null }; sfx.lick(); }
         }
         if (F.lick) {
@@ -4332,6 +4341,7 @@
         // what is she looking at? her snack first, then the bee, then nearby critters, turtles, or a glance around
         let look = null;
         if (F.lick) look = F.lick.tip || F.lick.from;
+        else if (F.aim) look = F.aim;
         else if (ridden) look = { x: F.x, y: F.y, z: frogTop(F) + 400 };   // peeking up at her passenger
         else if (F.fly) look = F.fly;
         else if (Math.hypot(bee.x - F.x, bee.y - F.y) < 320) look = { x: bee.x, y: bee.y, z: bee.z + 10 };
@@ -4426,6 +4436,24 @@
     ctx.save(); ctx.globalAlpha = a;
     if (hopPx > 0.5) { ctx.fillStyle = "rgba(40, 70, 40, 0.18)"; ctx.beginPath(); ctx.ellipse(x, baseY, 22 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill(); }
     if (F.sx && F.sx !== 1) { ctx.translate(x, baseY - hopPx); ctx.scale(F.sx, 1); ctx.translate(-x, -(baseY - hopPx)); }   // chubbier or slimmer
+    // v32: his tongue is drawn behind him when he faces away (his mouth is hidden), so it never seems to come out of the back of his head
+    const tongueBehind = Math.cos(yaw) > 0.2;
+    const drawTongue = () => {
+      const L = F.lick;
+      if (L && L.tip) {
+        const b = proj(L.tip.x, L.tip.y, L.tip.z);
+        if (b) {
+          // v38 (Playhouse v28): his mouth on the front of his face (21 frog units forward, 16.4 up), turned and tipped
+          // exactly the way the 3D frog is drawn, and squished with him when he squashes or stretches in a hop
+          const sqM = F.squash || 0, stj = jumping ? Math.sin(u * Math.PI) : 0, fx = 21 * (1 + 0.12 * sqM), fz = 16.4 * (1 - 0.2 * sqM) * (1 + 0.08 * stj);
+          const mx = x + s * fx * Math.sin(yaw), my = baseY - hopPx - s * (fx * Math.cos(yaw) * Math.sin(pitch) + fz * Math.cos(pitch));
+          ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = Math.max(1.5, 2.4 * s); ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.fillStyle = "#FF6F9C"; ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(2, 2.8 * s), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    };
+    if (tongueBehind) drawTongue();
     drawCachedFrog(F, x, baseY - hopPx, s, yaw, pitch, {
       t: dancing ? danceT : 0, jump: jumping ? Math.sin(u * Math.PI) : 0, squash: F.squash, happy: F.wiggle > 0 || F.gulp > 0 || dancing || F.act === "wave" ? 1 : 0,
       dance: dancing, armR: F.act === "wave" && !jumping ? clamp(Math.min(2.4 - F.actT, F.actT) * 3, 0, 1) * (0.75 + 0.25 * Math.sin(time * 10)) : 0, blink: F.blink < 0, lick: !!F.lick, shadow: hopPx <= 0.5
@@ -4437,19 +4465,7 @@
       const vx = 4, vy = sway, vz = 38 * (1 - 0.2 * sq);
       F.seat = { x: x + (vx * sy + vy * cy) * s * (F.sx || 1), y: baseY - hopPx - lift * cp * s - (vz * cp + (vx * cy - vy * sy) * sp) * s, t: time };
     }
-    const L = F.lick;
-    if (L && L.tip) {
-      const b = proj(L.tip.x, L.tip.y, L.tip.z);
-      if (b) {
-        // v38 (Playhouse v28): his mouth on the front of his face (21 frog units forward, 16.4 up), turned and tipped
-        // exactly the way the 3D frog is drawn, and squished with him when he squashes or stretches in a hop
-        const sqM = F.squash || 0, stj = jumping ? Math.sin(u * Math.PI) : 0, fx = 21 * (1 + 0.12 * sqM), fz = 16.4 * (1 - 0.2 * sqM) * (1 + 0.08 * stj);
-        const mx = x + s * fx * Math.sin(yaw), my = baseY - hopPx - s * (fx * Math.cos(yaw) * Math.sin(pitch) + fz * Math.cos(pitch));
-        ctx.strokeStyle = "#FF7FA8"; ctx.lineWidth = Math.max(1.5, 2.4 * s); ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(b.x, b.y); ctx.stroke();
-        ctx.fillStyle = "#FF6F9C"; ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(2, 2.8 * s), 0, Math.PI * 2); ctx.fill();
-      }
-    }
+    if (!tongueBehind) drawTongue();
     ctx.restore();
     residentHits.push({ id: "frog", kind: "frog", ref: F, x, y: baseY - hopPx - 22 * s, r: Math.max(20, 26 * s), top: baseY - hopPx - 50 * s, f: p.f });
   }
