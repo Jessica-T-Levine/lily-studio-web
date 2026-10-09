@@ -860,7 +860,7 @@
       const rx = (big ? 110 + r() * 35 : 90 + r() * 45) * scale, ry = (big ? 90 + r() * 35 : 70 + r() * 35) * scale;
       const ux = r(), uy = r();
       const shp = sp.sh || pondShapeOf(cx, cy), dims = pondDims(rx / scale, ry / scale, scale, shp);   // (the same size the planner worked out)
-      const p = { x: sp.x, y: sp.y, rx: dims.rx, ry: dims.ry, rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
+      const p = { x: sp.x, y: sp.y, rx: dims.rx * (sp.grow || 1), ry: dims.ry * (sp.grow || 1), rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
       const n = 4 + Math.floor(r() * (big ? 3 : 2));
       const keep = scale < 0.6 ? 2 : scale < 0.75 ? 3 : n;          // little ponds get fewer lily pads
       const ring = scale < 0.75 ? 0.5 : 0.55, padS = clamp(0.55 + 0.45 * scale, 0.72, 1.12);
@@ -879,6 +879,18 @@
         }
       }
       if (r() < 0.7) p.frogPad = Math.floor(r() * n) % keep;
+      {   // v31 (Jessica): 40% fewer lily pads, and the small ones shrink so sizes differ 20% more (the biggest pads stay as they are)
+        const MAXR = 34 * 1.12 * PAD_GROW;
+        p.pads.forEach(pd => { pd.r = Math.max(8, MAXR - 1.2 * (MAXR - pd.r)); });
+        const t = seeded(hash2(cx + 4242, cy - 2424)), cnt = p.pads.length;
+        let drop = Math.min(cnt - 1, Math.floor(cnt * 0.4 + t()));
+        const idx = p.pads.map((pd, i) => i).filter(i => i !== p.frogPad);
+        for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(t() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+        const gone = new Set(idx.slice(0, Math.max(0, drop)));
+        const remap = []; let k = 0;
+        p.pads = p.pads.filter((pd, i) => { if (gone.has(i)) return false; remap[i] = k++; return true; });
+        if (p.frogPad >= 0) p.frogPad = remap[p.frogPad];
+      }
       ch.pond = p;
       // reeds and cattails around the edge (fewer around the little ponds)
       const nr = Math.round((big ? 16 : 10) * 1.4);
@@ -1170,6 +1182,17 @@
     }
     if (sp && !clearOf(sp.x, sp.y, pondReach(sp) + 40)) sp = null;   // ponds never land on the playhouse, the hive tree or the start
     if (sp && sp.scale < 0.9 && !bigPondAt(cx, cy) && seeded(hash2(cx * 13 + 5, cy * 7 - 3))() < 0.65) sp = null;   // v27: fewer little ponds (Jessica)
+    if (sp && !bigPondAt(cx, cy) && seeded(hash2(cx * 17 + 11, cy * 5 - 7))() < 0.15) sp = null;   // v31: 15% fewer ponds (Jessica)
+    if (sp && !bigPondAt(cx, cy) && seeded(hash2(cx * 19 - 3, cy * 23 + 9))() < 0.10) {   // v31: one pond in ten is 15% larger, if it still fits
+      const g = 1.15, reach = pondReach(sp) * g;
+      let ok = sp.scale > 1.5 ? true : reach + 30 <= CS / 2 - 5;
+      if (ok && sp.scale > 1.5) for (let dy = -3; dy <= 3 && ok; dy++) for (let dx = -3; dx <= 3; dx++) {
+        if (!dx && !dy) continue;
+        const o = largePond(cx + dx, cy + dy);
+        if (o && Math.hypot(o.x - sp.x, o.y - sp.y) < pondReach(o) + reach + 60) { ok = false; break; }
+      }
+      if (ok && clearOf(sp.x, sp.y, reach + 40)) sp = { ...sp, rx: sp.rx * g, ry: sp.ry * g, grow: g };
+    }
     pondSpecs.set(key, sp);
     return sp;
   }
