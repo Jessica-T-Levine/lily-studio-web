@@ -23,9 +23,9 @@
   var W = 320, H = 190;            // drawing size (the canvas scales down on small screens)
   var FROG_X = 160, FROG_Y = 160;  // where Hop Hop sits (the point on the pad right under him)
   var SCALE = 1.38;                // flat backup Hop Hop: the game draws him at 1.38x
-  var S3D = 1.9, YAW = Math.PI + 0.35, PITCH = 0.32;   // 3D Hop Hop: size and angle (as on the games page)
+  var S3D = 1.9, YAW = Math.PI - 0.35, PITCH = 0.32;   // 3D Hop Hop: size and angle (as on the games page)
   var MOUTH_FLAT = { x: FROG_X + 5.5, y: FROG_Y - 36 };
-  var MOUTH_3D = { x: FROG_X - 14, y: FROG_Y - 18 };   // measured on his real face
+  var MOUTH_3D = { x: FROG_X + 14, y: FROG_Y - 18 };   // measured on his real face
 
   var STYLE =
     ".hop-nook{display:block;width:100%;max-width:" + W + "px;aspect-ratio:" + W + "/" + H + ";margin:8px auto 4px;border-radius:18px;" +
@@ -87,13 +87,13 @@
         state: "in", t: 0, dir: fromLeft ? 1 : -1, buzz: rand(0, 10),
         sx: fromLeft ? -20 : W + 20, sy: rand(20, 70),
         cx: rand(125, 195), cy: rand(50, 72),
-        wanderFor: rand(3, 4.5), side: -1,   // always his left: that is the side his mouth is on, so the tongue never crosses his face
+        wanderFor: rand(3, 4.5), side: 1,   // always his right: that is the side his mouth is on, so the tongue never crosses his face
        
         x: fromLeft ? -20 : W + 20, y: 40, hx: 0, hy: 0
       };
     }
 
-    function snackX() { return MOUTH.x - 62; }   // a tongue's length to his left
+    function snackX() { return MOUTH.x + 62; }   // a tongue's length to his right
 
     function updateFly(dt) {
       if (!fly) {
@@ -173,11 +173,11 @@
       ctx.beginPath(); ctx.ellipse(cx, cy + 3, 92 + Math.sin(time * 1.4) * 2, 19, 0, 0, Math.PI * 2); ctx.stroke();
       // the pad, with its little notch
       ctx.fillStyle = "#2C7C68";
-      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.ellipse(cx, cy, 74, 15, 0, 0.2, Math.PI * 2 - 0.2); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.ellipse(cx, cy, 74, 15, 0, Math.PI + 0.2, Math.PI * 3 - 0.2); ctx.closePath(); ctx.fill();
       ctx.fillStyle = "#3E9C82";
-      ctx.beginPath(); ctx.moveTo(cx, cy - 1); ctx.ellipse(cx, cy - 1.5, 70, 12, 0, 0.2, Math.PI * 2 - 0.2); ctx.closePath(); ctx.fill();
-      // a small pink lily bloom on the water beside him
-      var bx = cx + 92, by = cy + 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy - 1); ctx.ellipse(cx, cy - 1.5, 70, 12, 0, Math.PI + 0.2, Math.PI * 3 - 0.2); ctx.closePath(); ctx.fill();
+      // a small pink lily bloom on the water behind him
+      var bx = cx - 92, by = cy + 2;
       for (var i = 0; i < 6; i++) {
         ctx.save(); ctx.translate(bx, by); ctx.rotate((i / 6) * Math.PI * 2);
         ctx.fillStyle = i % 2 ? "#FFD6E6" : "#FF9EC3";
