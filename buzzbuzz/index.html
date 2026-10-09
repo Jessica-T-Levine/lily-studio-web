@@ -481,6 +481,7 @@
 <script src="/playhouse/lily-creatures-v4.js"></script>
 <script src="/playhouse/lily-playhouse-design.js"></script>
 <script src="/playhouse/lily-bee-home-v1.js"></script>
+<script src="/playhouse/lily-halloween-v1.js"></script>
 <script>
 (() => {
   "use strict";
@@ -497,6 +498,20 @@
   // The shared Lily Studio creature library draws our 3D bee, her friends and the bunny.
   // If it ever fails to load, the game falls back to the flat drawings below and still works.
   const LC = window.LilyCreatures || null;
+  // ---------- Halloween (Oct 2026): a pumpkin every so often, a bat now and then, one ghost, same as Lily's Playhouse ----------
+  // Pumpkins come back a little more each day through October (very sparse: one every so often). Add #hw1 (or #hw0.4) to the link to check.
+  const LH = window.LilyHalloween || null;
+  let HW_TEST = null;
+  try { const m = /[#&]hw(\d(\.\d+)?)/.exec(location.hash); if (m) HW_TEST = Math.max(0, Math.min(1, parseFloat(m[1]))); } catch (_) {}
+  function halloweenLevel() {
+    if (!LH) return 0;
+    if (HW_TEST !== null) return HW_TEST;
+    const d = new Date(), mo = d.getMonth(), day = d.getDate();
+    if (mo === 9) return Math.min(1, 0.08 + 0.92 * (day - 1) / 30);
+    if (mo === 10 && day <= 2) return 1;
+    return 0;
+  }
+  const HW_LEVEL = halloweenLevel();
   const BH = window.LilyBeeHome || null;   // v41: her home, the approved 3D hive (shared asset lily-bee-home-v1.js)
   const FROG = (LC && LC.frog) || null;   // Hop Hop, the approved 3D design (creature library v4, same frog as v3)
   const FROG_SIZE = 2;                     // pond frogs are drawn at 2x their size
@@ -1054,7 +1069,7 @@
     const x0 = cx * CS, y0 = cy * CS;
     const home = cx === 0 && cy === 0;
     const biome = biomeOf(cx, cy);
-    const ch = { cx, cy, biome, patches: [], tufts: [], flowers: [], rocks: [], shrooms: [], pond: null, lavender: [], clovers: [], puffs: [], trees: [], reeds: [], bushes: [] };
+    const ch = { cx, cy, biome, patches: [], tufts: [], flowers: [], rocks: [], shrooms: [], pond: null, lavender: [], clovers: [], puffs: [], trees: [], reeds: [], bushes: [], pumpkins: [] };
     // a large pond next door can reach into this patch of meadow: nothing grows in its water
     const nbPonds = [];
     for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
@@ -1223,6 +1238,17 @@
     if (ch.pond) {
       addPondTurtles(ch, seeded(hash2(cx + 9001, cy - 4409)));
       addPondFrogs(ch, seeded(hash2(cx - 7717, cy + 3301)));
+    }
+    // Halloween: a pumpkin only now and then (its own random stream, so nothing else in the world moves). It shows once the Halloween level reaches its number (th).
+    if (LH && biome !== "woods") {
+      const pr = seeded(hash2(cx + 3131, cy - 8081));
+      if (pr() < 0.14) {
+        const x = x0 + 60 + pr() * (CS - 120), y = y0 + 60 + pr() * (CS - 120), th = pr(), si = Math.floor(pr() * 4), fi = Math.floor(pr() * 3), sz = 0.9 + pr() * 0.35, ph = pr() * 6, coin = pr();
+        let face = LH.FACES[fi];
+        if (si === 1 && face === 4) face = coin < 0.5 ? 2 : 3;
+        if (free(x, y, 40) && !ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < o.s + 36) && !ch.flowers.some(o => Math.hypot(o.x - x, o.y - y) < 46) && !ch.bushes.some(o => Math.hypot(o.x - x, o.y - y) < (o.br || o.r || 30) + 40))
+          ch.pumpkins.push({ x, y, th, shape: LH.SHAPES[si], face, s: sz, ph });
+      }
     }
     return ch;
   }
@@ -2656,7 +2682,7 @@
     ctx.restore();
   }
   // Rare storybook flyers far off in the sky: a flying pig, a unicorn and a bunny (never the same twice in a row)
-  let flyers = [], nextFlyer = rand(25, 45), lastFlyerKind = null;
+  let flyers = [], nextFlyer = rand(25, 45), lastFlyerKind = null, nextBat = rand(3, 6), nextGhost = rand(25, 60);
   const FLYER_KINDS = ["pig", "unicorn", "bunny"];
   function updateFlyers(dt) {
     nextFlyer -= dt;
@@ -2667,6 +2693,23 @@
       const dir = Math.random() < 0.5 ? 1 : -1;
       flyers.push({ kind, dir, az: camYaw - dir * 0.75, el: rand(0.22, 0.66), t: rand(0, 5), speed: rand(0.04, 0.075), size: critterSize() * rand(0.5, 1.05), life: 0 });
       nextFlyer = rand(14, 30);
+    }
+    // Halloween: a bat now and then at dusk and after dark (never more than 2 a minute) and a tiny ghost even more rarely (never more than 1 every 3 minutes).
+    const dark = HW_LEVEL > 0 && nightness() > 0.2;
+    nextBat -= dt; nextGhost -= dt;
+    if (nextBat <= 0) {
+      if (dark && !flyers.some(f => f.kind === "bat")) {
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        flyers.push({ kind: "bat", dir, az: camYaw - dir * 0.75, el: rand(0.3, 0.62), t: rand(0, 5), speed: rand(0.07, 0.11), size: critterSize() * rand(0.55, 0.9), life: 0 });
+        nextBat = rand(30, 55);
+      } else nextBat = rand(5, 12);
+    }
+    if (nextGhost <= 0) {
+      if (dark && !flyers.some(f => f.kind === "ghost")) {
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        flyers.push({ kind: "ghost", dir, az: camYaw - dir * 0.75, el: rand(0.42, 0.6), t: rand(0, 5), speed: rand(0.035, 0.05), size: critterSize() * rand(0.85, 1.05), life: 0 });
+        nextGhost = rand(180, 240);
+      } else nextGhost = rand(8, 20);
     }
     flyers.forEach(f => { f.t += dt; f.life += dt; f.az += f.dir * f.speed * dt; });
     flyers = flyers.filter(f => f.life < 45 && Math.abs(angDiff(f.az, camYaw)) < 1.25 + (f.life < 3 ? 1 : 0));
@@ -2828,6 +2871,12 @@
     ctx.fillStyle = "rgba(255, 150, 185, 0.6)"; ctx.beginPath(); ctx.arc(19.5, -8.6, 1.1, 0, Math.PI * 2); ctx.fill();
     flyerWing(0, -5, t, 1.1);
   }
+  function drawFlyingBat(t) {
+    const g = ctx.createRadialGradient(0, -2, 4, 0, -2, 46); g.addColorStop(0, "rgba(200, 185, 255, 0.28)"); g.addColorStop(1, "rgba(200, 185, 255, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -2, 46, 0, Math.PI * 2); ctx.fill();
+    LH.bat(ctx, 0, 0, 0.5, reduceMotion ? 0 : Math.sin(t * 9) * 0.9, true);
+  }
+  function drawFlyingGhost(t) { LH.ghost(ctx, 0, 0, 0.62, t, 1, true); }
   function drawFlyers() {
     flyers.forEach(f => {
       const x = skyX(f.az); if (x === null) return;
@@ -2835,7 +2884,7 @@
       // moving across the sky: face the way it's going on screen
       const face = angDiff(f.az + f.dir * 0.01, camYaw) > angDiff(f.az, camYaw) ? 1 : -1;
       ctx.save(); ctx.translate(x, y); ctx.scale(face * f.size, f.size); ctx.rotate(Math.sin(f.t * 1.1 + 1) * 0.06);
-      if (f.kind === "pig") drawFlyingPig(f.t); else if (f.kind === "bunny") drawFlyingBunny(f.t); else drawFlyingUnicorn(f.t);
+      if (f.kind === "bat") drawFlyingBat(f.t); else if (f.kind === "ghost") drawFlyingGhost(f.t); else if (f.kind === "pig") drawFlyingPig(f.t); else if (f.kind === "bunny") drawFlyingBunny(f.t); else drawFlyingUnicorn(f.t);
       ctx.restore();
     });
   }
@@ -3273,6 +3322,40 @@
     ctx.moveTo(p.x + 4 * k, p.y); ctx.quadraticCurveTo(p.x + 5 * k, p.y - h * 0.5, p.x + 9 * k + sway + t.lean * h, p.y - h * 0.7);
     ctx.stroke();
     ctx.globalAlpha = 1;
+  }
+  // ---------- Halloween pumpkins: the approved pumpkin, drawn once as a small picture and reused ----------
+  const PUMPKIN_UNITS = 1.25;
+  const PSP = 3, PUW = 140, PUH = 100;
+  const pumpkinPics = {};
+  let pumpkinGlows = [];
+  function pumpkinPic(m, lit) {
+    const key = m.shape.name + m.face + (lit ? "L" : "D");
+    let c = pumpkinPics[key]; if (c) return c;
+    c = document.createElement("canvas"); c.width = PUW * PSP; c.height = PUH * PSP;
+    LH.pumpkin(c.getContext("2d"), PUW * PSP / 2, (PUH - 10) * PSP, PSP, lit ? "glow" : "carved", { shape: Object.assign({}, m.shape, { face: m.face }), halo: false });
+    return (pumpkinPics[key] = c);
+  }
+  function drawPumpkin(m, p) {
+    const fa = fadeFor(p.f); if (fa <= 0.01) return;
+    const sc = p.k * PUMPKIN_UNITS * m.s, nk = clamp((nightness() + goldness() * 0.35 - 0.12) / 0.4, 0, 1);
+    const x = p.x - PUW / 2 * sc, y = p.y - (PUH - 10) * sc, w = PUW * sc, h = PUH * sc;
+    ctx.globalAlpha = fa; ctx.drawImage(pumpkinPic(m, false), x, y, w, h);
+    if (nk > 0.02) {
+      const fl = reduceMotion ? 1 : 1 + 0.07 * Math.sin(time * 7 + m.ph * 3) + 0.05 * Math.sin(time * 12.7 + m.ph);
+      ctx.globalAlpha = fa * nk; ctx.drawImage(pumpkinPic(m, true), x, y, w, h);
+      ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = fa * nk * 0.3; ctx.drawImage(pumpkinPic(m, true), x, y, w, h);
+      ctx.globalCompositeOperation = "source-over";
+      pumpkinGlows.push({ x: p.x, y: p.y - 24 * sc * m.shape.h, r: 110 * sc * m.shape.w, a: fa * nk * fl });
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawPumpkinGlows() {
+    pumpkinGlows.forEach(g => {
+      const gr = ctx.createRadialGradient(g.x, g.y, g.r * 0.04, g.x, g.y, g.r);
+      gr.addColorStop(0, `rgba(255, 200, 90, ${0.4 * g.a})`); gr.addColorStop(0.5, `rgba(255, 170, 70, ${0.15 * g.a})`); gr.addColorStop(1, "rgba(255, 150, 60, 0)");
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2); ctx.fill();
+    });
+    pumpkinGlows = [];
   }
   function drawRock(r, p) {
     const a = fadeFor(p.f); if (a <= 0.01) return;
@@ -4715,6 +4798,7 @@
     const inView = (p, m) => p && p.x > -m && p.x < W + m;
     list.forEach(ch => {
       ch.tufts.forEach(t => { const p = proj(t.x, t.y, 0); if (inView(p, 60) && p.f < 950 && p.f > 80) items.push({ f: p.f, d: () => drawTuft(t, p) }); });
+      ch.pumpkins.forEach(m => { if (m.th > HW_LEVEL) return; const p = proj(m.x, m.y, 0); if (p && p.f > 70 && inView(p, 80 * m.s * p.k + 40)) items.push({ f: p.f, d: () => drawPumpkin(m, p) }); });
       ch.rocks.forEach(r => { const p = proj(r.x, r.y, 0); if (inView(p, 80)) items.push({ f: p.f, d: () => drawRock(r, p) }); });
       ch.shrooms.forEach(m => { const p = proj(m.x, m.y, 0); if (inView(p, m.w * (p ? p.k : 1) + 40)) items.push({ f: p.f, d: () => drawShroom(m, p) }); });
       ch.flowers.forEach(fl => {
@@ -4892,6 +4976,7 @@
     drawParticles();
     drawChargeMeter();
     drawLight(dusk);
+    drawPumpkinGlows();
     {   // v36: a gentle vignette, like the Playhouse
       const vg = ctx.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.45, W / 2, H * 0.5, Math.max(W, H) * 0.8);
       vg.addColorStop(0, "rgba(40, 30, 70, 0)"); vg.addColorStop(1, "rgba(40, 30, 70, 0.16)");
