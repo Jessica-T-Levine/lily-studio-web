@@ -318,14 +318,14 @@ html.ph-full { background: #8DB6EE; }
 html.ph-full .playhouse-stage { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 1000; background: #8DB6EE; }
 html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important; }
 /* loading screen: the live sky with the very same clouds as the Playhouse sky, then they part to show the Playhouse */
-.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(#8DB6EE, #B7D2F4 45%, #FFE6C2 80%, #FFE2B0); color: #0B1E3F; transition: background-color 0.4s ease 0.7s, opacity 0.4s ease 0.9s; }
+.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(#8DB6EE, #B7D2F4 45%, #FFE6C2 80%, #FFE2B0); color: #0B1E3F; transition: background-color 5s ease, opacity 5s ease; }
 .playhouse-loading.done { background: transparent !important; opacity: 0; pointer-events: none; }
-.playhouse-loading .cl { overflow: visible; position: absolute; top: -3%; height: 106%; width: 72%; animation: phDrift 5s ease-in-out infinite alternate; transition: transform 1.25s cubic-bezier(0.65, 0, 0.35, 1); }
+.playhouse-loading .cl { overflow: visible; position: absolute; top: -3%; height: 106%; width: 72%; animation: phDrift 5s ease-in-out infinite alternate; transition: transform 5s cubic-bezier(0.65, 0, 0.35, 1); }
 .playhouse-loading .cl-l { left: -12%; } .playhouse-loading .cl-r { right: -12%; animation-delay: -2.5s; }
 .playhouse-loading.done .cl-l { transform: translateX(-125%); animation: none; }
 .playhouse-loading.done .cl-r { transform: translateX(125%); animation: none; }
 .playhouse-loading .ld-bee { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
-.playhouse-loading .ld-msg { position: relative; z-index: 2; text-align: center; transition: opacity 0.4s ease, transform 0.6s ease; }
+.playhouse-loading .ld-msg { position: relative; z-index: 2; text-align: center; transition: opacity 2s ease, transform 2.4s ease; }
 .playhouse-loading.done .ld-msg { opacity: 0; transform: scale(0.94); }
 .playhouse-loading p { margin: 0; font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 1.3rem; text-shadow: 0 2px 12px rgba(255, 255, 255, 0.95), 0 0 4px rgba(255, 255, 255, 0.8); }
 .playhouse-loading.night { color: #FDFBF7; } .playhouse-loading.night p { text-shadow: 0 2px 12px rgba(6, 18, 42, 0.9); }
@@ -629,7 +629,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
     var LS = window.LilySky;
     if (LS) { var c = LS.skyRgb().map(function (v) { return 'rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ')'; }); box.style.background = 'linear-gradient(' + c[0] + ',' + c[1] + ' 40%,' + c[2] + ' 78%,' + c[3] + ')'; if (LS.nightness() > 0.5) box.classList.add('night'); }
   } catch (e) {}
-  function hide() { if (gone) return; gone = true; box.classList.add('done'); setTimeout(function () { box.style.display = 'none'; }, 1500); }
+  function hide() { if (gone) return; gone = true; box.classList.add('done'); setTimeout(function () { box.style.display = 'none'; }, 5200); }
 
   // A tiny pink bee (the Playhouse's own bee) buzzes in from the left, loops around the words, then flies off to the right as the clouds part.
   (function () {
@@ -645,12 +645,12 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
       var t = (now - t0) / 1000, cx = W / 2, cy = H / 2, A = Math.min(W * 0.42, 150), B = 44, x, y;
       if (exit === null && box.classList.contains('done')) exit = { t: t, x: prevX, y: cy };
       if (exit !== null) {
-        var u = Math.min(1, (t - exit.t) / 1.3);
+        var u = Math.min(1, (t - exit.t) / 2.6);
         x = exit.x + (W + 70 - exit.x) * u * u; y = exit.y - 30 * ease(u);
-      } else if (t < 1.4) {
-        var e = ease(t / 1.4); x = -30 + (cx - A + 30) * e; y = cy + Math.sin(t * 9) * 8;
+      } else if (t < 2.8) {
+        var e = ease(t / 2.8); x = -30 + (cx - A + 30) * e; y = cy + Math.sin(t * 4.5) * 8;
       } else {
-        var th = -Math.PI / 2 + (t - 1.4) * 1.5; x = cx + A * Math.sin(th); y = cy + B * Math.sin(2 * th) + Math.sin(t * 7) * 3;
+        var th = -Math.PI / 2 + (t - 2.8) * 0.75; x = cx + A * Math.sin(th); y = cy + B * Math.sin(2 * th) + Math.sin(t * 3.5) * 3;
       }
       var vx = x - prevX; prevX = x;
       var target = vx >= 0 ? Math.PI / 2 : -Math.PI / 2; yaw += (target - yaw) * 0.15;
