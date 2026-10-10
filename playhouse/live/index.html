@@ -361,6 +361,12 @@
     .vid-full:hover { background: rgba(249, 102, 188, 0.28); box-shadow: 0 0 18px rgba(249, 102, 188, 0.3); }
     .vid-full:focus-visible { outline: 2px solid var(--white, #fff); outline-offset: 3px; }
     .vid-full svg { width: 18px; height: 18px; }
+    .vid-tools { flex-wrap: wrap; gap: 10px 12px; }
+    .vid-yt { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid rgba(253, 251, 247, 0.4); background: rgba(253, 251, 247, 0.06); color: var(--cream); font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; text-decoration: none; transition: background 0.25s var(--ease), border-color 0.25s var(--ease); }
+    .vid-yt:hover { background: rgba(253, 251, 247, 0.14); border-color: var(--cream); }
+    .vid-yt:focus-visible { outline: 2px solid var(--white, #fff); outline-offset: 3px; }
+    .vid-yt svg { width: 22px; height: 22px; color: #FF4D6D; }
+    body.cam-full .vid-yt { display: none; }
     /* Full screen: the video fills the whole phone screen; the same button becomes "Exit" */
     body.cam-full { overflow: hidden; }
     body.cam-full .vid-screen { position: fixed; inset: 0; z-index: 9998; width: 100vw; height: 100vh; height: 100dvh; max-width: none; aspect-ratio: auto; border-radius: 0; border: 0; }
@@ -452,7 +458,7 @@
         <div class="vid-screen" id="camScreen"></div>
         <div class="cam-feet" aria-hidden="true"><i></i><i></i></div>
       </div>
-      <div class="vid-tools"><button type="button" class="vid-full" id="camFull" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full screen</span></button></div>
+      <div class="vid-tools"><button type="button" class="vid-full" id="camFull" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full screen</span></button><a class="vid-yt" href="https://www.youtube.com/@Thelilystudio" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4.5" fill="currentColor"/><path d="M10 9.3v5.4l4.8-2.7z" fill="#0B1E3F"/></svg><span>Watch whole days on YouTube</span></a></div>
       <div class="vid-now">
         <p class="vid-now-label" id="camLabel">Live now</p>
         <h2 id="camTitle">Hop Hop’s Pond</h2>
