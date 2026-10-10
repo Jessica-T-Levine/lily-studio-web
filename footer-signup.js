@@ -15,6 +15,7 @@
       ".fs-signup{max-width:520px;margin:0 auto 28px;padding:0 4px;text-align:center}" +
       ".fs-signup .fs-title{margin:0 0 6px;font:400 1.35rem/1.25 var(--font-serif,Georgia,serif);color:var(--cream,#FDFBF7)}" +
       ".fs-signup .fs-title em{color:#C277F5;font-style:italic}" +
+      ".fs-signup .fs-br{display:none}" +
       ".fs-signup .fs-sub{margin:0 0 14px;font:400 .85rem/1.5 var(--font-display,system-ui,sans-serif);color:var(--gray-light,#A8B2D1)}" +
       ".fs-signup form{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}" +
       ".fs-signup input[type=email]{flex:1 1 200px;max-width:280px;box-sizing:border-box;background:var(--navy-deep,#06122A);border:1px solid var(--gray-mid,#233554);border-radius:999px;padding:11px 16px;font:400 .9rem var(--font-display,system-ui,sans-serif);color:var(--cream,#FDFBF7);outline:none}" +
@@ -26,13 +27,13 @@
       ".fs-signup .fs-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}" +
       ".fs-signup .fs-status{min-height:1.3em;margin:10px 0 0;font:400 .82rem var(--font-display,system-ui,sans-serif);color:#A3D977}" +
       ".fs-signup .fs-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}" +
-      "@media(max-width:600px){.fs-signup input[type=email]{font-size:16px;max-width:none}.fs-signup button{width:100%}}";
+      "@media(max-width:600px){.fs-signup .fs-br{display:inline}.fs-signup input[type=email]{font-size:16px;max-width:none}.fs-signup button{width:100%}}";
     document.head.appendChild(css);
 
     var box = document.createElement("div");
     box.className = "fs-signup";
     box.innerHTML =
-      '<p class="fs-title">One tiny Claude tip, <em>every Tuesday.</em></p>' +
+      '<p class="fs-title">One tiny Claude tip,<br class="fs-br"> <em>every Tuesday.</em></p>' +
       '<p class="fs-sub">A 60-second tip and one great skill in your inbox. Unsubscribe anytime.</p>' +
       '<form action="' + FORM_URL + '" method="post">' +
       '<label class="fs-sr" for="fs-email">Email address</label>' +
