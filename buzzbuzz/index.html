@@ -468,6 +468,10 @@
  .site-header .nav-links a{letter-spacing:.05em}
 }
 .site-header .dm-t em{font-style:normal;font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#7DD3FC;margin-left:6px}
+/* ── Menu v8b: arrows ›closed ⌄open, none when no submenu ── */
+.site-header .nav-drop-btn svg{transform:rotate(-90deg)!important}
+.site-header .nav-drop.open .nav-drop-btn svg,.site-header .nav-drop:hover .nav-drop-btn svg{transform:rotate(0deg)!important}
+@media (max-width:768px){.site-header .nav-links>li>a:not(.nav-cta)::after{content:none!important;display:none!important}}
 </style>
 </head>
 <body>
