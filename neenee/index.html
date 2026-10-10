@@ -783,6 +783,8 @@
   </footer>
 </div>
 
+<script src="/lily-home-sky-v1.js"></script>
+<script src="/lily-sky-v1.js"></script>
 <script src="lily-creatures-v4.js"></script>
 <script src="/playhouse/lily-halloween-v1.js"></script>
 <script>
@@ -2098,6 +2100,7 @@
   try { const mh = /^#h(\d{1,2}(\.\d+)?)/.exec(location.hash); if (mh) testHour = parseFloat(mh[1]) % 24; } catch (_) {}
   function hourNow() {
     if (testHour !== null) return testHour;
+    if (window.LilySky) return window.LilySky.hour();   // the one shared live sky: Lily's home sky on Central Time
     const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
   }
   function cycle() {

@@ -597,6 +597,8 @@
   </footer>
 </div>
 
+<script src="/lily-home-sky-v1.js"></script>
+<script src="/lily-sky-v1.js"></script>
 <script src="/playhouse/lily-creatures-v4.js"></script>
 <script src="/playhouse/lily-playhouse-design.js"></script>
 <script src="/playhouse/lily-bee-home-v1.js"></script>
@@ -2651,6 +2653,7 @@
   // The night stays a little lighter here than in the Playhouse, so you can always see where she's going.
   function hourNow() {
     if (testHour !== null) return testHour;
+    if (window.LilySky) return window.LilySky.hour();   // the one shared live sky: Lily's home sky on Central Time
     const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
   }
   let HOUR = hourNow();
