@@ -324,18 +324,13 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
 .playhouse-loading .cl-l { left: -12%; } .playhouse-loading .cl-r { right: -12%; animation-delay: -2.5s; }
 .playhouse-loading.done .cl-l { transform: translateX(-125%); animation: none; }
 .playhouse-loading.done .cl-r { transform: translateX(125%); animation: none; }
+.playhouse-loading .ld-bee { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
 .playhouse-loading .ld-msg { position: relative; z-index: 2; text-align: center; transition: opacity 0.4s ease, transform 0.6s ease; }
 .playhouse-loading.done .ld-msg { opacity: 0; transform: scale(0.94); }
 .playhouse-loading p { margin: 0; font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 1.3rem; text-shadow: 0 2px 12px rgba(255, 255, 255, 0.95), 0 0 4px rgba(255, 255, 255, 0.8); }
 .playhouse-loading.night { color: #FDFBF7; } .playhouse-loading.night p { text-shadow: 0 2px 12px rgba(6, 18, 42, 0.9); }
-.playhouse-loading .sp { display: inline-block; margin: 0 6px; font-style: normal; animation: phTwinkle 1.6s ease-in-out infinite; }
-.playhouse-loading .sp:nth-child(1) { color: #F966BC; }
-.playhouse-loading .sp:nth-child(2) { color: #7DD3FC; animation-delay: .25s; }
-.playhouse-loading .sp:nth-child(3) { color: #C277F5; animation-delay: .5s; }
-.playhouse-loading .sp-row { margin-bottom: 8px; font-size: 1.6rem; line-height: 1; }
 @keyframes phDrift { from { margin-top: -8px; } to { margin-top: 8px; } }
-@keyframes phTwinkle { 0%, 100% { transform: scale(0.7) rotate(0); opacity: .55; } 50% { transform: scale(1.25) rotate(20deg); opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .playhouse-loading .cl, .playhouse-loading .sp { animation: none; } .playhouse-loading .cl { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .playhouse-loading .cl { animation: none; } .playhouse-loading .cl { transition: none; } }
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -460,7 +455,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   <main class="playhouse">
     <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily’s Playhouse</h1>
     <div class="playhouse-stage">
-      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="phCloud" fill="rgba(255,244,248,0.97)"><ellipse cx="0" cy="0" rx="50" ry="12"/><ellipse cx="-18" cy="-9" rx="22" ry="13"/><ellipse cx="14" cy="-12" rx="26" ry="16"/></g></defs></svg><svg class="cl cl-l" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(169 13) scale(2.38)"/><use href="#phCloud" transform="translate(105 102) scale(2.68)"/><use href="#phCloud" transform="translate(150 177) scale(2.79)"/><use href="#phCloud" transform="translate(100 259) scale(2.24)"/><use href="#phCloud" transform="translate(153 345) scale(2.46)"/><use href="#phCloud" transform="translate(92 429) scale(2.58)"/><use href="#phCloud" transform="translate(150 519) scale(2.71)"/><use href="#phCloud" transform="translate(88 602) scale(2.33)"/><use href="#phCloud" transform="translate(155 676) scale(2.73)"/></svg><svg class="cl cl-r" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(84 16) scale(2.63)"/><use href="#phCloud" transform="translate(154 86) scale(2.29)"/><use href="#phCloud" transform="translate(86 175) scale(2.74)"/><use href="#phCloud" transform="translate(177 264) scale(2.32)"/><use href="#phCloud" transform="translate(110 344) scale(2.34)"/><use href="#phCloud" transform="translate(155 428) scale(2.86)"/><use href="#phCloud" transform="translate(110 518) scale(2.88)"/><use href="#phCloud" transform="translate(159 603) scale(2.22)"/><use href="#phCloud" transform="translate(85 682) scale(2.86)"/></svg><div class="ld-msg"><div class="sp-row" aria-hidden="true"><span class="sp">&#10022;</span><span class="sp">&#10022;</span><span class="sp">&#10022;</span></div><p>Going to the Playhouse…</p></div></div>
+      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="phCloud" fill="rgba(255,244,248,0.97)"><ellipse cx="0" cy="0" rx="50" ry="12"/><ellipse cx="-18" cy="-9" rx="22" ry="13"/><ellipse cx="14" cy="-12" rx="26" ry="16"/></g></defs></svg><svg class="cl cl-l" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(175 -1) scale(2.08)"/><use href="#phCloud" transform="translate(115 72) scale(2.82)"/><use href="#phCloud" transform="translate(167 140) scale(4.41)"/><use href="#phCloud" transform="translate(88 209) scale(2.6)"/><use href="#phCloud" transform="translate(183 265) scale(2.74)"/><use href="#phCloud" transform="translate(92 338) scale(4.63)"/><use href="#phCloud" transform="translate(156 409) scale(2.63)"/><use href="#phCloud" transform="translate(125 470) scale(2.72)"/><use href="#phCloud" transform="translate(140 529) scale(2.12)"/><use href="#phCloud" transform="translate(75 610) scale(3.82)"/><use href="#phCloud" transform="translate(144 665) scale(4.28)"/><use href="#phCloud" transform="translate(117 734) scale(4.36)"/></svg><svg class="cl cl-r" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(108 8) scale(1.74)"/><use href="#phCloud" transform="translate(170 72) scale(3.89)"/><use href="#phCloud" transform="translate(86 128) scale(2.99)"/><use href="#phCloud" transform="translate(158 205) scale(4.29)"/><use href="#phCloud" transform="translate(96 270) scale(2.92)"/><use href="#phCloud" transform="translate(145 340) scale(3.43)"/><use href="#phCloud" transform="translate(103 408) scale(1.65)"/><use href="#phCloud" transform="translate(170 478) scale(3.21)"/><use href="#phCloud" transform="translate(105 537) scale(2.07)"/><use href="#phCloud" transform="translate(183 612) scale(4.2)"/><use href="#phCloud" transform="translate(75 662) scale(4.09)"/><use href="#phCloud" transform="translate(162 738) scale(4.01)"/></svg><canvas class="ld-bee" id="phBee" aria-hidden="true"></canvas><div class="ld-msg"><p>Going to the Playhouse…</p></div></div>
       <iframe class="playhouse-frame" src="/playhouse/world.html" title="Lily’s Playhouse: a little living world where all of Lily’s games take place" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
       <div class="playhouse-tip" id="playhouseTip" role="status" aria-live="polite">Tap or click the little house in the top right corner for more options</div>
     </div>
@@ -622,6 +617,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
 </script>
 <script src="/lily-home-sky-v1.js"></script>
 <script src="/lily-sky-v1.js"></script>
+<script src="/playhouse/lily-creatures-v4.js"></script>
 <script>
 /* Loading screen: shows until the world has loaded and drawn its first picture, then the clouds part and it fades away.
    (It also gives up after 12 seconds so it can never get stuck.) */
@@ -634,6 +630,36 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
     if (LS) { var c = LS.skyRgb().map(function (v) { return 'rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ')'; }); box.style.background = 'linear-gradient(' + c[0] + ',' + c[1] + ' 40%,' + c[2] + ' 78%,' + c[3] + ')'; if (LS.nightness() > 0.5) box.classList.add('night'); }
   } catch (e) {}
   function hide() { if (gone) return; gone = true; box.classList.add('done'); setTimeout(function () { box.style.display = 'none'; }, 1500); }
+
+  // A tiny pink bee (the Playhouse's own bee) buzzes in from the left, loops around the words, then flies off to the right as the clouds part.
+  (function () {
+    var cv = document.getElementById('phBee'), LC = window.LilyCreatures;
+    if (!cv || !LC || !LC.bee || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    var ctx = cv.getContext('2d'), dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0;
+    function size() { W = box.clientWidth; H = box.clientHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    size(); window.addEventListener('resize', size);
+    var t0 = performance.now(), prevX = -40, yaw = Math.PI / 2, exit = null;
+    var ease = function (u) { return u * u * (3 - 2 * u); };
+    function frame(now) {
+      if (box.style.display === 'none') return;
+      var t = (now - t0) / 1000, cx = W / 2, cy = H / 2, A = Math.min(W * 0.42, 150), B = 44, x, y;
+      if (exit === null && box.classList.contains('done')) exit = { t: t, x: prevX, y: cy };
+      if (exit !== null) {
+        var u = Math.min(1, (t - exit.t) / 1.3);
+        x = exit.x + (W + 70 - exit.x) * u * u; y = exit.y - 30 * ease(u);
+      } else if (t < 1.4) {
+        var e = ease(t / 1.4); x = -30 + (cx - A + 30) * e; y = cy + Math.sin(t * 9) * 8;
+      } else {
+        var th = -Math.PI / 2 + (t - 1.4) * 1.5; x = cx + A * Math.sin(th); y = cy + B * Math.sin(2 * th) + Math.sin(t * 7) * 3;
+      }
+      var vx = x - prevX; prevX = x;
+      var target = vx >= 0 ? Math.PI / 2 : -Math.PI / 2; yaw += (target - yaw) * 0.15;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      try { LC.bee.draw(ctx, x, y, 0.8, yaw, 0.25, { t: t, flying: true, pal: 'pink', lift: 0, shadow: false }); } catch (e2) { return; }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
   frame.addEventListener('load', function () { setTimeout(hide, 700); });
   try { if (frame.contentDocument && frame.contentDocument.readyState === 'complete' && frame.contentWindow.location.href !== 'about:blank') setTimeout(hide, 700); } catch (e) {}
   setTimeout(hide, 12000);
