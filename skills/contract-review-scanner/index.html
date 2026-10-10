@@ -455,6 +455,30 @@
  .site-header .nav-links a.nav-cta{display:block!important;width:100%;text-align:center;padding:16px 24px!important;font-size:1rem!important;border-radius:12px!important}
  .site-header .nav-links a.nav-cta::after{display:none!important}
 }
+/* ── Menu upgrade v8: tap-to-open sections ── */
+@media (max-width:768px){
+ .site-header .nav-drop{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center!important}
+ .site-header .nav-drop>a{flex:1 1 auto;width:auto!important;padding:15px 6px!important}
+ .site-header .nav-links>li.nav-drop>a::after{content:none!important;display:none!important}
+ .site-header .nav-drop-btn{display:grid!important;width:44px;height:44px;margin:0!important;padding:0!important;color:#F966BC;flex:0 0 auto}
+ .site-header .nav-drop-btn svg{width:16px;height:16px}
+ .site-header .nav-drop-menu{display:none;flex:0 0 100%;width:100%;padding:0 0 12px!important;transform:none!important;left:auto!important;opacity:1!important;visibility:visible!important}
+ .site-header .nav-links .nav-drop-panel{min-width:0!important;width:100%}
+ .site-header .nav-drop.open .nav-drop-menu{display:block;animation:dmOpen .25s ease}
+ .site-header .nav-drop.open>a{color:#F966BC}
+ @keyframes dmOpen{from{opacity:0}to{opacity:1}}
+}
+@media (min-width:769px) and (max-width:1100px){
+ .site-header .nav-drop{gap:0}
+ .site-header .nav-drop-btn{padding:8px 3px;margin:-8px -2px -8px 1px}
+ .site-header .nav-drop-btn svg{width:10px;height:10px}
+}
+@media (min-width:769px) and (max-width:900px){
+ .site-header .nav-links{gap:11px}
+ .site-header .nav-wordmark img{height:46px}
+ .site-header .nav-links a{letter-spacing:.05em}
+}
+.site-header .dm-t em{font-style:normal;font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#7DD3FC;margin-left:6px}
 </style>
 </head>
 <body>
@@ -469,14 +493,37 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links">
-        <li><a href="/apps.html">Apps</a></li>
-        <li><a href="/planners.html">Planners</a></li>
+        <li class="nav-drop">
+          <a href="/apps.html">Apps</a>
+          <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu-apps" aria-label="More in Apps"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-drop-menu" id="nav-drop-menu-apps">
+            <ul class="nav-drop-panel">
+              <li><a href="/apps.html"><span class="dm-t">All Apps</span><span class="dm-d">See everything we are building</span></a></li>
+              <li><a href="/apps.html#blocks-and-breath"><span class="dm-t">Blocks and Breath</span><span class="dm-d">Coming soon · a calm falling-block puzzle</span></a></li>
+              <li><a href="/apps.html#calming-water"><span class="dm-t">Calming Water: Baby &amp; Toddler</span><span class="dm-d">Coming soon · soothing water for little ones</span></a></li>
+              <li><a href="/apps.html#fidge"><span class="dm-t">Fidge</span><span class="dm-d">In testing · tactile fidget toys</span></a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-drop">
+          <a href="/planners.html">Planners</a>
+          <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu-planners" aria-label="More in Planners"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-drop-menu" id="nav-drop-menu-planners">
+            <ul class="nav-drop-panel">
+              <li><a href="/planners.html"><span class="dm-t">All Planners</span><span class="dm-d">Browse the whole collection</span></a></li>
+              <li><a href="/planners.html#budget-finance-2027"><span class="dm-t">2027 Budget &amp; Finance</span><span class="dm-d">Plan your money for the year ahead</span></a></li>
+              <li><a href="/planners.html#christmas-holiday"><span class="dm-t">Christmas &amp; Holiday</span><span class="dm-d">Plan the season with ease</span></a></li>
+              <li><a href="/planners.html#holiday-hosting"><span class="dm-t">Holiday &amp; Hosting</span><span class="dm-d">Host with confidence</span></a></li>
+            </ul>
+          </div>
+        </li>
         <li><a href="/printed.html">Printed</a></li>
         <li class="nav-drop">
           <a href="/playhouse/">Lily’s Playhouse</a>
           <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu" aria-label="More in Lily’s Playhouse"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="nav-drop-menu" id="nav-drop-menu">
             <ul class="nav-drop-panel">
+              <li><a href="/playhouse/"><span class="dm-t">Visit the Playhouse</span><span class="dm-d">Meet Hop Hop, Buzz Buzz, and Nee Nee</span></a></li>
               <li><a href="/playhouse/games/"><span class="dm-t">Play Games</span><span class="dm-d">Cute browser games for little hands</span></a></li>
               <li><a href="/playhouse/live/"><span class="dm-t"><i class="dm-live" aria-hidden="true"></i>Live Cams</span><span class="dm-d">Watch Hop Hop live, anytime</span></a></li>
               <li><a href="https://www.youtube.com/@Thelilystudio" target="_blank" rel="noopener"><span class="dm-t">Watch on YouTube</span><span class="dm-d">Full episodes and sing-alongs</span></a></li>
@@ -619,20 +666,26 @@
 })();
 </script>
 <script>
-/* Update 21: the Lily's Playhouse dropdown. The little arrow opens and closes it (that's how it works
-   on iPad and phones); a computer can also just hover. It closes when you tap somewhere else, press
-   Escape, scroll, or click into the Playhouse world. */
+/* Menu sections: Apps, Planners and Lily's Playhouse open and close. On a phone, tap the row (or the arrow);
+   on a computer, hover. One section is open at a time. The section you are in opens by itself on a phone. */
 (function () {
-  var drop = document.querySelector('.site-header .nav-drop');
-  if (!drop) return;
-  var btn = drop.querySelector('.nav-drop-btn');
-  function set(open) { drop.classList.toggle('open', open); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
-  btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); set(!drop.classList.contains('open')); });
-  document.addEventListener('click', function (e) { if (!drop.contains(e.target)) set(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drop.classList.contains('open')) { set(false); btn.focus(); } });
-  window.addEventListener('scroll', function () { if (drop.classList.contains('open')) set(false); }, { passive: true });
-  window.addEventListener('blur', function () { set(false); });
-  drop.addEventListener('mouseleave', function () { if (window.matchMedia('(hover: hover)').matches) set(false); });
+  var drops = [].slice.call(document.querySelectorAll('.site-header .nav-drop'));
+  if (!drops.length) return;
+  var phone = window.matchMedia('(max-width: 768px)');
+  function set(d, open) { d.classList.toggle('open', open); var b = d.querySelector('.nav-drop-btn'); if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  function closeAll(except) { drops.forEach(function (d) { if (d !== except) set(d, false); }); }
+  function toggle(d) { var o = !d.classList.contains('open'); closeAll(d); set(d, o); }
+  drops.forEach(function (d) {
+    var b = d.querySelector('.nav-drop-btn'), a = d.querySelector('a');
+    b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); toggle(d); });
+    a.addEventListener('click', function (e) { if (phone.matches) { e.preventDefault(); e.stopPropagation(); toggle(d); } });
+    d.addEventListener('mouseleave', function () { if (!phone.matches && window.matchMedia('(hover: hover)').matches) set(d, false); });
+    if (phone.matches && d.querySelector('.nav-drop-panel [aria-current="page"]')) set(d, true);
+  });
+  document.addEventListener('click', function (e) { if (!phone.matches) drops.forEach(function (d) { if (!d.contains(e.target)) set(d, false); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+  window.addEventListener('scroll', function () { if (!phone.matches) closeAll(); }, { passive: true });
+  window.addEventListener('blur', function () { if (!phone.matches) closeAll(); });
 })();
 </script>
 <script>
