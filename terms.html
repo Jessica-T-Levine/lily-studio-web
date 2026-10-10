@@ -284,7 +284,11 @@
       .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
     }
     @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
-  </style>
+  
+/* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
+.footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
+.pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+</style>
 </head>
 <body>
 

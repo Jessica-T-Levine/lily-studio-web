@@ -326,7 +326,11 @@
     .games-back a:hover { text-shadow: 0 0 12px var(--pink-glow); }
     @media (max-width: 700px) { .games-page { padding: 48px 16px 64px; } .games-hero { margin-bottom: 32px; } }
     @media (prefers-reduced-motion: reduce) { .game-art canvas { animation: none; } .game-card, a.game-btn.play { transition: none; } }
-  </style>
+  
+/* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
+.footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
+.pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+</style>
 </head>
 <body>
 
