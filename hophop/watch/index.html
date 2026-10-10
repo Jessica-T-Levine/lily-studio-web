@@ -2599,17 +2599,23 @@ if (/[?&]render=1(&|$)/.test(location.search) || (window.WATCH_CONFIG && window.
   } else {
     // Live watching: sound starts on the first tap (a browser rule)
     const soundBtn = document.getElementById("soundBtn"), vol = document.getElementById("vol");
+    // iPhone/iPad rules: sound only counts when it starts from a finished tap (click / touchend), and the
+    // phone's silent switch mutes web sound unless the page says it is "playback". So: ask for playback,
+    // create the sound system on the first tap, and wake it up (resume) on every tap until it is running.
     function startSound() {
-      if (actx) return;
-      try {
-        actx = new (window.AudioContext || window.webkitAudioContext)();
-        makeBuses(actx); startPond();
-        master.gain.value = Math.pow(vol.value / 100, 2) * 1.4;
-        soundBtn.textContent = "Volume"; vol.hidden = false;
-      } catch (e) { actx = null; }
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
+      if (!actx) {
+        try {
+          actx = new (window.AudioContext || window.webkitAudioContext)();
+          makeBuses(actx); startPond();
+          master.gain.value = Math.pow(vol.value / 100, 2) * 1.4;
+          soundBtn.textContent = "Volume"; vol.hidden = false;
+        } catch (e) { actx = null; return; }
+      }
+      if (actx.state !== "running") { try { actx.resume(); } catch (_) {} }
     }
     soundBtn.addEventListener("click", startSound);
-    document.addEventListener("pointerdown", e => { if (!e.target.closest(".sound")) startSound(); }, { once: true });
+    ["pointerup", "click", "touchend"].forEach(ev => document.addEventListener(ev, e => { if (!e.target.closest(".sound") || !actx) startSound(); }, { passive: true }));
     vol.addEventListener("input", () => { if (master) master.gain.setTargetAtTime(Math.pow(vol.value / 100, 2) * 1.4, actx.currentTime, 0.05); });
     document.addEventListener("visibilitychange", () => { if (!actx) return; if (document.hidden) actx.suspend(); else actx.resume(); });
     // tuck the sound control away after a few quiet seconds
