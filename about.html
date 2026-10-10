@@ -296,6 +296,34 @@
 .tcard-desc{font-size:0.82rem!important}
 .btn-primary,.btn-ghost,.app-cta,.cta-btn{font-size:max(0.8rem,12.5px)!important}
 .card-price,.skill-price{font-size:0.95rem!important}
+/* ── Menu upgrade v7: rich Playhouse menu, roomy phone menu, Live Cams ── */
+.site-header .nav-links .nav-drop-panel{min-width:300px;padding:10px}
+.site-header .nav-links .nav-drop-panel a{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:11px 14px;white-space:normal;font-size:.9rem!important}
+.site-header .nav-drop-panel .dm-t{font-family:var(--font-display,'Montserrat',sans-serif);font-weight:700;font-size:.9rem;letter-spacing:.02em;text-transform:none;display:flex;align-items:center;gap:8px}
+.site-header .nav-drop-panel .dm-d{font-family:var(--font-display,'Montserrat',sans-serif);font-weight:500;font-size:.78rem;letter-spacing:0;text-transform:none;color:#9FB0CC}
+.site-header .nav-drop-panel a:hover .dm-d,.site-header .nav-drop-panel a[aria-current="page"] .dm-d{color:#F7B6DA}
+.site-header .dm-live{width:8px;height:8px;border-radius:50%;background:#F966BC;box-shadow:0 0 0 0 rgba(249,102,188,.6);animation:dmPulse 1.8s infinite}
+@keyframes dmPulse{0%{box-shadow:0 0 0 0 rgba(249,102,188,.55)}70%{box-shadow:0 0 0 7px rgba(249,102,188,0)}100%{box-shadow:0 0 0 0 rgba(249,102,188,0)}}
+@media (prefers-reduced-motion:reduce){.site-header .dm-live{animation:none}}
+@media (max-width:768px){
+ .site-header .nav-brand{position:relative;z-index:3}
+ .site-header .nav-toggle{position:relative;z-index:3;padding:10px}
+ .site-header .nav-links{left:10px!important;right:10px!important;top:calc(100% + 6px)!important;padding:46px 14px 16px!important;gap:0!important;border:1px solid #233554!important;border-radius:18px!important;box-shadow:0 22px 48px rgba(0,0,0,.5)!important;max-height:calc(100vh - 100px);overflow-y:auto;z-index:2}
+ .site-header .nav-links>li{width:100%;border-bottom:1px solid rgba(255,255,255,.08)}
+ .site-header .nav-links>li:last-child{border-bottom:0;padding-top:14px}
+ .site-header .nav-links>li>a:not(.nav-cta),.site-header .nav-drop>a{display:flex!important;align-items:center;justify-content:space-between;width:100%;padding:15px 6px!important;font-size:1.05rem!important;letter-spacing:.06em;text-align:left}
+ .site-header .nav-links>li>a:not(.nav-cta)::after{content:"›"!important;position:static!important;width:auto!important;height:auto!important;background:none!important;color:#F966BC;font-size:1.4rem;line-height:1;transform:none!important;opacity:1!important}
+ .site-header .nav-drop{align-items:stretch}
+ .site-header .nav-drop>a{padding-bottom:10px!important}
+ .site-header .nav-drop-menu{width:100%;padding:0 0 14px!important}
+ .site-header .nav-drop-panel{background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:14px!important;padding:6px!important}
+ .site-header .nav-links .nav-drop-panel a{display:flex!important;padding:12px 12px!important;color:#FDFBF7!important;border-radius:10px;font-size:1rem!important}
+ .site-header .nav-links .nav-drop-panel a::before{content:none!important}
+ .site-header .nav-drop-panel .dm-t{font-size:1rem}
+ .site-header .nav-drop-panel .dm-d{font-size:.8rem}
+ .site-header .nav-links a.nav-cta{display:block!important;width:100%;text-align:center;padding:16px 24px!important;font-size:1rem!important;border-radius:12px!important}
+ .site-header .nav-links a.nav-cta::after{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -319,8 +347,9 @@
           <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="nav-drop-menu" aria-label="More in Lily’s Playhouse"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="nav-drop-menu" id="nav-drop-menu">
             <ul class="nav-drop-panel">
-              <li><a href="/playhouse/games/">Play Games</a></li>
-              <li><a href="https://www.youtube.com/@Thelilystudio" target="_blank" rel="noopener">Watch on YouTube</a></li>
+              <li><a href="/playhouse/games/"><span class="dm-t">Play Games</span><span class="dm-d">Cute browser games for little hands</span></a></li>
+              <li><a href="/playhouse/live/"><span class="dm-t"><i class="dm-live" aria-hidden="true"></i>Live Cams</span><span class="dm-d">Watch Hop Hop live, anytime</span></a></li>
+              <li><a href="https://www.youtube.com/@Thelilystudio" target="_blank" rel="noopener"><span class="dm-t">Watch on YouTube</span><span class="dm-d">Full episodes and sing-alongs</span></a></li>
             </ul>
           </div>
         </li>
@@ -375,6 +404,7 @@
       <li><a href="/planners.html">Planners</a></li>
       <li><a href="/printed.html">Printed</a></li>
       <li><a href="/playhouse/">Lily’s Playhouse</a></li>
+      <li><a href="/playhouse/live/">Live Cams</a></li>
       <li><a href="/skills.html#tuesday-tips">Tuesday Tips</a></li>
       <li><a href="/about.html">About</a></li>
       <li><a href="/privacy.html">Privacy</a></li>
