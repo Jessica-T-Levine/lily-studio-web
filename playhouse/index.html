@@ -317,27 +317,23 @@ html.ph-full { background: #8DB6EE; }
 /* full screen: truly edge to edge, under the browser's own bars and the notch */
 html.ph-full .playhouse-stage { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 1000; background: #8DB6EE; }
 html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important; }
-/* loading screen: soft clouds drift over a sunny sky, then part to show the Playhouse */
-.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #FFFFFF; color: #0B1E3F; transition: background-color 0.4s ease 0.7s, opacity 0.4s ease 0.9s; }
-.playhouse-loading.done { background: transparent; opacity: 0; pointer-events: none; }
-.playhouse-loading .cl-wrap { position: absolute; inset: 0; filter: drop-shadow(0 6px 14px rgba(110, 130, 190, 0.30)); }
-.playhouse-loading .cl { position: absolute; top: -4%; bottom: -4%; width: 66%; background: radial-gradient(circle at 28% 22%, rgba(150, 170, 225, 0.20), rgba(150, 170, 225, 0) 36%), radial-gradient(circle at 72% 50%, rgba(150, 170, 225, 0.16), rgba(150, 170, 225, 0) 34%), radial-gradient(circle at 36% 84%, rgba(249, 102, 188, 0.10), rgba(249, 102, 188, 0) 38%), #FFFFFF; transition: transform 1.15s cubic-bezier(0.65, 0, 0.35, 1); animation: phDrift 5s ease-in-out infinite alternate; }
-.playhouse-loading .cl::after, .playhouse-loading .cl::before { content: ""; position: absolute; top: 0; bottom: 0; background-repeat: repeat-y; }
-.playhouse-loading .cl::after { width: 110px; background-image: radial-gradient(circle at 55px 60px, #FFFFFF 55px, transparent 56px); background-size: 110px 130px; }
-.playhouse-loading .cl::before { width: 80px; background-image: radial-gradient(circle at 40px 40px, #FFFFFF 38px, transparent 39px); background-size: 80px 96px; background-position: 0 58px; }
-.playhouse-loading .cl-l { left: -14%; } .playhouse-loading .cl-l::after { right: -55px; } .playhouse-loading .cl-l::before { right: -88px; }
-.playhouse-loading .cl-r { right: -14%; animation-delay: -2.5s; } .playhouse-loading .cl-r::after { left: -55px; } .playhouse-loading .cl-r::before { left: -88px; }
-.playhouse-loading.done .cl-l { transform: translateX(-115%); animation: none; }
-.playhouse-loading.done .cl-r { transform: translateX(115%); animation: none; }
+/* loading screen: the live sky with the very same clouds as the Playhouse sky, then they part to show the Playhouse */
+.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(#8DB6EE, #B7D2F4 45%, #FFE6C2 80%, #FFE2B0); color: #0B1E3F; transition: background-color 0.4s ease 0.7s, opacity 0.4s ease 0.9s; }
+.playhouse-loading.done { background: transparent !important; opacity: 0; pointer-events: none; }
+.playhouse-loading .cl { overflow: visible; position: absolute; top: -3%; height: 106%; width: 72%; animation: phDrift 5s ease-in-out infinite alternate; transition: transform 1.25s cubic-bezier(0.65, 0, 0.35, 1); }
+.playhouse-loading .cl-l { left: -12%; } .playhouse-loading .cl-r { right: -12%; animation-delay: -2.5s; }
+.playhouse-loading.done .cl-l { transform: translateX(-125%); animation: none; }
+.playhouse-loading.done .cl-r { transform: translateX(125%); animation: none; }
 .playhouse-loading .ld-msg { position: relative; z-index: 2; text-align: center; transition: opacity 0.4s ease, transform 0.6s ease; }
 .playhouse-loading.done .ld-msg { opacity: 0; transform: scale(0.94); }
-.playhouse-loading p { margin: 0; font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 1.3rem; text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9); }
+.playhouse-loading p { margin: 0; font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 1.3rem; text-shadow: 0 2px 12px rgba(255, 255, 255, 0.95), 0 0 4px rgba(255, 255, 255, 0.8); }
+.playhouse-loading.night { color: #FDFBF7; } .playhouse-loading.night p { text-shadow: 0 2px 12px rgba(6, 18, 42, 0.9); }
 .playhouse-loading .sp { display: inline-block; margin: 0 6px; font-style: normal; animation: phTwinkle 1.6s ease-in-out infinite; }
 .playhouse-loading .sp:nth-child(1) { color: #F966BC; }
 .playhouse-loading .sp:nth-child(2) { color: #7DD3FC; animation-delay: .25s; }
 .playhouse-loading .sp:nth-child(3) { color: #C277F5; animation-delay: .5s; }
 .playhouse-loading .sp-row { margin-bottom: 8px; font-size: 1.6rem; line-height: 1; }
-@keyframes phDrift { from { margin-top: -6px; } to { margin-top: 6px; } }
+@keyframes phDrift { from { margin-top: -8px; } to { margin-top: 8px; } }
 @keyframes phTwinkle { 0%, 100% { transform: scale(0.7) rotate(0); opacity: .55; } 50% { transform: scale(1.25) rotate(20deg); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .playhouse-loading .cl, .playhouse-loading .sp { animation: none; } .playhouse-loading .cl { transition: none; } }
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
@@ -464,7 +460,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   <main class="playhouse">
     <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily’s Playhouse</h1>
     <div class="playhouse-stage">
-      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><div class="cl-wrap" aria-hidden="true"><div class="cl cl-l"></div><div class="cl cl-r"></div></div><div class="ld-msg"><div class="sp-row" aria-hidden="true"><span class="sp">&#10022;</span><span class="sp">&#10022;</span><span class="sp">&#10022;</span></div><p>Going to the Playhouse…</p></div></div>
+      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="phCloud" fill="rgba(255,244,248,0.97)"><ellipse cx="0" cy="0" rx="50" ry="12"/><ellipse cx="-18" cy="-9" rx="22" ry="13"/><ellipse cx="14" cy="-12" rx="26" ry="16"/></g></defs></svg><svg class="cl cl-l" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(169 13) scale(2.38)"/><use href="#phCloud" transform="translate(105 102) scale(2.68)"/><use href="#phCloud" transform="translate(150 177) scale(2.79)"/><use href="#phCloud" transform="translate(100 259) scale(2.24)"/><use href="#phCloud" transform="translate(153 345) scale(2.46)"/><use href="#phCloud" transform="translate(92 429) scale(2.58)"/><use href="#phCloud" transform="translate(150 519) scale(2.71)"/><use href="#phCloud" transform="translate(88 602) scale(2.33)"/><use href="#phCloud" transform="translate(155 676) scale(2.73)"/></svg><svg class="cl cl-r" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#phCloud" transform="translate(84 16) scale(2.63)"/><use href="#phCloud" transform="translate(154 86) scale(2.29)"/><use href="#phCloud" transform="translate(86 175) scale(2.74)"/><use href="#phCloud" transform="translate(177 264) scale(2.32)"/><use href="#phCloud" transform="translate(110 344) scale(2.34)"/><use href="#phCloud" transform="translate(155 428) scale(2.86)"/><use href="#phCloud" transform="translate(110 518) scale(2.88)"/><use href="#phCloud" transform="translate(159 603) scale(2.22)"/><use href="#phCloud" transform="translate(85 682) scale(2.86)"/></svg><div class="ld-msg"><div class="sp-row" aria-hidden="true"><span class="sp">&#10022;</span><span class="sp">&#10022;</span><span class="sp">&#10022;</span></div><p>Going to the Playhouse…</p></div></div>
       <iframe class="playhouse-frame" src="/playhouse/world.html" title="Lily’s Playhouse: a little living world where all of Lily’s games take place" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
       <div class="playhouse-tip" id="playhouseTip" role="status" aria-live="polite">Tap or click the little house in the top right corner for more options</div>
     </div>
@@ -624,6 +620,8 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   document.addEventListener('click', function () { setTimeout(tick, 120); setTimeout(tick, 500); }, true);
 })();
 </script>
+<script src="/lily-home-sky-v1.js"></script>
+<script src="/lily-sky-v1.js"></script>
 <script>
 /* Loading screen: shows until the world has loaded and drawn its first picture, then the clouds part and it fades away.
    (It also gives up after 12 seconds so it can never get stuck.) */
@@ -631,6 +629,10 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   var box = document.getElementById('phLoading'), frame = document.querySelector('.playhouse-frame');
   if (!box || !frame) return;
   var gone = false;
+  try {   // the loading sky is the live sky (Lily's home sky, Central Time), same as the Playhouse itself
+    var LS = window.LilySky;
+    if (LS) { var c = LS.skyRgb().map(function (v) { return 'rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ')'; }); box.style.background = 'linear-gradient(' + c[0] + ',' + c[1] + ' 40%,' + c[2] + ' 78%,' + c[3] + ')'; if (LS.nightness() > 0.5) box.classList.add('night'); }
+  } catch (e) {}
   function hide() { if (gone) return; gone = true; box.classList.add('done'); setTimeout(function () { box.style.display = 'none'; }, 1500); }
   frame.addEventListener('load', function () { setTimeout(hide, 700); });
   try { if (frame.contentDocument && frame.contentDocument.readyState === 'complete' && frame.contentWindow.location.href !== 'about:blank') setTimeout(hide, 700); } catch (e) {}
