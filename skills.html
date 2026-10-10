@@ -329,6 +329,30 @@
       .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
     }
     @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
+
+    /* ========== START HERE ========== */
+    .start-here { padding: 44px 0 40px; border-bottom: 1px solid var(--gray-mid); }
+    .sh-label { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--pink); text-align: center; margin-bottom: 8px; }
+    .sh-title { font-family: var(--font-serif); font-size: 1.9rem; font-weight: 400; color: var(--cream); text-align: center; margin-bottom: 26px; line-height: 1.25; }
+    .sh-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; max-width: 1100px; margin: 0 auto; }
+    .sh-card { --c: var(--green); --c-deep: #6FAF48; position: relative; display: flex; flex-direction: column; gap: 8px; padding: 20px 18px 16px; border-radius: 14px; color: var(--cream); text-decoration: none;
+      background: radial-gradient(120% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%), linear-gradient(170deg, #1F3760 0%, var(--navy-light) 55%, #142848 100%);
+      border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent);
+      box-shadow: 0 1px 0 var(--c-deep), 0 2px 0 color-mix(in srgb, var(--c-deep) 85%, #000), 0 3px 0 color-mix(in srgb, var(--c-deep) 70%, #000), 0 4px 0 color-mix(in srgb, var(--c-deep) 55%, #000), 0 14px 22px -8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18);
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+    .sh-card:hover, .sh-card:focus-visible { transform: translateY(-5px); box-shadow: 0 1px 0 var(--c-deep), 0 2px 0 color-mix(in srgb, var(--c-deep) 85%, #000), 0 3px 0 color-mix(in srgb, var(--c-deep) 70%, #000), 0 4px 0 color-mix(in srgb, var(--c-deep) 55%, #000), 0 22px 28px -8px rgba(0,0,0,0.65), 0 0 22px color-mix(in srgb, var(--c) 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.22); }
+    .sh-card:focus-visible { outline: 3px solid var(--pink); outline-offset: 4px; }
+    .sh-card:active { transform: translateY(1px); }
+    .sh-pink { --c: var(--pink); --c-deep: #B83C8A; } .sh-blue { --c: var(--blue); --c-deep: #3D8DB8; } .sh-purple { --c: var(--purple); --c-deep: #8A4DB8; }
+    .sh-goal { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c); }
+    .sh-name { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 600; line-height: 1.2; color: var(--cream); }
+    .sh-desc { font-family: var(--font-display); font-size: 0.82rem; line-height: 1.5; color: var(--gray-light); flex: 1; }
+    .sh-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 8px; border-top: 1px solid var(--gray-mid); }
+    .sh-price { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--c); }
+    .sh-go { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cream); }
+    @media (max-width: 960px) { .sh-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .sh-grid { grid-template-columns: 1fr; gap: 16px; } .start-here { padding: 32px 0 30px; } .sh-title { font-size: 1.5rem; } .hero { padding: 64px 0 36px; } .hero-stats { margin-bottom: 8px; } }
+    @media (prefers-reduced-motion: reduce) { .sh-card { transition: none; } .sh-card:hover, .sh-card:focus-visible { transform: none; } }
   </style>
 </head>
 <body>
@@ -372,8 +396,42 @@
       <div class="hero-stats">
         <div class="hero-stat"><span class="hero-stat-num">89</span><span class="hero-stat-label">Pro Skills</span></div>
         <div class="hero-stat"><span class="hero-stat-num">47</span><span class="hero-stat-label">Literary</span></div>
-        <div class="hero-stat"><span class="hero-stat-num">25</span><span class="hero-stat-label">Wisdom</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">28</span><span class="hero-stat-label">Wisdom</span></div>
         <div class="hero-stat"><span class="hero-stat-num">20</span><span class="hero-stat-label">Bundles</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== START HERE ========== -->
+  <section class="start-here" aria-labelledby="startHereTitle">
+    <div class="container">
+      <p class="sh-label">Start here</p>
+      <h2 class="sh-title" id="startHereTitle">Not sure where to begin? Pick your goal.</h2>
+      <div class="sh-grid">
+        <a class="sh-card sh-green" href="/skills/job-search-accelerator/">
+          <span class="sh-goal">Land the job</span>
+          <span class="sh-name">Job Search Accelerator</span>
+          <span class="sh-desc">Five skills in one bundle: resume, cover letter, LinkedIn profile, interview prep, and salary negotiation.</span>
+          <span class="sh-foot"><span class="sh-price">$3</span><span class="sh-go">See what’s inside →</span></span>
+        </a>
+        <a class="sh-card sh-pink" href="/skills/budget-builder/">
+          <span class="sh-goal">Get your money straight</span>
+          <span class="sh-name">Budget Builder</span>
+          <span class="sh-desc">Builds a personalized monthly budget with category breakdowns, savings targets, and smart places to cut.</span>
+          <span class="sh-foot"><span class="sh-price">$1</span><span class="sh-go">See it →</span></span>
+        </a>
+        <a class="sh-card sh-blue" href="/skills/the-great-gatsby/">
+          <span class="sh-goal">Read a classic with a guide</span>
+          <span class="sh-name">The Great Gatsby</span>
+          <span class="sh-desc">Study, character dialogue, and discussion modes for F. Scott Fitzgerald’s classic.</span>
+          <span class="sh-foot"><span class="sh-price">$12.99</span><span class="sh-go">See it →</span></span>
+        </a>
+        <a class="sh-card sh-purple" href="/skills/complete-library-bundle/">
+          <span class="sh-goal">Get everything</span>
+          <span class="sh-name">Complete Library Bundle</span>
+          <span class="sh-desc">All 75 literary and wisdom companions in one bundle, for readers who want the whole shelf.</span>
+          <span class="sh-foot"><span class="sh-price">$49.99</span><span class="sh-go">See what’s inside →</span></span>
+        </a>
       </div>
     </div>
   </section>
