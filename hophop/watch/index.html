@@ -47,6 +47,8 @@
   .back:focus-visible, .sound button:focus-visible { outline: 3px solid #FF8FB8; outline-offset: 3px; }
   body.quiet .back { opacity: 0; }
   html.embed .back { display: none; }
+  /* inside the Live Cams page, that page has its own Full screen button (it also works on iPhone) */
+  html.embed .full-btn { display: none !important; }
   /* website: a quiet link to the channel, bottom-left. Same look as the back link; never shown while recording, embedded, or full screen. */
   .yt-link {
     position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 5;

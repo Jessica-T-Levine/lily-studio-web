@@ -356,7 +356,48 @@
     .cam-soon canvas { width: min(28vw, 180px); height: min(28vw, 180px); }
     .cam-soon p { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255, 255, 255, 0.82); padding: 8px 14px; border-radius: 999px; }
 
-    @media (max-width: 760px) { .cam-pick { grid-template-columns: minmax(0, 1fr); } .cam-tab { min-height: 72px; } }
+    .vid-tools { display: flex; justify-content: center; margin-top: 14px; }
+    .vid-full { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--pink); background: rgba(249, 102, 188, 0.12); color: var(--cream); font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+    .vid-full:hover { background: rgba(249, 102, 188, 0.28); box-shadow: 0 0 18px rgba(249, 102, 188, 0.3); }
+    .vid-full:focus-visible { outline: 2px solid var(--white, #fff); outline-offset: 3px; }
+    .vid-full svg { width: 18px; height: 18px; }
+    /* Full screen: the video fills the whole phone screen; the same button becomes "Exit" */
+    body.cam-full { overflow: hidden; }
+    body.cam-full .vid-screen { position: fixed; inset: 0; z-index: 9998; width: 100vw; height: 100vh; height: 100dvh; max-width: none; aspect-ratio: auto; border-radius: 0; border: 0; }
+    body.cam-full .vid-tools { position: fixed; z-index: 9999; top: max(12px, env(safe-area-inset-top)); right: 12px; margin: 0; }
+    body.cam-full .vid-full { background: rgba(11, 30, 63, 0.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); min-height: 44px; padding: 0 16px; }
+    body.cam-full .site-header { display: none; }
+    body.cam-full .vid-screen { background: #0B1E3F; }
+    @media (orientation: portrait) {
+      body.cam-full .vid-screen::after { content: "Turn your phone sideways for a bigger view"; position: absolute; left: 12px; top: max(12px, env(safe-area-inset-top)); max-width: calc(100vw - 210px); padding: 8px 14px; border-radius: 14px; background: rgba(253, 251, 247, 0.92); color: #0B1E3F; font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; line-height: 1.3; pointer-events: none; z-index: 3; }
+    }
+    /* The cute camera: a cream bezel with a LIVE badge, the camera's name and your local time */
+    .cam-device { position: relative; background: linear-gradient(180deg, #FFFFFF 0%, #FDFBF7 60%, #F7EEF6 100%); border-radius: 28px; padding: 10px 12px 14px; box-shadow: 0 0 0 2px rgba(249, 102, 188, 0.55), 0 0 36px rgba(249, 102, 188, 0.28), 0 26px 60px rgba(0, 0, 0, 0.45); }
+    .cam-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 6px 10px; color: #0B1E3F; }
+    .cam-live { display: inline-flex; align-items: center; gap: 6px; background: #F966BC; color: #0B1E3F; font-family: var(--font-mono); font-size: max(0.72rem, 11.5px); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; box-shadow: 0 2px 0 rgba(176, 58, 132, 0.45); }
+    .cam-live .cam-dot { background: #0B1E3F; }
+    .cam-live.soon { background: #CFE3FA; box-shadow: 0 2px 0 rgba(37, 99, 235, 0.25); }
+    .cam-bar-title { flex: 1; text-align: center; font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cam-clock { font-family: var(--font-mono); font-size: max(0.72rem, 11.5px); font-weight: 600; letter-spacing: 0.04em; color: #54627B; white-space: nowrap; }
+    .cam-device .vid-screen { border: 0; border-radius: 18px; box-shadow: inset 0 0 0 3px #0B1E3F, 0 4px 14px rgba(11, 30, 63, 0.25); }
+    .cam-feet { display: flex; justify-content: center; gap: 46px; position: absolute; left: 0; right: 0; bottom: -9px; pointer-events: none; }
+    .cam-feet i { width: 44px; height: 12px; border-radius: 0 0 12px 12px; background: #F966BC; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35); }
+    .cam-device + .vid-tools { margin-top: 10px; }
+    @media (max-width: 520px) { .cam-bar-title { font-size: 0.92rem; } .cam-clock { display: none; } .cam-device { border-radius: 22px; padding: 8px 8px 12px; } }
+    body.cam-full .cam-device { position: static; background: none; padding: 0; box-shadow: none; border-radius: 0; }
+    body.cam-full .cam-bar, body.cam-full .cam-feet { display: none; }
+    body.cam-full .cam-device .vid-screen { box-shadow: none; }
+    .cam-state { font-size: max(0.72rem, 11.5px); }
+    .vid-stage { scroll-margin-top: 84px; }
+    /* Phones: the three cams sit in one compact row, so the live video is right underneath, on screen */
+    @media (max-width: 760px) {
+      .cam-pick { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+      .cam-tab { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 6px; padding: 8px 4px 9px; min-height: 0; }
+      .cam-art { width: 52px; height: 52px; }
+      .cam-art canvas { width: 42px; height: 42px; }
+      .cam-name { font-size: 0.95rem; }
+      .cam-state { margin-top: 2px; letter-spacing: 0.04em; gap: 4px; }
+    }
     @media (max-width: 700px) { .vid-page { padding: 44px 16px 64px; } .vid-screen { border-radius: 12px; } }
     @media (prefers-reduced-motion: reduce) { .cam-dot { animation: none; } .cam-tab { transition: none; } }
 </style>
@@ -402,7 +443,16 @@
     <div class="cam-pick" role="tablist" aria-label="Choose a live cam" id="camPick"></div>
 
     <section class="vid-stage" aria-label="Live cam">
-      <div class="vid-screen" id="camScreen"></div>
+      <div class="cam-device">
+        <div class="cam-bar">
+          <span class="cam-live" id="camLive"><span class="cam-dot"></span><span id="camLiveText">Live</span></span>
+          <span class="cam-bar-title" id="camBarTitle">Hop Hop’s Pond Cam</span>
+          <span class="cam-clock" id="camClock" aria-label="Your local time"></span>
+        </div>
+        <div class="vid-screen" id="camScreen"></div>
+        <div class="cam-feet" aria-hidden="true"><i></i><i></i></div>
+      </div>
+      <div class="vid-tools"><button type="button" class="vid-full" id="camFull" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full screen</span></button></div>
       <div class="vid-now">
         <p class="vid-now-label" id="camLabel">Live now</p>
         <h2 id="camTitle">Hop Hop’s Pond</h2>
@@ -488,7 +538,7 @@
 (function () {
   var CAMS = [
     { id: 'hophop', name: 'Hop Hop', who: 'frog', title: 'Hop Hop’s Pond', src: '/hophop/watch/?embed=1',
-      meta: 'Hop Hop the Frog lives his cozy day on the lily pond. Tap the screen for sound. Use the button in the top-right corner for full screen.' },
+      meta: 'Hop Hop the Frog lives his cozy day on the lily pond. Tap the screen for sound, or tap Full screen to fill your whole screen.' },
     { id: 'buzzbuzz', name: 'Buzz Buzz', who: 'bee', title: 'Buzz Buzz’s Garden', soon: true,
       meta: 'Buzz Buzz the Bee’s live day is on its way. Until then, you can play Lily’s Buzz Buzz.' },
     { id: 'neenee', name: 'Nee Nee', who: 'bunny', title: 'Nee Nee’s Meadow', soon: true,
@@ -563,9 +613,41 @@
     if (!c.soon) $('camLabel').appendChild(el('span', 'cam-dot'));
     $('camLabel').appendChild(document.createTextNode(c.soon ? 'Coming soon' : 'Live now'));
     $('camTitle').textContent = c.title;
+    $('camBarTitle').textContent = c.title + ' Cam';
+    $('camLive').className = 'cam-live' + (c.soon ? ' soon' : '');
+    $('camLiveText').textContent = c.soon ? 'Soon' : 'Live';
     $('camMeta').textContent = c.meta;
     if (user) { try { history.replaceState(null, '', '#' + c.id); } catch (e) {} }
+    if (user && window.matchMedia('(max-width: 760px)').matches) {   // phones: bring the video into view
+      var st = document.querySelector('.vid-stage');
+      var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (st && st.scrollIntoView) st.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    }
   }
+
+  /* Full screen: uses the browser's real full screen when it allows it (iPad, computers);
+     on iPhone, where that isn't allowed for embedded pages, the video fills the whole screen instead. */
+  var fullBtn = $('camFull'), fullOn = false;
+  function setFull(on) {
+    fullOn = on;
+    document.body.classList.toggle('cam-full', on);
+    fullBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    fullBtn.querySelector('span').textContent = on ? 'Exit full screen' : 'Full screen';
+  }
+  fullBtn.addEventListener('click', function () {
+    if (fullOn) {
+      if (document.fullscreenElement && document.exitFullscreen) { try { document.exitFullscreen(); } catch (e) {} }
+      setFull(false); return;
+    }
+    setFull(true);
+    var rf = screen.requestFullscreen || screen.webkitRequestFullscreen;
+    if (rf && !window.matchMedia('(max-width: 760px)').matches) { try { var p = rf.call(screen); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  });
+  document.addEventListener('fullscreenchange', function () { if (!document.fullscreenElement && fullOn) setFull(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && fullOn) setFull(false); });
+
+  function tick() { try { $('camClock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) {} }
+  tick(); setInterval(tick, 20000);
 
   var start = (location.hash || '').slice(1);
   show(CAMS.some(function (c) { return c.id === start; }) ? start : CAMS[0].id, false);
