@@ -386,6 +386,11 @@
 .site-header .nav-drop-btn svg{transform:rotate(-90deg)!important}
 .site-header .nav-drop.open .nav-drop-btn svg,.site-header .nav-drop:hover .nav-drop-btn svg{transform:rotate(0deg)!important}
 @media (max-width:768px){.site-header .nav-links>li>a:not(.nav-cta)::after{content:none!important;display:none!important}}
+/* ── Menu v8c: phone order, Got Skills on top, Playhouse at the bottom ── */
+@media (max-width:768px){
+ .site-header .nav-links>li:last-child{order:-1;padding:0 0 14px!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+ .site-header .nav-links>li:nth-last-child(2){border-bottom:0!important}
+}
 </style>
 </head>
 <body>
