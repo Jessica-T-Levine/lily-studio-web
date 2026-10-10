@@ -385,6 +385,20 @@
   /* the in-game games menu is off for now (Hop Hop and Nee Nee don't have one yet); the house above the game still goes to the Playhouse */
   #gamesBtn, #gamesMenu { display: none !important; }
 </style>
+<style id="home-btn-css">
+  /* Home-screen app only: a little playhouse button that goes back to Lily's Playhouse */
+  .home-btn { display: none; }
+  html.app .home-btn {
+    display: grid; place-items: center; position: fixed; z-index: 60; width: 44px; height: 44px; padding: 0; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(40, 30, 80, 0.22); text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  html.app .home-btn:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.8); }
+  html.app .home-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .home-btn canvas { width: 34px; height: 34px; display: block; }
+  html.app .home-btn { top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 50px); }
+</style>
 <style id="edge-blend-css">
   /* iOS 26 home-screen apps paint a flat color behind the status bar and home bar, and can come up one
      status-bar short of the screen. These rules (and the script at the bottom) keep those areas the same
@@ -453,6 +467,7 @@
       <button class="cbtn" id="fullBtn" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="open" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="close" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
       <button class="cbtn games-btn" id="gamesBtn" type="button" aria-label="Lily's games" title="Lily's games" aria-expanded="false" aria-controls="gamesMenu"><canvas id="gamesIcon" aria-hidden="true"></canvas></button>
     </div>
+    <a class="home-btn" id="homeBtn" href="/playhouse/" aria-label="Back to Lily’s Playhouse" title="Back to Lily’s Playhouse"><canvas id="homeIcon" aria-hidden="true"></canvas></a>
     <div class="games-menu" id="gamesMenu" hidden></div>
     <div class="mixer" id="mixer" hidden>
       <label for="sfxVol"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 17.5V6.2l10-2.2v11.3a2.6 2.6 0 1 1-1.6-2.4V7.8L10.6 9.3v8.2A2.6 2.6 0 1 1 9 15z"/></svg><span class="sr">Game sounds</span></label>
@@ -5894,6 +5909,26 @@
     window.addEventListener("resize", function () { setTimeout(tick, 300); });
     document.addEventListener("visibilitychange", function () { if (!document.hidden) tick(); });
   })();
+</script>
+<script>
+/* The home button's little playhouse: drawn from the Playhouse's one design, the same picture as in the Playhouse itself. */
+(function homeIcon() {
+  var cv = document.getElementById("homeIcon");
+  if (!cv || !window.LilyPlayhouse) return;
+  var d = Math.min(3, Math.max(2, window.devicePixelRatio || 1)), n = Math.round(34 * d);
+  cv.width = cv.height = n;
+  var g = cv.getContext("2d"), big = n * 2, t = document.createElement("canvas");
+  t.width = t.height = big;
+  var tg = t.getContext("2d");
+  try { tg.translate(big / 4, big / 4); window.LilyPlayhouse.drawIcon(tg, n / 2, n / 2, n * 0.9, 0); } catch (e) { return; }
+  var x0 = big, y0 = big, x1 = -1, y1 = -1, px;
+  try { px = tg.getImageData(0, 0, big, big).data; } catch (e) { g.drawImage(t, -big / 4, -big / 4); return; }
+  for (var y = 0; y < big; y++) for (var x = 0; x < big; x++) if (px[(y * big + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < x0) return;
+  var w = x1 - x0 + 1, h = y1 - y0 + 1, k = Math.min(n * 0.84 / w, n * 0.84 / h);
+  g.imageSmoothingQuality = "high";
+  g.drawImage(t, x0, y0, w, h, (n - w * k) / 2, (n - h * k) / 2, w * k, h * k);
+})();
 </script>
 </body>
 </html>
