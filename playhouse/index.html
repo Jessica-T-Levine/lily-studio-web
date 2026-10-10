@@ -318,12 +318,13 @@ html.ph-full { background: #8DB6EE; }
 html.ph-full .playhouse-stage { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 1000; background: #8DB6EE; }
 html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important; }
 /* loading screen: soft clouds drift over a sunny sky, then part to show the Playhouse */
-.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(#8DB6EE, #CFE3F6 70%, #BFE3A8); color: #0B1E3F; transition: background-color 0.4s ease 0.7s, opacity 0.4s ease 0.9s; }
+.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #FFFFFF; color: #0B1E3F; transition: background-color 0.4s ease 0.7s, opacity 0.4s ease 0.9s; }
 .playhouse-loading.done { background: transparent; opacity: 0; pointer-events: none; }
-.playhouse-loading .cl { position: absolute; top: -4%; bottom: -4%; width: 66%; background: radial-gradient(circle at 30% 18%, #FFFFFF, rgba(255, 255, 255, 0) 38%), radial-gradient(circle at 70% 48%, #FFFFFF, rgba(255, 255, 255, 0) 34%), radial-gradient(circle at 40% 82%, #FFE9F5, rgba(255, 233, 245, 0) 40%), #EDE9FB; transition: transform 1.15s cubic-bezier(0.65, 0, 0.35, 1); animation: phDrift 5s ease-in-out infinite alternate; }
+.playhouse-loading .cl-wrap { position: absolute; inset: 0; filter: drop-shadow(0 6px 14px rgba(110, 130, 190, 0.30)); }
+.playhouse-loading .cl { position: absolute; top: -4%; bottom: -4%; width: 66%; background: radial-gradient(circle at 28% 22%, rgba(150, 170, 225, 0.20), rgba(150, 170, 225, 0) 36%), radial-gradient(circle at 72% 50%, rgba(150, 170, 225, 0.16), rgba(150, 170, 225, 0) 34%), radial-gradient(circle at 36% 84%, rgba(249, 102, 188, 0.10), rgba(249, 102, 188, 0) 38%), #FFFFFF; transition: transform 1.15s cubic-bezier(0.65, 0, 0.35, 1); animation: phDrift 5s ease-in-out infinite alternate; }
 .playhouse-loading .cl::after, .playhouse-loading .cl::before { content: ""; position: absolute; top: 0; bottom: 0; background-repeat: repeat-y; }
-.playhouse-loading .cl::after { width: 110px; background-image: radial-gradient(circle at 55px 60px, #EDE9FB 55px, transparent 56px); background-size: 110px 130px; }
-.playhouse-loading .cl::before { width: 80px; background-image: radial-gradient(circle at 40px 40px, #EDE9FB 38px, transparent 39px); background-size: 80px 96px; background-position: 0 58px; }
+.playhouse-loading .cl::after { width: 110px; background-image: radial-gradient(circle at 55px 60px, #FFFFFF 55px, transparent 56px); background-size: 110px 130px; }
+.playhouse-loading .cl::before { width: 80px; background-image: radial-gradient(circle at 40px 40px, #FFFFFF 38px, transparent 39px); background-size: 80px 96px; background-position: 0 58px; }
 .playhouse-loading .cl-l { left: -14%; } .playhouse-loading .cl-l::after { right: -55px; } .playhouse-loading .cl-l::before { right: -88px; }
 .playhouse-loading .cl-r { right: -14%; animation-delay: -2.5s; } .playhouse-loading .cl-r::after { left: -55px; } .playhouse-loading .cl-r::before { left: -88px; }
 .playhouse-loading.done .cl-l { transform: translateX(-115%); animation: none; }
@@ -333,6 +334,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
 .playhouse-loading p { margin: 0; font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 1.3rem; text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9); }
 .playhouse-loading .sp { display: inline-block; margin: 0 6px; font-style: normal; animation: phTwinkle 1.6s ease-in-out infinite; }
 .playhouse-loading .sp:nth-child(1) { color: #F966BC; }
+.playhouse-loading .sp:nth-child(2) { color: #7DD3FC; animation-delay: .25s; }
 .playhouse-loading .sp:nth-child(3) { color: #C277F5; animation-delay: .5s; }
 .playhouse-loading .sp-row { margin-bottom: 8px; font-size: 1.6rem; line-height: 1; }
 @keyframes phDrift { from { margin-top: -6px; } to { margin-top: 6px; } }
@@ -462,7 +464,7 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   <main class="playhouse">
     <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily’s Playhouse</h1>
     <div class="playhouse-stage">
-      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><div class="cl cl-l" aria-hidden="true"></div><div class="cl cl-r" aria-hidden="true"></div><div class="ld-msg"><div class="sp-row" aria-hidden="true"><span class="sp">&#10022;</span><span class="sp">&#10022;</span><span class="sp">&#10022;</span></div><p>Going to the Playhouse…</p></div></div>
+      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><div class="cl-wrap" aria-hidden="true"><div class="cl cl-l"></div><div class="cl cl-r"></div></div><div class="ld-msg"><div class="sp-row" aria-hidden="true"><span class="sp">&#10022;</span><span class="sp">&#10022;</span><span class="sp">&#10022;</span></div><p>Going to the Playhouse…</p></div></div>
       <iframe class="playhouse-frame" src="/playhouse/world.html" title="Lily’s Playhouse: a little living world where all of Lily’s games take place" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
       <div class="playhouse-tip" id="playhouseTip" role="status" aria-live="polite">Tap or click the little house in the top right corner for more options</div>
     </div>
