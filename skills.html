@@ -2925,7 +2925,22 @@
       .tst-btn { width: 100%; }
     }
     @media (prefers-reduced-motion: reduce) { .tst::before { animation: none; } }
-  </style>
+  
+/* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
+.footer-copy,.hero-stat-label,.search-count,.filter-tab,.card-cat,.card-badge,.card-buy,.bundle-label,.coming-tag,.card-coming,.table-hint,.cta-reassurance,.ticker-text,.fig-caption,.skill-card-fig,.app-card-fig,.hero-caption,.skill-badge,.story-label,.section-label,.app-status,.games-meta,.tst-fine,.tst-pill,.games-hint,.story-sig,.skill-link,.planner-btn{font-size:max(0.72rem,11.5px)!important}
+.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+.tcard-desc{font-size:0.82rem!important}
+.btn-primary,.btn-ghost,.app-cta,.cta-btn{font-size:max(0.8rem,12.5px)!important}
+.card-price,.skill-price{font-size:0.95rem!important}
+
+/* Start Here row */
+.sh-label{font-size:0.78rem!important}
+.sh-goal{font-size:0.74rem!important}
+.sh-name{font-size:1.45rem!important}
+.sh-desc{font-size:1rem!important;line-height:1.5!important}
+.sh-go{font-size:0.78rem!important}
+.sh-price{font-size:1.1rem!important}
+</style>
   <section class="tst" id="tuesday-tips" aria-labelledby="tst-heading">
     <div class="tst-card">
       <div class="tst-stripe" aria-hidden="true"></div>

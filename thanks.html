@@ -245,7 +245,14 @@
       .site-header .nav-links .nav-drop-panel a::before { content: "↳ "; color: #F966BC; }
     }
     @media (prefers-reduced-motion: reduce) { .site-header .nav-drop-menu, .site-header .nav-drop-btn svg { transition: none !important; } }
-  </style>
+  
+/* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
+.footer-copy,.hero-stat-label,.search-count,.filter-tab,.card-cat,.card-badge,.card-buy,.bundle-label,.coming-tag,.card-coming,.table-hint,.cta-reassurance,.ticker-text,.fig-caption,.skill-card-fig,.app-card-fig,.hero-caption,.skill-badge,.story-label,.section-label,.app-status,.games-meta,.tst-fine,.tst-pill,.games-hint,.story-sig,.skill-link,.planner-btn{font-size:max(0.72rem,11.5px)!important}
+.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+.tcard-desc{font-size:0.82rem!important}
+.btn-primary,.btn-ghost,.app-cta,.cta-btn{font-size:max(0.8rem,12.5px)!important}
+.card-price,.skill-price{font-size:0.95rem!important}
+</style>
 </head>
 <body>
 
