@@ -98,14 +98,14 @@
   const H3 = a => a.map(v => v / 255);
   const FP = (o) => ({ name: o.name, skin: o.skin.map(H3), leg: o.leg.map(H3), belly: o.belly.map(H3), cheek: H3(o.cheek || [255, 133, 171]),
     mark: o.mark || 0, markCol: H3(o.markCol || [255, 255, 255]), bump: o.bump || 1, size: o.size || 1,
-    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1, drop: o.drop || 0, eyeK: o.eyeK || 1, cheekK: o.cheekK || 1, tummyK: o.tummyK || 1, tummyD: o.tummyD || 0 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
+    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1, drop: o.drop || 0, eyeK: o.eyeK || 1, cheekK: o.cheekK || 1, tummyK: o.tummyK || 1, tummyD: o.tummyD || 0, fade: o.fade || 0 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
   const FROG_PALETTES = Object.freeze({
     ours:     FP({ name: "Hop Hop", skin: [[62,150,88],[93,186,115],[160,226,172]], leg: [[44,110,64],[63,148,88],[104,184,124]], belly: [[170,222,160],[210,242,198],[236,251,228]], cheek: [255,133,171] }),
     golden:   FP({ name: "Golden", skin: [[196,128,24],[238,178,48],[255,226,128]], leg: [[160,96,16],[210,140,32],[245,190,80]], belly: [[250,226,150],[255,240,190],[255,250,226]], cheek: [255,128,120], size: 1.1, wide: 1.14, tall: 0.96, legs: 1.15, cheekK: 2 }),
     blue:     FP({ name: "Blue", skin: [[28,76,170],[56,128,224],[132,186,252]], leg: [[18,52,128],[38,92,184],[88,146,226]], belly: [[190,214,250],[222,236,255],[244,250,255]], cheek: [255,140,170], mark: 1, markCol: [22,30,78], size: 0.72, wide: 0.88, tall: 1.05, legs: 0.85, bump: 1.1, tummyK: 0.85, tummyD: 2.2 }),
     lime:     FP({ name: "Treetop", skin: [[58,150,40],[104,200,60],[190,240,120]], leg: [[214,92,20],[250,140,40],[255,184,90]], belly: [[255,244,200],[255,250,224],[255,255,244]], cheek: [255,150,120], mark: 2, markCol: [150,200,255], size: 1.0, wide: 0.9, tall: 1.06, legs: 1.0, gap: 1.12, bump: 1.14 }),
     hunter:   FP({ name: "Hunter", skin: [[30,70,44],[54,108,66],[108,158,114]], leg: [[22,52,32],[40,86,52],[80,130,92]], belly: [[206,226,192],[226,240,212],[244,250,236]], cheek: [255,150,140], mark: 3, markCol: [14,34,22], size: 1.3, wide: 1.16, tall: 0.72, drop: 8, eyeK: 0.8, legs: 1.2, gap: 0.92, bump: 0.94 }),
-    ember:    FP({ name: "Ember", skin: [[190,56,36],[240,104,60],[255,168,120]], leg: [[140,36,28],[200,70,44],[240,120,80]], belly: [[255,222,196],[255,238,218],[255,248,238]], cheek: [255,150,150], mark: 1, markCol: [52,34,48], size: 0.8, wide: 1.06, tall: 0.94, legs: 0.9, gap: 0.78, bump: 1.05 }),
+    ember:    FP({ name: "Ember", skin: [[190,56,36],[240,104,60],[255,168,120]], leg: [[140,36,28],[200,70,44],[240,120,80]], belly: [[255,222,196],[255,238,218],[255,248,238]], cheek: [255,150,150], mark: 1, markCol: [52,34,48], size: 0.8, wide: 1.06, tall: 0.94, legs: 0.9, gap: 0.78, bump: 1.05, fade: 0.5 }),
     pink:     FP({ name: "Pink", skin: [[240,150,190],[255,184,214],[255,222,238]], leg: [[214,112,160],[240,148,190],[255,190,216]], belly: [[255,240,246],[255,248,251],[255,252,254]], cheek: [255,110,140], size: 0.9, wide: 0.9, tall: 1.04, legs: 0.85, gap: 1.05, bump: 1.08 }),
     lavender: FP({ name: "Lavender", skin: [[160,128,222],[198,166,250],[230,212,255]], leg: [[128,96,190],[170,136,230],[208,184,248]], belly: [[244,238,255],[250,246,255],[254,252,255]], cheek: [255,130,180], mark: 3, markCol: [255,255,255], size: 1.0, wide: 1.1, tall: 1.0, legs: 1.1, gap: 0.95, bump: 1.04 }),
     mint:     FP({ name: "Mint", skin: [[96,205,184],[140,236,214],[200,252,238]], leg: [[58,166,146],[100,208,186],[158,236,214]], belly: [[240,255,250],[246,255,252],[252,255,254]], cheek: [255,130,160], mark: 2, markCol: [236,255,249], size: 1.15, wide: 0.95, tall: 1.08, legs: 1.0, gap: 1.05 })
@@ -343,7 +343,7 @@ uniform vec3 uFootA, uFootB; uniform float uFootR;
 uniform vec3 uEyeC, uEyeN; uniform float uEyeR; uniform vec2 uLook; uniform float uEyeMode;
 uniform float uMouthMode, uMouthZ, uMouthR, uMouthA, uMouthS;
 uniform vec3 uCheekC, uTummyC;
-uniform vec3 uSk0, uSk1, uSk2, uLg0, uLg1, uLg2, uBl0, uBl1, uBl2, uCheekCol, uMarkCol; uniform float uMarkKind, uEyeK, uCheekK, uTummyK, uTummyD;   // v5: friend colors and markings
+uniform vec3 uSk0, uSk1, uSk2, uLg0, uLg1, uLg2, uBl0, uBl1, uBl2, uCheekCol, uMarkCol; uniform float uMarkKind, uEyeK, uCheekK, uTummyK, uTummyD, uFade;   // v5: friend colors and markings
 
 float sdEll(vec3 p, vec3 r){ float k0 = length(p / r); float k1 = length(p / (r * r)); return k0 * (k0 - 1.0) / max(k1, 1e-4); }
 float sdCap(vec3 p, vec3 a, vec3 b, float r){ vec3 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0); return length(pa - ba * h) - r; }
@@ -433,6 +433,7 @@ void main(){
   vec3 skinC = ramp(uSk0, uSk1, uSk2, lit);
   vec3 legC  = ramp(uLg0, uLg1, uLg2, lit);
   vec3 col = mix(skinC, legC, m.y);
+  col *= 1.0 - uFade * (1.0 - smoothstep(1.0, 19.0, p.z));   // v5: the color fades darker toward his feet
   // v5: markings on his back only (never on his face): spots, two back stripes, or tiny speckles
   if (uMarkKind > 0.5) {
     float onBack = smoothstep(13.0, 7.0, p.x) * smoothstep(9.0, 15.0, p.z) * (1.0 - m.y);
@@ -580,7 +581,7 @@ void main(){
     const bn = [0.9, 0.2, 0.3],   /* v19: eyes look forward, centered on each bump, like the 2D design */ bl = Math.hypot(...bn), en = [bn[0] / bl, bn[1] / bl, bn[2] / bl];
     const bc = BCc, br = BR_;
     const ek = 1 / Math.hypot(en[0] / br[0], en[1] / br[1], en[2] / br[2]);
-    u3("uEyeC", [bc[0] + en[0] * ek, bc[1] + en[1] * ek, bc[2] + en[2] * ek]); u3("uEyeN", en); u("uEyeR", 5.6 * FPAL.bump * FPAL.eyeK); u("uEyeK", FPAL.eyeK); u("uCheekK", FPAL.cheekK); u("uTummyK", FPAL.tummyK); u("uTummyD", FPAL.tummyD);
+    u3("uEyeC", [bc[0] + en[0] * ek, bc[1] + en[1] * ek, bc[2] + en[2] * ek]); u3("uEyeN", en); u("uEyeR", 5.6 * FPAL.bump * FPAL.eyeK); u("uEyeK", FPAL.eyeK); u("uCheekK", FPAL.cheekK); u("uTummyK", FPAL.tummyK); u("uTummyD", FPAL.tummyD); u("uFade", FPAL.fade);
     u("uLook", clamp(pose.lookX || 0, -1, 1), clamp(pose.lookY || 0, -1, 1));
     u("uEyeMode", happy > 0 ? 2 : blink ? 1 : 0);
     u("uMouthMode", pose.lick ? 2 : pose.oops ? 3 : 0);
