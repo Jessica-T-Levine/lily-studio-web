@@ -1127,8 +1127,8 @@
     // Halloween: a pumpkin only now and then (its own random stream, so nothing else in the world moves). It shows once the Halloween level reaches its number (th).
     if (LH) {
       const pr = seeded(hash2(cx + 3131, cy - 8081));
-      if (pr() < 0.10) {
-        const x = x0 + 60 + pr() * (CS - 120), y = y0 + 60 + pr() * (CS - 120), th = pr(), si = Math.floor(pr() * 4), fi = Math.floor(pr() * 3), sz = 0.9 + pr() * 0.35, ph = pr() * 6, coin = pr();
+      if (pr() < 0.085) {   // 15% fewer pumpkins
+        const x = x0 + 60 + pr() * (CS - 120), y = y0 + 60 + pr() * (CS - 120), th = pr(), si = Math.floor(pr() * 4), fi = Math.floor(pr() * 3), sz = 0.75 + pr() * 0.5, ph = pr() * 6, coin = pr();
         let face = LH.FACES[fi];
         if (si === 1 && face === 4) face = coin < 0.5 ? 2 : 3;
         if (free(x, y, 40) && !ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < o.s + 36) && !ch.flowers.some(o => Math.hypot(o.x - x, o.y - y) < 46) && !ch.bushes.some(o => Math.hypot(o.x - x, o.y - y) < (o.br || o.r || 30) + 40))
