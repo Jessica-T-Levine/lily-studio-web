@@ -260,7 +260,7 @@
 
 <script src="/lily-home-sky-v1.js"></script>
 <script src="/lily-sky-v1.js"></script>
-<script src="lily-creatures-v4.js"></script>
+<script src="lily-creatures-v5.js"></script>
 <script src="lily-playhouse-design.js"></script>
 <script src="lily-flag-design.js"></script>
 <script src="lily-bee-home-v1.js"></script>
@@ -1053,6 +1053,15 @@
   // Hop Hop's pond, next to the playhouse: lily pads (a few already blooming) and reeds all around.
   const PAD_GROW = 1.5;   // v30: bigger lily pads (the frogs sit on them nicely)
   // a frog sized to sit on this pond's lily pads: his body about 60% as wide as a pad (a little bigger or smaller for each frog)
+  // Hop Hop's friends (library v5): every pond frog except Hop Hop himself is one of the friends, picked from where his lily pad is
+  // (so the world's other random numbers stay exactly as they were). A few are still plain green, like Hop Hop.
+  const FROG_FRIENDS = ["golden", "blue", "lime", "hunter", "ember", "pink", "lavender", "mint"];
+  function friendFor(x, y) {
+    const r = seeded(hash2(Math.round(x) + 4219, Math.round(y) - 1777)), a = r(), b = r();
+    if (a < 0.1) return "ours";
+    return FROG_FRIENDS[Math.floor(b * FROG_FRIENDS.length) % FROG_FRIENDS.length];
+  }
+  const palSize = F => { const c = FROG && FROG.colors && FROG.colors[F.pal]; return c ? c.size : 1; };
   function frogFit(p, roll) {
     const avg = p.pads.length ? p.pads.reduce((s, pd) => s + pd.r, 0) / p.pads.length : 40;
     return clamp(2 * avg * 0.6 / 88 * (0.88 + roll * 0.26), 0.25, 1.1);
@@ -1089,12 +1098,12 @@
   function setupHopHop(ch) {
     const p = ch.pond, pd = p.pads[0];
     p.residents = [];
-    p.frogs = [{ isFrog: true, hophop: true, pond: p, pad: 0, x: pd.x, y: pd.y, size: 0.7,
+    p.frogs = [{ isFrog: true, hophop: true, pal: "ours", pond: p, pad: 0, x: pd.x, y: pd.y, size: 0.7,
       blink: 2, glanceA: 1, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
       hop: 0, hopT: 0, nextHop: 3, lick: null, lickCd: 3, fly: null, nextFly: 5 }];
     [[2, 0.45, 1.1], [4, 0.55, 0.92]].forEach(([i, sz, sx]) => {
       const pd2 = p.pads[i];
-      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd2.x, y: pd2.y, size: sz, sx, blink: 1 + i, glanceA: i, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
+      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd2.x, y: pd2.y, pal: friendFor(pd2.x, pd2.y), size: sz, sx, blink: 1 + i, glanceA: i, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
         hop: 0, hopT: 0, nextHop: 4 + i, lick: null, lickCd: 3 + i, fly: null, nextFly: 6 + i });
     });
   }
@@ -1209,7 +1218,7 @@
     p.frogs = [];
     const add = (i, sizes) => {
       const pd = p.pads[i];
-      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd.x, y: pd.y, size: frogFit(p, q()), sx: 0.9 + q() * 0.22,
+      p.frogs.push({ isFrog: true, pond: p, pad: i, x: pd.x, y: pd.y, pal: friendFor(pd.x, pd.y), size: frogFit(p, q()), sx: 0.9 + q() * 0.22,
         blink: 1 + q() * 3, glanceA: q() * Math.PI * 2, glanceT: 0, look: null, wiggle: 0, gulp: 0, squash: 0,
         hop: 0, hopT: 0, nextHop: 3 + q() * 8, lick: null, lickCd: 2 + q() * 3, fly: null, nextFly: 3 + q() * 8 });
     };
@@ -1219,7 +1228,7 @@
       if (open.length) add(open[Math.floor(q() * open.length)], SIZES);
     }
   }
-  function frogTop(F) { return 95 * F.size; }
+  function frogTop(F) { return 95 * F.size * palSize(F); }
   function frogMouth(F) { return { x: F.x, y: F.y, z: 50 * F.size + F.hop }; }
   function turtleTop(T) { return (lerp(15, 11, pondWet(T.pond, T.x, T.y)) - 1.5) * 1.05 * T.size; }
   // land spots stay clear of rocks, trees, mushrooms and flower stems; water spots stay clear of lily pads
@@ -5121,7 +5130,7 @@
     if (tongueBehind) drawTongue();
     drawCachedFrog(F, x, baseY - hopPx, s, yaw, pitch, {
       t: dancing ? danceT : 0, jump: jumping ? Math.sin(u * Math.PI) : 0, squash: F.squash, happy: F.wiggle > 0 || F.gulp > 0 || dancing || F.act === "wave" ? 1 : 0,
-      dance: dancing, armR: F.act === "wave" && !jumping ? clamp(Math.min(2.4 - F.actT, F.actT) * 3, 0, 1) * (0.75 + 0.25 * Math.sin(time * 10)) : 0, blink: F.blink < 0, lick: !!F.lick, shadow: hopPx <= 0.5
+      pal: F.pal || "ours", dance: dancing, armR: F.act === "wave" && !jumping ? clamp(Math.min(2.4 - F.actT, F.actT) * 3, 0, 1) * (0.75 + 0.25 * Math.sin(time * 10)) : 0, blink: F.blink < 0, lick: !!F.lick, shadow: hopPx <= 0.5
     });
     if (!tongueBehind) drawTongue();
     ctx.restore();
@@ -5138,7 +5147,7 @@
     const w = Math.max(2, Math.ceil(2 * L * sk)), h = Math.max(2, Math.ceil((TOP + BOT) * sk));
     const moving = pose.dance || pose.jump > 0 || pose.squash > 0.01 || pose.armR > 0;   // v21: a wave is moving too
     const big = s * k >= 2.5, turnSteps = s * k < 1.2 ? 10 : big ? 24 : 16;   // little faraway frogs don't need every tiny turn
-    const key = moving ? null : [step, Math.round(yaw * turnSteps), Math.round(pitch * 45), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0].join(",");
+    const key = moving ? null : [step, Math.round(yaw * turnSteps), Math.round(pitch * 45), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0, pose.pal || ""].join(",");
     if (!F.pic) { F.pic = document.createElement("canvas"); F.picCtx = F.pic.getContext("2d"); F.picKey = ""; }
     if (frogRedrawT !== time) { frogRedrawT = time; frogRedraws = 0; }
     // v24: only a few refreshes each frame (a big frog that's dancing or hopping always gets his), and a little
@@ -6240,6 +6249,7 @@
   let last = performance.now();
   window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }),
     neenee: () => { const n = ANIMALS.find(a => a.neenee); return n ? { x: n.x, y: n.y } : null; },
+    frogs: () => { const out = []; chunks.forEach(ch => ch.pond && (ch.pond.frogs || []).forEach(F => out.push({ x: F.x, y: F.y, pal: F.pal, hophop: !!F.hophop, size: F.size }))); return out; },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
