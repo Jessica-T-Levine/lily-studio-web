@@ -3118,7 +3118,7 @@
   // empties and each carrot fills one back. Everyone else stays exactly where they are. The back button returns you to the Playhouse.
   // The distances are her game's, scaled up by BM.R so she plays the same at the Playhouse's size.
   const BM = { on: false, N: null, R: 1.9, ready: false };
-  const BM_RUN_RAMP = 2.4, BM_HOLD_TO_RUN = 0.28, BM_TUMMY_MAX = 5, BM_TUMMY_DRAIN = 1 / 60, BM_SLOW_LEN = 0.65, BM_SLOW_DUR = 1.5, BM_IDLE_AFTER = 5, BM_TUMMY_PAUSE = 120;
+  const BM_RUN_RAMP = 2.4, BM_HOLD_TO_RUN = 0.28, BM_TUMMY_MAX = 5, BM_TUMMY_DRAIN = 1 / 100, BM_SLOW_LEN = 0.65, BM_SLOW_DUR = 1.5, BM_IDLE_AFTER = 5, BM_TUMMY_PAUSE = 120;
   const bun = { x: 0, y: 0, z: 0, heading: 0, visYaw: 0, peekSide: 1, face: 1, faceS: 1, mode: "sit", hop: null, target: null, pending: null, pause: 0,
     stretch: 0, up: 0, flop: 0, groom: 0, chew: 0, squash: 0, wiggle: 0, happy: 0, blink: 2, earFlick: 0, earFlickSide: 1, look: 0, munch: null, act: null, sniffAt: 0 };
   let bmClaimed = null, bmRunning = false, bmRunV = 0, bmPeakSaid = false, bmTummy = BM_TUMMY_MAX, bmHungrySaid = false, bmTummyPop = 0, bmHungryLook = 0;
@@ -3376,7 +3376,7 @@
     if (!bun.earFlick && Math.random() < dt * 0.08) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; }
     // her tummy slowly empties (not while she munches, and it waits when nobody has played for two minutes)
     if (bun.mode !== "pull" && bun.mode !== "munch" && time - bmLastInputAt < BM_TUMMY_PAUSE) {
-      const before = bmTummy; bmTummy = Math.max(0, bmTummy - BM_TUMMY_DRAIN * (tgPlaying() ? 3 : 1) * dt);
+      const before = bmTummy; bmTummy = Math.max(0, bmTummy - BM_TUMMY_DRAIN * (tgPlaying() ? 2 : 1) * dt);
       if (before > 0 && bmTummy <= 0 && !bmHungrySaid) { bmHungrySaid = true; bun.earFlick = 1; popups.push({ x: bun.x, y: bun.y, z: 76 * R, text: pick(["so hungry...", "tummy's empty...", "need a carrot..."]), life: 1.6, big: false }); bsfx.snore(); }
     }
     bmTummyPop = Math.max(0, bmTummyPop - dt * 2.5);
@@ -3435,12 +3435,21 @@
     if (!BM.on) return;
     const n = BM_TUMMY_MAX, gap = 19, s = 0.95, k = W / (canvas.getBoundingClientRect().width || W), x1 = 0, y = 0, x0 = x1 - (n - 1) * gap;
     ctx.save(); ctx.translate(W - 22 * k, 81 * k); ctx.scale(k, k);   // always the same size on screen, just under the corner buttons
-    ctx.fillStyle = "rgba(255, 255, 255, 0.42)"; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill();
+    const hungry = bmHungry(), gl = hungry ? (reduceMotion ? 0.7 : 0.55 + 0.45 * Math.sin(time * 3.4)) : 0;   // out of carrots: the whole pill glows, warm and gentle
+    if (hungry) {
+      ctx.save(); ctx.shadowColor = `rgba(255, 150, 60, ${0.5 + 0.4 * gl})`; ctx.shadowBlur = 10 + 12 * gl;
+      ctx.fillStyle = `rgba(255, 226, 170, ${0.55 + 0.2 * gl})`; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill(); ctx.restore();
+      ctx.strokeStyle = `rgba(255, 150, 60, ${0.55 + 0.4 * gl})`; ctx.lineWidth = 2.4; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.stroke();
+    } else { ctx.fillStyle = "rgba(255, 255, 255, 0.42)"; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill(); }
     if (bmBoosting()) { ctx.strokeStyle = `rgba(255, 190, 40, ${0.75 + (reduceMotion ? 0.2 : 0.2 * Math.sin(time * 6))})`; ctx.lineWidth = 2.8; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.stroke(); }   // turbo: two or more carrots
     const pulse = bmHungry() && !reduceMotion ? 0.5 + 0.5 * Math.sin(time * 3) : 0;
     for (let i = 0; i < n; i++) {
       const j = n - 1 - i, fill = clamp(bmTummy - j, 0, 1), pop = j === Math.ceil(bmTummy) - 1 ? bmTummyPop : 0;
-      bmDrawTummyIcon(x0 + i * gap, y + 1, s * (1 + pop * 0.35), 0.1 + pulse * 0.06 + fill * 0.9);
+      if (hungry) {   // each empty carrot slot glows too
+        const g = ctx.createRadialGradient(x0 + i * gap, y, 0, x0 + i * gap, y, 17); g.addColorStop(0, `rgba(255, 170, 70, ${0.8 * gl})`); g.addColorStop(1, "rgba(255, 170, 70, 0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x0 + i * gap, y, 15, 0, Math.PI * 2); ctx.fill();
+      }
+      bmDrawTummyIcon(x0 + i * gap, y + 1, s * (1 + pop * 0.35), hungry ? 0.35 + 0.35 * gl : 0.1 + pulse * 0.06 + fill * 0.9);
     }
     ctx.restore();
     tgDrawHud();
