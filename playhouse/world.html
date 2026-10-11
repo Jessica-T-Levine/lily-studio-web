@@ -264,7 +264,7 @@
 <script src="lily-playhouse-design.js"></script>
 <script src="lily-flag-design.js"></script>
 <script src="lily-bee-home-v1.js"></script>
-<script src="lily-halloween-v1.js"></script>
+<script src="lily-halloween-v2.js"></script>
 <script>
 (() => {
   "use strict";
@@ -4054,24 +4054,38 @@
   const PSP = 3, PUW = 140, PUH = 100; // picture: pixels per design unit, and its size in design units
   const pumpkinPics = {};
   let pumpkinGlows = [];
-  function pumpkinPic(m, lit) {
-    const key = m.shape.name + m.face + (lit ? "L" : "D");
+  // v2: every pumpkin has its own way it faces. Seen from the front you get the carved face; turned, the face wraps round the side;
+  // from behind you see the plain back with its leaf and stem. The face turns in steps of 15 degrees (a picture is made only when first needed).
+  const PUMPKIN_STEP = Math.PI / 12, PUMPKIN_BACK = 6;      // 6 steps = 90 degrees: past that, the face is on the far side
+  let pumpkinCount = 0;
+  function pumpkinPic(m, lit, step) {
+    const key = m.shape.name + m.face + (lit ? "L" : "D") + (step === "back" ? "B" : step);
     let c = pumpkinPics[key]; if (c) return c;
+    if (pumpkinCount > 160) { Object.keys(pumpkinPics).forEach(k => delete pumpkinPics[k]); pumpkinCount = 0; }   // never hold too many pictures
     c = document.createElement("canvas"); c.width = PUW * PSP; c.height = PUH * PSP;
-    LH.pumpkin(c.getContext("2d"), PUW * PSP / 2, (PUH - 10) * PSP, PSP, lit ? "glow" : "carved", { shape: Object.assign({}, m.shape, { face: m.face }), halo: false });
+    LH.pumpkin(c.getContext("2d"), PUW * PSP / 2, (PUH - 10) * PSP, PSP, step === "back" ? "plain" : lit ? "glow" : "carved", { shape: Object.assign({}, m.shape, { face: m.face }), halo: false, turn: step === "back" ? 0 : step * PUMPKIN_STEP });
+    pumpkinCount++;
     return (pumpkinPics[key] = c);
   }
   function drawPumpkin(m, p) {
     const fa = fadeFor(p.f); if (fa <= 0.01) return;
-    const sc = p.k * PUMPKIN_UNITS * m.s, nk = clamp((nightness() + goldness() * 0.35 - 0.12) / 0.4, 0, 1);   // the candle lights as the sun sets
+    const sc = p.k * PUMPKIN_UNITS * m.s, nk0 = clamp((nightness() + goldness() * 0.35 - 0.12) / 0.4, 0, 1);   // the candle lights as the sun sets
+    // which way is this one facing, compared with the camera?
+    if (m.hd == null) m.hd = seeded(hash2(Math.round(m.x) + 913, Math.round(m.y) - 4471))() * Math.PI * 2;
+    const away = Math.cos(m.hd) * camC + Math.sin(m.hd) * camS, side = -Math.cos(m.hd) * camS + Math.sin(m.hd) * camC;
+    const turn = Math.atan2(side, -away), st = Math.round(turn / PUMPKIN_STEP), back = Math.abs(st) >= PUMPKIN_BACK;
+    const fv = back ? 0 : Math.cos(st * PUMPKIN_STEP), nk = nk0 * (back ? 0 : Math.sqrt(fv));      // the candle glows through the face only when you can see it
+    const step = back ? "back" : st;
     const x = p.x - PUW / 2 * sc, y = p.y - (PUH - 10) * sc, w = PUW * sc, h = PUH * sc;
-    ctx.globalAlpha = fa; ctx.drawImage(pumpkinPic(m, false), x, y, w, h);
-    if (nk > 0.02) {
+    ctx.globalAlpha = fa; ctx.drawImage(pumpkinPic(m, false, step), x, y, w, h);
+    if (nk0 > 0.02) {
       const fl = reduceMotion ? 1 : 1 + 0.07 * Math.sin(time * 7 + m.ph * 3) + 0.05 * Math.sin(time * 12.7 + m.ph);
-      ctx.globalAlpha = fa * nk; ctx.drawImage(pumpkinPic(m, true), x, y, w, h);
-      ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = fa * nk * 0.3; ctx.drawImage(pumpkinPic(m, true), x, y, w, h);   // keeps it bright through the night tint
-      ctx.globalCompositeOperation = "source-over";
-      pumpkinGlows.push({ x: p.x, y: p.y - 24 * sc * m.shape.h, r: 110 * sc * m.shape.w, a: fa * nk * fl });
+      if (nk > 0.02) {
+        ctx.globalAlpha = fa * nk; ctx.drawImage(pumpkinPic(m, true, step), x, y, w, h);
+        ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = fa * nk * 0.3; ctx.drawImage(pumpkinPic(m, true, step), x, y, w, h);   // keeps it bright through the night tint
+        ctx.globalCompositeOperation = "source-over";
+      }
+      pumpkinGlows.push({ x: p.x, y: p.y - 24 * sc * m.shape.h, r: 110 * sc * m.shape.w, a: fa * nk0 * fl * (back ? 0.45 : 0.45 + 0.55 * fv) });   // from behind it is still softly lit from inside
     }
     ctx.globalAlpha = 1;
   }
@@ -6253,6 +6267,7 @@
   window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }),
     neenee: () => { const n = ANIMALS.find(a => a.neenee); return n ? { x: n.x, y: n.y } : null; },
     frogs: () => { const out = []; chunks.forEach(ch => ch.pond && (ch.pond.frogs || []).forEach(F => out.push({ x: F.x, y: F.y, pal: F.pal, hophop: !!F.hophop, size: F.size }))); return out; },
+    pumpkins: () => { const out = []; chunks.forEach(ch => (ch.pumpkins || []).forEach(m => { const q = proj(m.x, m.y, 0); out.push({ x: m.x, y: m.y, th: m.th, hd: m.hd, sx: q && q.x, sy: q && q.y, k: q && q.k, f: q && q.f }); })); return out; },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
