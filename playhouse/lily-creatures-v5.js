@@ -98,7 +98,7 @@
   const H3 = a => a.map(v => v / 255);
   const FP = (o) => ({ name: o.name, skin: o.skin.map(H3), leg: o.leg.map(H3), belly: o.belly.map(H3), cheek: H3(o.cheek || [255, 133, 171]),
     mark: o.mark || 0, markCol: H3(o.markCol || [255, 255, 255]), bump: o.bump || 1, size: o.size || 1,
-    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1, drop: o.drop || 0, eyeK: o.eyeK || 1, cheekK: o.cheekK || 1, tummyK: o.tummyK || 1, tummyD: o.tummyD || 0, fade: o.fade || 0 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
+    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1, drop: o.drop || 0, eyeK: o.eyeK || 1, cheekK: o.cheekK || 1, tummyK: o.tummyK || 1, tummyD: o.tummyD || 0, fade: o.fade || 0, frontK: o.frontK || 1 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
   const FROG_PALETTES = Object.freeze({
     ours:     FP({ name: "Hop Hop", skin: [[62,150,88],[93,186,115],[160,226,172]], leg: [[44,110,64],[63,148,88],[104,184,124]], belly: [[170,222,160],[210,242,198],[236,251,228]], cheek: [255,133,171] }),
     golden:   FP({ name: "Golden", skin: [[196,128,24],[238,178,48],[255,226,128]], leg: [[160,96,16],[210,140,32],[245,190,80]], belly: [[250,226,150],[255,240,190],[255,250,226]], cheek: [255,128,120], size: 1.1, wide: 1.14, tall: 0.96, legs: 1.15, cheekK: 2 }),
@@ -106,7 +106,7 @@
     lime:     FP({ name: "Treetop", skin: [[58,150,40],[104,200,60],[190,240,120]], leg: [[214,92,20],[250,140,40],[255,184,90]], belly: [[255,244,200],[255,250,224],[255,255,244]], cheek: [255,150,120], mark: 2, markCol: [150,200,255], size: 1.0, wide: 0.9, tall: 1.06, legs: 1.0, gap: 1.12, bump: 1.14 }),
     hunter:   FP({ name: "Hunter", skin: [[30,70,44],[54,108,66],[108,158,114]], leg: [[22,52,32],[40,86,52],[80,130,92]], belly: [[206,226,192],[226,240,212],[244,250,236]], cheek: [255,150,140], mark: 3, markCol: [14,34,22], size: 1.3, wide: 1.16, tall: 0.72, drop: 8, eyeK: 0.8, legs: 1.2, gap: 0.92, bump: 0.94 }),
     ember:    FP({ name: "Ember", skin: [[190,56,36],[240,104,60],[255,168,120]], leg: [[140,36,28],[200,70,44],[240,120,80]], belly: [[255,222,196],[255,238,218],[255,248,238]], cheek: [255,150,150], mark: 1, markCol: [52,34,48], size: 0.8, wide: 1.06, tall: 0.94, legs: 0.9, gap: 0.78, bump: 1.05, fade: 0.5 }),
-    pink:     FP({ name: "Pink", skin: [[240,150,190],[255,184,214],[255,222,238]], leg: [[214,112,160],[240,148,190],[255,190,216]], belly: [[255,240,246],[255,248,251],[255,252,254]], cheek: [255,110,140], size: 0.9, wide: 0.9, tall: 1.04, legs: 0.85, gap: 1.05, bump: 1.08 }),
+    pink:     FP({ name: "Pink", skin: [[240,150,190],[255,184,214],[255,222,238]], leg: [[214,112,160],[240,148,190],[255,190,216]], belly: [[255,240,246],[255,248,251],[255,252,254]], cheek: [255,110,140], size: 0.9, wide: 0.9, tall: 1.04, legs: 0.85, gap: 1.05, bump: 1.08, frontK: 1.2 }),
     lavender: FP({ name: "Lavender", skin: [[160,128,222],[198,166,250],[230,212,255]], leg: [[128,96,190],[170,136,230],[208,184,248]], belly: [[244,238,255],[250,246,255],[254,252,255]], cheek: [255,130,180], mark: 3, markCol: [255,255,255], size: 1.0, wide: 1.1, tall: 1.0, legs: 1.1, gap: 0.95, bump: 1.04 }),
     mint:     FP({ name: "Mint", skin: [[96,205,184],[140,236,214],[200,252,238]], leg: [[58,166,146],[100,208,186],[158,236,214]], belly: [[240,255,250],[246,255,252],[252,255,254]], cheek: [255,130,160], mark: 2, markCol: [236,255,249], size: 1.15, wide: 0.95, tall: 1.08, legs: 1.0, gap: 1.05 })
   });
@@ -553,8 +553,8 @@ void main(){
     const M = M3.mul(M3.scale(sx, sx, sz), M3.rotX(pose.roll || 0));
     const FPAL = palOf(pose), SH = FPAL, BR_ = BUMP_R.map(v => v * FPAL.bump), TALLUP = BODY_R[2] * (SH.tall - 1);
     const LEGK = { uHipR: 1, uHipR2: 1, uLegR: 1, uLegR2: 1 }, WYN = { uHipA: 1, uHipB: 1, uHPawC: 1, uLegA: 1, uLegB: 1, uPawC: 1, uLegBUp: 1, uPawCUp: 1 };
-    const u = (name, ...v) => { const l = U[name]; if (l == null) return; if (LEGK[name]) v[0] *= SH.legs; if (v.length === 1) gl.uniform1f(l, v[0]); else if (v.length === 2) gl.uniform2f(l, v[0], v[1]); else gl.uniform3f(l, v[0], v[1], v[2]); };
-    const u3 = (name, a) => { if (WYN[name]) a = [a[0], a[1] * SH.wide, a[2]]; u(name, a[0], a[1], a[2]); };
+    const u = (name, ...v) => { const l = U[name]; if (l == null) return; if (LEGK[name]) v[0] *= SH.legs; if (name === "uLegR" || name === "uLegR2") v[0] *= SH.frontK; if (v.length === 1) gl.uniform1f(l, v[0]); else if (v.length === 2) gl.uniform2f(l, v[0], v[1]); else gl.uniform3f(l, v[0], v[1], v[2]); };
+    const u3 = (name, a) => { if (WYN[name]) a = [a[0], a[1] * SH.wide, a[2]]; if (name === "uPawR") a = [a[0] * SH.frontK, a[1] * SH.frontK, a[2] * SH.frontK]; u(name, a[0], a[1], a[2]); };
     const um = (name, m) => { if (U[name] != null) gl.uniformMatrix3fv(U[name], false, new Float32Array(colMajor(m))); };
     u("uRes", W, H); u("uAnchor", L * S, TOP * S); u("uS", S);
     u3("uR", R); u3("uU", Up); u3("uF", F); u3("uL", Ld);
