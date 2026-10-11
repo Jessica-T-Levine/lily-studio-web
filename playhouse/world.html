@@ -1062,6 +1062,8 @@
     return FROG_FRIENDS[Math.floor(b * FROG_FRIENDS.length) % FROG_FRIENDS.length];
   }
   const palSize = F => { const c = FROG && FROG.colors && FROG.colors[F.pal]; return c ? c.size : 1; };
+  // pad fit: a friend is never bigger (or wider) than Hop Hop on his lily pad. Small is fine, so only the big ones are trimmed.
+  const palPadK = F => { const c = FROG && FROG.colors && FROG.colors[F.pal]; return c && c.size > 1 ? 1 / (c.size * Math.max(1, c.wide || 1)) : 1; };
   function frogFit(p, roll) {
     const avg = p.pads.length ? p.pads.reduce((s, pd) => s + pd.r, 0) / p.pads.length : 40;
     return clamp(2 * avg * 0.6 / 88 * (0.88 + roll * 0.26), 0.25, 1.1);
@@ -1228,7 +1230,7 @@
       if (open.length) add(open[Math.floor(q() * open.length)], SIZES);
     }
   }
-  function frogTop(F) { return 95 * F.size * palSize(F); }
+  function frogTop(F) { return 95 * F.size * palSize(F) * palPadK(F); }
   function frogMouth(F) { return { x: F.x, y: F.y, z: 50 * F.size + F.hop }; }
   function turtleTop(T) { return (lerp(15, 11, pondWet(T.pond, T.x, T.y)) - 1.5) * 1.05 * T.size; }
   // land spots stay clear of rocks, trees, mushrooms and flower stems; water spots stay clear of lily pads
@@ -5094,7 +5096,7 @@
   function drawPondFrog(F, p) {
     if (!FROG) return drawPondFrogFlat(F, p);
     const a = fadeFor(p.f); if (a <= 0.01) return;
-    const s = FROG_SIZE * F.size * p.k, x = p.x, baseY = p.y + 2 * p.k, hopPx = F.hop * p.k;
+    const s = FROG_SIZE * F.size * palPadK(F) * p.k, x = p.x, baseY = p.y + 2 * p.k, hopPx = F.hop * p.k;
     const jumping = F.hopT > 0, u = jumping ? clamp(1 - F.hopT / (F.hopDur || 0.55), 0, 1) : 0;
     // he faces the way he's hopping, or whatever he's watching
     let want = F.heading == null ? camYaw + Math.PI : F.heading;
