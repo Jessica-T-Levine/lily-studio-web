@@ -481,7 +481,8 @@
 .site-header .dm-t em{font-style:normal;font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#7DD3FC;margin-left:6px}
 /* ── Menu v8b: arrows ›closed ⌄open, none when no submenu ── */
 .site-header .nav-drop-btn svg{transform:rotate(-90deg)!important}
-.site-header .nav-drop.open .nav-drop-btn svg,.site-header .nav-drop:hover .nav-drop-btn svg{transform:rotate(0deg)!important}
+.site-header .nav-drop.open .nav-drop-btn svg{transform:rotate(0deg)!important}
+@media (hover:hover) and (min-width:769px){.site-header .nav-drop:hover .nav-drop-btn svg{transform:rotate(0deg)!important}}   /* the arrow only drops on hover where hover really opens the menu */
 @media (max-width:768px){.site-header .nav-links>li>a:not(.nav-cta)::after{content:none!important;display:none!important}}
 /* ── Menu v8c: phone order, Got Skills on top, Playhouse at the bottom ── */
 @media (max-width:768px){
@@ -689,6 +690,7 @@
   var drops = [].slice.call(document.querySelectorAll('.site-header .nav-drop'));
   if (!drops.length) return;
   var phone = window.matchMedia('(max-width: 768px)');
+  function canHover() { return window.matchMedia('(hover: hover)').matches; }   // iPads (finger or trackpad) say no, so the menu opens on click instead
   var touched = false;   // iPad / tablet: the last thing that touched the page was a finger or pen, so there is no hover
   document.addEventListener('pointerdown', function (e) { touched = e.pointerType === 'touch' || e.pointerType === 'pen'; }, true);
   function set(d, open) { d.classList.toggle('open', open); var b = d.querySelector('.nav-drop-btn'); if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -697,7 +699,7 @@
   drops.forEach(function (d) {
     var b = d.querySelector('.nav-drop-btn'), a = d.querySelector('a');
     b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); toggle(d); });
-    a.addEventListener('click', function (e) { if (phone.matches || (touched && !d.classList.contains('open'))) { e.preventDefault(); e.stopPropagation(); toggle(d); } });   // tablet: first tap opens the menu, a second tap on the word goes to the page
+    a.addEventListener('click', function (e) { if (phone.matches || ((touched || !canHover()) && !d.classList.contains('open'))) { e.preventDefault(); e.stopPropagation(); toggle(d); } });   // tablet: first tap opens the menu, a second tap on the word goes to the page
     d.addEventListener('mouseleave', function () { if (!phone.matches && window.matchMedia('(hover: hover)').matches) set(d, false); });
     if (phone.matches && d.querySelector('.nav-drop-panel [aria-current="page"]')) set(d, true);
   });
