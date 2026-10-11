@@ -433,7 +433,7 @@ void main(){
   vec3 skinC = ramp(uSk0, uSk1, uSk2, lit);
   vec3 legC  = ramp(uLg0, uLg1, uLg2, lit);
   vec3 col = mix(skinC, legC, m.y);
-  col *= 1.0 - uFade * (1.0 - smoothstep(1.0, 12.0, p.z));   // v5: the color fades darker toward his feet
+  col *= 1.0 - uFade * m.y * (1.0 - smoothstep(1.0, 13.0, p.z));   // v5: the color fades darker toward his feet
   // v5: markings on his back only (never on his face): spots, two back stripes, or tiny speckles
   if (uMarkKind > 0.5) {
     float onBack = smoothstep(13.0, 7.0, p.x) * smoothstep(9.0, 15.0, p.z) * (1.0 - m.y);
