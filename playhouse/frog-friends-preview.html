@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hop Hop and friends (preview)</title>
+<style>body{margin:0;background:#FDFBF7;font-family:system-ui,sans-serif;color:#0B1E3F;text-align:center}h1{font-size:20px;margin:14px 0 2px}p{margin:0 0 8px;font-size:13px}canvas{width:100%;max-width:720px;display:block;margin:0 auto}</style></head><body>
+<h1>Hop Hop and his friends</h1><p>Preview only (library v5). Front view, then back view.</p>
+<canvas id="c" width="1080" height="1500"></canvas>
+<script src="lily-creatures-v5.js"></script>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),F=LilyCreatures.frog,names=Object.keys(F.colors);
+const bg=ctx.createLinearGradient(0,0,0,1500);bg.addColorStop(0,'#CFE8FF');bg.addColorStop(1,'#E6F5D5');ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1500);
+names.forEach((n,i)=>{const col=i%3,row=Math.floor(i/3);const cx=180+col*360,cy=250+row*470;
+ ctx.fillStyle='rgba(60,110,80,.18)';ctx.beginPath();ctx.ellipse(cx,cy+8,95,26,0,0,7);ctx.fill();
+ F.draw(ctx,cx,cy,4.2,Math.PI+0.5,0.28,{pal:n,t:0.2,blink:false});
+ F.draw(ctx,cx+70,cy+170,2.0,0.4,0.28,{pal:n,t:0.2,blink:false});
+ ctx.fillStyle='#0B1E3F';ctx.font='700 30px system-ui';ctx.textAlign='center';ctx.fillText(F.colors[n].name,cx,cy+60);});
+window.__done=true;
+</script></body></html>
