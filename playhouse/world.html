@@ -1032,9 +1032,10 @@
     if (LH && biome !== "woods") {
       const pr = seeded(hash2(cx + 3131, cy - 8081)), pn = 1 + Math.floor(pr() * 2);
       for (let i = 0; i < pn; i++) {
-        const x = x0 + 40 + pr() * (CS - 80), y = y0 + 40 + pr() * (CS - 80), th = pr(), si = Math.floor(pr() * 4), fi = Math.floor(pr() * 3), sz = 0.9 + pr() * 0.35, ph = pr() * 6, coin = pr();
+        const x = x0 + 40 + pr() * (CS - 80), y = y0 + 40 + pr() * (CS - 80), th = pr(), si = Math.floor(pr() * 4), fi = Math.floor(pr() * 3), sz = 0.75 + pr() * 0.5, ph = pr() * 6, coin = pr();   // sizes run 25% smaller to 25% bigger, so some are big and some small
         let face = LH.FACES[fi];
         if (si === 1 && face === 4) face = coin < 0.5 ? 2 : 3;      // the wink is never used on the wide, squat pumpkin
+        if (seeded(hash2(Math.round(x) + 6007, Math.round(y) - 2141))() < 0.15) continue;   // 15% fewer pumpkins (a fixed, repeatable pick, so the same ones always stay)
         if (!free(x, y, 40)) continue;
         if (ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < o.s + 36)) continue;
         if (ch.shrooms.some(o => Math.hypot(o.x - x, o.y - y) < (o.w || 40) * 0.6 + 40)) continue;
