@@ -1945,10 +1945,12 @@ if (/[?&]render=1(&|$)/.test(location.search) || (window.WATCH_CONFIG && window.
     ctx.restore();
   }
   function drawFxRipples() {
+    ctx.save(); ctx.beginPath(); ctx.rect(0, WATER_Y, W, H - WATER_Y); ctx.clip();   // rings only ever show on the water, never on the hills behind it
     fxRipples.forEach(r => {
       ctx.strokeStyle = `rgba(255,255,255,${0.5 * clamp(r.life, 0, 1)})`; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, r.r, r.r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
     });
+    ctx.restore();
   }
 
   // ---------- rain, rainbow and mist (drawing only) ----------
@@ -2209,10 +2211,12 @@ if (/[?&]render=1(&|$)/.test(location.search) || (window.WATCH_CONFIG && window.
     ctx.restore();
   }
   function drawRipples() {
+    ctx.save(); ctx.beginPath(); ctx.rect(0, WATER_Y, W, H - WATER_Y); ctx.clip();   // rings only ever show on the water, never on the hills behind it
     ripples.forEach(r => {
       ctx.strokeStyle = `rgba(255,255,255,${0.55 * clamp(r.life, 0, 1)})`; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, r.r, r.r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
     });
+    ctx.restore();
   }
   function drawPad(p) {
     const x = p.x - camX, bob = Math.sin(time * 1.6 + p.phase) * 1.4;

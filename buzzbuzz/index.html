@@ -4004,9 +4004,20 @@
       if (groundPath(ellipsePts(p.px - Math.cos(p.an) * 2, p.py - Math.sin(p.an) * 2, 5, 3, p.an, 10))) { ctx.fillStyle = "rgba(255, 255, 255, 0.55)"; ctx.fill(); }
     });
   }
+  // a ring on the water never spills onto the grass: any point that would land past the shore is pulled back to the water's edge
+  function ringOnWater(rp, n) {
+    const pts = ellipsePts(rp.x, rp.y, rp.r, rp.r, 0, n), pd = pondAt(rp.x, rp.y);
+    if (!pd) return pts;
+    return pts.map(([x, y]) => {
+      if (inPond(pd, x, y, 0)) return [x, y];
+      let lo = 0, hi = 1;
+      for (let i = 0; i < 7; i++) { const m = (lo + hi) / 2; if (inPond(pd, rp.x + (x - rp.x) * m, rp.y + (y - rp.y) * m, 0)) lo = m; else hi = m; }
+      return [rp.x + (x - rp.x) * lo, rp.y + (y - rp.y) * lo];
+    });
+  }
   function drawRipples() {
     ripples.forEach(rp => {
-      if (groundPath(ellipsePts(rp.x, rp.y, rp.r, rp.r, 0, 22))) {
+      if (groundPath(ringOnWater(rp, 22))) {
         ctx.strokeStyle = `rgba(255, 255, 255, ${0.6 * clamp(rp.life, 0, 1)})`; ctx.lineWidth = 1.6; ctx.stroke();
       }
     });
