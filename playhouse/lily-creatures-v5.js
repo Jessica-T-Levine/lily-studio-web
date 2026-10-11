@@ -98,13 +98,13 @@
   const H3 = a => a.map(v => v / 255);
   const FP = (o) => ({ name: o.name, skin: o.skin.map(H3), leg: o.leg.map(H3), belly: o.belly.map(H3), cheek: H3(o.cheek || [255, 133, 171]),
     mark: o.mark || 0, markCol: H3(o.markCol || [255, 255, 255]), bump: o.bump || 1, size: o.size || 1,
-    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
+    wide: o.wide || 1, tall: o.tall || 1, legs: o.legs || 1, gap: o.gap || 1, drop: o.drop || 0 });   // wide = body width (chubby/slim), tall = body height, legs = leg thickness, gap = how far apart the eyes sit
   const FROG_PALETTES = Object.freeze({
     ours:     FP({ name: "Hop Hop", skin: [[62,150,88],[93,186,115],[160,226,172]], leg: [[44,110,64],[63,148,88],[104,184,124]], belly: [[170,222,160],[210,242,198],[236,251,228]], cheek: [255,133,171] }),
     golden:   FP({ name: "Golden", skin: [[196,128,24],[238,178,48],[255,226,128]], leg: [[160,96,16],[210,140,32],[245,190,80]], belly: [[250,226,150],[255,240,190],[255,250,226]], cheek: [255,128,120], size: 1.1, wide: 1.14, tall: 0.96, legs: 1.15 }),
     blue:     FP({ name: "Blue", skin: [[28,76,170],[56,128,224],[132,186,252]], leg: [[18,52,128],[38,92,184],[88,146,226]], belly: [[190,214,250],[222,236,255],[244,250,255]], cheek: [255,140,170], mark: 1, markCol: [22,30,78], size: 0.72, wide: 0.88, tall: 1.05, legs: 0.85, bump: 1.1 }),
     lime:     FP({ name: "Treetop", skin: [[58,150,40],[104,200,60],[190,240,120]], leg: [[214,92,20],[250,140,40],[255,184,90]], belly: [[255,244,200],[255,250,224],[255,255,244]], cheek: [255,150,120], mark: 2, markCol: [150,200,255], size: 1.0, wide: 0.9, tall: 1.06, legs: 1.0, gap: 1.12, bump: 1.14 }),
-    hunter:   FP({ name: "Hunter", skin: [[30,70,44],[54,108,66],[108,158,114]], leg: [[22,52,32],[40,86,52],[80,130,92]], belly: [[206,226,192],[226,240,212],[244,250,236]], cheek: [255,150,140], mark: 3, markCol: [14,34,22], size: 1.3, wide: 1.16, tall: 0.72, legs: 1.2, gap: 0.92, bump: 0.94 }),
+    hunter:   FP({ name: "Hunter", skin: [[30,70,44],[54,108,66],[108,158,114]], leg: [[22,52,32],[40,86,52],[80,130,92]], belly: [[206,226,192],[226,240,212],[244,250,236]], cheek: [255,150,140], mark: 3, markCol: [14,34,22], size: 1.3, wide: 1.16, tall: 0.72, drop: 8, legs: 1.2, gap: 0.92, bump: 0.94 }),
     ember:    FP({ name: "Ember", skin: [[190,56,36],[240,104,60],[255,168,120]], leg: [[140,36,28],[200,70,44],[240,120,80]], belly: [[255,222,196],[255,238,218],[255,248,238]], cheek: [255,150,150], mark: 1, markCol: [52,34,48], size: 0.8, wide: 1.06, tall: 0.94, legs: 0.9, gap: 0.78, bump: 1.05 }),
     pink:     FP({ name: "Pink", skin: [[240,150,190],[255,184,214],[255,222,238]], leg: [[214,112,160],[240,148,190],[255,190,216]], belly: [[255,240,246],[255,248,251],[255,252,254]], cheek: [255,110,140], size: 0.9, wide: 0.9, tall: 1.04, legs: 0.85, gap: 1.05, bump: 1.08 }),
     lavender: FP({ name: "Lavender", skin: [[160,128,222],[198,166,250],[230,212,255]], leg: [[128,96,190],[170,136,230],[208,184,248]], belly: [[244,238,255],[250,246,255],[254,252,255]], cheek: [255,130,180], mark: 3, markCol: [255,255,255], size: 1.0, wide: 1.1, tall: 1.0, legs: 1.1, gap: 0.95, bump: 1.04 }),
@@ -565,7 +565,7 @@ void main(){
     u3("uButtC", lerp3([-6.6, 0, 9.4], [-8.5, 0, 10.5], st)); u3("uButtR", [6, 7, 6.2]); u("uButtSep", 3.3); um("uButtRot", M3.rotY(-lerp(0.1, -0.2, st)));   // v8: butt tucked in so it only shows from the back
     u3("uSk0", FPAL.skin[0]); u3("uSk1", FPAL.skin[1]); u3("uSk2", FPAL.skin[2]); u3("uLg0", FPAL.leg[0]); u3("uLg1", FPAL.leg[1]); u3("uLg2", FPAL.leg[2]);
     u3("uBl0", FPAL.belly[0]); u3("uBl1", FPAL.belly[1]); u3("uBl2", FPAL.belly[2]); u3("uCheekCol", FPAL.cheek); u3("uMarkCol", FPAL.markCol); u("uMarkKind", FPAL.mark);
-    const BCc = [BUMP_C[0], BUMP_C[1] * SH.gap, BUMP_C[2] + TALLUP];
+    const BCc = [BUMP_C[0], BUMP_C[1] * SH.gap, BUMP_C[2] + TALLUP - SH.drop];
     u3("uBumpC", BCc); u3("uBumpR", BR_);
     u3("uHipA", lerp3([-5, 16, 9.5], [-6, 12.5, 10], sl)); u3("uHipB", lerp3([-1.5, 16.8, 5.0], [-14, 12, 7], sl)); u("uHipR", 7.2); u("uHipR2", 5.3);   // v11: rounder, chubbier back legs
     u3("uHPawC", lerp3([0.8, 17.2, 2.2], [-18, 12, 6.4], sl)); u3("uHPawR", [5.2, 4.6, 2.2]);
