@@ -162,6 +162,21 @@
   #bmBack[hidden] { display: none; }
   #bmBack svg { width: 20px; height: 20px; }
   html.in-frame #bmBack { top: max(58px, env(safe-area-inset-top)); }   /* the site's big logo hangs over the top-left corner of the world, so sit just below it */
+  /* tag: the round card */
+  #tagCard { position: absolute; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(60, 40, 110, 0.18); }
+  #tagCard[hidden] { display: none; }
+  #tagCard .tc-box { width: min(320px, 100%); padding: 22px 22px 20px; border-radius: 26px; text-align: center; background: rgba(255, 253, 248, 0.97); color: #3D2F5C; box-shadow: 0 18px 44px rgba(40, 28, 70, 0.38); }
+  #tagCard.in .tc-box { animation: popIn2 0.28s ease-out; }
+  #tagCard h2 { margin: 0 0 6px; font: 800 24px/1.15 var(--display); color: #B03B81; }
+  #tagCard .tc-score { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 6px; }
+  #tagCard .tc-score svg { width: 34px; height: 34px; }
+  #tagCard .tc-score b { font: 800 46px/1 var(--display); color: #3D2F5C; }
+  #tagCard p { margin: 0 0 16px; font: 700 15px/1.4 var(--display); color: #5D4C80; }
+  #tagCard .tc-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  #tagCard button { min-height: 46px; padding: 0 22px; border: 0; border-radius: 999px; font: 800 16px/1 var(--display); color: #FFFFFF; background: #B03B81; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  #tagCard button.alt { color: #4B3A66; background: rgba(75, 58, 102, 0.1); }
+  #tagCard button:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
+  @keyframes popIn2 { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
   #bmBack:hover { background: rgba(255, 255, 255, 0.75); }
   #bmBack:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
   #soundBtn .slash { display: none; }
@@ -593,6 +608,7 @@
   // The ground is cut into square chunks. Each chunk is built from its own seed, so the
   // same spot always has the same flowers, no matter how far she hops or which way.
   // Flowers are giant compared to her: she is tiny, they are 3 to 5 times her size.
+  const TREE_FAT = 1.35;   // tag: about a third of the trees are this much wider
   const TREE_H = 1.5, TREE_W = 1.2;   // v32: trees 1.5x taller, 1.2x wider, so bunnies no longer look tree-tall
   const CS = 700;                      // v23: each patch of world is bigger (was 420), so everything has more room
   const AREA = (CS / 420) * (CS / 420);   // how much more ground each patch has than before
@@ -926,6 +942,7 @@
       const n = Math.round((3 + Math.floor(r() * 2)) * 1.6);
       for (let tries = 0; tries < 20 && ch.trees.length < n; tries++) {
         const t = { x: x0 + 70 + r() * (CS - 140), y: y0 + 70 + r() * (CS - 140), h: (380 + r() * 160) * TREE_H, w: (48 + r() * 24) * TREE_W, can: [], branches: [] };
+        if (hash2(Math.round(t.x), Math.round(t.y)) % 3 === 0) t.w *= TREE_FAT;   // tag: some trunks are wide enough to hide behind
         if (wet(t.x, t.y, 70) || !clearOf(t.x, t.y, 90) || ch.trees.some(o => Math.hypot(o.x - t.x, o.y - t.y) < 150)) continue;
         const nb = 7 + Math.floor(r() * 4);
         for (let i = 0; i < nb; i++) t.can.push({ dx: (r() - 0.5) * 2.6, dz: (r() - 0.3) * 0.9, r: 0.55 + r() * 0.5, shade: Math.floor(r() * 3) });
@@ -937,6 +954,7 @@
     const treeChance = biome === "glade" ? 0.4 : biome === "meadow" || biome === "pondland" ? 0.08 : 0.04;
     if (!nearHome(cx, cy) && biome !== "woods" && r() < treeChance) {
       const t = { x: x0 + 80 + r() * (CS - 160), y: y0 + 80 + r() * (CS - 160), h: (340 + r() * 140) * TREE_H, w: (44 + r() * 22) * TREE_W, can: [] };
+      if (hash2(Math.round(t.x), Math.round(t.y)) % 3 === 0) t.w *= TREE_FAT;
       if (!wet(t.x, t.y, 70) && clearOf(t.x, t.y, 90)) {
         const nb = 7 + Math.floor(r() * 4);
         for (let i = 0; i < nb; i++) t.can.push({ dx: (r() - 0.5) * 2.6, dz: (r() - 0.3) * 0.9, r: 0.55 + r() * 0.5, shade: Math.floor(r() * 3) });
@@ -1028,6 +1046,25 @@
         if (bloomy) { const nbl = 5 + Math.floor(q() * 8); for (let j = 0; j < nbl; j++) bl.push({ u: q() * 2 - 1, v: q(), s: 0.7 + q() * 0.6 }); }
         ch.bushes.push({ isBush: true, x, y, br, bh: br * (0.85 + q() * 0.4), lobes, bl, bcol: ["#FF9EC3", "#FFFFFF", "#FFD36E", "#C9A7F0", "#FF8FA3"][Math.floor(q() * 5)], tone: Math.floor(q() * 3), bounceAt: 0 });
         i++;
+      }
+    }
+    {   // tag: a big hideaway bush now and then, tall and round enough for a bunny friend to hide behind (its own random stream, so nothing else in the world moves)
+      const q = seeded(hash2(cx + 4441, cy - 9187));
+      if (!nearHome(cx, cy) && q() < 0.75) {
+        for (let tries = 0; tries < 10; tries++) {
+          const br = 125 + q() * 70, x = x0 + br + q() * (CS - 2 * br), y = y0 + br + q() * (CS - 2 * br);
+          if (!free(x, y, br * 0.7 + 25)) continue;
+          if (ch.rocks.some(o => Math.hypot(o.x - x, o.y - y) < br + o.s + 10)
+            || ch.shrooms.some(m => Math.hypot(m.x - x, m.y - y) < br + (m.w || 30) * 0.6) || ch.bushes.some(o => Math.hypot(o.x - x, o.y - y) < br + o.br + 30)
+            || ch.puffs.some(o => Math.hypot(o.x - x, o.y - y) < br + 30) || (ch.pond && inPond(ch.pond, x, y, br + 40))) continue;
+          ch.flowers = ch.flowers.filter(f => Math.hypot(f.x - x, f.y - y) > br * 0.9);   // the flowers that stood where the bush grows are simply not there
+          const lobes = [], nl = 7 + Math.floor(q() * 3);
+          for (let j = 0; j < nl; j++) lobes.push({ a: (j / nl) * Math.PI * 2 + q() * 0.5, d: 0.35 + q() * 0.3, r: 0.45 + q() * 0.25, z: 0.35 + q() * 0.45 });
+          const bl = [];
+          if (q() < 0.6) { const nbl = 10 + Math.floor(q() * 10); for (let j = 0; j < nbl; j++) bl.push({ u: q() * 2 - 1, v: q(), s: 0.7 + q() * 0.6 }); }
+          ch.bushes.push({ isBush: true, hide: true, x, y, br, bh: br * (0.95 + q() * 0.3), lobes, bl, bcol: ["#FF9EC3", "#FFFFFF", "#FFD36E", "#C9A7F0", "#FF8FA3"][Math.floor(q() * 5)], tone: Math.floor(q() * 3), bounceAt: 0 });
+          break;
+        }
       }
     }
     if (ch.pond) {
@@ -1868,6 +1905,7 @@
   const isYellowBee = a => !!a && (a.pal == null || a.pal === 0 || a.pal === "ours");
   function pageFor(h) {
     if (!h) return null;
+    if (BM.on && h.kind === "bunny") return TG.on ? null : { key: "tag", url: "#tag", ask: "Play tag?" };   // playing as Nee Nee: a bunny friend asks about tag
     if (h.kind === "frog" && h.ref && h.ref.pal && h.ref.pal !== "ours") return null;   // only the original Hop Hop has the popup; his friends just say hello
     const key = h.kind === "frog" ? "frog" : h.kind === "neenee" ? "neenee" : (h.kind === "hive" || (h.kind === "bee" && isYellowBee(h.ref))) ? "bee" : null;
     return key && PAGES[key] ? { key, url: PAGES[key], ask: PAGE_ASK[key] } : null;
@@ -1875,7 +1913,7 @@
   let popFor = null, popMode = null, overPop = false, hoverOff = 0;
   let popFade = 0;
   function hidePop() {   // a soft fade, then gone
-    clearTimeout(popTimer); popFor = null; popMode = null;
+    clearTimeout(popTimer); if (popFor) popFor.askHold = 0; popFor = null; popMode = null;
     if (goPop.hidden) return;
     goPop.classList.add("out"); clearTimeout(popFade);
     popFade = setTimeout(() => { goPop.hidden = true; goPop.classList.remove("out"); }, 260);
@@ -1908,7 +1946,7 @@
     else if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop && popMode === "hover") hidePop(); }, 350); }
   });
   canvas.addEventListener("pointerleave", () => { canvas.classList.remove("can-tap"); if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop) hidePop(); }, 350); } });
-  goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
+  goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === "#tag") { e.preventDefault(); e.stopPropagation(); const who = popFor; hidePop(); if (who && BM.on) tgStart(who); return; } if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
   function visit(h) {
     lastUserAt = time;
     const a = h.ref, now = performance.now();
@@ -2593,7 +2631,7 @@
     censusT -= dt; if (censusT > 0) return; censusT = 0.8;
     for (let i = ANIMALS.length - 1; i >= 0; i--) {
       const a = ANIMALS[i];
-      if (a.state !== "inside" && !a.neenee && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off (v38: never Nee Nee)
+      if (a.state !== "inside" && !a.neenee && !a.tag && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off (v38: never Nee Nee)
     }
     const near = k => ANIMALS.filter(a => a.kind === k && Math.hypot(a.x - bee.x, a.y - bee.y) < NEAR_R).length;
     if (near("bunny") < BUNNIES_NEAR) { const s = hiddenSpot(900, NEAR_R); if (s) ANIMALS.push(newBunny(s.x, s.y, pick(BUNNY_SIZES))); }
@@ -2609,6 +2647,9 @@
   }
   function bunnyStep(n, dt) {
     n.happy = Math.max(0, n.happy - dt); n.squash = Math.max(0, n.squash - dt * 3);
+    if (n.askHold > time && (n.state === "rest" || n.state === "go" || n.state === "pause" || n.state === "idle" || n.state === "munch")) {   // someone just asked her to play tag: she stands and waits for the answer
+      n.state = "idle"; n.idle = "up"; n.timer = 2; n.z = 0; n.headingT = Math.atan2(bun.y - n.y, bun.x - n.x); n.faceCam = false; n.heading += angDiff(n.headingT, n.heading) * (1 - Math.exp(-dt * 6)); return;
+    }
     if (n.state === "inside") {   // in the playhouse for a while, then out the front door
       n.timer -= dt;
       if (n.timer <= 0) { n.state = "exit"; n.u = 0; n.x = DOOR.x + rand(-50, 50); n.y = DOOR.y - 40; n.z = 0; n.heading = n.headingT = Math.PI / 2; }
@@ -2747,7 +2788,7 @@
     census(dt);
     ANIMALS.forEach(a => {
       if (Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 400 && a.state !== "inside") return;   // far away: resting
-      if (a.player) return;   // she is you right now
+      if (a.player || a.tag) return;   // she is you right now (or a friend playing tag, moved by the tag game)
       if (a.kind === "bunny") bunnyStep(a, dt); else beeStep(a, dt);
     });
     CARROTS.forEach(c => {
@@ -3096,7 +3137,7 @@
     snore() { tone("sine", 160, 120, 0.6, 0.025); }
   };
   // places she cannot hop into: ponds and the playhouse
-  const bmBlocked = (x, y) => !!pondAt(x, y) || insideHouse(x, y, 40);
+  const bmBlocked = (x, y) => !!pondAt(x, y) || insideHouse(x, y, 40) || solidIn(solidsNear(x, y, 10), x, y, 40, 1e9, 1e9);
   // carrot beds everywhere while you play as her (the world itself is unchanged for everyone else): a bed in about half of the patches of meadow
   function bmEnsureBeds() {
     const cx0 = Math.floor(bun.x / CS), cy0 = Math.floor(bun.y / CS);
@@ -3141,7 +3182,7 @@
     let len = 0;
     for (const off of [0, 0.45, -0.45, 0.9, -0.9, 1.4, -1.4]) {   // something in the way (a pond, the playhouse)? she hops around it
       let l = want; const hd = base + off;
-      while (l > 6 && bmBlocked(bun.x + Math.cos(hd) * l, bun.y + Math.sin(hd) * l)) l *= 0.7;
+      while (l > 6 && legBlocked(bun.x, bun.y, bun.x + Math.cos(hd) * l, bun.y + Math.sin(hd) * l, 22 * R)) l *= 0.7;
       if (l > 6) { len = l; bun.heading = hd; break; }
     }
     if (len <= 6) { bun.target = null; bmClaimed = null; bun.mode = "sit"; bun.squash = 0.5; bsfx.boop(); return; }
@@ -3185,12 +3226,21 @@
   }
   function bmStopRun() { bmRunning = false; }
   function bmStartRunHop() {
-    const R = BM.R, weak = bmHungry();
+    const R = BM.R, weak = bmHungry(), turbo = bmBoosting();
     let len = weak ? lerp(44 * R, 150 * R, bmRunV * 0.2) * BM_SLOW_LEN : lerp(44 * R, 150 * R, bmRunV);
-    while (len > 6 && bmBlocked(bun.x + Math.cos(bun.heading) * len, bun.y + Math.sin(bun.heading) * len)) len *= 0.7;
-    if (len <= 6) { bmRunV = 0; bun.squash = 0.5; bun.pause = 0.3; bsfx.boop(); return; }   // she bumps into something and stops
-    const x1 = bun.x + Math.cos(bun.heading) * len, y1 = bun.y + Math.sin(bun.heading) * len;
-    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.36 + len / (600 * R)) * (weak ? BM_SLOW_DUR : 1), peak: (10 * R + len * 0.26) * (weak ? 0.7 : 1), run: true };
+    if (turbo) len *= 1.4;   // tag only: two or more carrots in her tummy
+    let hd = bun.heading, bestScore = -1; const len0 = len;   // something in the way (a trunk, a bush, a pond)? she slides around it and keeps her heading
+    for (const off of [0, 0.4, -0.4, 0.8, -0.8]) {
+      let l = len0; const h = bun.heading + off;
+      while (l > 6 && legBlocked(bun.x, bun.y, bun.x + Math.cos(h) * l, bun.y + Math.sin(h) * l, 22 * R)) l *= 0.7;
+      const sc = l > 6 ? l * (1 - 0.3 * Math.abs(off)) : -1;
+      if (sc > bestScore) { bestScore = sc; hd = h; len = l; }
+      if (off === 0 && l >= len0 * 0.999) break;   // straight ahead is clear: no need to look further
+    }
+    if (bestScore < 0) { bmRunV = 0; bun.squash = 0.5; bun.pause = 0.3; bsfx.boop(); return; }   // she bumps into something and stops
+    const x1 = bun.x + Math.cos(hd) * len, y1 = bun.y + Math.sin(hd) * len;
+    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.36 + len / (600 * R)) * (weak ? BM_SLOW_DUR : 1) * (turbo ? 0.8 : 1), peak: (10 * R + len * 0.26) * (weak ? 0.7 : 1), run: true };
+    if (turbo) for (let i = 0; i < 5; i++) particles.push({ x: bun.x, y: bun.y, z: 8 * R, vx: rand(-30, 30), vy: rand(-30, 30), vz: rand(20, 60), life: rand(0.5, 0.9), c: "#FFD95A", r: rand(5, 8), kind: "star", tw: rand(0, 6) });
     bun.mode = "hop"; camYawTarget = bun.heading; hops++; bsfx.hop(bmRunV * 0.8);
   }
   function bmFinishMunch() {
@@ -3208,7 +3258,7 @@
     bun.up = Math.min(1, bun.up + dt * 3); m.nextBite -= dt;
     bun.chew = 0.5 + 0.5 * Math.sin(time * 22);
     if (m.nextBite <= 0) {
-      m.bites++; m.left = Math.max(0, 1 - m.bites / 5); m.nextBite = 0.55 + Math.random() * 0.15; bsfx.crunch();
+      m.bites++; m.left = Math.max(0, 1 - m.bites / 5); m.nextBite = (TG.on ? 0.4 : 0.55) + Math.random() * 0.15; bsfx.crunch();
       for (let i = 0; i < 5; i++) bmCrumbs.push({ x: rand(-2, 2), y: rand(-2, 2), vx: rand(-30, 40), vy: rand(-60, -10), life: rand(0.5, 0.8), r: rand(1.3, 2.4), c: i % 2 ? "#FF9A4D" : "#FFB870" });
       if (m.bites === 2 || m.bites === 4) popups.push({ x: bun.x, y: bun.y, z: 58 * BM.R, text: pick(["munch munch!", "nom nom!", "crunchy!", "yum!", "so good!", "nibble nibble!"]), life: 1, big: false });
       if (m.bites >= 5) bmFinishMunch();
@@ -3280,9 +3330,10 @@
   function bmUpdate(dt) {
     const R = BM.R;
     bmEnsureBeds();
-    if (bmRunning && bun.mode !== "pull" && bun.mode !== "munch") bmRunV = Math.min(1, bmRunV + dt / BM_RUN_RAMP);
+    if (tgFrozen()) { bmStopRun(); bun.target = null; bun.pending = null; bmClaimed = null; }   // tag: you count, so you stand still
+    if (bmRunning && bun.mode !== "pull" && bun.mode !== "munch") bmRunV = Math.min(1, bmRunV + dt / (TG.on ? 1.4 : BM_RUN_RAMP));
     else { bmRunV = Math.max(0, bmRunV - dt * 1.6); if (bmRunV < 0.9) bmPeakSaid = false; }
-    if (bmPtr && !bmPtr.run && bun.mode !== "pull" && bun.mode !== "munch" && time - bmPtr.t0 > BM_HOLD_TO_RUN && (!bmHopKey || bmHopKey === "Pointer")) { bmPtr.run = true; bmHopKey = "Pointer"; bmStartRun(); bmTapRing = null; bmWake(); }
+    if (bmPtr && !bmPtr.run && bun.mode !== "pull" && bun.mode !== "munch" && time - bmPtr.t0 > BM_HOLD_TO_RUN && !tgFrozen() && (!bmHopKey || bmHopKey === "Pointer")) { bmPtr.run = true; bmHopKey = "Pointer"; bmStartRun(); bmTapRing = null; bmWake(); }
     let turn = 0;
     keys.forEach(k => { turn += TURN_KEYS[k] || 0; });
     if (bmHopKey === "Pointer" && bmPtr) {
@@ -3290,7 +3341,7 @@
       if (Math.abs(dx) > dead) turn += clamp(Math.sign(dx) * (Math.abs(dx) - dead) / (0.6 - dead), -1, 1);
       bmWake();
     }
-    if (turn && (bmCanHop() || bmRunning)) { bun.heading += turn * 1.7 * dt; camYawTarget = bun.heading; lastTurnAt = time; bun.target = null; bmClaimed = null; if (bun.act) bmEndAct(); bmLastInputAt = time; }
+    if (turn && !tgFrozen() && (bmCanHop() || bmRunning)) { bun.heading += turn * 1.7 * dt; camYawTarget = bun.heading; lastTurnAt = time; bun.target = null; bmClaimed = null; if (bun.act) bmEndAct(); bmLastInputAt = time; }
     if (bun.hop) {
       const h = bun.hop; h.t += dt / h.dur;
       const t = Math.min(h.t, 1);
@@ -3315,13 +3366,14 @@
     if (!bun.earFlick && Math.random() < dt * 0.08) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; }
     // her tummy slowly empties (not while she munches, and it waits when nobody has played for two minutes)
     if (bun.mode !== "pull" && bun.mode !== "munch" && time - bmLastInputAt < BM_TUMMY_PAUSE) {
-      const before = bmTummy; bmTummy = Math.max(0, bmTummy - BM_TUMMY_DRAIN * dt);
+      const before = bmTummy; bmTummy = Math.max(0, bmTummy - BM_TUMMY_DRAIN * (tgPlaying() ? 3 : 1) * dt);
       if (before > 0 && bmTummy <= 0 && !bmHungrySaid) { bmHungrySaid = true; bun.earFlick = 1; popups.push({ x: bun.x, y: bun.y, z: 76 * R, text: pick(["so hungry...", "tummy's empty...", "need a carrot..."]), life: 1.6, big: false }); bsfx.snore(); }
     }
     bmTummyPop = Math.max(0, bmTummyPop - dt * 2.5);
     if (bmTapRing) { bmTapRing.t += dt; if (bmTapRing.t > 0.9) bmTapRing = null; }
     bmCrumbs.forEach(c => { c.x += c.vx * dt; c.y += c.vy * dt; c.vy += 220 * dt; c.life -= dt; }); bmCrumbs = bmCrumbs.filter(c => c.life > 0);
     bmHint = Math.max(0, bmHint - dt);
+    tgUpdate(dt);
     // she is the real Nee Nee in the world: the drawing code reads these
     const N = BM.N, bk = bmBinky();
     N.x = bun.x; N.y = bun.y; N.z = bun.z + bk.z; N.heading = bun.visYaw + bk.spin * 3; N.headingT = N.heading; N.state = "player"; N.alpha = 1;
@@ -3352,7 +3404,7 @@
   function exitBunny() {
     if (!BM.on) return;
     BM.on = false; const N = BM.N; N.player = false; N.state = "rest"; N.timer = rand(1, 2); N.z = 0; N.home = { x: N.x, y: N.y };
-    bmRemoveBeds(); bmRunning = false; bmHopKey = null; bmPtr = null; keys.clear();
+    tgStop(); ANIMALS.forEach(a => { a.askHold = 0; }); bmRemoveBeds(); bmRunning = false; bmHopKey = null; bmPtr = null; keys.clear();
     bun.act = null; bun.munch = null; bun.hop = null;
     document.body.classList.remove("playing-nee");
     bmBackBtn.hidden = true;
@@ -3374,12 +3426,14 @@
     const n = BM_TUMMY_MAX, gap = 19, s = 0.95, k = W / (canvas.getBoundingClientRect().width || W), x1 = 0, y = 0, x0 = x1 - (n - 1) * gap;
     ctx.save(); ctx.translate(W - 22 * k, 81 * k); ctx.scale(k, k);   // always the same size on screen, just under the corner buttons
     ctx.fillStyle = "rgba(255, 255, 255, 0.42)"; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill();
+    if (bmBoosting()) { ctx.strokeStyle = `rgba(255, 190, 40, ${0.75 + (reduceMotion ? 0.2 : 0.2 * Math.sin(time * 6))})`; ctx.lineWidth = 2.8; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.stroke(); }   // turbo: two or more carrots
     const pulse = bmHungry() && !reduceMotion ? 0.5 + 0.5 * Math.sin(time * 3) : 0;
     for (let i = 0; i < n; i++) {
       const j = n - 1 - i, fill = clamp(bmTummy - j, 0, 1), pop = j === Math.ceil(bmTummy) - 1 ? bmTummyPop : 0;
       bmDrawTummyIcon(x0 + i * gap, y + 1, s * (1 + pop * 0.35), 0.1 + pulse * 0.06 + fill * 0.9);
     }
     ctx.restore();
+    tgDrawHud();
     // a ring where you tapped
     if (bmTapRing) {
       const k = bmTapRing.t / 0.9, r = 20 + 14 * Math.sin(Math.min(1, bmTapRing.t * 3) * Math.PI / 2);
@@ -3397,6 +3451,8 @@
   // what a tap or click does while you are her
   function bmTapAt(p) {
     bmWake(); audio();
+    if (tgFrozen()) return false;
+    if (!TG.on) { const fh = tgFriendHit(p); if (fh) { showPop("#tag", fh, "tap"); fh.ref.askHold = time + 6.5; return false; } }   // tap a bunny friend: she asks if you want to play tag
     let best = null, bf = Infinity;
     carrotHits.forEach(h => { if (Math.hypot(p.sx - h.x, p.sy - h.y) < h.rad && h.f < bf && h.c.grown >= 1) { bf = h.f; best = h.c; } });
     let tx, ty, carrot = null;
@@ -3474,6 +3530,296 @@
     if (BM.fromPage) { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } return; }
     exitBunny();
   });
+
+  // ---------- Tag: Nee Nee and a bunny friend play tag ----------
+  // Tap a bunny friend and say yes to "Play tag?". She tags you, then glows and runs off to hide while you count to three.
+  // Find her and catch her (she bolts when you get close). Then she chases YOU, so run! A round lasts two minutes and every catch scores.
+  // Two or more carrots in your tummy give you a turbo run, but only while you play tag; an empty tummy means slow hops.
+  // Nothing in the world is written in words: just numbers, glows and an arrow.
+  const TG_ROUND = 120, TG_SP = 246, TG_FLEE = 0.7, TG_CHASE = 0.8, TG_SCARE = 95, TG_CATCH = 48, TG_TAG = 40, TG_SAFE_SEC = 12, TG_BEST_KEY = "nee-tag-best";
+  const TG = { on: false, phase: "off", f: null, score: 0, catches: 0, left: 0, cnt: 0, seekT: 0, safeLeft: 0, swapT: 0, comeT: 0, mode: "run", hide: null, lastHide: null,
+    react: 0, floats: [], best: 0, newBest: false, round: 0, lastNum: 0, turbo: false, turboFlash: 0, help: 0 };
+  const tgFrozen = () => TG.on && (TG.phase === "come" || TG.phase === "count");
+  const tgPlaying = () => TG.on && (TG.phase === "seek" || TG.phase === "flee");
+  const bmBoosting = () => TG.on && TG.phase !== "over" && bmTummy >= 2;
+  const tgBest = () => Math.max(0, parseInt(store.get(TG_BEST_KEY, "0"), 10) || 0);
+
+  // trunks and big bushes are solid: she hops around them, and a friend can really hide behind one
+  function solidsNear(x, y, rad) {
+    const out = [];
+    chunksAround(x, y, rad).forEach(ch => {
+      ch.trees.forEach(t => out.push({ x: t.x, y: t.y, r: t.w * 0.55, tree: true }));
+      ch.bushes.forEach(b => out.push({ x: b.x, y: b.y, r: b.br * 0.7, bush: true, big: b.br >= 100 }));
+    });
+    return out.filter(o => Math.abs(o.x - x) < rad + 220 && Math.abs(o.y - y) < rad + 220);
+  }
+  // a solid never blocks someone who is already standing in it (so nobody gets stuck)
+  function solidIn(sol, x, y, pad, fx, fy) {
+    return sol.some(o => Math.hypot(o.x - x, o.y - y) < o.r + pad && Math.hypot(o.x - fx, o.y - fy) >= o.r + pad * 0.6);
+  }
+  function legBlocked(x0, y0, x1, y1, pad) {
+    const d = Math.hypot(x1 - x0, y1 - y0), sol = solidsNear((x0 + x1) / 2, (y0 + y1) / 2, d / 2 + 60), n = Math.max(1, Math.ceil(d / 30));
+    for (let i = 1; i <= n; i++) {
+      const u = i / n, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u;
+      if (pondAt(x, y) || insideHouse(x, y, 40) || solidIn(sol, x, y, pad, x0, y0)) return true;
+    }
+    return false;
+  }
+
+  // which bunny friend is under the finger? (not Nee Nee, not one inside the playhouse, and close enough to come over)
+  function tgFriendHit(p) {
+    let best = null, bf = Infinity;
+    lastResidentHits.forEach(h => {
+      const a = h.ref;
+      if (h.kind !== "bunny" || !a || a.player || a.tag || a.alpha < 0.99 || !(a.state === "rest" || a.state === "go" || a.state === "hop" || a.state === "pause" || a.state === "munch" || a.state === "idle")) return;
+      if (Math.hypot(p.sx - h.x, p.sy - h.y) < h.r + 14 && h.f < bf && Math.hypot(a.x - bun.x, a.y - bun.y) < 1500) { bf = h.f; best = h; }
+    });
+    return best;
+  }
+
+  // one hop of hers toward a spot, steering around anything in the way. Returns true when she is there.
+  function tgMove(f, gx, gy, mul, dt) {
+    const R = BM.R, sp = TG_SP * R * mul;
+    f.heading += angDiff(f.headingT, f.heading) * (1 - Math.exp(-dt * 14));
+    if (f.tgHop) {
+      const h = f.tgHop; h.u = Math.min(1, h.u + dt / h.dur);
+      f.x = lerp(h.x0, h.x1, h.u); f.y = lerp(h.y0, h.y1, h.u); f.z = Math.sin(h.u * Math.PI) * h.peak; f.state = "hop"; f.u = h.u;
+      if (h.u >= 1) { f.tgHop = null; f.z = 0; f.state = "pause"; f.squash = 0.6; f.gap = 0.02; }
+      return false;
+    }
+    f.state = "pause"; f.gap = (f.gap || 0) - dt;
+    const dx = gx - f.x, dy = gy - f.y, d = Math.hypot(dx, dy);
+    if (d < 22) return true;
+    if (f.gap > 0) return false;
+    const base = Math.atan2(dy, dx), maxLen = Math.min(d, sp * 0.36, 38 * f.size + 40);
+    for (const off of [0, 0.5, -0.5, 1.0, -1.0, 1.6, -1.6]) {
+      let l = maxLen; const hd = base + off;
+      while (l > 8 && legBlocked(f.x, f.y, f.x + Math.cos(hd) * l, f.y + Math.sin(hd) * l, 26)) l *= 0.7;
+      if (l > 8) {
+        f.tgHop = { x0: f.x, y0: f.y, x1: f.x + Math.cos(hd) * l, y1: f.y + Math.sin(hd) * l, u: 0, dur: l / sp, peak: 6.5 * f.size * clamp(l / (16 * f.size), 0.7, 1.6) };
+        f.headingT = hd; f.stuck = 0;
+        return false;
+      }
+    }
+    f.stuck = (f.stuck || 0) + 1; f.gap = 0.15;
+    return false;
+  }
+  function tgSit(f, dt) {
+    f.state = "idle"; f.idle = Math.sin(time * 0.8 + f.size) > 0.72 ? "up" : "look"; f.tgHop = null; f.z = 0;
+    f.headingT = Math.atan2(bun.y - f.y, bun.x - f.x); f.heading += angDiff(f.headingT, f.heading) * (1 - Math.exp(-dt * 6));
+  }
+
+  // where to hide: behind a trunk or a big bush, as seen from the camera, not too near and not too far
+  function tgPickHide(f) {
+    const px = bun.x, py = bun.y, sol = solidsNear(px, py, 1500);
+    let best = null, bs = -1e9;
+    sol.forEach(S => {
+      const d = Math.hypot(S.x - px, S.y - py);
+      if (d < 380 || d > 1500 || S.r < 26) return;
+      const u = Math.atan2(S.y - camY, S.x - camX), off = S.r + 12 * f.size, hx = S.x + Math.cos(u) * off, hy = S.y + Math.sin(u) * off;
+      if (pondAt(hx, hy) || insideHouse(hx, hy, 60) || solidIn(sol, hx, hy, 14, S.x, S.y)) return;
+      const ang = Math.abs(angDiff(Math.atan2(S.y - py, S.x - px), bun.heading));
+      const toward = Math.cos(angDiff(Math.atan2(hy - f.y, hx - f.x), Math.atan2(py - f.y, px - f.x)));
+      let sc = -Math.abs(d - 850) * 0.55 + (S.big ? 90 : 0) + Math.cos(ang) * 130 + Math.random() * 120 - Math.hypot(hx - f.x, hy - f.y) * 0.2
+        - Math.max(0, toward) * 260 - Math.max(0, 1 - S.r / (f.size * 13)) * 220;
+      if (TG.lastHide && Math.hypot(TG.lastHide.x - S.x, TG.lastHide.y - S.y) < 60) sc -= 400;
+      if (sc > bs) { bs = sc; best = { x: hx, y: hy, S }; }
+    });
+    if (best) return best;
+    for (let i = 0; i < 12; i++) {   // nothing to hide behind nearby: she just runs off ahead and sits very still
+      const a = bun.heading + rand(-1.1, 1.1), dd = rand(800, 1100), x = px + Math.cos(a) * dd, y = py + Math.sin(a) * dd;
+      if (!pondAt(x, y) && !insideHouse(x, y, 60)) return { x, y, S: null };
+    }
+    return { x: px + Math.cos(bun.heading) * 900, y: py + Math.sin(bun.heading) * 900, S: null };
+  }
+
+  function tgBurst(x, y, n, z0) {
+    for (let i = 0; i < n; i++) { const a = rand(0, Math.PI * 2), s = rand(40, 110); particles.push({ x, y, z: z0 + rand(0, 20), vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: rand(50, 130), life: rand(0.8, 1.3), c: i % 2 ? "#FFE27A" : "#FFFFFF", r: rand(7, 12), kind: "star", tw: rand(0, 6) }); }
+  }
+  function tgFloat(text, x, y, z) { TG.floats.push({ text, x, y, z, t: 0 }); }
+
+  function tgStart(f) {
+    if (!BM.on || TG.on || !f || f.player) return;
+    TG.on = true; TG.f = f; f.tag = true; f.alpha = 1; f.state = "pause"; f.tgHop = null; f.toHouse = false; f.bed = null; f.goal = null; f.munch = 0; f.stuck = 0; f.gap = 0;
+    tgNewRound(true);
+  }
+  function tgNewRound(first) {
+    TG.score = 0; TG.catches = 0; TG.left = TG_ROUND; TG.floats = []; TG.newBest = false; TG.best = tgBest(); TG.round++; TG.lastHide = null; TG.turbo = false; TG.turboFlash = 0;
+    tagCard.hidden = true;
+    bun.target = null; bun.pending = null; bmClaimed = null; bmStopRun(); bmEndAct();
+    if (first) { TG.phase = "come"; TG.comeT = 0; bsfx.pop(); }
+    else tgStartHide(3);
+  }
+  // she runs off to hide and you count (you cannot move while you count)
+  function tgStartHide(count) {
+    const f = TG.f; TG.hide = tgPickHide(f); TG.lastHide = TG.hide.S ? TG.hide : null; TG.mode = "run"; f.stuck = 0; f.tgHop = null;
+    TG.phase = "count"; TG.cnt = count; TG.lastNum = Math.ceil(count) + 1; TG.seekT = 0; TG.react = 0; TG.help = 0;
+    bun.target = null; bun.pending = null; bmClaimed = null; bmStopRun(); bmEndAct();
+  }
+  function tgYoureIt() {
+    const f = TG.f;
+    bsfx.pop(); bsfx.happy(); tgBurst(bun.x, bun.y, 10, 30 * BM.R); bun.squash = 0.8; bun.happy = 1.2; f.happy = 1.2;
+    tgStartHide(TG.score || TG.catches ? 2 : 3);
+  }
+  function tgCaught() {
+    const f = TG.f, pts = 100 + clamp(Math.round((30 - TG.seekT) * 2), 0, 60);
+    TG.score += pts; TG.catches++; bsfx.happy(); bsfx.binky(); tgBurst(f.x, f.y, 16, 40 * f.size); tgFloat("+" + pts, f.x, f.y, 90 * f.size);
+    f.tgHop = null; f.z = 0; f.happy = 1.6; bun.happy = 1.4; bun.wiggle = 1;
+    TG.phase = "swap"; TG.swapT = 1.6;
+  }
+  function tgOver() {
+    TG.phase = "over"; bmStopRun(); bun.target = null;
+    TG.newBest = TG.score > TG.best && TG.score > 0;
+    if (TG.newBest) { store.set(TG_BEST_KEY, String(TG.score)); }
+    document.getElementById("tcTitle").textContent = TG.catches ? "Great hopping!" : "Time’s up!";
+    document.getElementById("tcScore").textContent = String(TG.score);
+    document.getElementById("tcLine").textContent = (TG.catches ? "You caught your friend " + TG.catches + (TG.catches === 1 ? " time." : " times.") : "Nobody got caught this time.") + (TG.newBest ? " A new best score!" : TG.best ? " Best score: " + TG.best + "." : "");
+    tagCard.hidden = false; tagCard.classList.remove("in"); void tagCard.offsetWidth; tagCard.classList.add("in");
+    bsfx.happy();
+    try { document.getElementById("tcAgain").focus({ preventScroll: true }); } catch (_) {}
+  }
+  function tgStop() {
+    if (!TG.on) return;
+    const f = TG.f; TG.on = false; TG.phase = "off"; TG.floats = []; tagCard.hidden = true;
+    if (f) { f.tag = false; f.tgHop = null; f.z = 0; f.state = "rest"; f.timer = rand(1, 2); f.alpha = 1; f.home = { x: f.x, y: f.y }; f.happy = 0; }
+    TG.f = null;
+  }
+
+  function tgUpdate(dt) {
+    if (!TG.on) return;
+    const f = TG.f, R = BM.R;
+    if (!f) { tgStop(); return; }
+    f.alpha = 1; f.happy = Math.max(0, f.happy - dt); f.squash = Math.max(0, f.squash - dt * 3);
+    const dP = Math.hypot(f.x - bun.x, f.y - bun.y);
+    TG.floats.forEach(p => { p.t += dt; }); TG.floats = TG.floats.filter(p => p.t < 1.4);
+    TG.turboFlash = Math.max(0, TG.turboFlash - dt);
+    const boost = bmBoosting();
+    if (boost !== TG.turbo) { TG.turbo = boost; if (boost) { TG.turboFlash = 1.2; bsfx.binky(); } }
+    if (tgPlaying()) { TG.left -= dt; if (TG.left <= 0) { TG.left = 0; tgOver(); return; } }
+    switch (TG.phase) {
+      case "come":   // she runs over to tag you
+        TG.comeT += dt;
+        if (tgMove(f, bun.x, bun.y, 0.9, dt) || dP < 58 * R) { tgYoureIt(); break; }
+        if (TG.comeT > 4.5) { f.tgHop = null; f.x = bun.x - Math.cos(bun.heading) * 60 * R; f.y = bun.y - Math.sin(bun.heading) * 60 * R; tgYoureIt(); }
+        break;
+      case "count": {
+        const before = Math.ceil(TG.cnt); TG.cnt -= dt;
+        if (Math.ceil(TG.cnt) !== before && TG.cnt > 0) bsfx.boop();
+        if (TG.mode === "run") { if (tgMove(f, TG.hide.x, TG.hide.y, TG_FLEE, dt)) TG.mode = "hidden"; else if (f.stuck > 3) { TG.hide = tgPickHide(f); f.stuck = 0; } }
+        else tgSit(f, dt);
+        if (TG.cnt <= 0) { TG.phase = "seek"; TG.seekT = 0; bsfx.binky(); tgBurst(bun.x, bun.y, 8, 30 * R); bun.squash = 0.7; }
+        break;
+      }
+      case "seek": {
+        TG.seekT += dt; TG.help = clamp((TG.seekT - 20) / 25, 0, 1);
+        if (dP < TG_CATCH * R) { tgCaught(); break; }
+        if (TG.mode === "run") {
+          const slow = 1 - clamp((TG.seekT - 25) / 60, 0, 0.3);
+          if (tgMove(f, TG.hide.x, TG.hide.y, TG_FLEE * slow, dt)) TG.mode = "hidden";
+          else if (f.stuck > 3) { TG.hide = tgPickHide(f); f.stuck = 0; }
+        } else {
+          tgSit(f, dt);
+          if (dP < TG_SCARE * R) { TG.react += dt; if (TG.react > 0.22) { TG.react = 0; TG.hide = tgPickHide(f); TG.lastHide = TG.hide.S ? TG.hide : null; TG.mode = "run"; f.stuck = 0; bsfx.pop(); } }
+          else TG.react = 0;
+        }
+        break;
+      }
+      case "swap":   // you got her! she waits a moment, then comes after you
+        TG.swapT -= dt; tgSit(f, dt); f.idle = "up";
+        if (TG.swapT <= 0) { TG.phase = "flee"; TG.safeLeft = TG_SAFE_SEC; bsfx.binky(); }
+        break;
+      case "flee":
+        TG.safeLeft -= dt;
+        tgMove(f, bun.x, bun.y, TG_CHASE, dt);
+        if (dP < TG_TAG * R) { tgYoureIt(); }
+        else if (TG.safeLeft <= 0) { TG.score += 50; tgFloat("+50", bun.x, bun.y, 90 * R); bsfx.happy(); tgBurst(bun.x, bun.y, 10, 30 * R); tgStartHide(2); }
+        break;
+      case "over": tgSit(f, dt); f.idle = "up"; break;
+    }
+  }
+
+  // her glow while she hides (it shines through leaves, so you can always find your way to her)
+  function drawTagGlow() {
+    if (!TG.on || !TG.f || !(TG.phase === "count" || TG.phase === "seek")) return;
+    const f = TG.f, p = proj(f.x, f.y, f.z + 16 * f.size);
+    if (!p || p.f < 30) return;
+    const pulse = reduceMotion ? 0.6 : 0.5 + 0.5 * Math.sin(time * 3.2), a = clamp(0.6 + pulse * 0.2 + TG.help * 0.2, 0, 1) * (TG.phase === "count" ? clamp(1 - TG.cnt * 0.15, 0.4, 1) : 1);
+    const r = Math.max(46, (34 * f.size + 70) * p.k + 26);
+    ctx.save();
+    const g0 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);   // a warm gold-pink halo that shows in daylight too
+    g0.addColorStop(0, `rgba(255, 214, 110, ${0.5 * a})`); g0.addColorStop(0.5, `rgba(255, 170, 190, ${0.22 * a})`); g0.addColorStop(1, "rgba(255, 170, 200, 0)");
+    ctx.fillStyle = g0; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "lighter";   // and a bright white-gold core that really glows after dark
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 0.8);
+    g.addColorStop(0, `rgba(255, 244, 190, ${0.8 * a})`); g.addColorStop(0.4, `rgba(255, 205, 120, ${0.4 * a})`); g.addColorStop(1, "rgba(255, 170, 200, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r * 0.8, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    {   // a little gold star floats above her, so you can spot her even behind leaves
+      const sz = clamp(r * 0.2, 8, 20) * (0.85 + 0.15 * pulse), sy = p.y - r * 0.72 - (reduceMotion ? 0 : Math.sin(time * 2.4) * 3);
+      ctx.save(); ctx.globalAlpha = 0.95 * a; ctx.fillStyle = "#FFC933"; ctx.strokeStyle = "rgba(255, 255, 255, 0.95)"; ctx.lineWidth = 2; ctx.lineJoin = "round";
+      tgStarShape(p.x, sy, sz, sz * 0.46); ctx.fill(); ctx.stroke(); ctx.restore();
+    }
+    if (!reduceMotion) {   // three little twinkles drifting around her
+      ctx.save(); ctx.fillStyle = `rgba(255, 250, 220, ${0.9 * a})`;
+      for (let i = 0; i < 3; i++) {
+        const an = time * 0.9 + i * 2.1, rr = r * (0.55 + 0.2 * Math.sin(time * 1.7 + i)), x = p.x + Math.cos(an) * rr, y = p.y + Math.sin(an) * rr * 0.7 - r * 0.15, s = Math.max(2.5, r * 0.09) * (0.6 + 0.4 * Math.sin(time * 4 + i * 2));
+        ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s * 0.3, y - s * 0.3); ctx.lineTo(x + s, y); ctx.lineTo(x + s * 0.3, y + s * 0.3); ctx.lineTo(x, y + s); ctx.lineTo(x - s * 0.3, y + s * 0.3); ctx.lineTo(x - s, y); ctx.lineTo(x - s * 0.3, y - s * 0.3); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  function tgStarShape(cx, cy, R1, R2) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) { const r = i % 2 ? R2 : R1, a = -Math.PI / 2 + i * Math.PI / 5; ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+    ctx.closePath();
+  }
+  // the numbers: time left and score at the top middle, an arrow that points to her, the big 3-2-1, and floating points
+  function tgDrawHud() {
+    if (!TG.on) return;
+    const k = W / (canvas.getBoundingClientRect().width || W), f = TG.f;
+    ctx.save();
+    ctx.font = '800 17px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.translate(W / 2, 0); ctx.scale(k, k);
+    const t = Math.max(0, Math.ceil(TG.left)), low = TG.left < 10 && TG.phase !== "over" && !reduceMotion;
+    ctx.fillStyle = low && Math.floor(time * 2) % 2 ? "rgba(255, 170, 190, 0.85)" : "rgba(255, 255, 255, 0.5)"; roundRect(-38, 14, 76, 30, 15); ctx.fill();
+    ctx.fillStyle = "#4B3A66"; ctx.fillText(Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"), 0, 30);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; roundRect(-38, 49, 76, 28, 14); ctx.fill();
+    ctx.fillStyle = "#FFB300"; tgStarShape(-21, 63, 9, 4.2); ctx.fill();
+    ctx.fillStyle = "#4B3A66"; ctx.textAlign = "left"; ctx.fillText(String(TG.score), -7, 64); ctx.textAlign = "center";
+    if (f && (TG.phase === "count" || TG.phase === "seek" || TG.phase === "swap" || TG.phase === "flee")) {
+      const rel = angDiff(Math.atan2(f.y - bun.y, f.x - bun.x), camYaw), hunted = TG.phase === "count" || TG.phase === "seek";
+      ctx.save(); ctx.translate(0, 101);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)"; ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill();
+      ctx.rotate(rel);
+      ctx.globalAlpha = TG.phase === "count" ? 0.35 : 0.8 + (reduceMotion ? 0 : 0.2 * Math.sin(time * 5)) * (0.5 + TG.help);
+      ctx.fillStyle = hunted ? "#FFB300" : "#F2569C";
+      ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(8.5, 8); ctx.lineTo(0, 3.5); ctx.lineTo(-8.5, 8); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+    // the big 3, 2, 1
+    if (TG.phase === "count" && TG.cnt > 0) {
+      const n = Math.ceil(TG.cnt), fr = TG.cnt - Math.floor(TG.cnt), s = (1 + (reduceMotion ? 0 : 0.35 * fr)) * 84 * k;
+      ctx.save(); ctx.font = `800 ${s}px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.globalAlpha = 0.5 + 0.5 * fr; ctx.lineWidth = 9 * k; ctx.lineJoin = "round"; ctx.strokeStyle = "rgba(70, 60, 110, 0.45)"; ctx.strokeText(String(n), W / 2, H * 0.3); ctx.fillStyle = "#FFE27A"; ctx.fillText(String(n), W / 2, H * 0.3);
+      ctx.restore();
+    }
+    // floating points
+    TG.floats.forEach(p => {
+      const q = proj(p.x, p.y, p.z + p.t * 70); if (!q) return;
+      ctx.save(); ctx.globalAlpha = clamp(1.4 - p.t, 0, 1); ctx.font = `800 ${26 * k}px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.lineWidth = 6 * k; ctx.lineJoin = "round"; ctx.strokeStyle = "rgba(70, 60, 110, 0.5)"; ctx.strokeText(p.text, q.x, q.y); ctx.fillStyle = "#FFE27A"; ctx.fillText(p.text, q.x, q.y);
+      ctx.restore();
+    });
+  }
+  // the round card (a real page element, so it reads well and the buttons are easy to press)
+  const tagCard = document.createElement("div");
+  tagCard.id = "tagCard"; tagCard.hidden = true;
+  tagCard.innerHTML = '<div class="tc-box" role="dialog" aria-labelledby="tcTitle"><h2 id="tcTitle"></h2><div class="tc-score"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.8-6.3 3.8 1.7-7L2 9.2l7.1-.6z" fill="#FFB300"/></svg><b id="tcScore">0</b></div><p id="tcLine"></p><div class="tc-btns"><button type="button" id="tcAgain">Play again</button><button type="button" id="tcDone" class="alt">All done</button></div></div>';
+  stage.appendChild(tagCard);
+  ["pointerdown", "pointerup", "click", "wheel"].forEach(t => tagCard.addEventListener(t, e => e.stopPropagation()));
+  document.getElementById("tcAgain").addEventListener("click", () => { audio(); tgNewRound(false); });
+  document.getElementById("tcDone").addEventListener("click", () => { tgStop(); });
 
   let carrotHits = [];
   // ---------- update ----------
@@ -6139,6 +6485,7 @@
       ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
     }
     drawFairyDust();
+    drawTagGlow();
     drawPopups();
     bmDrawHud();
     drawTags();
@@ -6707,6 +7054,11 @@
     carrots: () => CARROTS.map(c => ({ x: c.x, y: c.y, g: c.grown })),
     setTummy: v => { bmTummy = v; }, carrotScreen: () => carrotHits.map(h => ({ x: h.x, y: h.y, g: h.c.grown, f: h.f })), playNee: () => enterBunny(), leaveNee: () => exitBunny(), nee: () => ({ on: BM.on, x: bun.x, y: bun.y, z: bun.z, mode: bun.mode, heading: bun.heading, tummy: bmTummy, running: bmRunning, runV: bmRunV, camX, camY, camH, camYaw, R: BM.R, beds: CARROTS.length }),
     pumpkins: () => { const out = []; chunks.forEach(ch => (ch.pumpkins || []).forEach(m => { const q = proj(m.x, m.y, 0); out.push({ x: m.x, y: m.y, th: m.th, hd: m.hd, sx: q && q.x, sy: q && q.y, k: q && q.k, f: q && q.f }); })); return out; },
+    tg: () => ({ on: TG.on, phase: TG.phase, score: TG.score, catches: TG.catches, left: TG.left, cnt: TG.cnt, mode: TG.mode, seekT: TG.seekT, turbo: TG.turbo, hide: TG.hide && { x: TG.hide.x, y: TG.hide.y, s: !!TG.hide.S, S: TG.hide.S && { x: TG.hide.S.x, y: TG.hide.S.y, r: TG.hide.S.r, tree: !!TG.hide.S.tree } },
+      f: TG.f && { x: TG.f.x, y: TG.f.y, size: TG.f.size, state: TG.f.state }, you: { x: bun.x, y: bun.y, h: bun.heading }, tummy: bmTummy, cardShown: !tagCard.hidden }),
+    tgStart: i => { const l = ANIMALS.filter(a => a.kind === "bunny" && !a.neenee && a.alpha > 0.9); const f = l[i || 0]; if (!f) return false; f.x = bun.x + 400 * Math.cos(bun.heading + 0.4); f.y = bun.y + 400 * Math.sin(bun.heading + 0.4); tgStart(f); return true; },
+    tgSet: o => { Object.assign(TG, o); }, tgStop: () => tgStop(), bunnyTap: () => { const fh = tgFriendHit({ sx: W / 2, sy: H / 2 }); return !!fh; },
+    solids: (x, y, r) => solidsNear(x, y, r), step: (n, dt) => { for (let i = 0; i < n; i++) update(dt || 0.05); },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
