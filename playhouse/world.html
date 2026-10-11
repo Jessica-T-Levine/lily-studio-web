@@ -155,6 +155,15 @@
   .cbtn svg { width: 22px; height: 22px; }
   .cbtn:hover { background: rgba(255, 255, 255, 0.75); }
   .cbtn:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
+  /* playing as Nee Nee: the way back to the Playhouse */
+  #bmBack { position: absolute; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); z-index: 6; height: 42px; padding: 0 16px 0 10px; border: 0; border-radius: 999px;
+    display: flex; align-items: center; gap: 2px; cursor: pointer; background: rgba(255, 255, 255, 0.55); color: #4B3A66; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(40, 30, 80, 0.2); font: 800 15px/1 var(--display); -webkit-tap-highlight-color: transparent; }
+  #bmBack[hidden] { display: none; }
+  #bmBack svg { width: 20px; height: 20px; }
+  html.in-frame #bmBack { top: max(58px, env(safe-area-inset-top)); }   /* the site's big logo hangs over the top-left corner of the world, so sit just below it */
+  #bmBack:hover { background: rgba(255, 255, 255, 0.75); }
+  #bmBack:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
   #soundBtn .slash { display: none; }
   #soundBtn.muted .slash { display: inline; } #soundBtn.muted .waves { display: none; }
   /* v30: the games menu: a tiny playhouse button, and the animals with games in a column under it */
@@ -1845,10 +1854,12 @@
   // "Go to page?". Tapping it twice quickly (a double tap or double click) goes straight there.
   const PAGES = { frog: "/hophop/", neenee: "/neenee/", bee: "/buzzbuzz/" };   // v38: Nee Nee's game; v39: Buzz Buzz's game
   const framed = (() => { try { return window.top !== window; } catch (_) { return true; } })();
+  if (framed) document.documentElement.classList.add("in-frame");
   const goPop = document.getElementById("goPop"), goLink = document.getElementById("goLink");
   goLink.target = framed ? "_top" : "_self"; goLink.rel = "noopener";
   let lastTap = null, popTimer = 0;
-  function openPage(url) { hidePop(); if (framed) { try { window.top.location.href = url; } catch (_) { window.open(url, "_blank", "noopener"); } } else location.href = url; }
+  function openPage(url) { hidePop(); if (url === PAGES.neenee) { enterBunny(); return; }   // Nee Nee: you play her right here
+    if (framed) { try { window.top.location.href = url; } catch (_) { window.open(url, "_blank", "noopener"); } } else location.href = url; }
   // The popup shows while the mouse is on a frog ("hover"), or after a tap on a touch screen ("tap").
   // It rides along above him as he moves.
   const PAGE_ASK = { frog: "Play Hop Hop?", neenee: "Play with Nee Nee?", bee: "Wanna Make Honey?" };
@@ -1897,7 +1908,7 @@
     else if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop && popMode === "hover") hidePop(); }, 350); }
   });
   canvas.addEventListener("pointerleave", () => { canvas.classList.remove("can-tap"); if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop) hidePop(); }, 350); } });
-  goLink.addEventListener("click", e => { if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
+  goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
   function visit(h) {
     lastUserAt = time;
     const a = h.ref, now = performance.now();
@@ -2463,13 +2474,15 @@
   });
   aroundBtn.addEventListener("pointerdown", e => {
     padPress(aroundBtn, e);
+    if (BM.on) { if (bmCanHop() || bmRunning) { bun.heading += Math.PI; camYawTarget = bun.heading; lastTurnAt = time; bun.target = null; bmClaimed = null; bmEndAct(); bsfx.boop(); } return; }
     if (!bee.hop && !trip) { bee.aim += Math.PI; camYawTarget = bee.aim; lastTurnAt = time; sfx.boop(); }
   });
   ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => aroundBtn.addEventListener(t, () => aroundBtn.classList.remove("on")));
-  hopBtn.addEventListener("pointerdown", e => { padPress(hopBtn, e); if (!hopKey) { hopKey = "BtnHop"; startCharge(); } });
-  hopBtn.addEventListener("pointerup", () => { hopBtn.classList.remove("on"); if (hopKey === "BtnHop") { hopKey = null; releaseHop(); } });
-  hopBtn.addEventListener("pointercancel", () => { hopBtn.classList.remove("on"); if (hopKey === "BtnHop") { hopKey = null; charging = false; charge = 0; resumeFlight(); } });
-  hopBtn.addEventListener("lostpointercapture", () => { hopBtn.classList.remove("on"); if (hopKey === "BtnHop") { hopKey = null; releaseHop(); } });
+  hopBtn.addEventListener("pointerdown", e => { padPress(hopBtn, e); if (BM.on) { if (!bmHopKey) { bmHopKey = "BtnHop"; bmStartRun(); } return; } if (!hopKey) { hopKey = "BtnHop"; startCharge(); } });
+  const bmHopUp = () => { if (BM.on && bmHopKey === "BtnHop") { bmHopKey = null; bmStopRun(); return true; } return false; };
+  hopBtn.addEventListener("pointerup", () => { hopBtn.classList.remove("on"); if (bmHopUp()) return; if (hopKey === "BtnHop") { hopKey = null; releaseHop(); } });
+  hopBtn.addEventListener("pointercancel", () => { hopBtn.classList.remove("on"); if (bmHopUp()) return; if (hopKey === "BtnHop") { hopKey = null; charging = false; charge = 0; resumeFlight(); } });
+  hopBtn.addEventListener("lostpointercapture", () => { hopBtn.classList.remove("on"); if (bmHopUp()) return; if (hopKey === "BtnHop") { hopKey = null; releaseHop(); } });
   touchPad.addEventListener("contextmenu", e => e.preventDefault());
   // keyboard users can still press the buttons with Enter (they act like a quick tap)
   touchPad.querySelectorAll(".pbtn").forEach(b => b.addEventListener("click", e => { if (e.detail === 0) e.preventDefault(); }));
@@ -2664,6 +2677,7 @@
     n.heading += angDiff(n.headingT, n.heading) * (1 - Math.exp(-dt * 8));
   }
   function bunnyPose(n) {
+    if (n.player) return bmPose();
     const pose = { t: time, stretch: n.state === "hop" ? Math.sin(n.u * Math.PI) : 0, squash: n.squash, happy: n.happy > 0 ? 1 : 0 };
     if (n.state === "munch") { pose.carrot = Math.max(0, 1 - n.munch); pose.chew = 0.5 + 0.5 * Math.sin(time * 14); pose.up = 1; }
     if (n.state === "idle") {
@@ -2733,6 +2747,7 @@
     census(dt);
     ANIMALS.forEach(a => {
       if (Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 400 && a.state !== "inside") return;   // far away: resting
+      if (a.player) return;   // she is you right now
       if (a.kind === "bunny") bunnyStep(a, dt); else beeStep(a, dt);
     });
     CARROTS.forEach(c => {
@@ -2845,6 +2860,7 @@
       const q = proj(c.x + dx, c.y + dy, 5); if (!q) return;
       ctx.fillStyle = "#5CAE52"; ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1.5, 11 * q.k), 0, Math.PI * 2); ctx.fill();
     });
+    if (BM.on && c.grown >= 1) carrotHits.push({ c, x: p.x, y: p.y - 12 * p.k, rad: Math.max(26, 46 * p.k), f: p.f });
     if (c.grown > 0) {
       const g = c.grown, k = p.k, x = p.x, y = p.y - 4 * k;
       ctx.fillStyle = "#F2803A"; ctx.beginPath(); ctx.moveTo(x - 9 * k * g, y); ctx.lineTo(x + 9 * k * g, y); ctx.lineTo(x, y + 12 * k * g); ctx.closePath(); ctx.fill();
@@ -3045,10 +3061,427 @@
     popups.push({ x: bee.x, y: bee.y, z: 70, text: pick(["boop!", "grassy!", "oops!", "tickly!"]), life: 0.9, big: false });
   }
 
+  // ---------- Play as Nee Nee: tap her, say yes to "Play with Nee Nee?", and you ARE her, right here in the Playhouse ----------
+  // It is her own game (Lily's Bun Nee Nee) running inside this world. Tap anywhere and she hops there; tap a carrot and she hops over
+  // and munches it; hold (mouse, trackpad, finger, space bar) and she runs, faster the longer you hold; arrows steer; her tummy slowly
+  // empties and each carrot fills one back. Everyone else stays exactly where they are. The back button returns you to the Playhouse.
+  // The distances are her game's, scaled up by BM.R so she plays the same at the Playhouse's size.
+  const BM = { on: false, N: null, R: 1.9, ready: false };
+  const BM_RUN_RAMP = 2.4, BM_HOLD_TO_RUN = 0.28, BM_TUMMY_MAX = 5, BM_TUMMY_DRAIN = 1 / 60, BM_SLOW_LEN = 0.65, BM_SLOW_DUR = 1.5, BM_IDLE_AFTER = 5, BM_TUMMY_PAUSE = 120;
+  const bun = { x: 0, y: 0, z: 0, heading: 0, visYaw: 0, peekSide: 1, face: 1, faceS: 1, mode: "sit", hop: null, target: null, pending: null, pause: 0,
+    stretch: 0, up: 0, flop: 0, groom: 0, chew: 0, squash: 0, wiggle: 0, happy: 0, blink: 2, earFlick: 0, earFlickSide: 1, look: 0, munch: null, act: null, sniffAt: 0 };
+  let bmClaimed = null, bmRunning = false, bmRunV = 0, bmPeakSaid = false, bmTummy = BM_TUMMY_MAX, bmHungrySaid = false, bmTummyPop = 0, bmHungryLook = 0;
+  let bmNextAct = 1.5, bmLastInputAt = 0, bmTapRing = null, bmCrumbs = [], bmHopKey = null, bmPtr = null, bmHint = 0, bmPlayBeds = [];
+  const bmHungry = () => bmTummy <= 0;
+  const bmCarrotReady = c => c.grown >= 1 && c !== bmClaimed;
+  // her sounds (the Playhouse had none of these): all made in code, like the rest
+  let bmNoiseBuf = null;
+  function bmNoise(freq, q, dur, vol, delay = 0) {
+    const a = audio(); if (!a || sfxVol === 0) return;
+    if (!bmNoiseBuf) { const len = Math.floor(a.sampleRate * 0.5); bmNoiseBuf = a.createBuffer(1, len, a.sampleRate); const d = bmNoiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; }
+    const t = a.currentTime + delay, src = a.createBufferSource(); src.buffer = bmNoiseBuf;
+    const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q;
+    const g = a.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(sfxBus); src.start(t, Math.random() * 0.3); src.stop(t + dur + 0.02);
+  }
+  const bsfx = {
+    hop(power = 0.2) { tone("sine", 280 + power * 160, 560 + power * 420, 0.12 + power * 0.1, 0.09 + power * 0.04); bmNoise(900, 0.8, 0.06, 0.03); },
+    land(power = 0.2) { tone("sine", 190, 90, 0.1 + power * 0.08, 0.07 + power * 0.07); bmNoise(700, 0.8, 0.08, 0.03 + power * 0.03); },
+    pop() { tone("sine", 380, 900, 0.1, 0.1); bmNoise(1500, 1, 0.12, 0.05); tone("sine", 900, 1300, 0.08, 0.05, 0.08); },
+    crunch() { const f = rand(1800, 3000); bmNoise(f, 1.4, 0.06, 0.13); bmNoise(f * 1.3, 1.6, 0.05, 0.08, 0.055); bmNoise(f * 0.8, 1.2, 0.04, 0.05, 0.1); },
+    happy() { [784, 988, 1175].forEach((f, i) => tone("triangle", f, f, 0.16, 0.06, i * 0.08)); },
+    binky() { tone("sine", 400, 1100, 0.2, 0.09); tone("triangle", 1319, 1568, 0.18, 0.05, 0.14); },
+    boop() { tone("sine", 700, 1000, 0.08, 0.05); },
+    sniff() { bmNoise(3200, 2, 0.04, 0.03); bmNoise(3400, 2, 0.04, 0.03, 0.09); },
+    snore() { tone("sine", 160, 120, 0.6, 0.025); }
+  };
+  // places she cannot hop into: ponds and the playhouse
+  const bmBlocked = (x, y) => !!pondAt(x, y) || insideHouse(x, y, 40);
+  // carrot beds everywhere while you play as her (the world itself is unchanged for everyone else): a bed in about half of the patches of meadow
+  function bmEnsureBeds() {
+    const cx0 = Math.floor(bun.x / CS), cy0 = Math.floor(bun.y / CS);
+    for (let cx = cx0 - 2; cx <= cx0 + 2; cx++) for (let cy = cy0 - 2; cy <= cy0 + 2; cy++) {
+      const key = cx + "," + cy;
+      if (bmPlayBeds.some(b => b.key === key) || bmBedsDone.has(key)) continue;
+      bmBedsDone.add(key);
+      const r = seeded(hash2(cx + 7211, cy - 5303));
+      if (r() < 0.5) continue;
+      const x = cx * CS + 60 + r() * (CS - 120), y = cy * CS + 60 + r() * (CS - 120);
+      if (bmBlocked(x, y) || !clearOf(x, y, 40)) continue;
+      const c = { x, y, grown: 1, regrow: 0, key, play: true };
+      bmPlayBeds.push(c); CARROTS.push(c);
+    }
+  }
+  const bmBedsDone = new Set();
+  function bmRemoveBeds() { bmPlayBeds.forEach(c => { const i = CARROTS.indexOf(c); if (i >= 0) CARROTS.splice(i, 1); }); bmPlayBeds = []; bmBedsDone.clear(); }
+
+  function bmNearestCarrot(rad) {
+    let best = null, bd = rad;
+    CARROTS.forEach(c => { if (!bmCarrotReady(c)) return; const d = Math.hypot(c.x - bun.x, c.y - bun.y); if (d < bd) { bd = d; best = c; } });
+    return best;
+  }
+  function bmEndAct() { if (bun.act) bun.act = null; bmNextAct = 1.5; }
+  function bmWake() {
+    bmLastInputAt = time; lastUserAt = time;
+    if (bun.act && bun.act.kind === "flop" && bun.act.hungry) { bun.act = null; bmNextAct = 1.5; popups.push({ x: bun.x, y: bun.y, z: 60 * BM.R, text: pick(["yawn...", "*stretch*", "hungry..."]), life: 1.2, big: false }); }
+  }
+  function bmSetTarget(x, y, carrot) {
+    if (bmClaimed && bmClaimed !== carrot) bmClaimed = null;
+    bun.target = { x, y, carrot: carrot || null };
+    if (carrot) bmClaimed = carrot;
+    bmEndAct(); bun.flop = Math.min(bun.flop, 0.99);
+  }
+  function bmStartHop() {
+    const t = bun.target, R = BM.R;
+    let tx = t.x, ty = t.y;
+    const d = Math.hypot(tx - bun.x, ty - bun.y), stop = t.carrot ? 30 * R : 0;
+    if (d <= stop + 4) { bmArrive(); return; }
+    bun.heading = Math.atan2(ty - bun.y, tx - bun.x);
+    const want = Math.min(56 * R * (bmHungry() ? BM_SLOW_LEN : 1), d - stop), base = bun.heading;
+    let len = 0;
+    for (const off of [0, 0.45, -0.45, 0.9, -0.9, 1.4, -1.4]) {   // something in the way (a pond, the playhouse)? she hops around it
+      let l = want; const hd = base + off;
+      while (l > 6 && bmBlocked(bun.x + Math.cos(hd) * l, bun.y + Math.sin(hd) * l)) l *= 0.7;
+      if (l > 6) { len = l; bun.heading = hd; break; }
+    }
+    if (len <= 6) { bun.target = null; bmClaimed = null; bun.mode = "sit"; bun.squash = 0.5; bsfx.boop(); return; }
+    const x1 = bun.x + Math.cos(bun.heading) * len, y1 = bun.y + Math.sin(bun.heading) * len;
+    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.34 + len / (420 * R)) * (bmHungry() ? BM_SLOW_DUR : 1), peak: (10 * R + len * 0.28) * (bmHungry() ? 0.7 : 1) };
+    bun.mode = "hop";
+    if (d > 36 * R) camYawTarget = bun.heading;
+    hops++; bsfx.hop();
+  }
+  function bmArrive() {
+    const t = bun.target; bun.target = null;
+    if (t && t.carrot && t.carrot.grown >= 1) { bmStartMunch(t.carrot); return; }
+    bmClaimed = null; bun.mode = "sit"; bun.squash = Math.max(bun.squash, 0.5);
+    if (bun.pending) { const p = bun.pending; bun.pending = null; bmSetTarget(p.x, p.y, p.carrot); }
+  }
+  function bmStartMunch(c) {
+    bmClaimed = c;
+    bun.peekSide = angDiff(bun.heading, camYaw) >= 0 ? -1 : 1;
+    bun.heading = Math.atan2(c.y - bun.y, c.x - bun.x);
+    bun.mode = "pull"; bun.munch = { c, t: 0, bites: 0, left: 1, nextBite: 0.7 };
+    c.grown = 0; c.regrow = 25;   // it leaves the ground now, and sprouts back later
+    bsfx.pop();
+    popups.push({ x: c.x, y: c.y, z: 60 * BM.R, text: pick(["pop!", "found one!", "carrot!", "ooh!"]), life: 1, big: false });
+    for (let i = 0; i < 10; i++) { const a = rand(0, Math.PI * 2), s = rand(30, 70) * BM.R; particles.push({ x: c.x, y: c.y, z: 3, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: rand(60, 130) * BM.R, life: 0.8, c: i % 2 ? "#7FC476" : "#B7E29C", r: rand(2, 3.4), kind: "petal", rot: rand(0, 6) }); }
+  }
+  function bmLand() {
+    const h = bun.hop; bun.hop = null;
+    const power = h ? clamp(h.peak / (110 * BM.R), 0, 1) : 0.2;
+    bun.squash = 0.6 + power * 0.5; bun.mode = "sit"; bsfx.land(power);
+    for (let i = 0; i < 4; i++) { const a = rand(0, Math.PI * 2), s = rand(20, 45) * BM.R; particles.push({ x: bun.x, y: bun.y, z: 2, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: rand(30, 70) * BM.R, life: 0.5, c: i % 2 ? "#7FC476" : "#B7E29C", r: rand(1.6, 2.6), kind: "petal", rot: rand(0, 6) }); }
+    if (h && h.carrot) { if (h.carrot.grown >= 1) { bmStartMunch(h.carrot); return; } bmClaimed = null; }
+    if (h && h.run && bmRunV > 0.97 && !bmPeakSaid && !bmHungry()) { bmPeakSaid = true; popups.push({ x: bun.x, y: bun.y, z: 60 * BM.R, text: pick(["zoom!", "wheee!", "so fast!", "full speed!"]), life: 1, big: true }); }
+    if (bun.target) bun.pause = 0.05;
+    else if (h && h.run) bun.pause = bmRunning ? (bmHungry() ? 0.25 : lerp(0.1, 0, bmRunV)) : 0;
+  }
+  const bmCanHop = () => !bun.hop && bun.mode === "sit";
+  function bmStartRun() {
+    audio();
+    if (!bmRunning) { bun.target = null; bun.pending = null; bmClaimed = null; bmEndAct(); }
+    bmRunning = true;
+  }
+  function bmStopRun() { bmRunning = false; }
+  function bmStartRunHop() {
+    const R = BM.R, weak = bmHungry();
+    let len = weak ? lerp(44 * R, 150 * R, bmRunV * 0.2) * BM_SLOW_LEN : lerp(44 * R, 150 * R, bmRunV);
+    while (len > 6 && bmBlocked(bun.x + Math.cos(bun.heading) * len, bun.y + Math.sin(bun.heading) * len)) len *= 0.7;
+    if (len <= 6) { bmRunV = 0; bun.squash = 0.5; bun.pause = 0.3; bsfx.boop(); return; }   // she bumps into something and stops
+    const x1 = bun.x + Math.cos(bun.heading) * len, y1 = bun.y + Math.sin(bun.heading) * len;
+    bun.hop = { x0: bun.x, y0: bun.y, x1, y1, t: 0, dur: (0.36 + len / (600 * R)) * (weak ? BM_SLOW_DUR : 1), peak: (10 * R + len * 0.26) * (weak ? 0.7 : 1), run: true };
+    bun.mode = "hop"; camYawTarget = bun.heading; hops++; bsfx.hop(bmRunV * 0.8);
+  }
+  function bmFinishMunch() {
+    bun.munch = null; bmClaimed = null; bun.mode = "sit"; bun.happy = 1.4; bun.wiggle = 1; bsfx.happy();
+    const wasHungry = bmHungry();
+    bmTummy = Math.min(BM_TUMMY_MAX, bmTummy + 1); bmHungrySaid = false; bmTummyPop = 1;
+    if (bmTummy >= BM_TUMMY_MAX) popups.push({ x: bun.x, y: bun.y, z: 76 * BM.R, text: pick(["so full!", "full tummy!", "yum, all full!"]), life: 1.3, big: true });
+    else if (wasHungry) popups.push({ x: bun.x, y: bun.y, z: 76 * BM.R, text: pick(["much better!", "energy!", "ahh, yum!"]), life: 1.2, big: false });
+    if (Math.random() < 0.4 && !bun.pending) setTimeout(() => { if (BM.on && bun.mode === "sit" && !bun.target) bmStartAct("binky"); }, 650);
+    if (bun.pending) { const p = bun.pending; bun.pending = null; bmSetTarget(p.x, p.y, p.carrot); }
+  }
+  function bmUpdateMunch(dt) {
+    const m = bun.munch; m.t += dt;
+    if (bun.mode === "pull") { bun.up = Math.min(1, bun.up + dt * 3); if (m.t > 0.55) { bun.mode = "munch"; m.t = 0; } return; }
+    bun.up = Math.min(1, bun.up + dt * 3); m.nextBite -= dt;
+    bun.chew = 0.5 + 0.5 * Math.sin(time * 22);
+    if (m.nextBite <= 0) {
+      m.bites++; m.left = Math.max(0, 1 - m.bites / 5); m.nextBite = 0.55 + Math.random() * 0.15; bsfx.crunch();
+      for (let i = 0; i < 5; i++) bmCrumbs.push({ x: rand(-2, 2), y: rand(-2, 2), vx: rand(-30, 40), vy: rand(-60, -10), life: rand(0.5, 0.8), r: rand(1.3, 2.4), c: i % 2 ? "#FF9A4D" : "#FFB870" });
+      if (m.bites === 2 || m.bites === 4) popups.push({ x: bun.x, y: bun.y, z: 58 * BM.R, text: pick(["munch munch!", "nom nom!", "crunchy!", "yum!", "so good!", "nibble nibble!"]), life: 1, big: false });
+      if (m.bites >= 5) bmFinishMunch();
+    }
+  }
+  // when nobody is playing: she keeps herself busy (washes her face, looks around, flicks an ear, binkies, naps)
+  function bmStartAct(kind) {
+    const dur = { groom: 3, look: 3.2, ear: 0.7, binky: 0.8, flop: rand(8, 12), sniff: 1.4, peek: rand(3.5, 5) }[kind] || 1;
+    if (kind === "peek") bun.peekSide = angDiff(bun.heading, camYaw) >= 0 ? -1 : 1;
+    bun.act = { kind, t: 0, dur, said: false };
+    if (kind === "binky") { bsfx.binky(); popups.push({ x: bun.x, y: bun.y, z: 80 * BM.R, text: pick(["binky!", "wheee!", "hop hop!"]), life: 1.1, big: true }); }
+    if (kind === "sniff") bsfx.sniff();
+    if (kind === "flop") popups.push({ x: bun.x, y: bun.y, z: 60 * BM.R, text: pick(["flop!", "cozy...", "sleepy..."]), life: 1.1, big: false });
+  }
+  function bmUpdateIdle(dt) {
+    const quiet = bun.mode === "sit" && !bun.target && !bmRunning && time - bmLastInputAt > BM_IDLE_AFTER;
+    if (bun.act) {
+      bun.act.t += dt;
+      if (bun.act.t >= bun.act.dur) { const k = bun.act.kind; bun.act = null; bmNextAct = k === "flop" ? rand(4, 7) : rand(2, 4.5); }
+    } else if (quiet && bmHungry()) {
+      if (time - bmLastInputAt > BM_IDLE_AFTER + 3) { bmStartAct("flop"); bun.act.dur = 1e9; bun.act.hungry = true; }
+    } else if (quiet) {
+      bmNextAct -= dt;
+      if (bmNextAct <= 0) {
+        const idleFor = time - bmLastInputAt, opts = [["groom", 3], ["look", 3], ["ear", 2], ["binky", 1.5], ["sniff", 2], ["peek", 3.5]];
+        if (idleFor > 12) opts.push(["wander", 4]);
+        if (idleFor > 25) opts.push(["flop", 2]);
+        let total = opts.reduce((a, o) => a + o[1], 0), roll = Math.random() * total, kind = opts[0][0];
+        for (const o of opts) { if ((roll -= o[1]) <= 0) { kind = o[0]; break; } }
+        if (kind === "wander") { const a = bun.heading + rand(-1.2, 1.2), d = rand(100, 220) * BM.R; bmSetTarget(bun.x + Math.cos(a) * d, bun.y + Math.sin(a) * d, null); }
+        else bmStartAct(kind);
+      }
+    }
+    const a = bun.act, k = 1 - Math.exp(-dt * 8);
+    let wantUp = 0, wantGroom = 0, wantFlop = 0, wantLook = 0;
+    if (a) {
+      const u = a.t / a.dur, env = Math.min(1, a.t / 0.35, (a.dur - a.t) / 0.35);
+      if (a.kind === "groom") { wantUp = 0.45 * env; wantGroom = env; }
+      else if (a.kind === "look") { wantUp = 0.9 * env; wantLook = Math.sin(u * Math.PI * 2) * env; }
+      else if (a.kind === "ear") { if (a.t < dt * 1.5) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; } }
+      else if (a.kind === "sniff") { wantUp = 0.25 * env; }
+      else if (a.kind === "peek") { wantUp = 0.35 * env; if (!a.said && a.t > 0.8) { a.said = true; bun.happy = 1.2; popups.push({ x: bun.x, y: bun.y, z: 70 * BM.R, text: pick(["hi!", "hello!", "peekaboo!"]), life: 1.1, big: false }); } }
+      else if (a.kind === "flop") {
+        wantFlop = env;
+        if (a.t > 2 && Math.floor(a.t / 2.2) !== Math.floor((a.t - dt) / 2.2)) { bsfx.snore(); popups.push({ x: bun.x, y: bun.y, z: 50 * BM.R, text: "z", life: 1.4, big: false, drift: true }); }
+      }
+    }
+    if (bmHungry() && !a && bun.mode === "sit") {
+      bmHungryLook -= dt;
+      if (bmHungryLook <= 0) { bmHungryLook = 0.5; const c = bmNearestCarrot(700 * BM.R); bun.sniffAt = c ? clamp(angDiff(Math.atan2(c.y - bun.y, c.x - bun.x), bun.heading) / 1.2, -1, 1) : 0; }
+      wantLook = bun.sniffAt || 0; wantUp = Math.max(wantUp, 0.15);
+    }
+    if (bun.mode !== "pull" && bun.mode !== "munch") bun.up += (wantUp - bun.up) * k;
+    bun.groom += (wantGroom - bun.groom) * k; bun.flop += (wantFlop - bun.flop) * (1 - Math.exp(-dt * 4)); bun.look += (wantLook - bun.look) * k;
+  }
+  function bmBinky() {
+    const a = bun.act;
+    if (!a || a.kind !== "binky") return { z: 0, spin: 0 };
+    const u = clamp(a.t / a.dur, 0, 1);
+    return { z: 34 * 4 * u * (1 - u) * BM.R, spin: Math.sin(u * Math.PI) * 0.5 };
+  }
+  // the pose the Playhouse's drawing code reads for her
+  function bmPose() {
+    return { t: time, roll: bun.wiggle > 0 && !reduceMotion ? Math.sin(time * 18) * 0.12 * Math.min(1, bun.wiggle) : 0, stretch: bun.stretch, up: bun.up, flop: bun.flop, groom: bun.groom, chew: bun.chew,
+      squash: bun.squash, blink: bun.blink, happy: bun.happy, earFlick: bun.earFlick, earFlickSide: bun.earFlickSide, look: bun.look,
+      carrot: bun.munch ? (bun.mode === "pull" ? 1 : bun.munch.left) : undefined };
+  }
+  // one step of her game, plus the camera that follows her
+  function bmUpdate(dt) {
+    const R = BM.R;
+    bmEnsureBeds();
+    if (bmRunning && bun.mode !== "pull" && bun.mode !== "munch") bmRunV = Math.min(1, bmRunV + dt / BM_RUN_RAMP);
+    else { bmRunV = Math.max(0, bmRunV - dt * 1.6); if (bmRunV < 0.9) bmPeakSaid = false; }
+    if (bmPtr && !bmPtr.run && bun.mode !== "pull" && bun.mode !== "munch" && time - bmPtr.t0 > BM_HOLD_TO_RUN && (!bmHopKey || bmHopKey === "Pointer")) { bmPtr.run = true; bmHopKey = "Pointer"; bmStartRun(); bmTapRing = null; bmWake(); }
+    let turn = 0;
+    keys.forEach(k => { turn += TURN_KEYS[k] || 0; });
+    if (bmHopKey === "Pointer" && bmPtr) {
+      const dx = (bmPtr.sx - W / 2) / (W / 2), dead = 0.1;
+      if (Math.abs(dx) > dead) turn += clamp(Math.sign(dx) * (Math.abs(dx) - dead) / (0.6 - dead), -1, 1);
+      bmWake();
+    }
+    if (turn && (bmCanHop() || bmRunning)) { bun.heading += turn * 1.7 * dt; camYawTarget = bun.heading; lastTurnAt = time; bun.target = null; bmClaimed = null; if (bun.act) bmEndAct(); bmLastInputAt = time; }
+    if (bun.hop) {
+      const h = bun.hop; h.t += dt / h.dur;
+      const t = Math.min(h.t, 1);
+      bun.x = lerp(h.x0, h.x1, t); bun.y = lerp(h.y0, h.y1, t); bun.z = h.peak * 4 * t * (1 - t); bun.stretch = Math.sin(t * Math.PI);
+      if (h.t >= 1) { bun.x = h.x1; bun.y = h.y1; bun.z = 0; bmLand(); }
+    } else {
+      bun.stretch = Math.max(0, bun.stretch - dt * 6);
+      if (bun.mode === "sit" && bun.target) { bun.pause -= dt; if (bun.pause <= 0) bmStartHop(); }
+      else if (bun.mode === "sit" && bmRunning) { bun.pause -= dt; if (bun.pause <= 0) bmStartRunHop(); }
+    }
+    if (bun.mode === "pull" || bun.mode === "munch") bmUpdateMunch(dt); else bun.chew = Math.max(0, bun.chew - dt * 4);
+    bmUpdateIdle(dt);
+    const rel = Math.sin(angDiff(bun.heading, camYaw));
+    if (Math.abs(rel) > 0.15) bun.face = Math.sign(rel);
+    bun.faceS = lerp(bun.faceS, bun.face, 1 - Math.exp(-dt * 12));
+    const peeking = bun.mode === "munch" || (bun.act && bun.act.kind === "peek");
+    const wantYaw = peeking ? camYaw + Math.PI - bun.peekSide * 0.7 : bun.heading;
+    bun.visYaw += angDiff(wantYaw, bun.visYaw) * (1 - Math.exp(-dt * (bun.hop || bmRunning ? 14 : 5)));
+    bun.squash = Math.max(0, bun.squash - dt * 4); bun.wiggle = Math.max(0, bun.wiggle - dt); bun.happy = Math.max(0, bun.happy - dt);
+    bun.earFlick = Math.max(0, bun.earFlick - dt * 2.2);
+    bun.blink -= dt; if (bun.blink < -0.13) bun.blink = rand(2.2, 5);
+    if (!bun.earFlick && Math.random() < dt * 0.08) { bun.earFlick = 1; bun.earFlickSide = Math.random() < 0.5 ? 1 : -1; }
+    // her tummy slowly empties (not while she munches, and it waits when nobody has played for two minutes)
+    if (bun.mode !== "pull" && bun.mode !== "munch" && time - bmLastInputAt < BM_TUMMY_PAUSE) {
+      const before = bmTummy; bmTummy = Math.max(0, bmTummy - BM_TUMMY_DRAIN * dt);
+      if (before > 0 && bmTummy <= 0 && !bmHungrySaid) { bmHungrySaid = true; bun.earFlick = 1; popups.push({ x: bun.x, y: bun.y, z: 76 * R, text: pick(["so hungry...", "tummy's empty...", "need a carrot..."]), life: 1.6, big: false }); bsfx.snore(); }
+    }
+    bmTummyPop = Math.max(0, bmTummyPop - dt * 2.5);
+    if (bmTapRing) { bmTapRing.t += dt; if (bmTapRing.t > 0.9) bmTapRing = null; }
+    bmCrumbs.forEach(c => { c.x += c.vx * dt; c.y += c.vy * dt; c.vy += 220 * dt; c.life -= dt; }); bmCrumbs = bmCrumbs.filter(c => c.life > 0);
+    bmHint = Math.max(0, bmHint - dt);
+    // she is the real Nee Nee in the world: the drawing code reads these
+    const N = BM.N, bk = bmBinky();
+    N.x = bun.x; N.y = bun.y; N.z = bun.z + bk.z; N.heading = bun.visYaw + bk.spin * 3; N.headingT = N.heading; N.state = "player"; N.alpha = 1;
+    bee.x = bun.x; bee.y = bun.y; bee.hop = null; move.target = null; move.vx = move.vy = 0; spin = 0; liftTarget = 0; lift = 0; lastUserAt = time; auto.on = false;
+    // the camera: swings around behind her and stays a little above; keeps up when she runs
+    camYaw += angDiff(camYawTarget, camYaw) * (1 - Math.exp(-dt * 2));
+    camC = Math.cos(camYaw); camS = Math.sin(camYaw);
+    const kc = 1 - Math.exp(-dt * (3 + 5 * bmRunV));
+    camX = lerp(camX, bun.x - camC * 470, kc); camY = lerp(camY, bun.y - camS * 470, kc); camH = lerp(camH, 165 + bun.z * 0.2, kc);
+  }
+  // starting and stopping
+  function enterBunny() {
+    if (BM.on) return;
+    const N = ANIMALS.find(a => a.neenee); if (!N) return;
+    BM.on = true; BM.N = N; BM.R = N.size / 2.1; N.player = true; bee.floating = false; bee.perch = null;
+    hidePop(); audio(); lastTap = null;
+    bun.x = N.x; bun.y = N.y; bun.z = 0; bun.heading = N.heading; bun.visYaw = N.heading; bun.mode = "sit"; bun.hop = null; bun.target = null; bun.pending = null; bun.pause = 0; bun.act = null;
+    bun.up = bun.flop = bun.groom = bun.chew = bun.squash = bun.look = 0; bun.munch = null;
+    bmClaimed = null; bmRunning = false; bmRunV = 0; bmTummy = BM_TUMMY_MAX; bmHungrySaid = false; bmHopKey = null; bmPtr = null; bmCrumbs = []; bmTapRing = null;
+    bmLastInputAt = time; bmNextAct = 1.5; bmHint = 7;
+    move.target = null; move.vx = move.vy = 0; spin = 0; bee.hop = null; liftTarget = 0;
+    camYawTarget = bun.heading;   // the view swings round behind her
+    document.body.classList.add("playing-nee");
+    bmBackBtn.hidden = false;
+    if (touchPad && !hasKeyboard) touchPad.hidden = false;
+    setTimeout(() => { if (BM.on && bun.mode === "sit" && !bun.act && !bmRunning) bmStartAct("peek"); }, 400);   // she says hi
+  }
+  function exitBunny() {
+    if (!BM.on) return;
+    BM.on = false; const N = BM.N; N.player = false; N.state = "rest"; N.timer = rand(1, 2); N.z = 0; N.home = { x: N.x, y: N.y };
+    bmRemoveBeds(); bmRunning = false; bmHopKey = null; bmPtr = null; keys.clear();
+    bun.act = null; bun.munch = null; bun.hop = null;
+    document.body.classList.remove("playing-nee");
+    bmBackBtn.hidden = true;
+    if (touchPad) touchPad.hidden = true;
+    lastUserAt = time; sfx.friend();
+  }
+  // the tummy meter: five little carrots, top right under the corner buttons (the leftmost fades first)
+  function bmDrawTummyIcon(x, y, s, alpha) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-0.55); ctx.scale(s, s); ctx.globalAlpha = alpha;
+    ctx.fillStyle = "#6CBF74";
+    [-0.45, 0, 0.45].forEach(o => { ctx.beginPath(); ctx.ellipse(Math.sin(o) * 3, -9 - Math.cos(o) * 3, 1.7, 4.2, o, 0, Math.PI * 2); ctx.fill(); });
+    const g = ctx.createLinearGradient(-3.5, 0, 3.5, 0); g.addColorStop(0, "#FFB46B"); g.addColorStop(1, "#F2803A"); ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-3.6, -6); ctx.quadraticCurveTo(0, -8, 3.6, -6); ctx.quadraticCurveTo(2.6, 3, 0, 10); ctx.quadraticCurveTo(-2.6, 3, -3.6, -6); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(200, 90, 40, 0.5)"; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(-2.2, -2); ctx.lineTo(0.6, -2.4); ctx.moveTo(-1.4, 2.4); ctx.lineTo(0.8, 2); ctx.stroke();
+    ctx.restore();
+  }
+  function bmDrawHud() {
+    if (!BM.on) return;
+    const n = BM_TUMMY_MAX, gap = 19, s = 0.95, k = W / (canvas.getBoundingClientRect().width || W), x1 = 0, y = 0, x0 = x1 - (n - 1) * gap;
+    ctx.save(); ctx.translate(W - 22 * k, 81 * k); ctx.scale(k, k);   // always the same size on screen, just under the corner buttons
+    ctx.fillStyle = "rgba(255, 255, 255, 0.42)"; roundRect(x0 - 15, y - 17, (n - 1) * gap + 30, 34, 17); ctx.fill();
+    const pulse = bmHungry() && !reduceMotion ? 0.5 + 0.5 * Math.sin(time * 3) : 0;
+    for (let i = 0; i < n; i++) {
+      const j = n - 1 - i, fill = clamp(bmTummy - j, 0, 1), pop = j === Math.ceil(bmTummy) - 1 ? bmTummyPop : 0;
+      bmDrawTummyIcon(x0 + i * gap, y + 1, s * (1 + pop * 0.35), 0.1 + pulse * 0.06 + fill * 0.9);
+    }
+    ctx.restore();
+    // a ring where you tapped
+    if (bmTapRing) {
+      const k = bmTapRing.t / 0.9, r = 20 + 14 * Math.sin(Math.min(1, bmTapRing.t * 3) * Math.PI / 2);
+      if (groundPath(ellipsePts(bmTapRing.x, bmTapRing.y, r * BM.R, r * BM.R, 0, 24))) { ctx.strokeStyle = bmTapRing.carrot ? `rgba(255, 160, 70, ${0.95 * (1 - k)})` : `rgba(255, 255, 255, ${0.9 * (1 - k)})`; ctx.lineWidth = 2.6; ctx.stroke(); }
+    }
+    // munch crumbs fly from her mouth
+    if (bmCrumbs.length && BM.mouth) { bmCrumbs.forEach(c => { ctx.globalAlpha = clamp(c.life * 2, 0, 1); ctx.fillStyle = c.c; ctx.beginPath(); ctx.arc(BM.mouth.x + c.x, BM.mouth.y + c.y, c.r, 0, Math.PI * 2); ctx.fill(); }); ctx.globalAlpha = 1; }
+    // first seconds: how to play
+    if (bmHint > 0) {
+      ctx.save(); ctx.globalAlpha = clamp(bmHint, 0, 1) * 0.95; ctx.font = '800 16px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif'; ctx.textAlign = "center";
+      const t1 = hasKeyboard ? "click to hop  ·  hold to run  ·  arrows steer" : "tap to hop  ·  hold to run", y2 = touchPad && !touchPad.hidden ? H - 128 : H - 64;
+      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(70, 60, 110, 0.5)"; ctx.strokeText(t1, W / 2, y2); ctx.fillStyle = "#FFFFFF"; ctx.fillText(t1, W / 2, y2); ctx.restore();
+    }
+  }
+  // what a tap or click does while you are her
+  function bmTapAt(p) {
+    bmWake(); audio();
+    let best = null, bf = Infinity;
+    carrotHits.forEach(h => { if (Math.hypot(p.sx - h.x, p.sy - h.y) < h.rad && h.f < bf && h.c.grown >= 1) { bf = h.f; best = h.c; } });
+    let tx, ty, carrot = null;
+    if (best) { tx = best.x; ty = best.y; carrot = best; }
+    else {
+      const g = groundAt(p.sx, p.sy);
+      if (g) { tx = g.x; ty = g.y; }
+      else { const a = camYaw + Math.atan((p.sx - W / 2) / F); tx = bun.x + Math.cos(a) * 200 * BM.R; ty = bun.y + Math.sin(a) * 200 * BM.R; }
+    }
+    bmTapRing = { x: tx, y: ty, t: 0, carrot: !!carrot };
+    if (bmHopKey !== "Pointer") { bmStopRun(); bmRunV = Math.min(bmRunV, 0.3); }
+    if (bun.mode === "pull" || bun.mode === "munch") { bun.pending = { x: tx, y: ty, carrot }; return !!carrot; }
+    bmSetTarget(tx, ty, carrot);
+    return !!carrot;
+  }
+  // input while you are her: these run before the Playhouse's own (they only act on the canvas, and only while you are her)
+  stage.addEventListener("pointerdown", e => {
+    if (!BM.on || e.target !== canvas) return;
+    e.stopPropagation(); e.stopImmediatePropagation();
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    hidePop(); if (!mixerEl.hidden) { mixerEl.hidden = true; soundBtn.setAttribute("aria-expanded", "false"); }
+    if (e.pointerType === "mouse" && hasKeyboard && !gameHasFocus()) grabKeys();
+    if (e.pointerType === "touch" && touchPad) touchPad.hidden = false;
+    try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {}
+    const p = toGame(e), onCarrot = bmTapAt(p);
+    bmPtr = { id: e.pointerId, sx: p.sx, sy: p.sy, t0: time, run: false, carrot: onCarrot };
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  }, true);
+  stage.addEventListener("pointermove", e => {
+    if (!BM.on || e.target !== canvas) return;
+    e.stopPropagation(); e.stopImmediatePropagation();
+    if (!bmPtr || e.pointerId !== bmPtr.id) return;
+    const p = toGame(e); bmPtr.sx = p.sx; bmPtr.sy = p.sy;
+  }, true);
+  const bmEndPtr = e => {
+    if (!BM.on) return;
+    if (e.target === canvas) { e.stopPropagation(); e.stopImmediatePropagation(); }
+    if (!bmPtr || e.pointerId !== bmPtr.id) return;
+    bmPtr = null; if (bmHopKey === "Pointer") { bmHopKey = null; bmStopRun(); }
+  };
+  ["pointerup", "pointercancel"].forEach(t => stage.addEventListener(t, bmEndPtr, true));
+  stage.addEventListener("lostpointercapture", e => { if (BM.on && bmPtr && e.pointerId === bmPtr.id) bmEndPtr(e); }, true);
+  ["wheel", "gesturestart", "gesturechange", "gestureend"].forEach(t => stage.addEventListener(t, e => { if (BM.on && e.target === canvas) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, { capture: true, passive: false }));
+  // keyboard: left/right (or A/D) steer, space / up / down (or W/S) run
+  const BM_HOPK = ["Space", "ArrowUp", "ArrowDown", "KeyW", "KeyS"];
+  window.addEventListener("keydown", e => {
+    if (!BM.on) return;
+    const code = e.code === "Space" || e.key === " " ? "Space" : e.code;
+    const turn = code in TURN_KEYS, hop = BM_HOPK.includes(code);
+    if (!turn && !hop) return;
+    const tag = document.activeElement && document.activeElement.tagName; if (tag === "INPUT") return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (e.repeat) return;
+    bmWake(); audio();
+    if (turn) { keys.add(code); lastTurnAt = time; }
+    if (hop && !bmHopKey) { bmHopKey = code; bmStartRun(); }
+  }, true);
+  window.addEventListener("keyup", e => {
+    if (!BM.on) return;
+    const code = e.code === "Space" || e.key === " " ? "Space" : e.code;
+    keys.delete(code);
+    if (code === bmHopKey) { bmHopKey = null; bmStopRun(); }
+  }, true);
+  window.addEventListener("blur", () => { if (!BM.on) return; keys.clear(); bmHopKey = null; bmPtr = null; bmStopRun(); });
+  // the back button
+  const bmBackBtn = document.createElement("button");
+  bmBackBtn.type = "button"; bmBackBtn.id = "bmBack"; bmBackBtn.hidden = true; bmBackBtn.setAttribute("aria-label", "Back to the Playhouse");
+  bmBackBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Playhouse</span>';
+  stage.appendChild(bmBackBtn);
+  bmBackBtn.addEventListener("pointerdown", e => e.stopPropagation());
+  // opened from Lily's Bun Nee Nee's own page (world.html?play=neenee): you start as her, and the back button goes to the Playhouse page
+  BM.fromPage = /[?&]play=neenee\b/.test(location.search);
+  bmBackBtn.addEventListener("click", () => {
+    if (BM.fromPage) { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } return; }
+    exitBunny();
+  });
+
+  let carrotHits = [];
   // ---------- update ----------
   function update(dt) {
     time += dt;
     HOUR = hourNow();
+    if (BM.on) bmUpdate(dt);   // playing as Nee Nee: her game steers her and the camera; the world carries on around her
+    else {
     if (trip) updateTrip(dt);
     // winding up: the meter fills, then gently empties, then fills again (like Hop Hop)
     if (charging) {
@@ -3134,6 +3567,7 @@
     camX = lerp(camX, bee.x - camC * CAM_DIST, kc);
     camY = lerp(camY, bee.y - camS * CAM_DIST, kc);
     camH = lerp(camH, bee.z + CAM_UP + lift, 1 - Math.exp(-dt * 7));
+    }
 
     // the frog says hi when she hops by a pond
     chunksAround(bee.x, bee.y, 420).forEach(ch => {
@@ -3154,8 +3588,7 @@
 
     updateCritters(dt);
     updateBunny(dt);
-    updateAuto(dt);
-    updateMover(dt);
+    if (!BM.on) { updateAuto(dt); updateMover(dt); }
     updatePals(dt);
     updateFriend(dt);
     updateStar(dt);
@@ -5521,6 +5954,7 @@
   }
 
   function draw() {
+    carrotHits = [];
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     HORIZON = Math.round(H * (0.36 - 0.46 * clamp((camH - 156) / TIP_SCALE, 0, 1) ** 0.8));
     camC = Math.cos(camYaw); camS = Math.sin(camYaw);
@@ -5628,7 +6062,7 @@
           groundShadow(a.x, a.y, 12 * a.size * a.sx * (1 - clamp(a.z / (30 * a.size), 0, 0.4)));
           const S = a.size * p.k, yaw = angDiff(a.heading, camYaw), pitch = Math.atan2(Math.max(10, camH - a.z), p.f);
           ctx.translate(p.x, p.y); ctx.scale(a.sx, 1); ctx.translate(-p.x, -p.y);   // chubbier or slimmer
-          if (LC) LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(bunnyPose(a), { pal: a.pal, ears: a.ears || undefined }));
+          if (LC) { const mo = LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(bunnyPose(a), { pal: a.pal, ears: a.ears || undefined })); if (a.player) BM.mouth = mo; }
           else drawBunny(p.x, p.y, S, screenDir(Math.cos(a.heading), Math.sin(a.heading)), a.z);
           ctx.restore();
           residentHits.push({ kind: a.neenee ? "neenee" : "bunny", ref: a, x: p.x, y: p.y - 14 * S, r: Math.max(22, 16 * S * a.sx), top: p.y - 36 * S, f: p.f });
@@ -5706,6 +6140,7 @@
     }
     drawFairyDust();
     drawPopups();
+    bmDrawHud();
     drawTags();
     drawBanner();
     drawHint();
@@ -6268,6 +6703,9 @@
   window.__playhouse = { cam: () => ({ x: camX, y: camY, yaw: camYaw }),
     neenee: () => { const n = ANIMALS.find(a => a.neenee); return n ? { x: n.x, y: n.y } : null; },
     frogs: () => { const out = []; chunks.forEach(ch => ch.pond && (ch.pond.frogs || []).forEach(F => out.push({ x: F.x, y: F.y, pal: F.pal, hophop: !!F.hophop, size: F.size }))); return out; },
+    teleNee: (x, y, h) => { bun.x = x; bun.y = y; bun.heading = h; bun.visYaw = h; camYawTarget = camYaw = h; camC = Math.cos(h); camS = Math.sin(h); camX = x - camC * 470; camY = y - camS * 470; },
+    carrots: () => CARROTS.map(c => ({ x: c.x, y: c.y, g: c.grown })),
+    setTummy: v => { bmTummy = v; }, carrotScreen: () => carrotHits.map(h => ({ x: h.x, y: h.y, g: h.c.grown, f: h.f })), playNee: () => enterBunny(), leaveNee: () => exitBunny(), nee: () => ({ on: BM.on, x: bun.x, y: bun.y, z: bun.z, mode: bun.mode, heading: bun.heading, tummy: bmTummy, running: bmRunning, runV: bmRunV, camX, camY, camH, camYaw, R: BM.R, beds: CARROTS.length }),
     pumpkins: () => { const out = []; chunks.forEach(ch => (ch.pumpkins || []).forEach(m => { const q = proj(m.x, m.y, 0); out.push({ x: m.x, y: m.y, th: m.th, hd: m.hd, sx: q && q.x, sy: q && q.y, k: q && q.k, f: q && q.f }); })); return out; },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
@@ -6303,6 +6741,7 @@
   draw();
   requestAnimationFrame(frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  if (BM.fromPage) setTimeout(enterBunny, 400);   // opened as Lily's Bun Nee Nee
 })();
 </script>
 </body>
