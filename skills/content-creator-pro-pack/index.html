@@ -676,13 +676,15 @@
   var drops = [].slice.call(document.querySelectorAll('.site-header .nav-drop'));
   if (!drops.length) return;
   var phone = window.matchMedia('(max-width: 768px)');
+  var touched = false;   // iPad / tablet: the last thing that touched the page was a finger or pen, so there is no hover
+  document.addEventListener('pointerdown', function (e) { touched = e.pointerType === 'touch' || e.pointerType === 'pen'; }, true);
   function set(d, open) { d.classList.toggle('open', open); var b = d.querySelector('.nav-drop-btn'); if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
   function closeAll(except) { drops.forEach(function (d) { if (d !== except) set(d, false); }); }
   function toggle(d) { var o = !d.classList.contains('open'); closeAll(d); set(d, o); }
   drops.forEach(function (d) {
     var b = d.querySelector('.nav-drop-btn'), a = d.querySelector('a');
     b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); toggle(d); });
-    a.addEventListener('click', function (e) { if (phone.matches) { e.preventDefault(); e.stopPropagation(); toggle(d); } });
+    a.addEventListener('click', function (e) { if (phone.matches || (touched && !d.classList.contains('open'))) { e.preventDefault(); e.stopPropagation(); toggle(d); } });   // tablet: first tap opens the menu, a second tap on the word goes to the page
     d.addEventListener('mouseleave', function () { if (!phone.matches && window.matchMedia('(hover: hover)').matches) set(d, false); });
     if (phone.matches && d.querySelector('.nav-drop-panel [aria-current="page"]')) set(d, true);
   });
