@@ -1856,6 +1856,7 @@
   const isYellowBee = a => !!a && (a.pal == null || a.pal === 0 || a.pal === "ours");
   function pageFor(h) {
     if (!h) return null;
+    if (h.kind === "frog" && h.ref && h.ref.pal && h.ref.pal !== "ours") return null;   // only the original Hop Hop has the popup; his friends just say hello
     const key = h.kind === "frog" ? "frog" : h.kind === "neenee" ? "neenee" : (h.kind === "hive" || (h.kind === "bee" && isYellowBee(h.ref))) ? "bee" : null;
     return key && PAGES[key] ? { key, url: PAGES[key], ask: PAGE_ASK[key] } : null;
   }
@@ -1871,14 +1872,8 @@
     goPop.style.left = clamp(h.x / W * 100, 22, 78) + "%";
     goPop.style.top = clamp((h.top || h.y) / H * 100, 14, 92) + "%";
   }
-  // a friend's popup uses their own name; Hop Hop keeps "Play Hop Hop?"
-  function popAsk(h) {
-    const pg = pageFor(h), F = h && h.kind === "frog" ? h.ref : null;
-    const c = F && F.pal && F.pal !== "ours" && FROG && FROG.colors && FROG.colors[F.pal];
-    return c && c.name ? "Play Hop Hop with " + c.name + "?" : (pg || {}).ask || "Play?";
-  }
   function showPop(url, h, mode) {
-    goLink.href = url; goLink.textContent = popAsk(h);
+    goLink.href = url; goLink.textContent = (pageFor(h) || {}).ask || "Play?";
     placePop(h); popFor = h.ref; popMode = mode || "tap";
     clearTimeout(popFade); goPop.classList.remove("out"); goPop.hidden = false;
     clearTimeout(popTimer); if (popMode === "tap") popTimer = setTimeout(hidePop, 6000);
