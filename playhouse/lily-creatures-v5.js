@@ -4,7 +4,7 @@
   One master design for every Lily Studio creature. Every game, Watch page and video loads this
   one file, so all the creatures live in the same world and look the same everywhere.
 
-  Creatures in v5 (same as v4, plus FROG FRIENDS: LilyCreatures.frog.colors = ours, golden, blue, lime, toad, ember, pink, lavender, mint; use pose.pal):
+  Creatures in v5 (same as v4, plus FROG FRIENDS: LilyCreatures.frog.colors = ours, golden, blue, lime, hunter, ember, pink, lavender, mint; use pose.pal):
     bee    Our bee in 3D (approved Sept 28, 2026, bee-3d-preview-v2), plus her six friend colors.
     bunny  Nee Nee the Bunny in 3D. NEW APPROVED MASTER DESIGN (Jessica, Sept 30, 2026), from bunny-3d-v10:
            one smooth solid body (like Hop Hop), soft cheek swells with a rosy glow, slim back thighs, a tiny
@@ -103,7 +103,7 @@
     golden:   FP({ name: "Golden", skin: [[196,128,24],[238,178,48],[255,226,128]], leg: [[160,96,16],[210,140,32],[245,190,80]], belly: [[250,226,150],[255,240,190],[255,250,226]], cheek: [255,128,120] }),
     blue:     FP({ name: "Blue", skin: [[28,76,170],[56,128,224],[132,186,252]], leg: [[18,52,128],[38,92,184],[88,146,226]], belly: [[190,214,250],[222,236,255],[244,250,255]], cheek: [255,140,170], mark: 1, markCol: [22,30,78], bump: 0.95, size: 0.92 }),
     lime:     FP({ name: "Treetop", skin: [[58,150,40],[104,200,60],[190,240,120]], leg: [[214,92,20],[250,140,40],[255,184,90]], belly: [[255,244,200],[255,250,224],[255,255,244]], cheek: [255,150,120], mark: 2, markCol: [150,200,255], bump: 1.1 }),
-    toad:     FP({ name: "Toad", skin: [[110,80,52],[168,128,84],[222,184,132]], leg: [[84,60,38],[132,98,62],[184,146,100]], belly: [[236,218,184],[246,232,206],[255,246,228]], cheek: [255,150,140], mark: 3, markCol: [70,46,28], bump: 1.08, size: 1.08 }),
+    hunter:   FP({ name: "Hunter", skin: [[30,70,44],[54,108,66],[108,158,114]], leg: [[22,52,32],[40,86,52],[80,130,92]], belly: [[206,226,192],[226,240,212],[244,250,236]], cheek: [255,150,140], mark: 3, markCol: [14,34,22], bump: 1.08, size: 1.08 }),
     ember:    FP({ name: "Ember", skin: [[190,56,36],[240,104,60],[255,168,120]], leg: [[140,36,28],[200,70,44],[240,120,80]], belly: [[255,222,196],[255,238,218],[255,248,238]], cheek: [255,150,150], mark: 1, markCol: [52,34,48], bump: 0.98, size: 0.95 }),
     pink:     FP({ name: "Pink", skin: [[240,150,190],[255,184,214],[255,222,238]], leg: [[214,112,160],[240,148,190],[255,190,216]], belly: [[255,240,246],[255,248,251],[255,252,254]], cheek: [255,110,140] }),
     lavender: FP({ name: "Lavender", skin: [[160,128,222],[198,166,250],[230,212,255]], leg: [[128,96,190],[170,136,230],[208,184,248]], belly: [[244,238,255],[250,246,255],[254,252,255]], cheek: [255,130,180], mark: 3, markCol: [255,255,255], bump: 1.04 }),
