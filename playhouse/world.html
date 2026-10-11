@@ -1871,8 +1871,14 @@
     goPop.style.left = clamp(h.x / W * 100, 22, 78) + "%";
     goPop.style.top = clamp((h.top || h.y) / H * 100, 14, 92) + "%";
   }
+  // a friend's popup uses their own name; Hop Hop keeps "Play Hop Hop?"
+  function popAsk(h) {
+    const pg = pageFor(h), F = h && h.kind === "frog" ? h.ref : null;
+    const c = F && F.pal && F.pal !== "ours" && FROG && FROG.colors && FROG.colors[F.pal];
+    return c && c.name ? "Play Hop Hop with " + c.name + "?" : (pg || {}).ask || "Play?";
+  }
   function showPop(url, h, mode) {
-    goLink.href = url; goLink.textContent = (pageFor(h) || {}).ask || "Play?";
+    goLink.href = url; goLink.textContent = popAsk(h);
     placePop(h); popFor = h.ref; popMode = mode || "tap";
     clearTimeout(popFade); goPop.classList.remove("out"); goPop.hidden = false;
     clearTimeout(popTimer); if (popMode === "tap") popTimer = setTimeout(hidePop, 6000);
