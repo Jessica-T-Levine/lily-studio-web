@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Frog friends: 3D and 2D side by side (preview)</title></head><body style="margin:0">
+<canvas id="c" width="1200" height="1700"></canvas>
+<script src="lily-creatures-v5.js"></script><script src="lily-frog-friends-2d-v1.js"></script>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),F=LilyCreatures.frog,N=LilyFrogFriends2D;
+const g=ctx.createLinearGradient(0,0,0,1700);g.addColorStop(0,'#CFE8FF');g.addColorStop(1,'#E6F5D5');ctx.fillStyle=g;ctx.fillRect(0,0,1200,1700);
+ctx.textAlign='center';ctx.fillStyle='#0B1E3F';ctx.font='700 26px system-ui';
+Object.keys(N.palettes).forEach((n,i)=>{const col=i%2,row=Math.floor(i/2),ox=col*600,oy=row*330;
+ const cy=oy+235;
+ ctx.fillStyle='rgba(40,90,70,.16)';ctx.beginPath();ctx.ellipse(ox+150,cy+8,95,24,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(ox+450,cy+8,95,24,0,0,7);ctx.fill();
+ F.draw(ctx,ox+150,cy,3.5,Math.PI+0.0,0.28,{pal:n,t:0.2,blink:false});
+ ctx.save();ctx.translate(ox+450,cy);const s=2.5*1.38*N.palettes[n].size;ctx.scale(s,s);N.draw(ctx,n,{});ctx.restore();
+ ctx.fillStyle='#0B1E3F';ctx.font='700 26px system-ui';ctx.fillText(N.palettes[n].name,ox+300,oy+300);
+ ctx.font='600 14px system-ui';ctx.fillStyle='#4a5a78';ctx.fillText('3D',ox+150,oy+28);ctx.fillText('2D',ox+450,oy+28);});
+window.__done=true;
+</script></body></html>
