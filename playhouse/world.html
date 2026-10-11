@@ -162,6 +162,15 @@
   #bmBack[hidden] { display: none; }
   #bmBack svg { width: 20px; height: 20px; }
   html.in-frame #bmBack { top: max(58px, env(safe-area-inset-top)); }   /* the site's big logo hangs over the top-left corner of the world, so sit just below it */
+  /* tag: a button to stop playing tag any time (you keep Nee Nee and just hop around) */
+  #tagEnd { position: absolute; top: calc(max(12px, env(safe-area-inset-top)) + 50px); left: max(12px, env(safe-area-inset-left)); z-index: 6; height: 38px; padding: 0 14px 0 10px; border: 0; border-radius: 999px;
+    display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255, 255, 255, 0.55); color: #4B3A66; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(40, 30, 80, 0.2); font: 800 14px/1 var(--display); -webkit-tap-highlight-color: transparent; }
+  #tagEnd[hidden] { display: none; }
+  #tagEnd svg { width: 16px; height: 16px; }
+  html.in-frame #tagEnd { top: calc(max(58px, env(safe-area-inset-top)) + 50px); }
+  #tagEnd:hover { background: rgba(255, 255, 255, 0.75); }
+  #tagEnd:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
   /* tag: the round card */
   #tagCard { position: absolute; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(60, 40, 110, 0.18); }
   #tagCard[hidden] { display: none; }
@@ -3734,11 +3743,11 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     TG.role = "run"; TG.phase = "count"; TG.cnt = 3; TG.lastNum = 4; TG.f.tgHop = null; TG.help = 0;
     bun.target = null; bun.pending = null; bmClaimed = null; bmStopRun(); bsfx.binky();
   }
-  function tgOver() {
-    TG.phase = "over"; bmStopRun(); bun.target = null; tagGo.hidden = true;
+  function tgOver(manual) {
+    TG.phase = "over"; bmStopRun(); bun.target = null; tagGo.hidden = true; tagEnd.hidden = true;
     TG.newBest = TG.score > TG.best && TG.score > 0;
     if (TG.newBest) { store.set(TG_BEST_KEY, String(TG.score)); }
-    document.getElementById("tcTitle").textContent = TG.catches ? "Great hopping!" : "Time’s up!";
+    document.getElementById("tcTitle").textContent = manual ? (TG.catches ? "Nice playing!" : "Tag stopped") : TG.catches ? "Great hopping!" : "Time’s up!";
     document.getElementById("tcScore").textContent = String(TG.score);
     document.getElementById("tcLine").textContent = (TG.catches ? "You caught your friend " + TG.catches + (TG.catches === 1 ? " time." : " times.") : "Nobody got caught this time.") + (TG.newBest ? " A new best score!" : TG.best ? " Best score: " + TG.best + "." : "");
     tagCard.hidden = false; tagCard.classList.remove("in"); void tagCard.offsetWidth; tagCard.classList.add("in");
@@ -3747,7 +3756,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   }
   function tgStop() {
     if (!TG.on) return;
-    const f = TG.f; TG.on = false; TG.phase = "off"; TG.floats = []; tagCard.hidden = true; tagGo.hidden = true;
+    const f = TG.f; TG.on = false; TG.phase = "off"; TG.floats = []; tagCard.hidden = true; tagGo.hidden = true; tagEnd.hidden = true;
     if (f) { f.tag = false; f.tgHop = null; f.z = 0; f.state = "rest"; f.timer = rand(1, 2); f.alpha = 1; f.home = { x: f.x, y: f.y }; f.happy = 0; }
     TG.f = null;
   }
@@ -3763,6 +3772,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const boost = bmBoosting();
     if (boost !== TG.turbo) { TG.turbo = boost; if (boost) { TG.turboFlash = 1.2; bsfx.binky(); } }
     if (tgPlaying()) { TG.left -= dt; if (TG.left <= 0) { TG.left = 0; tgOver(); return; } }
+    tagEnd.hidden = !(TG.phase === "come" || TG.phase === "count" || TG.phase === "seek" || TG.phase === "flee");
     switch (TG.phase) {
       case "come":   // she runs over to tag you
         TG.comeT += dt;
@@ -3919,16 +3929,24 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   // the round card (a real page element, so it reads well and the buttons are easy to press)
   const tagCard = document.createElement("div");
   tagCard.id = "tagCard"; tagCard.hidden = true;
-  tagCard.innerHTML = '<div class="tc-box" role="dialog" aria-labelledby="tcTitle"><h2 id="tcTitle"></h2><div class="tc-score"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.8-6.3 3.8 1.7-7L2 9.2l7.1-.6z" fill="#FFB300"/></svg><b id="tcScore">0</b></div><p id="tcLine"></p><div class="tc-btns"><button type="button" id="tcAgain">Play again</button><button type="button" id="tcDone" class="alt">All done</button></div></div>';
+  tagCard.innerHTML = '<div class="tc-box" role="dialog" aria-labelledby="tcTitle"><h2 id="tcTitle"></h2><div class="tc-score"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.8-6.3 3.8 1.7-7L2 9.2l7.1-.6z" fill="#FFB300"/></svg><b id="tcScore">0</b></div><p id="tcLine"></p><div class="tc-btns"><button type="button" id="tcAgain">Play again</button><button type="button" id="tcDone" class="alt">Keep hopping</button></div></div>';
   stage.appendChild(tagCard);
   // the question between roles: a clear button, so nothing starts until you press it
   const tagGo = document.createElement("div");
   tagGo.id = "tagGo"; tagGo.hidden = true;
-  tagGo.innerHTML = '<div class="tg-box" role="dialog" aria-labelledby="tgMsg"><p id="tgMsg"></p><button type="button" id="tgKeep"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Keep playing</button><button type="button" id="tgStopBtn" class="alt">All done</button></div>';
+  tagGo.innerHTML = '<div class="tg-box" role="dialog" aria-labelledby="tgMsg"><p id="tgMsg"></p><button type="button" id="tgKeep"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Keep playing</button><button type="button" id="tgStopBtn" class="alt">Stop tag</button></div>';
   stage.appendChild(tagGo);
   ["pointerdown", "pointerup", "click", "wheel"].forEach(t => tagGo.addEventListener(t, e => e.stopPropagation()));
   document.getElementById("tgKeep").addEventListener("click", () => tgKeepPlaying());
-  document.getElementById("tgStopBtn").addEventListener("click", () => { tagGo.hidden = true; tgOver(); });
+  document.getElementById("tgStopBtn").addEventListener("click", () => { tagGo.hidden = true; tgOver(true); });
+  // a button that is always there while you play: stop tag, see your score, and keep hopping as Nee Nee
+  const tagEnd = document.createElement("button");
+  tagEnd.type = "button"; tagEnd.id = "tagEnd"; tagEnd.hidden = true; tagEnd.setAttribute("aria-label", "Stop playing tag");
+  tagEnd.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Stop tag</span>';
+  stage.appendChild(tagEnd);
+  ["pointerdown", "pointerup", "wheel"].forEach(t => tagEnd.addEventListener(t, e => e.stopPropagation()));
+  tagEnd.addEventListener("click", e => { e.stopPropagation(); audio(); if (TG.on && TG.phase !== "over") tgOver(true); });
+  window.addEventListener("keydown", e => { if (e.key === "Escape" && BM.on && TG.on && TG.phase !== "over") { e.preventDefault(); tgOver(true); } });
   ["pointerdown", "pointerup", "click", "wheel"].forEach(t => tagCard.addEventListener(t, e => e.stopPropagation()));
   document.getElementById("tcAgain").addEventListener("click", () => { audio(); tgNewRound(false); });
   document.getElementById("tcDone").addEventListener("click", () => { tgStop(); });
@@ -7154,7 +7172,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     gamesTimer = setTimeout(closeGames, 10000);   // it fades away by itself after 10 seconds
   }
   gamesBtn.addEventListener("pointerdown", e => e.stopPropagation());
-  gamesBtn.addEventListener("click", e => { e.stopPropagation(); if (gamesMenu.hidden || gamesMenu.classList.contains("fade")) openGames(); else closeGames(); });
+  gamesBtn.addEventListener("click", e => { e.stopPropagation(); if (BM.on) { closeGames(); exitBunny(); return; } if (gamesMenu.hidden || gamesMenu.classList.contains("fade")) openGames(); else closeGames(); });
   gamesMenu.addEventListener("pointerdown", e => e.stopPropagation());
 
   // ---------- loop ----------
