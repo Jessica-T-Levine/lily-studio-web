@@ -3816,10 +3816,40 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   }
 
   // her glow while she hides (it shines through leaves, so you can always find your way to her)
+  // Whoever is being hunted glows big and gold (her while you look for her, you while she looks for you).
+  // Your friend ALWAYS glows, so you can tell her from every other bunny: when she is the chaser (or between rounds) it is a softer pink-white glow.
   function drawTagGlow() {
-    if (!TG.on || !TG.f || !(TG.phase === "count" || TG.phase === "seek" || TG.phase === "flee")) return;
-    // whoever is being hunted glows: her while you look for her, you while she looks for you
-    const f = TG.role === "seek" ? TG.f : { x: bun.x, y: bun.y, z: bun.z, size: BM.N ? BM.N.size : 4 }, p = proj(f.x, f.y, f.z + 16 * f.size);
+    if (!TG.on || !TG.f || TG.phase === "off" || TG.phase === "over") return;
+    const you = { x: bun.x, y: bun.y, z: bun.z, size: BM.N ? BM.N.size : 4 };
+    if (TG.phase === "count" || TG.phase === "seek" || TG.phase === "flee") {
+      if (TG.role === "seek") tgGlowFull(TG.f);
+      else { tgGlowSoft(TG.f); tgGlowFull(you); }
+    } else tgGlowSoft(TG.f);
+  }
+  function tgGlowSoft(f) {
+    const p = proj(f.x, f.y, f.z + 16 * f.size);
+    if (!p || p.f < 30) return;
+    const pulse = reduceMotion ? 0.6 : 0.5 + 0.5 * Math.sin(time * 2.6), a = 0.85 + pulse * 0.15, r = Math.max(50, (36 * f.size + 66) * p.k + 26);
+    ctx.save();
+    const g0 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+    g0.addColorStop(0, `rgba(255, 236, 248, ${0.7 * a})`); g0.addColorStop(0.55, `rgba(255, 150, 206, ${0.4 * a})`); g0.addColorStop(1, "rgba(255, 170, 214, 0)");
+    ctx.fillStyle = g0; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 0.7);
+    g.addColorStop(0, `rgba(255, 240, 250, ${0.6 * a})`); g.addColorStop(1, "rgba(255, 190, 230, 0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r * 0.7, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    if (!reduceMotion) {   // two little pink-white twinkles
+      ctx.save(); ctx.fillStyle = `rgba(255, 246, 252, ${0.9 * a})`;
+      for (let i = 0; i < 2; i++) {
+        const an = time * 0.8 + i * Math.PI, rr = r * (0.5 + 0.15 * Math.sin(time * 1.5 + i)), x = p.x + Math.cos(an) * rr, y = p.y + Math.sin(an) * rr * 0.7 - r * 0.15, sz = Math.max(2.2, r * 0.08) * (0.6 + 0.4 * Math.sin(time * 3.6 + i * 2));
+        ctx.beginPath(); ctx.moveTo(x, y - sz); ctx.lineTo(x + sz * 0.3, y - sz * 0.3); ctx.lineTo(x + sz, y); ctx.lineTo(x + sz * 0.3, y + sz * 0.3); ctx.lineTo(x, y + sz); ctx.lineTo(x - sz * 0.3, y + sz * 0.3); ctx.lineTo(x - sz, y); ctx.lineTo(x - sz * 0.3, y - sz * 0.3); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  function tgGlowFull(f) {
+    const p = proj(f.x, f.y, f.z + 16 * f.size);
     if (!p || p.f < 30) return;
     const pulse = reduceMotion ? 0.6 : 0.5 + 0.5 * Math.sin(time * 3.2), a = clamp(0.6 + pulse * 0.2 + TG.help * 0.2, 0, 1) * (TG.phase === "count" && TG.role === "seek" ? clamp(1 - TG.cnt * 0.15, 0.4, 1) : 1);
     const r = Math.max(46, (34 * f.size + 70) * p.k + 26);
@@ -7143,6 +7173,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     tg: () => ({ on: TG.on, phase: TG.phase, role: TG.role, goShown: !tagGo.hidden, score: TG.score, catches: TG.catches, left: TG.left, cnt: TG.cnt, mode: TG.mode, seekT: TG.seekT, turbo: TG.turbo, hide: TG.hide && { x: TG.hide.x, y: TG.hide.y, s: !!TG.hide.S, S: TG.hide.S && { x: TG.hide.S.x, y: TG.hide.S.y, r: TG.hide.S.r, tree: !!TG.hide.S.tree } },
       f: TG.f && { x: TG.f.x, y: TG.f.y, size: TG.f.size, state: TG.f.state }, you: { x: bun.x, y: bun.y, h: bun.heading }, tummy: bmTummy, cardShown: !tagCard.hidden }),
     tgStart: i => { const l = ANIMALS.filter(a => a.kind === "bunny" && !a.neenee && a.alpha > 0.9); const f = l[i || 0]; if (!f) return false; f.x = bun.x + 400 * Math.cos(bun.heading + 0.4); f.y = bun.y + 400 * Math.sin(bun.heading + 0.4); tgStart(f); return true; },
+    tgScreen: () => { const f = TG.f, q = f && proj(f.x, f.y, f.z + 16 * f.size); return q ? { x: q.x, y: q.y, k: q.k } : null; },
     tgSet: o => { Object.assign(TG, o); }, tgStop: () => tgStop(), bunnyTap: () => { const fh = tgFriendHit({ sx: W / 2, sy: H / 2 }); return !!fh; },
     solids: (x, y, r) => solidsNear(x, y, r), step: (n, dt) => { for (let i = 0; i < n; i++) update(dt || 0.05); },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
