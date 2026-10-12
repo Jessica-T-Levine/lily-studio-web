@@ -2160,6 +2160,9 @@
     if (time - flagTexT[i] > 0.12 || flagTexT[i] < 0) { window.LilyFlag.paint(flagTex[i], time, back); flagTexT[i] = time; }   // the sparkles twinkle a few times a second
     return flagTex[i];
   }
+  // v40: on a phone the bunnies are drawn a little less finely when they are close up (about 9 instead of 14 screen
+  // pixels per bunny unit): roughly 40% less work for the biggest bunny, still sharp on a phone screen. Tablets and computers keep 14.
+  const bunnyDetail = () => (Math.min(window.innerWidth, window.innerHeight) < 700 ? 9 : 14);
   // ---------- v34: a little gold statue of Hop Hop on top of the pole (an homage to the frog who started it all) ----------
   // Hop Hop is drawn from the creature library, then turned to polished gold: his own shading is kept (so he
   // still looks round and 3D), his colors become warm gold, and a bright shine sits on top.
@@ -2168,7 +2171,7 @@
   function drawGoldFrog(x, y, s, yaw, pitch) {
     if (!LC || !LC.frog) return;
     let k = 1; try { const T = ctx.getTransform(); k = Math.hypot(T.a, T.b) || 1; } catch (_) {}
-    const step = Math.ceil(Math.log(Math.max(0.05, s * k)) / Math.log(1.1)), sk = Math.pow(1.1, step), sB = sk / k;
+    const step = Math.ceil(Math.log(Math.max(0.05, Math.min(s * k, 9.5))) / Math.log(1.1)), sk = Math.pow(1.1, step), sB = sk / k;   // v40: no finer than the frog's own drawing (about 9.5 px per unit), so a close-up statue never builds a giant picture
     const L = 40, TOP = 64, BOT = 10, w = Math.max(2, Math.ceil(2 * L * sk)), h = Math.max(2, Math.ceil((TOP + BOT) * sk));
     const key = [step, Math.round(yaw * 24), Math.round(pitch * 30), nightness() > 0.5 ? 1 : 0].join(",");
     if (!goldFrog.pic) { goldFrog.pic = document.createElement("canvas"); goldFrog.src = document.createElement("canvas"); }
@@ -6755,7 +6758,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
           groundShadow(a.x, a.y, 12 * a.size * a.sx * (1 - clamp(a.z / (30 * a.size), 0, 0.4)));
           const S = a.size * p.k, yaw = angDiff(a.heading, camYaw), pitch = Math.atan2(Math.max(10, camH - a.z), p.f);
           ctx.translate(p.x, p.y); ctx.scale(a.sx, 1); ctx.translate(-p.x, -p.y);   // chubbier or slimmer
-          if (LC) { const mo = LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(bunnyPose(a), { pal: a.pal, ears: a.ears || undefined })); if (a.player) BM.mouth = mo; }
+          if (LC) { const mo = LC.bunny.draw(ctx, p.x, p.y, S, yaw, pitch, Object.assign(bunnyPose(a), { pal: a.pal, ears: a.ears || undefined, maxDetail: bunnyDetail() })); if (a.player) BM.mouth = mo; }
           else drawBunny(p.x, p.y, S, screenDir(Math.cos(a.heading), Math.sin(a.heading)), a.z);
           ctx.restore();
           residentHits.push({ kind: a.neenee ? "neenee" : "bunny", ref: a, x: p.x, y: p.y - 14 * S, r: Math.max(22, 16 * S * a.sx), top: p.y - 36 * S, f: p.f });

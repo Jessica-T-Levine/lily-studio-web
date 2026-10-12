@@ -1014,7 +1014,7 @@ void main(){
     const blink = pose.blink != null ? pose.blink < 0 : (((t + ph) % 3.9 + 3.9) % 3.9 < 0.13);
     const closed = o.flop > 0.5 || o.groom > 0.5;
     let k = 1; try { const T = c.getTransform(); k = Math.hypot(T.a, T.b) || 1; } catch (_) {}
-    const S = Math.min(s * k, 14);   // detail cap (pixels per bunny unit) so big screens stay smooth
+    const S = Math.min(s * k, pose.maxDetail || 14);   // detail cap (pixels per bunny unit) so big screens stay smooth; a game can ask for less on phones (pose.maxDetail)
     const L = 30, TOP = 50, BOT = 6;
     const W = Math.max(2, Math.ceil(2 * L * S)), H = Math.max(2, Math.ceil((TOP + BOT) * S));
     if (W > 4096 || H > 4096) return false;
@@ -1687,6 +1687,7 @@ void main(){
   //   roll       a little side-to-side wiggle (radians)
   //   blink      leave out to let the library blink her; a number below 0 means eyes shut
   //   shadow     true draws her shadow on the ground at (x, y)
+  //   maxDetail  most real screen pixels per bunny unit (default 14). Phones can pass a lower number (about 9) to stay smooth.
   //   pal        v4: a friend color name ("ours", "caramel", "gray", "cocoa", "spotted", "oreo", "pink",
   //              "lavender", "mint") or a color set like those. Leave out for Nee Nee.
   //   ears       v4: { left, right, len } for bunny friends. left / right: "up" (like Nee Nee), "bent" (the top
