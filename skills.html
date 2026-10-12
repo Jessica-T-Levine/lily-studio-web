@@ -18,8 +18,20 @@
   <meta property="og:image:alt" content="The Lily Studio: Useful things, made beautifully.">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://thelilystudio.com/skills.html">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Fonts are hosted on our own site (faster, no third-party stop-and-wait). The two headline/body fonts load first. -->
+  <link rel="preload" href="/fonts/playfair-display-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/montserrat-latin-var.woff2" as="font" type="font/woff2" crossorigin>
   <style>
+    /* ---- Self-hosted fonts (latin) + size-matched backups so the page never jumps when a font arrives ---- */
+    @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/playfair-display-latin-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Playfair Display'; font-style: italic; font-weight: 600; font-display: swap; src: url('/fonts/playfair-display-latin-600-italic.woff2') format('woff2'); }
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('/fonts/montserrat-latin-var.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/jetbrains-mono-latin-400.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/jetbrains-mono-latin-500.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/jetbrains-mono-latin-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Playfair Fallback'; src: local('Georgia'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
+    @font-face { font-family: 'Playfair Fallback'; font-style: italic; src: local('Georgia Italic'), local('Georgia-Italic'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
+    @font-face { font-family: 'Montserrat Fallback'; src: local('Arial'); size-adjust: 112.8%; ascent-override: 85.8%; descent-override: 22.3%; line-gap-override: 0%; }
     :root {
       --navy: #0B1E3F;
       --navy-deep: #06122A;
@@ -40,8 +52,8 @@
       --gray-light: #CCCFD4;
       --gray-mid: #233554;
       --gray-warm: #A2A9B6;
-      --font-serif: 'Playfair Display', serif;
-      --font-display: 'Montserrat', sans-serif;
+      --font-serif: 'Playfair Display', 'Playfair Fallback', Georgia, serif;
+      --font-display: 'Montserrat', 'Montserrat Fallback', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }

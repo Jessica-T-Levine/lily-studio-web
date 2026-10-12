@@ -1,6 +1,6 @@
 // Lily's Buzz Buzz — offline support.
 // Change VERSION whenever you upload a new version of the game so players get the update.
-const VERSION = "buzzbuzz-page-v12";
+const VERSION = "buzzbuzz-page-v13";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "/playhouse/lily-halloween-v2.js", "/lily-home-sky-v1.js", "/lily-sky-v1.js"];
 
 self.addEventListener("install", event => {

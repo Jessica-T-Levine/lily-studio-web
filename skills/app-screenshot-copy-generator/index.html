@@ -18,11 +18,23 @@
   <meta property="og:image:alt" content="App Screenshot Copy Generator: Your App Store screenshots are your most valuable marketing real estate.">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://thelilystudio.com/skills/app-screenshot-copy-generator/">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Fonts are hosted on our own site (faster, no third-party stop-and-wait). The two headline/body fonts load first. -->
+  <link rel="preload" href="/fonts/playfair-display-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/montserrat-latin-var.woff2" as="font" type="font/woff2" crossorigin>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Product", "name": "App Screenshot Copy Generator", "description": "Writes compelling App Store screenshot captions and overlay text that convert browsers into downloads. A Claude AI skill by The Lily Studio.", "image": ["https://thelilystudio.com/skills/app-screenshot-copy-generator/product.webp", "https://thelilystudio.com/skills/app-screenshot-copy-generator/share.png"], "sku": "app-screenshot-copy-generator", "category": "Claude AI skills > Developer", "brand": {"@type": "Brand", "name": "The Lily Studio"}, "offers": {"@type": "Offer", "url": "https://thelilystudio.com/skills/app-screenshot-copy-generator/", "price": "5.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "The Lily Studio", "url": "https://thelilystudio.com/"}}}</script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thelilystudio.com/"}, {"@type": "ListItem", "position": 2, "name": "Skills", "item": "https://thelilystudio.com/skills.html"}, {"@type": "ListItem", "position": 3, "name": "App Screenshot Copy Generator", "item": "https://thelilystudio.com/skills/app-screenshot-copy-generator/"}]}</script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Do I need a paid Claude plan?", "acceptedAnswer": {"@type": "Answer", "text": "No. Skills work on every Claude plan, so you don’t need to upgrade. You just need Code execution turned on in Settings → Capabilities. On a Team or Enterprise plan, your admin turns it on."}}, {"@type": "Question", "name": "Is it good for beginners?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. No tech skills needed. The skill comes with a step-by-step install guide and sample prompts, and you talk to Claude in plain English."}}, {"@type": "Question", "name": "Can I use it on my phone or tablet?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. You add the skill once on claude.ai or in the Claude desktop app. After that it’s part of your Claude account and ready in your chats, including on your phone or tablet."}}, {"@type": "Question", "name": "How do I get my files?", "acceptedAnswer": {"@type": "Answer", "text": "Your download is ready right after checkout, and the store emails you the link too."}}]}</script>
   <style>
+    /* ---- Self-hosted fonts (latin) + size-matched backups so the page never jumps when a font arrives ---- */
+    @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/playfair-display-latin-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Playfair Display'; font-style: italic; font-weight: 600; font-display: swap; src: url('/fonts/playfair-display-latin-600-italic.woff2') format('woff2'); }
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('/fonts/montserrat-latin-var.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/jetbrains-mono-latin-400.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/jetbrains-mono-latin-500.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/jetbrains-mono-latin-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Playfair Fallback'; src: local('Georgia'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
+    @font-face { font-family: 'Playfair Fallback'; font-style: italic; src: local('Georgia Italic'), local('Georgia-Italic'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
+    @font-face { font-family: 'Montserrat Fallback'; src: local('Arial'); size-adjust: 112.8%; ascent-override: 85.8%; descent-override: 22.3%; line-gap-override: 0%; }
     :root {
       --navy: #0B1E3F;
       --navy-deep: #06122A;
@@ -43,8 +55,8 @@
       --gray-light: #CCCFD4;
       --gray-mid: #233554;
       --gray-warm: #A2A9B6;
-      --font-serif: 'Playfair Display', serif;
-      --font-display: 'Montserrat', sans-serif;
+      --font-serif: 'Playfair Display', 'Playfair Fallback', Georgia, serif;
+      --font-display: 'Montserrat', 'Montserrat Fallback', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
