@@ -1,9 +1,7 @@
 // Lily's Buzz Buzz — offline support.
 // Change VERSION whenever you upload a new version of the game so players get the update.
-const VERSION = "buzzbuzz-page-v11";
-// the page and its icons, plus the shared Lily's Playhouse files it uses (creatures, playhouse design, the hive)
-const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
-  "/playhouse/lily-creatures-v4.js", "/playhouse/lily-playhouse-design.js", "/playhouse/lily-bee-home-v1.js", "/playhouse/lily-halloween-v2.js", "/lily-home-sky-v1.js", "/lily-sky-v1.js"];
+const VERSION = "buzzbuzz-page-v12";
+const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "/playhouse/lily-halloween-v2.js", "/lily-home-sky-v1.js", "/lily-sky-v1.js"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
@@ -39,6 +37,6 @@ self.addEventListener("fetch", event => {
     fetch(req).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
       return res;
-    }).catch(() => caches.match(req).then(hit => hit || (req.mode === "navigate" ? caches.match("index.html") : Response.error())))
+    }).catch(() => caches.match(req).then(hit => hit || caches.match("index.html")))
   );
 });

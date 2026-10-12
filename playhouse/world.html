@@ -79,18 +79,30 @@
   .pbar i { display: block; height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg, #FFE27A, #FFC921); transition: width 0.35s ease; }
   .pollen.full .pbar { box-shadow: 0 0 10px rgba(255, 230, 120, 0.95); }
   .pollen.full b { color: #FFF371; }
+  /* playing as Buzz Buzz: the pollen meter, the score and the way home to the hive (all hidden the rest of the time) */
+  .bz-only { display: none; }
+  body.playing-bee .bz-only { display: block; }
+  body.playing-bee .clock { display: none; }
+  body.playing-bee .hud { display: flex !important; }   /* the world hides its corner clock; the bee game shows only numbers (no words) */
+  .bz-ico { width: 28px; height: 28px; vertical-align: -4px; margin-right: 6px; filter: drop-shadow(0 2px 0 rgba(120, 80, 0, 0.3)); }
+  .score.bz-only { font-size: 34px; }
+  .hud .pollen { margin-top: 54px; }
+  body.playing-bee .score.bz-only { margin-top: 48px; }
+  html.in-frame body.playing-bee .score.bz-only { margin-top: 94px; }   /* the site's logo hangs over the top-left corner, so sit below the back button */
   .hivebtn {
-    position: absolute; top: 92px; right: 14px; display: flex; align-items: center; gap: 8px;
+    position: absolute; top: 146px; right: 14px; display: flex; align-items: center; gap: 8px;
     padding: 10px 16px 10px 12px; border: 0; border-radius: 999px; cursor: pointer;
     font: 800 14px/1 var(--body); color: #5A3B00; background: #FFC921;
     box-shadow: 0 5px 14px rgba(120, 80, 0, 0.3), inset 0 -3px 0 rgba(160, 100, 0, 0.25);
-    animation: hivePulse 1.5s ease-in-out infinite; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
+  .hivebtn:not(.full) { background: rgba(255, 236, 170, 0.92); box-shadow: 0 4px 10px rgba(120, 80, 0, 0.2), inset 0 -3px 0 rgba(160, 100, 0, 0.15); }
+  .hivebtn.full { animation: hivePulse 1.5s ease-in-out infinite; }   /* always there; it pulses when her pollen is full */
   .hivebtn svg { width: 22px; height: 22px; }
   .hivebtn[hidden] { display: none; }
   .hivebtn:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
   @keyframes hivePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-  @media (prefers-reduced-motion: reduce) { .hivebtn { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .hivebtn, .hivebtn.full { animation: none; } }
   .pollen b { display: block; font: 800 22px/1 var(--display); letter-spacing: 0; font-variant-numeric: tabular-nums; color: #FFF1B8; text-shadow: 0 2px 0 rgba(160, 100, 20, 0.35); }
   .keyhint {
     position: absolute; left: 16px; right: 16px; bottom: 118px; margin: 0 auto; width: fit-content;
@@ -274,7 +286,8 @@
     </div>
     <div class="hud">
       <div class="score clock"><span id="clockTime">&nbsp;</span><small id="clockPart">where you are</small></div>
-      <div hidden><span id="score">0</span><div id="pollenBox"><span id="pollenLabel"></span><b id="pollen"></b><i id="pollenBar"></i></div></div>
+      <div class="score bz-only" role="status" aria-label="Pollen delivered to the hive"><svg class="bz-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-3.3 0-6 2.4-6 5.4V9h12v-.6C18 5.4 15.3 3 12 3z" fill="#E5A23A"/><rect x="4.5" y="9" width="15" height="4" rx="2" fill="#F2C46B"/><rect x="3.5" y="13" width="17" height="4.2" rx="2.1" fill="#E5A23A"/><rect x="4.5" y="17.2" width="15" height="3.8" rx="1.9" fill="#F2C46B"/><path d="M10 21v-2.2a2 2 0 0 1 4 0V21z" fill="#5A3A1E"/></svg><span id="score">0</span></div>
+      <div class="pollen bz-only" id="pollenBox" aria-label="Pollen she is carrying"><span id="pollenLabel" class="sr"></span><b id="pollen">0/10</b><span class="pbar" aria-hidden="true"><i id="pollenBar"></i></span></div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="gopop" id="goPop" hidden>
@@ -290,7 +303,7 @@
         <button class="pbtn small" type="button" id="aroundBtn" aria-label="Turn around"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5h7a5.25 5.25 0 0 1 0 10.5H7"/><path d="M10.5 4l-3.5 3.5 3.5 3.5"/></svg></button>
         <button class="pbtn" type="button" data-turn="right" aria-label="Turn right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
-      <button class="pbtn hop" type="button" id="hopBtn" aria-label="Hold to wind up, let go to glide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg>go</button>
+      <button class="pbtn hop" type="button" id="hopBtn" aria-label="Hold to wind up, let go to hop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg>go</button>
     </div>
     <div class="keyhint" id="keyHint" aria-hidden="true">Click the game to play with your keyboard</div>
   </div>
@@ -385,9 +398,12 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
   };
   // pollen fills up with every bloom; at 10 she can fly it to the hive. The score is how many hive trips she's made.
+  // Buzz Buzz play mode (the bee game, inside the shared world): when on, you are the bee, hopping flower to flower
+  const BZ = { on: false, fromPage: false, B: null };
   const POLLEN_FULL = 10;
   let pollenFill = Math.min(POLLEN_FULL, Math.max(0, parseInt(store.get("bee-pollen-fill", "0"), 10) || 0));
   let trips = Math.max(0, parseInt(store.get("bee-hive-trips", "0"), 10) || 0);
+  let delivered = Math.max(0, parseInt(store.get("bee-pollen-delivered", String(trips * POLLEN_FULL)), 10) || 0);   // the score: all the pollen she has delivered
   let trip = null;   // the hive trip animation while it's playing
   const pollenBox = document.getElementById("pollenBox"), pollenLabel = document.getElementById("pollenLabel");
   const pollenBar = document.getElementById("pollenBar"), hiveBtn = document.getElementById("hiveBtn");
@@ -397,8 +413,10 @@
     pollenBar.style.width = (pollenFill / POLLEN_FULL * 100) + "%";
     pollenBox.classList.toggle("full", full);
     pollenLabel.textContent = full ? "pollen full!" : "pollen";
-    hiveBtn.hidden = !full || !!trip;
-    scoreEl.textContent = trips;
+    hiveBtn.hidden = !BZ.on || !!trip;
+    hiveBtn.classList.toggle("full", full);
+    hiveBtn.setAttribute("aria-label", full ? "Pollen full. Fly to the hive to drop it off" : pollenFill > 0 ? "Fly home to the hive with " + pollenFill + " pollen" : "Fly home to the hive and dance with friends");
+    scoreEl.textContent = delivered;
   }
   renderPollen();
 
@@ -497,6 +515,7 @@
       tone("sine", f * 2, f * 2, 0.3, 0.04, 0.04);
     },
     yay() { [784, 988, 1175, 1568].forEach((f, i) => tone("triangle", f, f, 0.18, 0.07, i * 0.08)); },
+    danceNote(i) { const tune = [523, 659, 784, 659, 587, 698, 880, 698, 659, 784, 988, 784]; const f = tune[i % tune.length]; tone("triangle", f, f, 0.16, 0.06); },
     pollen() { [659, 784, 988, 1319, 1568].forEach((f, i) => tone("triangle", f, f, 0.24, 0.08, i * 0.09)); tone("sine", 392, 392, 0.8, 0.05, 0.1); },
     boop() { tone("sine", 700, 1000, 0.08, 0.06); },
     lick() { tone("sine", 900, 1500, 0.07, 0.06); },
@@ -529,7 +548,7 @@
   // Two warm tones a hair apart make a slow wobble; a soft "wave" swells the volume in and out,
   // and a slow drift bends the pitch up and down a little.
   function startBuzz() {
-    return;   // no player bee, so no hum that follows the camera
+    if (!BZ.on) return;   // the hum only follows the camera while you are Buzz Buzz
     if (!actx || buzz) return;
     const o1 = actx.createOscillator(), o2 = actx.createOscillator();
     o1.type = "sawtooth"; o2.type = "triangle";
@@ -653,7 +672,8 @@
   const DOOR = { x: HOUSE.x, y: HOUSE.y + HOUSE.d / 2 };   // the front door (it faces you when you arrive)
   // The beehive from the bee game (the same straw skep), sitting on a branch of its own big tree.
   const HIVE_TREE_AT = spreadOut(-60, -150);
-  let HIVE_PT = null, HIVE_BRANCH = null;
+  let HIVE_PT = null, HIVE_BRANCH = null, HIVE_TREE = null;
+  const HIVE_CHUNK = { cx: -1, cy: -1 };   // the chunk the hive tree grows in
   const insideHouse = (x, y, pad) => Math.abs(x - HOUSE.x) < HOUSE.w / 2 + pad && Math.abs(y - HOUSE.y) < HOUSE.d / 2 + pad;
   const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88 * 2.3, ry: 62 * 2.3 });   // v25: bigger (v30: bigger again, for bigger lily pads)
   // v21: big ponds that are always there: one on each side of the start, and two huge ones farther out
@@ -1158,7 +1178,9 @@
     // the hive sits on the branch that reaches most toward the start, so you can see it
     const score = b => Math.sin(b.ang) + 0.3 * Math.cos(b.ang) - b.z0 / 250;   // toward the start, and low enough to see
     HIVE_BRANCH = t.branches.reduce((best, b) => (score(b) > score(best) ? b : best), t.branches[0]);
+    HIVE_BRANCH.hive = true;   // (the hive sits on this one, so she never lands on it)
     HIVE_PT = branchPt(HIVE_BRANCH, 0.58, HIVE_BRANCH.thick * 0.4);
+    HIVE_TREE = t;
     ch.trees.push(t);
   }
   // Hop Hop himself lives on the home pond (full size), with no turtles to crowd him.
@@ -1427,7 +1449,7 @@
   function branchNear(x, y, exclude) {
     let best = null, bd = Infinity;
     chunksAround(x, y, 260).forEach(ch => ch.trees.forEach(t => t.branches && t.branches.forEach(b => {
-      if (b === exclude) return;
+      if (b === exclude || b.hive) return;
       const pp = perchOf(b), d = Math.hypot(pp.x - x, pp.y - y);
       if (d < 34 && d < bd) { bd = d; best = b; }
     })));
@@ -1444,6 +1466,7 @@
       ch.lavender.forEach(o => out.push({ kind: "lavender", o, x: o.x, y: o.y, z: o.h * 0.98 + 5, r: 18 }));
       ch.reeds.forEach(o => { if (o.cat) out.push({ kind: "cattail", o, x: o.x, y: o.y, z: o.h * 0.86 + 13, r: 18 }); });
       ch.clovers.forEach(o => out.push({ kind: "clover", o, x: o.x, y: o.y, z: o.s * 27.5, r: 14 }));
+      ch.bushes.forEach(o => out.push({ kind: "bush", o, x: o.x, y: o.y, z: o.bh * 0.72 + o.br * 0.55, r: o.br * 0.85 + 12 }));   // the tops of the round bushes
       ch.trees.forEach(o => out.push({ kind: "treetop", o, x: o.x, y: o.y, z: o.h + o.w * 2.2, r: o.w * 1.3 + 20 }));
       if (ch.pond && ch.pond.frogs) ch.pond.frogs.forEach(F => out.push({ kind: "frog", o: F, x: F.x, y: F.y, z: frogTop(F), r: 14 + 16 * F.size }));
       if (ch.cx === 0 && ch.cy === 0) out.push({ kind: "roof", o: HOUSE, x: HOUSE.x, y: HOUSE.y, z: HOUSE.roofZ + 4, r: 70 });
@@ -1453,7 +1476,7 @@
   }
   function planHop() {
     const d = MIN_HOP + charge * (MAX_HOP - MIN_HOP);
-    {
+    if (!BZ.on) {
       // Playhouse: you are the camera, so you glide to the spot at eye height
       const gx = bee.x + Math.cos(bee.aim) * d, gy = bee.y + Math.sin(bee.aim) * d;
       return { x1: gx, y1: gy, z1: EYE_Z, f: null, shroom: null, branch: null, perch: null, kind: "glide", dist: d, peak: d * 0.06 };
@@ -1486,6 +1509,8 @@
       });
       if (perch) { x1 = perch.x; y1 = perch.y; z1 = perch.z; kind = "perch"; }
     }
+    // the playhouse is solid: a hop that would end inside it lands on its roof instead
+    if (BZ.on && (kind === "grass" || kind === "water") && insideHouse(x1, y1, 12)) { x1 = HOUSE.x; y1 = HOUSE.y; z1 = HOUSE.roofZ + 4; kind = "perch"; perch = { kind: "roof", o: HOUSE, x: x1, y: y1, z: z1, r: 70 }; }
     const dist = Math.hypot(x1 - bee.x, y1 - bee.y);
     return { x1, y1, z1, f, shroom, branch, perch, kind, dist, peak: 40 + dist * 0.22 };
   }
@@ -1544,7 +1569,7 @@
   // around her flower, does a waggly bee dance, and friends drop by to say hi. All of it is a
   // small offset from her real spot, so the moment you touch or press a key she zips straight back.
   const EYE_Z = 101;            // the camera travels at the bee game's starting eye height
-  const IDLE_AFTER = 1e9;       // no idle bee tricks: there is no player bee here                        // seconds of quiet before she starts
+  let IDLE_AFTER = 1e9;       // no idle bee tricks: there is no player bee here                        // seconds of quiet before she starts
   let lastInputAt = 0;
   const idle = { act: null, t: 0, dur: 0, next: 1.5, off: { x: 0, y: 0, z: 0 }, flying: false, face: 0, lastFriend: -99, said: false };
   function wakeUp() {
@@ -1763,6 +1788,8 @@
   // Height above the meadow: 0 is the bee game's eye level, LIFT_MIN is right down in the grass,
   // LIFT_MAX is high in the sky looking down over everything.
   const LIFT_MIN = -60, LIFT_MAX = 640, TIP_SCALE = 1500;   // top height: the horizon stays in view (about an eighth of the way down)
+  let camLift = 0;   // how far the camera rises above her while she flies home (so you see the world)
+  let cutFade = 0;   // the soft flash when a flight home is skipped
   let lift = 0, liftTarget = 0;
   function raise(d) { liftTarget = clamp(liftTarget + d, LIFT_MIN, LIFT_MAX); lastUserAt = time; hidePop(); }
   function updateMover(dt) {
@@ -1913,11 +1940,11 @@
   const goPop = document.getElementById("goPop"), goLink = document.getElementById("goLink");
   goLink.target = framed ? "_top" : "_self"; goLink.rel = "noopener";
   let lastTap = null, popTimer = 0;
-  function openPage(url) { hidePop(); if (url === PAGES.neenee) { enterBunny(); return; }   // Nee Nee: you play her right here
+  function openPage(url) { hidePop(); if (url === PAGES.neenee) { enterBunny(); return; } if (url === PAGES.bee) { enterBee(); return; }   // Nee Nee: you play her right here
     if (framed) { try { window.top.location.href = url; } catch (_) { window.open(url, "_blank", "noopener"); } } else location.href = url; }
   // The popup shows while the mouse is on a frog ("hover"), or after a tap on a touch screen ("tap").
   // It rides along above him as he moves.
-  const PAGE_ASK = { frog: "Play Hop Hop?", neenee: "Play with Nee Nee?", bee: "Wanna Make Honey?" };
+  const PAGE_ASK = { frog: "Play Hop Hop?", neenee: "Play with Nee Nee?", bee: "Play with Buzz Buzz?", hive: "Wanna Make Honey?" };
   // v38: which page a tap asks about. Any frog -> Lily's Hop Hop. A yellow bee (Buzz Buzz's own color)
   // or the beehive -> Lily's Buzz Buzz. Bees in other colors just get happy.
   const isYellowBee = a => !!a && (a.pal == null || a.pal === 0 || a.pal === "ours");
@@ -1926,7 +1953,7 @@
     if (BM.on && h.kind === "bunny") return TG.on ? null : { key: "tag", url: "#tag", ask: "Play tag?" };   // playing as Nee Nee: a bunny friend asks about tag
     if (h.kind === "frog" && h.ref && h.ref.pal && h.ref.pal !== "ours") return null;   // only the original Hop Hop has the popup; his friends just say hello
     const key = h.kind === "frog" ? "frog" : h.kind === "neenee" ? "neenee" : (h.kind === "hive" || (h.kind === "bee" && isYellowBee(h.ref))) ? "bee" : null;
-    return key && PAGES[key] ? { key, url: PAGES[key], ask: PAGE_ASK[key] } : null;
+    return key && PAGES[key] ? { key, url: PAGES[key], ask: h.kind === "hive" ? PAGE_ASK.hive : PAGE_ASK[key] } : null;
   }
   let popFor = null, popMode = null, overPop = false, hoverOff = 0;
   let popFade = 0;
@@ -1964,7 +1991,7 @@
     else if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop && popMode === "hover") hidePop(); }, 350); }
   });
   canvas.addEventListener("pointerleave", () => { canvas.classList.remove("can-tap"); if (popMode === "hover") { clearTimeout(hoverOff); hoverOff = setTimeout(() => { if (!overPop) hidePop(); }, 350); } });
-  goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === "#tag") { e.preventDefault(); e.stopPropagation(); const who = popFor; hidePop(); if (who && BM.on) tgStart(who); return; } if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
+  goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === "#tag") { e.preventDefault(); e.stopPropagation(); const who = popFor; hidePop(); if (who && BM.on) tgStart(who); return; } if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (goLink.getAttribute("href") === PAGES.bee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBee(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
   function visit(h) {
     lastUserAt = time;
     const a = h.ref, now = performance.now();
@@ -2467,27 +2494,105 @@
     if (e.code && (e.code in TURN_KEYS || HOP_KEYS.includes(e.code))) return e.code;
     return KEY_NAMES[e.key] || KEY_CODES[e.keyCode] || e.code || "";
   }
-  // ---------- the hive trip: drop off a full load of pollen ----------
+  // ---------- fly home to the hive, from anywhere ----------
+  // The button is always there while you are Buzz Buzz. She flies for real across the world to the hive (the camera rises so
+  // you see where home is), then the 3D hive scene plays: with pollen she goes in and drops it all off;
+  // with none she lands on the step and dances with her friends. Afterward she stays at home on the hive tree.
+  let wantHome = false;   // pressed while she was mid-hop: she heads home the moment she lands
+  const homeFlying = () => !!trip && trip.phase === "fly";
+    function hiveDoorDir() { return HIVE_PT ? Math.atan2(START.y - HIVE_PT.y, START.x - HIVE_PT.x) : 0; }   // the door faces the meadow
+  function ensureHive() { if (!HIVE_PT) chunkAt(HIVE_CHUNK.cx, HIVE_CHUNK.cy); return !!HIVE_PT; }
   function startTrip() {
-    return;   // the playhouse has no hive trips (that stays in the bee game)
-    if (trip || pollenFill < POLLEN_FULL || bee.hop) return;
+    if (trip) return;
+    if (bee.hop) { wantHome = true; return; }
+    if (!ensureHive()) return;
+    wantHome = false;
     audio();
     charging = false; charge = 0; hopKey = null; keys.clear();
     wakeUp(); idle.off = { x: 0, y: 0, z: 0 }; idle.act = null; idle.flying = false; idle.face = 0;
     let a = Math.floor(Math.random() * FRIEND_COLORS.length), b = (a + 1 + Math.floor(Math.random() * (FRIEND_COLORS.length - 1))) % FRIEND_COLORS.length;
-    trip = { t: 0, pals: [FRIEND_COLORS[a], FRIEND_COLORS[b]], done: {} };
+    const dd = hiveDoorDir(), dx = Math.cos(dd), dy = Math.sin(dd);
+    const P2 = { x: HIVE_PT.x + dx * 170, y: HIVE_PT.y + dy * 170, z: HIVE_PT.z + 30 };
+    const P0 = { x: bee.x, y: bee.y, z: bee.z }, D = Math.hypot(P2.x - P0.x, P2.y - P0.y);
+    const reach = Math.min(D * 0.45, 520);
+    const fly = { t: 0, P0, P1: { x: P2.x + dx * reach, y: P2.y + dy * reach }, P2, D,
+      dur: clamp(1.3 + D / 650, 1.4, 7.5), cruise: clamp(D * 0.15, 30, 360), lift: clamp(D * 0.13, 0, 300) };
+    const load = pollenFill;
+    trip = { phase: "fly", fly, t: 0, mode: load > 0 ? "drop" : "dance", load, pals: [FRIEND_COLORS[a], FRIEND_COLORS[b]], done: {} };
+    bee.flower = null; bee.shroom = null; bee.branch = null; bee.perch = null; bee.floating = false;
     renderPollen();
     if (touchPad) touchPad.style.visibility = "hidden";
     sfx.hop();
+    popups.push({ x: bee.x, y: bee.y, z: bee.z + 80, text: load > 0 ? "home to the hive!" : "going home!", life: 1.3, big: false });
+  }
+    function ensureHive() { if (!HIVE_PT) chunkAt(HIVE_CHUNK.cx, HIVE_CHUNK.cy); return !!HIVE_PT; }
+  function startTrip() {
+    if (!BZ.on || trip) return;
+    if (bee.hop) { wantHome = true; return; }
+    if (!ensureHive()) return;
+    wantHome = false;
+    audio();
+    charging = false; charge = 0; hopKey = null; keys.clear();
+    wakeUp(); idle.off = { x: 0, y: 0, z: 0 }; idle.act = null; idle.flying = false; idle.face = 0;
+    let a = Math.floor(Math.random() * FRIEND_COLORS.length), b = (a + 1 + Math.floor(Math.random() * (FRIEND_COLORS.length - 1))) % FRIEND_COLORS.length;
+    const dd = hiveDoorDir(), dx = Math.cos(dd), dy = Math.sin(dd);
+    const P2 = { x: HIVE_PT.x + dx * 170, y: HIVE_PT.y + dy * 170, z: HIVE_PT.z + 30 };
+    const P0 = { x: bee.x, y: bee.y, z: bee.z }, D = Math.hypot(P2.x - P0.x, P2.y - P0.y);
+    const reach = Math.min(D * 0.45, 520);
+    const fly = { t: 0, P0, P1: { x: P2.x + dx * reach, y: P2.y + dy * reach }, P2, D,
+      dur: clamp(1.3 + D / 650, 1.4, 7.5), cruise: clamp(D * 0.15, 30, 360), lift: clamp(D * 0.13, 0, 300) };
+    const load = pollenFill;
+    trip = { phase: "fly", fly, t: 0, mode: load > 0 ? "drop" : "dance", load, pals: [FRIEND_COLORS[a], FRIEND_COLORS[b]], done: {} };
+    bee.flower = null; bee.shroom = null; bee.branch = null; bee.perch = null; bee.floating = false;
+    renderPollen();
+    if (touchPad) touchPad.style.visibility = "hidden";
+    sfx.hop();
+    popups.push({ x: bee.x, y: bee.y, z: bee.z + 80, text: load > 0 ? "home to the hive!" : "going home!", life: 1.3, big: false });
+  }
+  function updateHomeFlight(dt) {
+    const F = trip.fly;
+    F.t += dt;
+    const u0 = clamp(F.t / F.dur, 0, 1), u = u0 * u0 * (3 - 2 * u0), v = 1 - u;
+    const { P0, P1, P2 } = F;
+    bee.x = v * v * P0.x + 2 * v * u * P1.x + u * u * P2.x;
+    bee.y = v * v * P0.y + 2 * v * u * P1.y + u * u * P2.y;
+    bee.z = lerp(P0.z, P2.z, u) + F.cruise * Math.sin(Math.PI * u);
+    const tx = 2 * v * (P1.x - P0.x) + 2 * u * (P2.x - P1.x), ty = 2 * v * (P1.y - P0.y) + 2 * u * (P2.y - P1.y);
+    if (Math.hypot(tx, ty) > 1e-3) bee.aim = Math.atan2(ty, tx);
+    else bee.aim = hiveDoorDir() + Math.PI;
+    camYawTarget = bee.aim;
+    if (Math.random() < dt * 30) {   // pollen sparkles trail behind her
+      particles.push({ x: bee.x + rand(-4, 4), y: bee.y + rand(-4, 4), z: bee.z + 14 + rand(-4, 4), vx: 0, vy: 0, vz: 0, life: 0.8, c: "#FFE27A", r: rand(1.4, 2.4), kind: "dot" });
+    }
+    if (F.t >= F.dur + 0.35) {   // a little hover in front of the door, then the hive scene
+      trip.phase = "scene"; trip.t = 0;
+      sfx.friend();
+    }
+  }
+  function settleAtHome() {
+    const dd = hiveDoorDir(), spot = { x: HIVE_PT.x + Math.cos(dd) * 280, y: HIVE_PT.y + Math.sin(dd) * 280 };
+    let fl = null, bd = 140;
+    chunksAround(spot.x, spot.y, 200).forEach(ch => ch.flowers.forEach(f => { const d = Math.hypot(f.x - spot.x, f.y - spot.y); if (d < bd) { bd = d; fl = f; } }));
+    if (fl) { bee.flower = fl; bee.x = fl.x; bee.y = fl.y; bee.z = fl.h + 6; fl.bounceAt = time; }
+    else { bee.x = spot.x; bee.y = spot.y; bee.z = 0; }
+    camYaw = camYawTarget = bee.aim = Math.atan2(HIVE_PT.y - bee.y, HIVE_PT.x - bee.x);
+    camC = Math.cos(camYaw); camS = Math.sin(camYaw); camLift = 0;
+    camX = bee.x - camC * CAM_DIST; camY = bee.y - camS * CAM_DIST; camH = bee.z + CAM_UP;
+    bee.face = 1; bee.faceS = 1; bee.relYaw = Math.PI / 2 + 0.6;
+    bee.tuck = 0; bee.seat = 1; lastTurnAt = -99;
   }
   hiveBtn.addEventListener("click", e => { e.preventDefault(); startTrip(); try { canvas.focus({ preventScroll: true }); } catch (_) {} });
   hiveBtn.addEventListener("pointerdown", e => e.stopPropagation());
   document.addEventListener("keydown", e => {
-    return;   // Playhouse: you move only by clicking
-    if (trip) { if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Enter"].includes(e.key)) e.preventDefault(); return; }
+    if (!BZ.on) return;   // Playhouse: you move only by clicking (Buzz Buzz play mode turns the keys on)
+    if (trip) {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Enter"].includes(e.key)) e.preventDefault();
+      if (!e.repeat && [" ", "Enter", "Escape"].includes(e.key)) skipTrip();   // space, Enter or Esc ends the hive visit
+      return;
+    }
     const tagNow = document.activeElement && document.activeElement.tagName;
     if ((e.key === "Enter" || e.code === "KeyH") && tagNow !== "BUTTON" && tagNow !== "INPUT") {
-      if (pollenFill >= POLLEN_FULL) { e.preventDefault(); startTrip(); }
+      e.preventDefault(); startTrip();
       return;
     }
     const code = keyCodeOf(e);
@@ -2512,7 +2617,7 @@
   }, true);
   // ---------- on-screen buttons (phones and tablets): the same controls as the keyboard ----------
   const touchPad = document.getElementById("touchPad"), hopBtn = document.getElementById("hopBtn"), aroundBtn = document.getElementById("aroundBtn");
-  function showTouchPad() {}   // Playhouse: no on-screen buttons, just click where you want to go
+  function showTouchPad() { if (BZ.on && touchPad.hidden) touchPad.hidden = false; }   // Playhouse: no on-screen buttons; the bee game shows them
   if (!hasKeyboard) showTouchPad();
   function padPress(btn, e) {
     e.preventDefault(); e.stopPropagation();
@@ -2629,7 +2734,7 @@
   // v32: Nee Nee first (cream, both ears up), then friends of every size, including two very small ones
   [[40, 60, 4, 1, "ours", null], [-320, 260, 3.3, 0, "caramel"], [520, -420, 5, 0, "gray"], [-120, -560, 2.1, 0, "spotted"], [760, 150, 4, 0, "pink"], [-520, 420, 5.8, 0, "cocoa"], [640, 520, 1.9, 0, "lavender"]]
     .forEach(([x, y, s, sx, pal, ears], i) => { const q = spreadOut(x, y), b = newBunny(q.x, q.y, s, sx || 0, pal, ears); if (i === 0) b.neenee = true; ANIMALS.push(b); });   // v38: the first one is the real Nee Nee
-  { const b = newBee(START.x, START.y, 101, "ours", 1); b.sit = 7; b.sx = 1; ANIMALS.push(b); }   // on the flower right in front of you
+  { const b = newBee(START.x, START.y, 101, "ours", 1); b.sit = 7; b.sx = 1; b.buzz = true; ANIMALS.push(b); }   // the real Buzz Buzz: the one you play   // on the flower right in front of you
   [["pink", 250, 60, 170, 0.8], ["mint", 40, 150, 130, 0.8], ["lavender", 420, -300, 200, 1.2], ["blue", -200, -200, 150, 0.65],
    ["peach", 120, -700, 260, 1.05], ["strawberry", 600, -150, 120, 0.72], ["ours", -60, -900, 220, 1.3], ["mint", 700, -800, 180, 0.6], ["pink", -380, 120, 200, 1.75], ["blue", 330, 180, 140, 0.45]]
     .forEach(([pal, x, y, z, s]) => { const q = spreadOut(x, y); ANIMALS.push(newBee(q.x, q.y, z, pal, s)); });
@@ -2649,7 +2754,7 @@
     censusT -= dt; if (censusT > 0) return; censusT = 0.8;
     for (let i = ANIMALS.length - 1; i >= 0; i--) {
       const a = ANIMALS[i];
-      if (a.state !== "inside" && !a.neenee && !a.tag && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off (v38: never Nee Nee)
+      if (a.state !== "inside" && !a.neenee && !a.buzz && !a.tag && Math.hypot(a.x - bee.x, a.y - bee.y) > NEAR_R + 900) ANIMALS.splice(i, 1);   // wandered off (v38: never Nee Nee)
     }
     const near = k => ANIMALS.filter(a => a.kind === k && Math.hypot(a.x - bee.x, a.y - bee.y) < NEAR_R).length;
     if (near("bunny") < BUNNIES_NEAR) { const s = hiddenSpot(900, NEAR_R); if (s) ANIMALS.push(newBunny(s.x, s.y, pick(BUNNY_SIZES))); }
@@ -2996,6 +3101,19 @@
       setTimeout(sfx.yay, 160);
     }
     popups.push({ x: f.x, y: f.y, z: f.h + 70, text, life: 1, big });
+    if (BZ.on) {
+    if (pollenFill < POLLEN_FULL) {
+      pollenFill++; store.set("bee-pollen-fill", String(pollenFill)); renderPollen();
+      if (pollenFill === POLLEN_FULL) setTimeout(() => {
+        bee.wiggle = 1.4;
+        popups.push({ x: bee.x, y: bee.y, z: bee.z + 95, text: "pollen full!", life: 1.6, big: true });
+        burst(bee.x, bee.y, bee.z + 20, ["#FFC94D", "#FFE27A", "#FFF1B8", "#F2A93B"], 22, 190);
+        sfx.pollen();
+      }, 420);
+    } else if (Math.random() < 0.35) {
+      setTimeout(() => popups.push({ x: bee.x, y: bee.y, z: bee.z + 95, text: "off to the hive?", life: 1.3, big: false }), 380);
+    }
+    }
   }
 
   // ---------- landing ----------
@@ -3013,7 +3131,7 @@
     }));
   }
   function land(h) {
-    bee.z = EYE_Z; return;   // Playhouse: the camera simply arrives
+    if (!BZ.on) { bee.z = EYE_Z; return; }   // Playhouse: the camera simply arrives
     const f = h.f;
     bee.squash = 1;
     bee.floating = false;
@@ -3030,7 +3148,7 @@
       o.bounceAt = time;
       const say = {
         rock: ["warm stone!", "rocky!", "cozy rock!"], puff: ["whoosh!", "fluffy!", "wish wish!"], lavender: ["smells nice!", "lavender!", "so purple!"],
-        cattail: ["wobbly!", "cattail!", "fuzzy top!"], clover: ["lucky!", "clover!", "four leaves?"], treetop: ["what a view!", "treetop!", "so high!"],
+        cattail: ["wobbly!", "cattail!", "fuzzy top!"], bush: ["bushy!", "so soft!", "leafy!"], clover: ["lucky!", "clover!", "four leaves?"], treetop: ["what a view!", "treetop!", "so high!"],
         frog: [o.hophop ? "hi Hop Hop!" : "hi frog!", "ribbit!", "froggy ride!"], roof: ["rooftop!", "what a view!", "hi playhouse!"], turtle: ["turtle ride!", "hi turtle!", "slow and steady!"]
       }[c.kind];
       popups.push({ x: bee.x, y: bee.y, z: bee.z + 60, text: pick(say), life: 1, big: c.kind === "treetop" || c.kind === "frog" || c.kind === "turtle" });
@@ -3043,13 +3161,17 @@
         }
         sfx.dust(); bee.z = o.h + 5;
       } else if (c.kind === "frog") {
-        o.wiggle = 1.1; sfx.ribbit();
+        o.wiggle = 1.1; o.act = null; sfx.ribbit();
+        bee.happy = 1.4; bee.wiggle = Math.max(bee.wiggle, 1.2); bee.perchAt = time;   // they both do their happy
       } else if (c.kind === "turtle") {
         // she pokes her head out, then sets off with her passenger
         o.mode = "rest"; o.timer = rand(1, 2); o.nap = 0;
         sfx.boop();
       } else if (c.kind === "lavender" || c.kind === "clover") {
         burst(o.x, o.y, bee.z, c.kind === "lavender" ? ["#A98BE0", "#8F6BD4", "#E6DAFF"] : ["#FFFFFF", "#FFD0E2", "#DFF2D0"], 8, 80);
+        sfx.boop();
+      } else if (c.kind === "bush") {   // the bush rustles, and a few leaves and petals fly
+        for (let i = 0; i < 7; i++) particles.push({ x: bee.x + rand(-20, 20), y: bee.y + rand(-20, 20), z: bee.z - rand(0, 12), vx: rand(-25, 25), vy: rand(-25, 25), vz: rand(15, 45), life: 1.4, c: i % 3 === 0 && o.bl.length ? o.bcol : i % 2 ? "#82C77E" : "#66B56A", r: rand(2.5, 4), kind: "leaf", rot: rand(0, 6) });
         sfx.boop();
       } else if (c.kind === "treetop") {
         for (let i = 0; i < 5; i++) particles.push({ x: bee.x + rand(-30, 30), y: bee.y + rand(-30, 30), z: bee.z - rand(0, 20), vx: rand(-15, 15), vy: rand(-15, 15), vz: rand(5, 25), life: 1.6, c: i % 2 ? "#82C77E" : "#66B56A", r: rand(3, 4.5), kind: "leaf", rot: rand(0, 6) });
@@ -3570,6 +3692,83 @@
     if (code === bmHopKey) { bmHopKey = null; bmStopRun(); }
   }, true);
   window.addEventListener("blur", () => { if (!BM.on) return; keys.clear(); bmHopKey = null; bmPtr = null; bmStopRun(); });
+  // ---------- Buzz Buzz play mode: input (these run before the Playhouse's own, and only while you are the bee) ----------
+  // Press a flower (or anywhere): she turns to face it. Hold to wind up, let go to hop.
+  stage.addEventListener("pointerdown", e => {
+    if (!BZ.on || e.target !== canvas) return;
+    e.stopPropagation(); e.stopImmediatePropagation();
+    if (trip) { e.preventDefault(); skipTrip(); return; }   // a tap ends the hive visit
+    hidePop();
+    if (e.pointerType === "mouse" && hasKeyboard && !gameHasFocus()) grabKeys();
+    if (e.pointerType === "touch") showTouchPad();
+    wakeUp();
+    if (!mixerEl.hidden) { mixerEl.hidden = true; soundBtn.setAttribute("aria-expanded", "false"); }
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    try { window.focus(); canvas.focus({ preventScroll: true }); } catch (_) {}
+    if (activePointer !== null) return;
+    activePointer = e.pointerId;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    pointer = toGame(e);
+    audio();
+    aimFromScreen(pointer);
+    startCharge();
+  }, true);
+  stage.addEventListener("pointermove", e => {
+    if (!BZ.on || e.target !== canvas) return;
+    e.stopPropagation(); e.stopImmediatePropagation();
+    if (e.pointerId === activePointer) { pointer = toGame(e); aimFromScreen(pointer); }
+  }, true);
+  const bzEndPtr = e => {
+    if (!BZ.on) return;
+    if (e.target === canvas) { e.stopPropagation(); e.stopImmediatePropagation(); }
+    if (activePointer === null || e.pointerId !== activePointer) return;
+    activePointer = null; pointer = null;
+    releaseHop();
+  };
+  ["pointerup", "pointercancel"].forEach(t => stage.addEventListener(t, bzEndPtr, true));
+  stage.addEventListener("lostpointercapture", e => { if (BZ.on && e.pointerId === activePointer) bzEndPtr(e); }, true);
+  ["wheel", "gesturestart", "gesturechange", "gestureend"].forEach(t => stage.addEventListener(t, e => { if (BZ.on && e.target === canvas) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, { capture: true, passive: false }));
+  // starting and stopping
+  function enterBee() {
+    if (BZ.on) return;
+    if (BM.on) exitBunny();
+    hidePop(); audio(); lastTap = null;
+    const B = ANIMALS.find(a => a.buzz) || null;
+    BZ.on = true; BZ.B = B;
+    // she starts on the flower closest to where Buzz Buzz is sitting (or right where you are)
+    const sx = B ? B.x : bee.x, sy = B ? B.y : bee.y;
+    let fl = null, bd = 520;
+    chunksAround(sx, sy, 540).forEach(ch => ch.flowers.forEach(f => { const d = Math.hypot(f.x - sx, f.y - sy); if (d < bd) { bd = d; fl = f; } }));
+    if (B) { B.player = true; B.alpha = 0; B.sit = 0; B.state = null; B.toFlower = false; B.flower = null; }
+    if (fl) { bee.x = fl.x; bee.y = fl.y; bee.z = fl.h + 6; bee.flower = fl; } else { bee.x = sx; bee.y = sy; bee.z = 0; bee.flower = null; }
+    bee.hop = null; bee.shroom = bee.branch = bee.perch = null; bee.floating = false;
+    bee.aim = camYaw; camYawTarget = camYaw;
+    bee.face = 1; bee.faceS = 1; bee.relYaw = Math.PI / 2 + 0.6; bee.tuck = 0; bee.seat = 1;
+    move.target = null; move.vx = move.vy = 0; spin = 0; lift = liftTarget = 0; auto.on = false; lastUserAt = time;
+    camLift = 0; charging = false; charge = 0; hopKey = null; keys.clear(); trip = null; wantHome = false; pointer = null; activePointer = null;
+    hops = 0; streak = 0; IDLE_AFTER = 6; wakeUp(); idle.off = { x: 0, y: 0, z: 0 }; idle.act = null; idle.flying = false; idle.face = 0;
+    startBuzz();
+    document.body.classList.add("playing-bee");
+    bmBackBtn.hidden = false;
+    if (touchPad && !hasKeyboard) touchPad.hidden = false;
+    renderPollen();
+  }
+  function exitBee() {
+    if (!BZ.on) return;
+    trip = null; wantHome = false;
+    BZ.on = false; const B = BZ.B;
+    if (B) { B.player = false; B.x = bee.x; B.y = bee.y; B.z = bee.z; B.tx = bee.x; B.ty = bee.y; B.tz = bee.z; B.alpha = 1; B.state = null; B.flower = bee.flower || null; B.toFlower = false; B.sit = 8; B.timer = rand(1, 2); B.heading = bee.aim; }
+    charging = false; charge = 0; hopKey = null; keys.clear(); pointer = null; activePointer = null; bee.hop = null; camLift = 0;
+    bee.floating = false; bee.flower = bee.shroom = bee.branch = bee.perch = null; bee.z = EYE_Z;
+    IDLE_AFTER = 1e9; idle.off = { x: 0, y: 0, z: 0 }; idle.act = null; idle.flying = false; idle.face = 0;
+    try { if (buzz && actx) buzz.g.gain.setTargetAtTime(0, actx.currentTime, 0.1); } catch (_) {}
+    document.body.classList.remove("playing-bee");
+    bmBackBtn.hidden = true;
+    if (touchPad) touchPad.hidden = true;
+    renderPollen();
+    lastUserAt = time; sfx.friend();
+  }
   // the back button
   const bmBackBtn = document.createElement("button");
   bmBackBtn.type = "button"; bmBackBtn.id = "bmBack"; bmBackBtn.hidden = true; bmBackBtn.setAttribute("aria-label", "Back to the Playhouse");
@@ -3578,9 +3777,10 @@
   bmBackBtn.addEventListener("pointerdown", e => e.stopPropagation());
   // opened from Lily's Bun Nee Nee's own page (world.html?play=neenee): you start as her, and the back button goes to the Playhouse page
   BM.fromPage = /[?&]play=neenee\b/.test(location.search);
+  BZ.fromPage = /[?&]play=buzz\b/.test(location.search);   // opened from Lily's Buzz Buzz's own page: you start as her
   bmBackBtn.addEventListener("click", () => {
-    if (BM.fromPage) { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } return; }
-    exitBunny();
+    if (BM.fromPage || BZ.fromPage) { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } return; }
+    if (BZ.on) exitBee(); else exitBunny();
   });
 
   // ---------- Tag: Nee Nee and a bunny friend play tag ----------
@@ -4001,7 +4201,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       if (!h.paused && !h.back && Math.random() < dt * 26) {
         particles.push({ x: bee.x + rand(-4, 4), y: bee.y + rand(-4, 4), z: bee.z + 14 + rand(-4, 4), vx: 0, vy: 0, vz: 0, life: 0.8, c: "#FFE27A", r: rand(1.4, 2.4), kind: "dot" });
       }
-      if (h.t >= 1) { bee.hop = null; land(h); }
+      if (h.t >= 1) { bee.hop = null; land(h); if (wantHome) setTimeout(() => { if (!bee.hop && !trip) startTrip(); }, 350); }
     }
     // she turns (on screen) to face the way she's aiming
     const rel = Math.sin(angDiff(bee.aim, camYaw));
@@ -4021,7 +4221,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       const h = bee.hop;
       let want;
       if (h && (h.paused || h.back)) want = bee.face * (Math.PI / 2 + 0.25);
-      else if (h || charging || trip || time - lastTurnAt < 1.6) want = angDiff(bee.aim, camYaw);
+      else if (h || charging || homeFlying() || time - lastTurnAt < 1.6) want = angDiff(bee.aim, camYaw);
       else if (idle.face) want = idle.face * (Math.PI / 2 + 0.35);
       else want = bee.face * (Math.PI / 2 + 0.6);
       bee.relYaw += angDiff(want, bee.relYaw) * (1 - Math.exp(-dt * (h || charging ? 12 : 5)));
@@ -4031,18 +4231,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     bee.oops = Math.max(0, bee.oops - dt);
     bee.squash = Math.max(0, bee.squash - dt * 4);
     // legs: tuck up in the air, settle down to sit when she lands
-    const aloft = !!bee.hop || idle.flying;
+    const aloft = !!bee.hop || idle.flying || homeFlying();
     bee.tuck += ((aloft ? 1 : 0) - bee.tuck) * Math.min(1, dt * 7);
     bee.seat += ((aloft ? 0 : 1) - bee.seat) * Math.min(1, dt * 5);
-    updateBuzz(bee.hop ? (bee.hop.paused ? 0.75 : 1) : idle.flying ? 0.55 : charging ? 0.15 + charge * 0.35 : 0);
+    if (BZ.on) updateBuzz(homeFlying() ? 1 : bee.hop ? (bee.hop.paused ? 0.75 : 1) : idle.flying ? 0.55 : charging ? 0.15 + charge * 0.35 : 0);
 
     // camera: swings around behind her after each hop, and stays near her eye level
-    camYaw += angDiff(camYawTarget, camYaw) * (1 - Math.exp(-dt * 2.2));
+    const fh = homeFlying();
+    camLift = lerp(camLift, fh ? trip.fly.lift * Math.sin(Math.PI * clamp(trip.fly.t / trip.fly.dur, 0, 1)) : 0, 1 - Math.exp(-dt * 2.5));
+    camYaw += angDiff(camYawTarget, camYaw) * (1 - Math.exp(-dt * (fh ? 3.4 : 2.2)));
     camC = Math.cos(camYaw); camS = Math.sin(camYaw);
-    const kc = 1 - Math.exp(-dt * 3.2);
-    camX = lerp(camX, bee.x - camC * CAM_DIST, kc);
-    camY = lerp(camY, bee.y - camS * CAM_DIST, kc);
-    camH = lerp(camH, bee.z + CAM_UP + lift, 1 - Math.exp(-dt * 7));
+    const kc = 1 - Math.exp(-dt * (fh ? 7 : 3.2)), camD = CAM_DIST + camLift * 0.9;
+    camX = lerp(camX, bee.x - camC * camD, kc);
+    camY = lerp(camY, bee.y - camS * camD, kc);
+    camH = lerp(camH, bee.z + CAM_UP + lift + camLift, fh ? kc : 1 - Math.exp(-dt * 7));
     }
 
     // the frog says hi when she hops by a pond
@@ -4064,7 +4266,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
 
     updateCritters(dt);
     updateBunny(dt);
-    if (!BM.on) { updateAuto(dt); updateMover(dt); }
+    if (!BM.on && !BZ.on) { updateAuto(dt); updateMover(dt); }
     updatePals(dt);
     updateFriend(dt);
     updateStar(dt);
@@ -6359,14 +6561,14 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     ctx.globalAlpha = 1;
   }
   function drawHint() {
-    return;   // no words inside the Playhouse world
+    if (!BZ.on) return;   // (the Playhouse itself has no guide marks or words, just go)
     if (hops > 0) return;
     ctx.globalAlpha = 0.75 + Math.sin(time * 3) * 0.25;
     ctx.font = '800 18px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif';
     ctx.textAlign = "center";
     ctx.lineWidth = 5; ctx.strokeStyle = "rgba(70, 60, 110, 0.45)";
-    const t1 = hasKeyboard ? "click anywhere to go there" : "tap anywhere to go there";
-    const t2 = "tap a friend to visit them";
+    const t1 = hasKeyboard ? "arrow keys turn her" : "press a flower or the arrows to turn her";
+    const t2 = hasKeyboard ? "hold space to wind up, let go to hop!" : "hold to wind up, let go to hop!";
     const y = touchPad.hidden ? H - 70 : H - 128;
     ctx.strokeText(t1, W / 2, y); ctx.strokeText(t2, W / 2, y + 24);
     ctx.fillStyle = "#FFFFFF";
@@ -6375,12 +6577,12 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   }
   // while winding up: a dotted arc to where she'll land, and a ring there (gold = a flower)
   function drawAim() {
-    return;   // Playhouse: no guide marks, just go
+    if (!BZ.on) return;   // (the Playhouse itself has no guide marks or words, just go)
     if (!charging && !bee.hop && time - lastTurnAt < 1.6) {
       // a little dotted arrow on the ground showing which way she'll hop
       const fade = clamp((1.6 - (time - lastTurnAt)) / 0.5, 0, 1);
       for (let i = 1; i <= 6; i++) {
-        const q = proj(bee.x + Math.cos(bee.aim) * (30 + i * 26), bee.y + Math.sin(bee.aim) * (30 + i * 26), 0);
+        const q = proj(bee.x + Math.cos(bee.aim) * (30 + i * 26), bee.y + Math.sin(bee.aim) * (30 + i * 26), bee.z + 14);
         if (!q) continue;
         const r = clamp(3.2 * q.k, 2.5, 6);
         ctx.fillStyle = `rgba(90, 65, 99, ${0.35 * fade})`;
@@ -6394,12 +6596,12 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const n = Math.max(4, Math.floor(pl.dist / 24));
     for (let i = 1; i < n; i++) {
       const t = i / n;
-      const q = proj(lerp(bee.x, pl.x1, t), lerp(bee.y, pl.y1, t), 0);
+      const q = proj(lerp(bee.x, pl.x1, t), lerp(bee.y, pl.y1, t), lerp(bee.z, pl.z1, t) + pl.peak * 4 * t * (1 - t) + 12);
       if (!q) continue;
       ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + 0.5 * t})`;
       ctx.beginPath(); ctx.arc(q.x, q.y, clamp(2.4 * q.k, 1.5, 5), 0, Math.PI * 2); ctx.fill();
     }
-    const q = proj(pl.x1, pl.y1, 0); if (!q) return;
+    const q = proj(pl.x1, pl.y1, pl.z1); if (!q) return;
     ctx.lineWidth = 2.6;
     if (pl.perch) {
       const rx = clamp(pl.perch.r * 0.8, 16, 60) * q.k, ry = rx * 0.45;
@@ -6424,9 +6626,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     }
   }
   function drawChargeMeter() {
-    return;   // Playhouse: no guide marks, just go
+    if (!BZ.on) return;   // (the Playhouse itself has no guide marks or words, just go)
     if (!charging || bee.hop) return;
-    const x = W / 2 - 26, y = H - 150;   // the wind-up meter sits above the buttons
+    const x = beeScreen.x - 26, y = beeScreen.y - 62 * beeScreen.size / 1.5;
     ctx.fillStyle = "rgba(255,255,255,0.65)";
     roundRect(x, y, 52, 9, 4.5); ctx.fill();
     const g = ctx.createLinearGradient(x, 0, x + 52, 0);
@@ -6607,7 +6809,48 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
           : drawBee(p.x, p.y, { size: s, lift: 0, noShadow: true, faceS: friend.face, vx: 0, wiggle: 0, happy: 0, look: null, ph: 1.7, pal: friend.pal, flying: true }) });
       }
     }
-    beeScreen = { x: W / 2, y: H * 0.52, size: 1.2, f: 240 };   // the middle of the view: near things in front of it turn see-through
+    if (!BZ.on) beeScreen = { x: W / 2, y: H * 0.52, size: 1.2, f: 240 };   // the middle of the view: near things in front of it turn see-through
+    else {   // playing as Buzz Buzz: she is on screen
+    const bx = bee.x + idle.off.x, by = bee.y + idle.off.y, bz = bee.z + idle.off.z;
+    const bp = proj(bx, by, bz);
+    if (bp) {
+      const s = 1.0 * bp.k;
+      beeScreen = { x: bp.x, y: bp.y - 14 * s, size: s, f: bp.f };
+      let look = null;
+      if (charging) { const pl = planHop(), q = proj(pl.x1, pl.y1, pl.z1); if (q) look = { x: q.x - bp.x, y: q.y - bp.y }; }
+      else if (star) look = { x: star.x - bp.x, y: star.y - (bp.y - 14 * s) };   // ooh, a shooting star!
+      else if (friend && Math.hypot(friend.x - bee.x, friend.y - bee.y) < 220) { const fq = proj(friend.x, friend.y, friend.z); if (fq) look = { x: fq.x - bp.x, y: fq.y - bp.y }; }   // watching her friend
+      else {
+        let best = null, bd = Infinity;
+        lastHits.forEach(h => { if (!h.bud) return; const d = Math.hypot(h.x - bp.x, h.y - bp.y); if (d < bd) { bd = d; best = h; } });
+        if (best) look = { x: best.x - bp.x, y: best.y - bp.y };
+      }
+      let sx = 1, sy = 1;
+      if (charging && !bee.hop) { sy = 1 - charge * 0.22; sx = 1 + charge * 0.14; }
+      else if (bee.squash > 0) { sy = 1 - bee.squash * 0.18; sx = 1 + bee.squash * 0.12; }
+      else if (bee.hop) { sy = 1.06; sx = 0.95; }
+      if (bee.floating && !bee.hop) {
+        const fp = floatiePetals();
+        items.push({ f: bp.f + 0.2, d: () => drawFloatie(fp.back, true) });
+        items.push({ f: bp.f - 0.7, d: () => drawFloatie(fp.front, false) });
+      } else if (bee.hop || homeFlying() || bee.z < 1) items.push({ f: bp.f + 0.3, d: () => groundShadow(bx, by, 14 * clamp(1 - bz / 400, 0.4, 1)) });
+      const pitchB = Math.atan2(Math.max(10, camH - bz), bp.f) * 0.5;   // a gentler look down, so her face stays clear of the petals
+      const onFrog = bee.perch && bee.perch.isFrog && !bee.hop ? bee.perch : null;
+      const at = () => {   // v37: riding a frog, she sits right on top of his head
+        if (!onFrog || !onFrog.seat || time - onFrog.seat.t > 0.1) return bp;
+        const b0 = proj(bee.x, bee.y, bee.z), m = clamp((time - (bee.perchAt || 0)) / 0.2, 0, 1);
+        const ox = b0 ? bp.x - b0.x : 0, oy = b0 ? bp.y - b0.y : 0;   // her little idle loops still show
+        return { x: lerp(bp.x, onFrog.seat.x + ox, m), y: lerp(bp.y, onFrog.seat.y + oy, m) };
+      };
+      if (LC) items.push({ f: bp.f - 0.5, d: () => LC.bee.draw(ctx, at().x, at().y, s, bee.relYaw, pitchB, {
+        t: time, lift: bee.floating ? 5 : SEAT_GROUND + (bee.flower && !bee.hop ? 6 : 0), flying: !!bee.hop || idle.flying || homeFlying(), tuck: bee.tuck, seat: bee.seat,
+        wiggle: bee.wiggle, happy: bee.happy, oops: bee.oops, focus: charging && !bee.hop,
+        squish: charging && !bee.hop ? charge : bee.squash * 0.7, speed: homeFlying() ? 170 : bee.hop && !bee.hop.paused && !bee.hop.back ? 140 : idle.flying ? 90 : 0 }) });
+      else items.push({ f: bp.f - 0.5, d: () => drawBee(at().x, at().y, { size: s, lift: (bee.floating ? 5 : SEAT_GROUND) * s, noShadow: true, faceS: bee.faceS, vx: bee.hop ? 140 * bee.face : idle.flying ? 90 * bee.face : 0,
+        wiggle: bee.wiggle, happy: bee.happy, look, ph: 0, flying: !!bee.hop || idle.flying || homeFlying(), sx, sy, oops: bee.oops, focus: charging,
+        tuck: bee.tuck, seat: bee.seat, squish: charging && !bee.hop ? charge : 0 }) });
+    }
+    }
     items.sort((a, b) => b.f - a.f);
     items.forEach(it => it.d());
     lastHits = flowerHits;
@@ -6632,31 +6875,68 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     drawTags();
     drawBanner();
     drawHint();
-    if (trip) drawTrip();
+    if (trip && trip.phase === "scene") drawTrip();
+    if (cutFade > 0) {   // the soft flash when a flight home is skipped
+      ctx.fillStyle = `rgba(255, 248, 228, ${cutFade})`; ctx.fillRect(0, 0, W, H);
+      cutFade = Math.max(0, cutFade - 1 / 24);
+    }
   }
 
   // ---------- the hive trip ----------
   // She flies to the hive, wiggles hello with two friends, walks in, drops off her pollen,
   // walks back out, wiggles again and flies back to exactly where you left off.
-  const TRIP = { fadeIn: 0.7, arrive: 2.6, greet: 4.0, land: 4.5, walkIn: 5.4, inside: 6.7, walkOut: 7.5, wiggle: 9.0, flyOff: 10.4, end: 11.2 };
-  function updateTrip(dt) {
-    const T = trip; T.t += dt;
-    charging = false; keys.clear(); lastInputAt = time;
-    const once = (k, at, fn) => { if (!T.done[k] && T.t >= at) { T.done[k] = true; fn(); } };
-    once("hi", TRIP.arrive + 0.15, () => sfx.friend());
-    once("drop", TRIP.walkIn + 0.25, () => {
-      trips++; pollenFill = 0;
-      store.set("bee-hive-trips", String(trips)); store.set("bee-pollen-fill", "0");
-      renderPollen(); sfx.pollen();
-    });
-    once("yay", TRIP.walkOut + 0.2, () => sfx.yay());
-    once("off", TRIP.wiggle, () => sfx.hop());
-    if (T.t >= TRIP.end) {
-      trip = null; renderPollen();
-      if (touchPad) touchPad.style.visibility = "";
-      wakeUp(); bee.happy = 1.2; bee.wiggle = 1;
-      popups.push({ x: bee.x, y: bee.y, z: bee.z + 80, text: pick(["back to work!", "more flowers!", "bzz bzz!"]), life: 1.3, big: false });
+  const TRIP = { fadeIn: 0.7, arrive: 2.6, greet: 4.0, land: 4.5, walkIn: 5.4, inside: 6.7, walkOut: 7.5, wiggle: 9.0, flyOff: 9.6, end: 10.4 };
+  const DANCE = { fadeIn: 0.7, arrive: 2.6, greet: 3.8, land: 4.4, dance: 8.8, flyOff: 9.2, end: 10.0 };
+  const tripEnd = () => (trip.mode === "dance" ? DANCE : TRIP);
+  function dropPollen(T) {
+    if (T.dropped) return;   // (only once, even if the visit is skipped)
+    T.dropped = true;
+    delivered += T.load; trips++;
+    pollenFill = Math.max(0, pollenFill - T.load);
+    store.set("bee-pollen-delivered", String(delivered)); store.set("bee-hive-trips", String(trips)); store.set("bee-pollen-fill", String(pollenFill));
+    renderPollen(); sfx.pollen();
+  }
+  // a tap (or a key) ends the hive visit right away. Her pollen still gets dropped off, and she is at home.
+  function skipTrip() {
+    const T = trip;
+    if (!T) return;
+    if (T.phase === "fly") {
+      if (T.fly.t < 0.25) return;   // (the tap that pressed the button)
+      if (T.mode === "drop") dropPollen(T);
+      settleAtHome();
+      endTrip();
+      cutFade = 1;
+      return;
     }
+    const L = tripEnd();
+    if (T.t >= L.flyOff) return;    // already ending
+    if (T.mode === "drop") dropPollen(T);
+    T.t = L.flyOff;                 // (the fade-out settles her at home)
+  }
+  function endTrip() {
+    trip = null; renderPollen();
+    if (touchPad) touchPad.style.visibility = "";
+    wakeUp(); bee.happy = 1.2; bee.wiggle = 1;
+    popups.push({ x: bee.x, y: bee.y, z: bee.z + 70, text: pick(["home sweet home!", "home sweet hive!", "bzz bzz!"]), life: 1.5, big: false });
+  }
+  function updateTrip(dt) {
+    charging = false; keys.clear(); lastInputAt = time;
+    if (trip.phase === "fly") { updateHomeFlight(dt); return; }
+    const T = trip; T.t += dt;
+    const once = (k, at, fn) => { if (!T.done[k] && T.t >= at) { T.done[k] = true; fn(); } };
+    const L = tripEnd();
+    once("hi", L.arrive + 0.15, () => sfx.friend());
+    if (T.mode === "drop") {
+      once("drop", TRIP.walkIn + 0.25, () => dropPollen(T));
+      once("yay", TRIP.walkOut + 0.2, () => sfx.yay());
+    } else {
+      // a happy little tune while they dance (one note on each bounce)
+      const beat = 0.4, n = Math.floor((T.t - DANCE.land) / beat);
+      if (T.t >= DANCE.land && n >= 0 && T.t < DANCE.dance && T.beat !== n) { T.beat = n; sfx.danceNote(n); }
+      once("yay", DANCE.dance - 0.3, () => sfx.yay());
+    }
+    once("home", L.flyOff, () => settleAtHome());
+    if (T.t >= L.end) endTrip();
   }
   const ease = u => u * u * (3 - 2 * u);
   const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
@@ -6871,7 +7151,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     return drawTripHive2D(hx, baseY, Wh, glow, yaw, behind, front);
   }
   // v38: two friend bees take turns flying out of the little upper entrance, doing a loop, and flying back in.
-  function hiveFlyers(hx, baseY, Wh, yaw, pitch, isFront) {
+  function hiveFlyers(hx, baseY, Wh, yaw, pitch, isFront, pals) {
     if (!BH || !BH.hole || !LC) return;
     const s = Wh / 40, hp = BH.hole.point, ha = BH.hole.angle, bs = s * 0.19;
     const outV = [Math.cos(ha), Math.sin(ha), 0], sideV = [-Math.sin(ha), Math.cos(ha), 0];
@@ -6885,10 +7165,10 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       const e = Math.sin(Math.PI * u), p = at(u, i), p2 = at(Math.min(1, u + 0.01), i);
       const front = p.depth > 0 && (e > 0.12 || Math.cos(yaw - ha) > 0);
       if (front !== isFront) return;
-      const k = Math.min(1, e * 4);
+      const k = Math.min(1, e * 4);                                       // small and see-through right at the doorway
       ctx.save(); ctx.globalAlpha *= 0.35 + 0.65 * k;
       LC.bee.draw(ctx, p.x, p.y, bs * (0.7 + 0.3 * k), Math.atan2(p2.x - p.x, p2.depth - p.depth), 0.15,
-        { t: time, ph: 2.3 + i, pal: ["lavender", "peach"][i], flying: true, lift: 0, speed: 60 });
+        { t: time, ph: 2.3 + i, pal: (pals || ["lavender", "peach"])[i % 2], flying: true, lift: 0, speed: 60 });
       ctx.restore();
     });
   }
@@ -7018,14 +7298,16 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     drawTripTrunk(tx, tw, yaw);
     drawTripBranch(hx - Wh * 0.85, tx - tw * 0.3, baseY + Wh * 0.06, Wh * 0.15);
     const midY = baseY - Wh * 0.55;
-    const door = drawTripHive(hx, baseY, Wh, glow, yaw, () => tripBuzzers(hx, midY, Wh, false), () => {});
+    const view = { yaw: yaw * 1.4, pitch: 0.08 };   // v41: the 3D hive turns a little as the camera drifts
+    const door = BH ? drawTripHive(hx, baseY, Wh, glow, yaw, () => hiveFlyers(hx, baseY, Wh, view.yaw, view.pitch, false, ["lavender", "blue"]), () => {}, view)
+                    : drawTripHive(hx, baseY, Wh, glow, yaw, () => tripBuzzers(hx, midY, Wh, false), () => {});
     drawTripCanopy(tx, Wh, yaw);
-    door.front = () => tripBuzzers(hx, midY, Wh, true);
+    door.front = BH ? () => hiveFlyers(hx, baseY, Wh, view.yaw, view.pitch, true, ["lavender", "blue"]) : () => tripBuzzers(hx, midY, Wh, true);
     return door;
   }
   function drawTrip() {
-    const T = trip, t = T.t;
-    const alpha = t < TRIP.fadeIn ? ease(t / TRIP.fadeIn) : t > TRIP.flyOff ? 1 - ease(seg(t, TRIP.flyOff, TRIP.end)) : 1;
+    const T = trip, t = T.t, L = tripEnd(), dance = T.mode === "dance";
+    const alpha = t < L.fadeIn ? ease(t / L.fadeIn) : t > L.flyOff ? 1 - ease(seg(t, L.flyOff, L.end)) : 1;
     ctx.save(); ctx.globalAlpha = alpha;
     // the camera eases in as she arrives, then drifts slowly from side to side (so you feel the depth)
     const yawT = reduceMotion ? 0 : 0.16 * Math.sin(t * 0.5 - 0.4);
@@ -7034,21 +7316,59 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     drawTripBackdrop(yawT);
     drawTripMeadow(yawT);
     const Wh = Math.min(W * 0.52, H * 0.34), hx = W * 0.4 - yawT * 90, baseY = H * 0.62;
-    const glow = t > TRIP.walkIn - 0.1 && t < TRIP.inside + 0.3 ? Math.sin(seg(t, TRIP.walkIn - 0.1, TRIP.inside + 0.3) * Math.PI) : 0;
+    const glow = dance ? 0.18 + 0.12 * Math.sin(time * 4) * (t > DANCE.land && t < DANCE.dance ? 1 : 0)
+      : t > TRIP.walkIn - 0.1 && t < TRIP.inside + 0.3 ? Math.sin(seg(t, TRIP.walkIn - 0.1, TRIP.inside + 0.3) * Math.PI) : 0;
     const door = drawHiveScene(hx, baseY, Wh, glow, yawT);
     const s = door.dw / 40;   // bee size in this scene
     const sill = { x: door.doorX, y: door.doorY + 4 };
-    // two friends wait by the door
-    const greetK = t > TRIP.arrive && t < TRIP.greet ? 1 : t > TRIP.walkOut && t < TRIP.wiggle ? 1 : 0;
+    // two friends wait by the door (and when it's a dance visit, they come down to the step and dance with her)
+    const dancing = dance && t > DANCE.land && t < DANCE.dance;
+    const beatU = dancing ? ((t - DANCE.land) / 0.4) % 1 : 0, bounce = dancing ? Math.abs(Math.sin(beatU * Math.PI)) : 0;
+    const beatN = dancing ? Math.floor((t - DANCE.land) / 0.4) : 0;
+    const greetK = (t > L.arrive && t < L.greet) || dancing || (!dance && t > TRIP.walkOut && t < TRIP.wiggle) ? 1 : 0;
     [-1, 1].forEach((side, i) => {
-      const fx = hx + side * door.dw * 1.9 + Math.sin(time * 1.3 + i) * 5, fy = door.doorY - door.dh * 1.1 + Math.sin(time * 2.1 + i * 2) * 5;
-      if (LC) LC.bee.draw(ctx, fx, fy, s * 0.9, -side * (Math.PI / 2 + 0.45), 0.15, { t: time, ph: 1.3 + i, pal: T.pals[i], flying: true, lift: 0, wiggle: greetK ? 1 : 0, happy: greetK ? 1 : 0 });
-      else drawBee(fx, fy, { size: s * 0.9, lift: 0, noShadow: true, faceS: -side, vx: 0, wiggle: greetK ? 1 : 0, happy: greetK ? 1 : 0, look: null, ph: 1.3 + i, pal: T.pals[i], flying: true });
+      let fx = hx + side * door.dw * 1.9 + Math.sin(time * 1.3 + i) * 5, fy = door.doorY - door.dh * 1.1 + Math.sin(time * 2.1 + i * 2) * 5;
+      let fFly = true, fFace = -side, fSeat = 0;
+      if (dance && t > DANCE.greet) {
+        // down to the step beside her, then bounce to the beat (each friend half a beat apart), then back up
+        const spotX = sill.x + side * door.dw * 1.25, spotY = sill.y;
+        const down = ease(seg(t, DANCE.greet, DANCE.land)), up = ease(seg(t, DANCE.dance, DANCE.flyOff + 0.4));
+        const k = down * (1 - up);
+        fx = lerp(fx, spotX, k); fy = lerp(fy, spotY, k);
+        if (dancing) {
+          const u2 = (beatU + (i ? 0.5 : 0)) % 1;
+          fy -= Math.abs(Math.sin(u2 * Math.PI)) * door.dh * 0.32;
+          fx += Math.sin((t - DANCE.land) * Math.PI * 1.25 + i * Math.PI) * door.dw * 0.12;
+          fFace = (beatN + i) % 4 < 2 ? -side : side;   // they turn this way and that
+          fFly = false; fSeat = 1;
+        } else if (k > 0.85) { fFly = false; fSeat = 1; }
+      }
+      if (LC) LC.bee.draw(ctx, fx, fy, s * 0.9, fFace * (Math.PI / 2 + 0.45), 0.15, { t: time, ph: 1.3 + i, pal: T.pals[i], flying: fFly, lift: fFly ? 0 : SEAT_GROUND, shadow: !fFly, tuck: fFly ? 1 : 0, seat: fSeat, wiggle: greetK ? 1 : 0, happy: greetK ? 1 : 0, speed: fFly ? 60 : 0 });
+      else drawBee(fx, fy, { size: s * 0.9, lift: 0, noShadow: true, faceS: fFace, vx: 0, wiggle: greetK ? 1 : 0, happy: greetK ? 1 : 0, look: null, ph: 1.3 + i, pal: T.pals[i], flying: fFly });
     });
     // our bee
     let bx, by, flying = true, face = 1, wig = 0, happy = 0, a = 1, sc = 1, seat = 0;
     const hover = { x: hx - door.dw * 0.2, y: door.doorY - door.dh * 1.25 };
-    if (t < TRIP.arrive) {
+    if (dance && t >= DANCE.greet) {
+      const spot = { x: sill.x, y: sill.y };   // right on the step, in front of the door (she doesn't go in)
+      if (t < DANCE.land) {
+        const u = ease(seg(t, DANCE.greet, DANCE.land)); bx = lerp(hover.x, spot.x, u); by = lerp(hover.y, spot.y, u); flying = u < 0.85; seat = u;
+      } else if (t < DANCE.dance) {
+        // bounce, sway, spin around and wiggle
+        bx = spot.x + Math.sin((t - DANCE.land) * Math.PI * 1.25) * door.dw * 0.18;
+        by = spot.y - bounce * door.dh * 0.38;
+        flying = bounce > 0.55; seat = flying ? 0.4 : 1; wig = 1; happy = 1;
+        face = beatN % 4 < 2 ? 1 : -1;
+        // little music notes float up
+        if (T.noteN !== beatN) {
+          T.noteN = beatN; T.notes = T.notes || [];
+          T.notes.push({ x: spot.x + rand(-door.dw, door.dw), y: spot.y - door.dh * 0.8, vx: rand(-14, 14), life: 1, ch: beatN % 2 ? "\u266A" : "\u266B", c: ["#FF8FB8", "#9C7BEA", "#5BB7E8", "#FFB04D"][beatN % 4] });
+        }
+      } else {
+        const u = ease(seg(t, DANCE.dance, L.end));
+        bx = spot.x + u * door.dw * 0.4; by = spot.y - u * door.dh * 1.0 + Math.sin(t * 5) * 3 * u; flying = u > 0.12; seat = 1 - u; happy = 1;
+      }
+    } else if (t < TRIP.arrive) {
       const u = ease(seg(t, 0.3, TRIP.arrive));
       bx = lerp(-40, hover.x, u); by = lerp(H * 0.3, hover.y, u) - Math.sin(u * Math.PI) * 40 + Math.sin(t * 5) * 4;
     } else if (t < TRIP.greet) {
@@ -7075,9 +7395,14 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       bx = sill.x + door.dw * 0.9; by = sill.y; flying = false; seat = 1; wig = 1; happy = 1;
       face = Math.sin(t * 6) > 0 ? 1 : -1;
     } else {
-      const u = ease(seg(t, TRIP.wiggle, TRIP.flyOff + 0.6));
-      bx = lerp(sill.x + door.dw * 0.9, W + 50, u); by = lerp(sill.y, H * 0.22, u) - Math.sin(u * Math.PI) * 30 + Math.sin(t * 5) * 3;
+      // she lifts off the step and hovers by her door: she's home
+      const u = ease(seg(t, TRIP.wiggle, TRIP.end));
+      bx = sill.x + door.dw * (0.9 + u * 0.3); by = sill.y - u * door.dh * 1.0 + Math.sin(t * 5) * 3 * u; flying = u > 0.12; seat = 1 - u;
       happy = 1;
+    }
+    if (T.notes) {
+      T.notes.forEach(n => { n.x += n.vx / 60; n.y -= 55 / 60; n.life -= 1 / 75; });
+      T.notes = T.notes.filter(n => n.life > 0);
     }
     // golden sparkles
     if (T.sparks) {
@@ -7094,7 +7419,14 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     // the buzzing bees on the near side of their loops, pollen motes, little hearts when she drops off
     // her pollen, and soft flowers right up close
     if (door.front) door.front();
-    if (t > TRIP.walkIn + 0.25 && !T.hearts) {
+    if (T.notes) T.notes.forEach(n => {
+      ctx.save(); ctx.globalAlpha = alpha * Math.min(1, n.life * 1.6);
+      ctx.font = `800 ${Math.round(s * 22)}px Grandstander, "Chalkboard SE", sans-serif`; ctx.textAlign = "center";
+      ctx.lineWidth = 4; ctx.strokeStyle = "rgba(255, 255, 255, 0.85)"; ctx.strokeText(n.ch, n.x, n.y);
+      ctx.fillStyle = n.c; ctx.fillText(n.ch, n.x, n.y + Math.sin(time * 5 + n.x) * 0);
+      ctx.restore();
+    });
+    if (!dance && t > TRIP.walkIn + 0.25 && !T.hearts) {
       T.hearts = Array.from({ length: 9 }, (_, i) => ({ x: door.doorX + rand(-10, 10), y: door.doorY - door.dh * 0.6, vx: rand(-40, 40), vy: rand(-90, -50), life: 1, r: rand(4, 7), ph: i }));
     }
     if (T.hearts) {
@@ -7116,15 +7448,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       ctx.lineWidth = 5; ctx.strokeStyle = "rgba(70, 60, 110, 0.45)"; ctx.strokeText(text, x, y);
       ctx.fillStyle = "#FFFFFF"; ctx.fillText(text, x, y);
     };
-    if (t < TRIP.arrive) say("off to the hive!", W / 2, H * 0.16, 24);
-    if (t > TRIP.arrive && t < TRIP.greet) say("hi friends!", hx, door.doorY - door.dh * 2.4, 20);
-    if (t > TRIP.walkIn && t < TRIP.walkOut) {
-      const u = seg(t, TRIP.walkIn + 0.25, TRIP.walkOut);
-      ctx.save(); ctx.globalAlpha = alpha * (1 - Math.max(0, u - 0.7) / 0.3);
-      say("+1 hive trip!", hx, door.doorY - door.dh * 2.2 - u * 20, 26);
-      ctx.restore();
+    if (t < L.arrive) say(dance ? "home, sweet hive!" : "home to the hive!", W / 2, H * 0.16, 24);
+    if (t > L.arrive && t < L.greet) say("hi friends!", hx, door.doorY - door.dh * 2.4, 20);
+    if (dance) {
+      if (t > DANCE.greet && t < DANCE.land + 0.6) say("no pollen? let's dance!", hx, door.doorY - door.dh * 2.4, 20);
+      else if (t >= DANCE.land + 0.6 && t < DANCE.dance) say("dance party!", hx, door.doorY - door.dh * 2.5 - bounce * 6, 22);
+    } else {
+      if (t > TRIP.walkIn && t < TRIP.walkOut) {
+        const u = seg(t, TRIP.walkIn + 0.25, TRIP.walkOut);
+        ctx.save(); ctx.globalAlpha = alpha * (1 - Math.max(0, u - 0.7) / 0.3);
+        say("+" + T.load + " pollen!", hx, door.doorY - door.dh * 2.2 - u * 20, 26);
+        ctx.restore();
+      }
+      if (t > TRIP.walkOut + 0.15 && t < TRIP.wiggle) say("bzz bzz!", hx, door.doorY - door.dh * 2.4, 20);
     }
-    if (t > TRIP.walkOut + 0.15 && t < TRIP.wiggle) say("bzz bzz!", hx, door.doorY - door.dh * 2.4, 20);
     ctx.restore();
   }
 
@@ -7183,7 +7520,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     gamesTimer = setTimeout(closeGames, 10000);   // it fades away by itself after 10 seconds
   }
   gamesBtn.addEventListener("pointerdown", e => e.stopPropagation());
-  gamesBtn.addEventListener("click", e => { e.stopPropagation(); if (BM.on) { closeGames(); exitBunny(); return; } if (gamesMenu.hidden || gamesMenu.classList.contains("fade")) openGames(); else closeGames(); });
+  gamesBtn.addEventListener("click", e => { e.stopPropagation(); if (BM.on) { closeGames(); exitBunny(); return; } if (BZ.on) { closeGames(); exitBee(); return; } if (gamesMenu.hidden || gamesMenu.classList.contains("fade")) openGames(); else closeGames(); });
   gamesMenu.addEventListener("pointerdown", e => e.stopPropagation());
 
   // ---------- loop ----------
@@ -7198,6 +7535,10 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     tg: () => ({ on: TG.on, phase: TG.phase, role: TG.role, goShown: !tagGo.hidden, score: TG.score, catches: TG.catches, left: TG.left, cnt: TG.cnt, mode: TG.mode, seekT: TG.seekT, turbo: TG.turbo, hide: TG.hide && { x: TG.hide.x, y: TG.hide.y, s: !!TG.hide.S, S: TG.hide.S && { x: TG.hide.S.x, y: TG.hide.S.y, r: TG.hide.S.r, tree: !!TG.hide.S.tree } },
       f: TG.f && { x: TG.f.x, y: TG.f.y, size: TG.f.size, state: TG.f.state }, you: { x: bun.x, y: bun.y, h: bun.heading }, tummy: bmTummy, cardShown: !tagCard.hidden }),
     tgStart: i => { const l = ANIMALS.filter(a => a.kind === "bunny" && !a.neenee && a.alpha > 0.9); const f = l[i || 0]; if (!f) return false; f.x = bun.x + 400 * Math.cos(bun.heading + 0.4); f.y = bun.y + 400 * Math.sin(bun.heading + 0.4); tgStart(f); return true; },
+    playBee: () => enterBee(), leaveBee: () => exitBee(),
+    bz: () => ({ on: BZ.on, x: bee.x, y: bee.y, z: bee.z, aim: bee.aim, hop: !!bee.hop, hopKind: bee.hop ? bee.hop.kind : null, paused: !!(bee.hop && bee.hop.paused), charging, charge, pollen: pollenFill, delivered, blooms, hops, camH, camYaw, camX, camY,
+      trip: trip ? { phase: trip.phase, mode: trip.mode, t: trip.t, load: trip.load } : null, flower: bee.flower ? bee.flower.id : null, hiveBtnHidden: hiveBtn.hidden, backHidden: bmBackBtn.hidden, perch: bee.perch ? true : false }),
+    bzFlowers: () => lastHits.map(h => ({ x: h.x, y: h.y, rad: h.rad, f: h.f, bud: !!h.bud, id: h.fl ? h.fl.id : null, fx: h.fl ? h.fl.x : null, fy: h.fl ? h.fl.y : null })),
     ripple: (x, y, r) => { ripples.push({ x, y, r: r || 20, life: 1 }); },
     tgScreen: () => { const f = TG.f, q = f && proj(f.x, f.y, f.z + 16 * f.size); return q ? { x: q.x, y: q.y, k: q.k } : null; },
     tgSet: o => { Object.assign(TG, o); }, tgStop: () => tgStop(), bunnyTap: () => { const fh = tgFriendHit({ sx: W / 2, sy: H / 2 }); return !!fh; },
@@ -7236,6 +7577,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   draw();
   requestAnimationFrame(frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  if (BZ.fromPage) setTimeout(enterBee, 400);   // opened as Lily’s Buzz Buzz
   if (BM.fromPage) setTimeout(enterBunny, 400);   // opened as Lily's Bun Nee Nee
 })();
 </script>
