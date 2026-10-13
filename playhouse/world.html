@@ -2422,7 +2422,7 @@
   // way as the front door (toward +y), so you can walk all the way around it and see its sides and back.
   // Everything is measured in world units (the door is 340 tall). Its flag wiggles when tapped.
   const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 92, face: 0 };   // face = turn it (in radians) if you ever want it to look another way
-  const MB = { base: 8, baseR: 32, post: 126, postW: 10, hw: 36, hs: 40, rise: 36, d: 72, flagH: 46, flagL: 70 };   // a long tunnel shape, like a real mailbox (twice as long as it is wide)
+  const MB = { base: 8, baseR: 32, post: 126, postW: 10, hw: 36, hs: 40, rise: 36, d: 54, flagH: 46, flagL: 70 };   // a tunnel shape like a real mailbox (about 1.5 times as long as it is wide)
   const MAIL_REF = { x: MAILBOX.x, y: MAILBOX.y, z: 170 };
   const MAIL_FORM_URL = "https://app.kit.com/forms/9972716/subscriptions";
   let mailWiggleUntil = 0;
@@ -2466,7 +2466,7 @@
     face([[pw, pw, BH], [pw, -pw, BH], [pw, -pw, z0], [pw, pw, z0]], [1, 0, 0], PC);
     face([[-pw, -pw, BH], [-pw, pw, BH], [-pw, pw, z0], [-pw, -pw, z0]], [-1, 0, 0], PC);
     // the small support plate the box sits on
-    const qu = 22, qv = 46, qz = z0 - 7, QC = [236, 205, 224];
+    const qu = 22, qv = 34, qz = z0 - 7, QC = [236, 205, 224];
     face([[-qu, qv, qz], [qu, qv, qz], [qu, qv, z0], [-qu, qv, z0]], [0, 1, 0], QC);
     face([[qu, -qv, qz], [-qu, -qv, qz], [-qu, -qv, z0], [qu, -qv, z0]], [0, -1, 0], QC);
     face([[qu, qv, qz], [qu, -qv, qz], [qu, -qv, z0], [qu, qv, z0]], [1, 0, 0], QC);
