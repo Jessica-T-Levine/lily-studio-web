@@ -2416,6 +2416,39 @@
     const f = camF(FLAGPOLE.x, FLAGPOLE.y), a = clamp((Math.max(5000, farReach() + 1500) - f) / 1500, 0, 1);   // seen from far away, like the playhouse
     drawFlag(a * (f < 120 ? clamp((f - 45) / 75, 0, 1) : 1));
   }
+  // ---------- v45: drawing things next to the playhouse in the right order ----------
+  // The world draws far things first and near things last, and the playhouse goes in that order by its middle. For
+  // something right beside the house that can be wrong: seen from off to the side, a thing in front of a wall can be
+  // farther away than the middle (so the wall was painted over it), and a thing just behind the house can be nearer
+  // (so it showed through the wall). So anything near the house that lines up with it on screen asks one question:
+  // does the house stand between you and it? Yes: the house is drawn over it. No: it is drawn over the house.
+  function houseBlocks(x, y, X0, X1, Y0, Y1) {   // does the line on the ground from the camera to (x, y) cross the house?
+    let t0 = 0, t1 = 1;
+    for (const [p, dp, lo, hi] of [[camX, x - camX, X0, X1], [camY, y - camY, Y0, Y1]]) {
+      if (Math.abs(dp) < 1e-9) { if (p < lo || p > hi) return false; continue; }
+      let a = (lo - p) / dp, b = (hi - p) / dp; if (a > b) { const t = a; a = b; b = t; }
+      t0 = Math.max(t0, a); t1 = Math.min(t1, b); if (t0 > t1) return false;
+    }
+    return true;
+  }
+  function houseOrder(items) {
+    const hi = items.find(it => it.house); if (!hi) return;
+    const hf = hi.f, X0 = HOUSE.x - HOUSE.w / 2, X1 = HOUSE.x + HOUSE.w / 2, Y0 = HOUSE.y - HOUSE.d / 2, Y1 = HOUSE.y + HOUSE.d / 2, NEAR_HOUSE = 600;
+    if (camX > X0 && camX < X1 && camY > Y0 && camY < Y1) return;
+    let sl = Infinity, sr = -Infinity;   // where the house is on screen, left to right (with its roof edges)
+    for (const [x, y] of [[X0, Y0], [X0, Y1], [X1, Y0], [X1, Y1]]) {
+      const q = proj(x, y, 0); if (!q) { sl = -Infinity; sr = Infinity; break; }
+      sl = Math.min(sl, q.x); sr = Math.max(sr, q.x);
+    }
+    for (const it of items) {
+      const w = it.w; if (!w || it.house) continue;
+      if (w.x < X0 - NEAR_HOUSE || w.x > X1 + NEAR_HOUSE || w.y < Y0 - NEAR_HOUSE || w.y > Y1 + NEAR_HOUSE) continue;
+      const q = proj(w.x, w.y, 0); if (!q || q.x < sl - 150 || q.x > sr + 150) continue;
+      const blocked = houseBlocks(w.x, w.y, X0, X1, Y0, Y1);
+      if (blocked && it.f < hf) it.f = hf + 1 + it.f * 1e-4;              // behind the house: draw it first (keeps its order among its neighbours)
+      else if (!blocked && it.f > hf) it.f = hf - 1 + (it.f - hf) * 1e-4;   // nothing in the way: draw it after the house
+    }
+  }
   // ---------- v44: the mailbox by the front door (the Tuesday Tips sign-up) ----------
   // A little pink mailbox on a short post, just right of the door. Tap it and a small sign-up card opens (same list as the
   // sign-up at the bottom of the site). v45: it is a real solid object, not a flat picture. Its opening always looks the same
@@ -6856,32 +6889,32 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     residentHits = []; houseScreen = null;
     const inView = (p, m) => p && p.x > -m && p.x < W + m;
     list.forEach(ch => {
-      ch.tufts.forEach(t => { if (inPlanter(t.x, t.y, 20)) return; const p = proj(t.x, t.y, 0); if (inView(p, 60) && p.f < 950 && p.f > 80) items.push({ f: p.f, d: () => drawTuft(t, p) }); });
-      ch.rocks.forEach(r => { if (inPlanter(r.x, r.y, 30)) return; const p = proj(r.x, r.y, 0); if (inView(p, 80)) items.push({ f: p.f, d: () => drawRock(r, p) }); });
-      ch.pumpkins.forEach(m => { if (m.th > HW_LEVEL || inPlanter(m.x, m.y, 30)) return; const p = proj(m.x, m.y, 0); if (p && p.f > 70 && inView(p, 80 * m.s * p.k + 40)) items.push({ f: p.f, d: () => drawPumpkin(m, p) }); });
-      ch.shrooms.forEach(m => { if (inPlanter(m.x, m.y, 30)) return; const p = proj(m.x, m.y, 0); if (inView(p, m.w * (p ? p.k : 1) + 40)) items.push({ f: p.f, d: () => drawShroom(m, p) }); });
+      ch.tufts.forEach(t => { if (inPlanter(t.x, t.y, 20)) return; const p = proj(t.x, t.y, 0); if (inView(p, 60) && p.f < 950 && p.f > 80) items.push({ f: p.f, w: t, d: () => drawTuft(t, p) }); });
+      ch.rocks.forEach(r => { if (inPlanter(r.x, r.y, 30)) return; const p = proj(r.x, r.y, 0); if (inView(p, 80)) items.push({ f: p.f, w: r, d: () => drawRock(r, p) }); });
+      ch.pumpkins.forEach(m => { if (m.th > HW_LEVEL || inPlanter(m.x, m.y, 30)) return; const p = proj(m.x, m.y, 0); if (p && p.f > 70 && inView(p, 80 * m.s * p.k + 40)) items.push({ f: p.f, w: m, d: () => drawPumpkin(m, p) }); });
+      ch.shrooms.forEach(m => { if (inPlanter(m.x, m.y, 30)) return; const p = proj(m.x, m.y, 0); if (inView(p, m.w * (p ? p.k : 1) + 40)) items.push({ f: p.f, w: m, d: () => drawShroom(m, p) }); });
       ch.flowers.forEach(fl => {
         if (inPlanter(fl.x, fl.y, 40)) return;
         const pb = proj(fl.x, fl.y, 0), ph = proj(fl.x, fl.y, fl.h);
         if (!pb || !ph || !inView(pb, fl.R * pb.k + 40)) return;
-        items.push({ f: pb.f + 0.6, d: () => drawFlower(fl, pb, ph) });
+        items.push({ f: pb.f + 0.6, w: fl, d: () => drawFlower(fl, pb, ph) });
         const b = bloomed.get(fl.id) || 0;
         if (b > 0) {
           const bl = buildBloom(fl, b), a = fadeFor(pb.f), k = pb.k;
           if (a > 0.01) {
-            items.push({ f: pb.f + 0.4, d: () => { drawPetals(bl.back, a, k, true); drawBloomCenter(bl, a, k); } });
-            items.push({ f: pb.f - 0.8, d: () => drawPetals(bl.front, a, k, false) });
+            items.push({ f: pb.f + 0.4, w: fl, d: () => { drawPetals(bl.back, a, k, true); drawBloomCenter(bl, a, k); } });
+            items.push({ f: pb.f - 0.8, w: fl, d: () => drawPetals(bl.front, a, k, false) });
           }
         }
       });
-      ch.reeds.forEach(rd => { if (inPlanter(rd.x, rd.y, 20)) return; const p = proj(rd.x, rd.y, 0); if (p && p.f > 80 && inView(p, 60)) items.push({ f: p.f, d: () => drawReed(rd, p) }); });
-      ch.lavender.forEach(l => { if (inPlanter(l.x, l.y, 20)) return; const p = proj(l.x, l.y, 0); if (p && p.f > 80 && p.f < 950 && inView(p, 40)) items.push({ f: p.f, d: () => drawLavender(l, p) }); });
-      ch.clovers.forEach(c => { if (inPlanter(c.x, c.y, 20)) return; const p = proj(c.x, c.y, 0); if (p && p.f > 60 && p.f < 800 && inView(p, 40)) items.push({ f: p.f, d: () => drawClover(c, p) }); });
-      ch.bushes.forEach(b => { if (inPlanter(b.x, b.y, 60)) return; const p = proj(b.x, b.y, 0); if (p && p.f > 70 && inView(p, b.br * 1.6 * p.k + 30)) items.push({ f: p.f, d: () => drawBush19(b, p) }); });
-      ch.puffs.forEach(d => { if (inPlanter(d.x, d.y, 20)) return; const pb = proj(d.x, d.y, 0), ph = proj(d.x, d.y, d.h); if (pb && ph && pb.f > 80 && inView(pb, 80)) items.push({ f: pb.f, d: () => drawPuff(d, pb, ph) }); });
+      ch.reeds.forEach(rd => { if (inPlanter(rd.x, rd.y, 20)) return; const p = proj(rd.x, rd.y, 0); if (p && p.f > 80 && inView(p, 60)) items.push({ f: p.f, w: rd, d: () => drawReed(rd, p) }); });
+      ch.lavender.forEach(l => { if (inPlanter(l.x, l.y, 20)) return; const p = proj(l.x, l.y, 0); if (p && p.f > 80 && p.f < 950 && inView(p, 40)) items.push({ f: p.f, w: l, d: () => drawLavender(l, p) }); });
+      ch.clovers.forEach(c => { if (inPlanter(c.x, c.y, 20)) return; const p = proj(c.x, c.y, 0); if (p && p.f > 60 && p.f < 800 && inView(p, 40)) items.push({ f: p.f, w: c, d: () => drawClover(c, p) }); });
+      ch.bushes.forEach(b => { if (inPlanter(b.x, b.y, 60)) return; const p = proj(b.x, b.y, 0); if (p && p.f > 70 && inView(p, b.br * 1.6 * p.k + 30)) items.push({ f: p.f, w: b, d: () => drawBush19(b, p) }); });
+      ch.puffs.forEach(d => { if (inPlanter(d.x, d.y, 20)) return; const pb = proj(d.x, d.y, 0), ph = proj(d.x, d.y, d.h); if (pb && ph && pb.f > 80 && inView(pb, 80)) items.push({ f: pb.f, w: d, d: () => drawPuff(d, pb, ph) }); });
       ch.trees.forEach(t => {
         const p = proj(t.x, t.y, 0);
-        if (p && p.f > 90 && inView(p, t.w * 5 * p.k + 60)) items.push({ f: p.f, d: () => drawTree(t, p) });
+        if (p && p.f > 90 && inView(p, t.w * 5 * p.k + 60)) items.push({ f: p.f, w: t, d: () => drawTree(t, p) });
         if (t.branches) t.branches.forEach(b => {
           const m = branchPt(b, 0.55), q = proj(m.x, m.y, m.z);
           if (q && q.f > 60 && inView(q, b.len * q.k + 60)) {
@@ -6919,7 +6952,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     critters.forEach(c => {
       const p = proj(c.x, c.y, c.z); if (!inView(p, 60)) return;
       const dir = screenDir(Math.cos(c.a), Math.sin(c.a));
-      items.push({ f: p.f, d: () => {
+      items.push({ f: p.f, w: c, d: () => {
         ctx.globalAlpha = fadeFor(p.f);
         if (c.kind === "butterfly") drawButterfly(p.x, p.y, c.size * p.k, dir, c.t, c.col);
         else if (c.kind === "bug") drawLightningBug(p.x, p.y, c.size * p.k, dir, c.t);
@@ -6935,7 +6968,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       if (a.kind === "bunny") {
         const p = proj(a.x, a.y, a.z);
         if (!inView(p, 40 * a.size) || p.f < 60) return;
-        items.push({ f: p.f, d: () => {
+        items.push({ f: p.f, w: a, d: () => {
           const fa = fadeFor(p.f) * a.alpha; if (fa <= 0.01) return;
           ctx.save(); ctx.globalAlpha = fa;
           groundShadow(a.x, a.y, 12 * a.size * a.sx * (1 - clamp(a.z / (30 * a.size), 0, 0.4)));
@@ -6949,7 +6982,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       } else {
         const z = a.sit > 0 ? a.z : a.z + Math.sin(time * 2 + a.ph) * 6, p = proj(a.x, a.y, z);
         if (!inView(p, 60) || p.f < 60) return;
-        items.push({ f: p.f - (a.sit > 0 ? 0.5 : 0), d: () => {
+        items.push({ f: p.f - (a.sit > 0 ? 0.5 : 0), w: a, d: () => {
           const s = a.size * p.k, fa = fadeFor(p.f) * a.alpha, sitting = a.sit > 0;
           if (fa <= 0.01) return;
           ctx.save(); ctx.globalAlpha = fa;
@@ -6964,7 +6997,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         } });
       }
     });
-    CARROTS.forEach(c => { const p = proj(c.x, c.y, 0); if (inView(p, 90) && p.f > 60) items.push({ f: p.f + 0.5, d: () => drawCarrotBed(c, p) }); });
+    CARROTS.forEach(c => { const p = proj(c.x, c.y, 0); if (inView(p, 90) && p.f > 60) items.push({ f: p.f + 0.5, w: c, d: () => drawCarrotBed(c, p) }); });
     // the beehive (the bee game's straw skep), 150 units wide: about four bees across
     if (HIVE_PT) {
       const p = proj(HIVE_PT.x, HIVE_PT.y, HIVE_PT.z);
@@ -6985,12 +7018,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       } });
     }
     // the playhouse
-    { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), d: () => drawHouse() }); }
-    if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, d: () => drawFlagpole() }); }
-    { let f = camF(MAILBOX.x, MAILBOX.y);   // v44: the mailbox by the door
-      // v45: it stands in front of the house, so whenever you are on the front side of the house it must be drawn after
-      // the house (the house is sorted by its middle, which from off to the side can seem closer than the mailbox)
-      if (f > 40) { if (camY > HOUSE.y + HOUSE.d / 2) f = Math.min(f, Math.max(camF(HOUSE.x, HOUSE.y), 30) - 1); items.push({ f, d: () => drawMailbox() }); } }
+    { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), house: true, d: () => drawHouse() }); }
+    if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, w: FLAGPOLE, d: () => drawFlagpole() }); }
+    { const f = camF(MAILBOX.x, MAILBOX.y); if (f > 40) items.push({ f, w: MAILBOX, d: () => drawMailbox() }); }   // v44: the mailbox by the door
     if (friend) {
       const p = proj(friend.x, friend.y, friend.z);
       if (inView(p, 80)) {
@@ -6998,7 +7028,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         friend.lastSx = p.x;
         const s = 0.8 * p.k;
         const pitchF = Math.atan2(Math.max(10, camH - friend.z), p.f);
-        items.push({ f: p.f, d: () => LC
+        items.push({ f: p.f, w: friend, d: () => LC
           ? LC.bee.draw(ctx, p.x, p.y, s, friend.face * (Math.PI / 2 + 0.3), pitchF, { t: time, ph: 1.7, pal: friend.pal, flying: true, lift: 0, speed: 40 })
           : drawBee(p.x, p.y, { size: s, lift: 0, noShadow: true, faceS: friend.face, vx: 0, wiggle: 0, happy: 0, look: null, ph: 1.7, pal: friend.pal, flying: true }) });
       }
@@ -7006,7 +7036,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     if (!BZ.on) beeScreen = { x: W / 2, y: H * 0.52, size: 1.2, f: 240 };   // the middle of the view: near things in front of it turn see-through
     else {   // playing as Buzz Buzz: she is on screen
     const bx = bee.x + idle.off.x, by = bee.y + idle.off.y, bz = bee.z + idle.off.z;
-    const bp = proj(bx, by, bz);
+    const bp = proj(bx, by, bz), bw = { x: bx, y: by };
     if (bp) {
       const s = 1.0 * bp.k;
       beeScreen = { x: bp.x, y: bp.y - 14 * s, size: s, f: bp.f };
@@ -7025,9 +7055,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       else if (bee.hop) { sy = 1.06; sx = 0.95; }
       if (bee.floating && !bee.hop) {
         const fp = floatiePetals();
-        items.push({ f: bp.f + 0.2, d: () => drawFloatie(fp.back, true) });
-        items.push({ f: bp.f - 0.7, d: () => drawFloatie(fp.front, false) });
-      } else if (bee.hop || homeFlying() || bee.z < 1) items.push({ f: bp.f + 0.3, d: () => groundShadow(bx, by, 14 * clamp(1 - bz / 400, 0.4, 1)) });
+        items.push({ f: bp.f + 0.2, w: bw, d: () => drawFloatie(fp.back, true) });
+        items.push({ f: bp.f - 0.7, w: bw, d: () => drawFloatie(fp.front, false) });
+      } else if (bee.hop || homeFlying() || bee.z < 1) items.push({ f: bp.f + 0.3, w: bw, d: () => groundShadow(bx, by, 14 * clamp(1 - bz / 400, 0.4, 1)) });
       const pitchB = Math.atan2(Math.max(10, camH - bz), bp.f) * 0.5;   // a gentler look down, so her face stays clear of the petals
       const onFrog = bee.perch && bee.perch.isFrog && !bee.hop ? bee.perch : null;
       const at = () => {   // v37: riding a frog, she sits right on top of his head
@@ -7036,15 +7066,16 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         const ox = b0 ? bp.x - b0.x : 0, oy = b0 ? bp.y - b0.y : 0;   // her little idle loops still show
         return { x: lerp(bp.x, onFrog.seat.x + ox, m), y: lerp(bp.y, onFrog.seat.y + oy, m) };
       };
-      if (LC) items.push({ f: bp.f - 0.5, d: () => LC.bee.draw(ctx, at().x, at().y, s, bee.relYaw, pitchB, {
+      if (LC) items.push({ f: bp.f - 0.5, w: bw, d: () => LC.bee.draw(ctx, at().x, at().y, s, bee.relYaw, pitchB, {
         t: time, lift: bee.floating ? 5 : SEAT_GROUND + (bee.flower && !bee.hop ? 6 : 0), flying: !!bee.hop || idle.flying || homeFlying(), tuck: bee.tuck, seat: bee.seat,
         wiggle: bee.wiggle, happy: bee.happy, oops: bee.oops, focus: charging && !bee.hop,
         squish: charging && !bee.hop ? charge : bee.squash * 0.7, speed: homeFlying() ? 170 : bee.hop && !bee.hop.paused && !bee.hop.back ? 140 : idle.flying ? 90 : 0 }) });
-      else items.push({ f: bp.f - 0.5, d: () => drawBee(at().x, at().y, { size: s, lift: (bee.floating ? 5 : SEAT_GROUND) * s, noShadow: true, faceS: bee.faceS, vx: bee.hop ? 140 * bee.face : idle.flying ? 90 * bee.face : 0,
+      else items.push({ f: bp.f - 0.5, w: bw, d: () => drawBee(at().x, at().y, { size: s, lift: (bee.floating ? 5 : SEAT_GROUND) * s, noShadow: true, faceS: bee.faceS, vx: bee.hop ? 140 * bee.face : idle.flying ? 90 * bee.face : 0,
         wiggle: bee.wiggle, happy: bee.happy, look, ph: 0, flying: !!bee.hop || idle.flying || homeFlying(), sx, sy, oops: bee.oops, focus: charging,
         tuck: bee.tuck, seat: bee.seat, squish: charging && !bee.hop ? charge : 0 }) });
     }
     }
+    houseOrder(items);   // v45: things right next to the playhouse go in front of it or behind it the right way
     items.sort((a, b) => b.f - a.f);
     items.forEach(it => it.d());
     lastHits = flowerHits;
