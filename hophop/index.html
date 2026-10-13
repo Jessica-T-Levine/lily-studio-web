@@ -2184,6 +2184,18 @@
       ctx.lineTo(W, WATER_Y); ctx.closePath(); ctx.fill();
     });
   }
+  // The night stars: 46 spots scattered across the whole sky (not in neat rows), the same every visit.
+  // Spots are picked once from a fixed seed, and a new one is skipped if it lands too close to one already placed.
+  const NIGHT_STARS = (() => {
+    let seed = 20261010;
+    const rnd = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const out = [];
+    for (let tries = 0; out.length < 46 && tries < 2000; tries++) {
+      const xf = rnd(), yf = rnd();
+      if (out.every(o => (o.xf - xf) * (o.xf - xf) + (o.yf - yf) * (o.yf - yf) * 0.8 > 0.0036)) out.push({ xf, yf });
+    }
+    return out;
+  })();
   // the setting sun sits centered and is drawn BEFORE the hills,
   // so the hills cover its lower half and it looks like it is setting behind them
   function sun() {
@@ -2199,8 +2211,8 @@
     const h = skyHour, N = LS.nightness(h), G = LS.goldness(h);
     // stars come out as the sky darkens
     if (N > 0.02) {
-      for (let i = 0; i < 46; i++) {
-        const x = ((i * 137.5) % 100) / 100 * W, y = 14 + ((i * 61.8) % 100) / 100 * (WATER_Y - 120);
+      for (let i = 0; i < NIGHT_STARS.length; i++) {
+        const x = NIGHT_STARS[i].xf * W, y = 14 + NIGHT_STARS[i].yf * (WATER_Y - 120);
         const tw = 0.55 + 0.45 * Math.sin(time * 1.3 + i * 1.7);
         ctx.fillStyle = `rgba(255, 250, 235, ${N * tw * 0.9})`;
         ctx.beginPath(); ctx.arc(x, y, i % 5 === 0 ? 1.8 : 1.1, 0, Math.PI * 2); ctx.fill();

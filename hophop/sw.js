@@ -1,6 +1,6 @@
 // Lily's Hop Hop — offline support.
 // Change VERSION whenever you upload a new version of the game so players get the update.
-const VERSION = "hophop-page-v20";
+const VERSION = "hophop-page-v21";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "../playhouse/lily-halloween-v1.js", "/lily-home-sky-v1.js", "/lily-sky-v1.js"];
 
 self.addEventListener("install", event => {
