@@ -6987,7 +6987,10 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     // the playhouse
     { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), d: () => drawHouse() }); }
     if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, d: () => drawFlagpole() }); }
-    { const f = camF(MAILBOX.x, MAILBOX.y); if (f > 40) items.push({ f, d: () => drawMailbox() }); }   // v44: the mailbox by the door
+    { let f = camF(MAILBOX.x, MAILBOX.y);   // v44: the mailbox by the door
+      // v45: it stands in front of the house, so whenever you are on the front side of the house it must be drawn after
+      // the house (the house is sorted by its middle, which from off to the side can seem closer than the mailbox)
+      if (f > 40) { if (camY > HOUSE.y + HOUSE.d / 2) f = Math.min(f, Math.max(camF(HOUSE.x, HOUSE.y), 30) - 1); items.push({ f, d: () => drawMailbox() }); } }
     if (friend) {
       const p = proj(friend.x, friend.y, friend.z);
       if (inView(p, 80)) {
