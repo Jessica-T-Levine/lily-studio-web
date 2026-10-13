@@ -2417,37 +2417,101 @@
     drawFlag(a * (f < 120 ? clamp((f - 45) / 75, 0, 1) : 1));
   }
   // ---------- v44: the mailbox by the front door (the Tuesday Tips sign-up) ----------
-  // A little pink mailbox on a post, just right of the door. Tap it and a small sign-up card opens (same list as the
-  // sign-up at the bottom of the site). It is a flat picture that always faces you, like the flowers. Its flag wiggles when tapped.
-  // One picture unit is 1.8 world units, so it stands about 305 units tall (the door is 340).
-  const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 80, unit: 1.8 };
-  const MAIL_REF = { x: MAILBOX.x, y: MAILBOX.y, z: 120 };
+  // A little pink mailbox on a short post, just right of the door. Tap it and a small sign-up card opens (same list as the
+  // sign-up at the bottom of the site). v45: it is a real solid object, not a flat picture. Its opening always looks the same
+  // way as the front door (toward +y), so you can walk all the way around it and see its sides and back.
+  // Everything is measured in world units (the door is 340 tall). Its flag wiggles when tapped.
+  const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 62, face: 0 };   // face = turn it (in radians) if you ever want it to look another way
+  const MB = { base: 8, baseR: 32, post: 126, postW: 10, hw: 40, hs: 44, rise: 42, d: 48, flagH: 46, flagL: 70 };
+  const MAIL_REF = { x: MAILBOX.x, y: MAILBOX.y, z: 170 };
   const MAIL_FORM_URL = "https://app.kit.com/forms/9972716/subscriptions";
   let mailWiggleUntil = 0;
   const mailCard = document.getElementById("mailCard"), mailForm = document.getElementById("mailForm"), mailEmail = document.getElementById("mailEmail");
   const mailStat = document.getElementById("mailStat"), mailGo = document.getElementById("mailGo");
   function drawMailbox() {
-    const M = MAILBOX, p = proj(M.x, M.y, 0); if (!p) return;
-    const a = clamp((Math.max(5000, farReach() + 1500) - p.f) / 1500, 0, 1) * (p.f < 120 ? clamp((p.f - 45) / 75, 0, 1) : 1);   // seen from far away, like the playhouse
+    const M = MAILBOX, g = proj(M.x, M.y, 0); if (!g) return;
+    const a = clamp((Math.max(5000, farReach() + 1500) - g.f) / 1500, 0, 1) * (g.f < 120 ? clamp((g.f - 45) / 75, 0, 1) : 1);   // seen from far away, like the playhouse
     if (a <= 0.01) return;
-    const S = p.k * M.unit, wig = reduceMotion ? 0 : Math.max(0, (mailWiggleUntil - time) / 1.2);
-    ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.scale(S, S); ctx.translate(-60, -160);   // now drawn in picture units, feet at (60, 160)
-    ctx.fillStyle = "rgba(60, 100, 60, 0.22)"; ctx.beginPath(); ctx.ellipse(60, 160, 34, 7, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#F7E9F2"; roundRect(53, 82, 14, 76, 7); ctx.fill();
-    ctx.fillStyle = "#EAD3E4"; roundRect(53, 82, 6, 76, 3); ctx.fill();
-    ctx.fillStyle = "#F58FC0"; ctx.fill(new Path2D("M18 48Q18 14 60 14Q102 14 102 48L102 84Q102 90 96 90L24 90Q18 90 18 84Z"));
-    ctx.fillStyle = "#F9B2D3"; ctx.fill(new Path2D("M18 48Q18 14 60 14Q102 14 102 48L102 56Q60 46 18 56Z"));
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.7)"; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke(new Path2D("M30 30Q42 18 60 18"));
-    ctx.fillStyle = "#C94F8E"; roundRect(38, 60, 44, 26, 13); ctx.fill();
-    ctx.save(); ctx.translate(102, 68); ctx.rotate((reduceMotion ? 0 : Math.sin(time * 1.6) * 0.03) + Math.sin(time * 20) * 0.28 * wig); ctx.translate(-102, -68);   // the flag: a slow sway, and a wiggle when tapped
-    ctx.fillStyle = "#B9A6F2"; roundRect(100, 38, 5, 32, 2.5); ctx.fill();
-    ctx.fillStyle = "#FFD84D"; ctx.fill(new Path2D("M104 38L128 44L104 54Z"));
+    const wig = reduceMotion ? 0 : Math.max(0, (mailWiggleUntil - time) / 1.2);
+    const cf = Math.cos(M.face), sf = Math.sin(M.face);
+    const z0 = MB.post, hw = MB.hw, hs = MB.hs, rise = MB.rise, d = MB.d, BH = MB.base;
+    const W3 = (u, v) => [M.x + u * cf - v * sf, M.y + u * sf + v * cf];   // spot on the mailbox -> spot in the world
+    const P = (u, v, z) => { const w = W3(u, v); return proj(w[0], w[1], z); };
+    const LX = -0.55, LY = 0.5, LZ = 0.7, LL = Math.hypot(LX, LY, LZ);   // a soft light from the upper left
+    // one flat side of a solid: drawn only when it turns toward the camera, shaded by how it meets the light
+    const face = (pts, n, base) => {
+      const nx = n[0] * cf - n[1] * sf, ny = n[0] * sf + n[1] * cf, nz = n[2], w0 = W3(pts[0][0], pts[0][1]);
+      if (nx * (camX - w0[0]) + ny * (camY - w0[1]) + nz * (camH - pts[0][2]) <= 0) return false;
+      const q = pts.map(p => P(p[0], p[1], p[2])); if (!q.every(Boolean)) return false;
+      const lam = clamp((nx * LX + ny * LY + nz * LZ) / LL, -0.2, 1), m = 0.8 + 0.3 * ((lam + 0.2) / 1.2);
+      ctx.fillStyle = "rgb(" + [0, 1, 2].map(i => Math.min(255, base[i] * m) | 0).join(",") + ")";
+      ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.7; ctx.stroke();   // a hairline in the same color hides seams between faces
+      return true;
+    };
+    ctx.save(); ctx.globalAlpha = a;
+    softGround(M.x + 30, M.y + 14, 54, 34, 0, "60, 100, 50", 0.26, 5, 0.6);
+    // the round base
+    const ring = [], RN = 18;
+    for (let i = 0; i < RN; i++) { const t = i / RN * Math.PI * 2; ring.push([Math.cos(t) * MB.baseR, Math.sin(t) * MB.baseR]); }
+    for (let i = 0; i < RN; i++) {
+      const A = ring[i], B = ring[(i + 1) % RN], mid = (i + 0.5) / RN * Math.PI * 2;
+      face([[A[0], A[1], 0], [B[0], B[1], 0], [B[0], B[1], BH], [A[0], A[1], BH]], [Math.cos(mid), Math.sin(mid), 0], [236, 190, 214]);
+    }
+    face(ring.map(r => [r[0], r[1], BH]), [0, 0, 1], [247, 214, 232]);
+    // the post (four sides)
+    const pw = MB.postW, PC = [247, 233, 242];
+    face([[-pw, pw, BH], [pw, pw, BH], [pw, pw, z0], [-pw, pw, z0]], [0, 1, 0], PC);
+    face([[pw, -pw, BH], [-pw, -pw, BH], [-pw, -pw, z0], [pw, -pw, z0]], [0, -1, 0], PC);
+    face([[pw, pw, BH], [pw, -pw, BH], [pw, -pw, z0], [pw, pw, z0]], [1, 0, 0], PC);
+    face([[-pw, -pw, BH], [-pw, pw, BH], [-pw, pw, z0], [-pw, -pw, z0]], [-1, 0, 0], PC);
+    // the flag: a thin pole beside the box and a big yellow pennant that sways (a flat shape, so it shows from both sides)
+    const flagU = hw + 8, flagV = 14, zBr = z0 + hs - 14, zTop = z0 + hs + rise + 26;
+    const drawFlag3 = () => {
+      const pb = P(flagU, flagV, zBr - 6), pt = P(flagU, flagV, zTop), br0 = P(hw - 1, flagV, zBr), br1 = P(flagU, flagV, zBr);
+      if (!pb || !pt || !br0 || !br1) return;
+      ctx.lineCap = "round"; ctx.strokeStyle = "#B9A6F2"; ctx.lineWidth = Math.max(1.6, 5 * pb.k);
+      ctx.beginPath(); ctx.moveTo(br0.x, br0.y); ctx.lineTo(br1.x, br1.y); ctx.moveTo(pb.x, pb.y); ctx.lineTo(pt.x, pt.y); ctx.stroke();
+      const ang = 0.55 + (reduceMotion ? 0 : Math.sin(time * 1.6) * 0.05) + Math.sin(time * 20) * 0.3 * wig, du = Math.cos(ang), dv = Math.sin(ang);
+      const wave = (reduceMotion ? 0 : Math.sin(time * 2.4) * 5) + Math.sin(time * 20 + 1) * 10 * wig;
+      const f0 = P(flagU, flagV, zTop), f1 = P(flagU, flagV, zTop - MB.flagH), tip = P(flagU + du * MB.flagL, flagV + dv * MB.flagL, zTop - MB.flagH * 0.5 + wave);
+      if (!f0 || !f1 || !tip) return;
+      ctx.fillStyle = "#FFD84D"; ctx.beginPath(); ctx.moveTo(f0.x, f0.y); ctx.lineTo(tip.x, tip.y); ctx.lineTo(f1.x, f1.y); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "rgba(214, 160, 20, 0.55)"; ctx.lineWidth = Math.max(0.8, 1.6 * f0.k); ctx.lineJoin = "round"; ctx.stroke();
+    };
+    const flagFar = camF(W3(flagU, flagV)[0], W3(flagU, flagV)[1]) > camF(M.x, M.y);
+    if (flagFar) drawFlag3();
+    // the box: an arch shape pushed straight back, so it has two sides, a curved top, a front and a back
+    const prof = [[hw, z0], [hw, z0 + hs]];
+    for (let i = 1; i <= 12; i++) { const t = i / 12 * Math.PI; prof.push([hw * Math.cos(t), z0 + hs + rise * Math.sin(t)]); }
+    prof.push([-hw, z0]);
+    const PINK = [245, 143, 192];
+    for (let i = 0; i < prof.length; i++) {
+      const A = prof[i], B = prof[(i + 1) % prof.length], du = B[0] - A[0], dz = B[1] - A[1], L = Math.hypot(du, dz) || 1;
+      face([[A[0], -d, A[1]], [B[0], -d, B[1]], [B[0], d, B[1]], [A[0], d, A[1]]], [dz / L, 0, -du / L], PINK);
+    }
+    face(prof.map(p => [p[0], -d, p[1]]), [0, -1, 0], [226, 122, 172]);   // the back
+    if (face(prof.map(p => [p[0], d, p[1]]), [0, 1, 0], PINK)) {           // the front, with its dark round opening and a shine
+      const hw2 = hw * 0.62, zb2 = z0 + 10, sh2 = z0 + hs - 2, rise2 = rise * 0.7, open = [[hw2, zb2], [hw2, sh2]];
+      for (let i = 1; i <= 10; i++) { const t = i / 10 * Math.PI; open.push([hw2 * Math.cos(t), sh2 + rise2 * Math.sin(t)]); }
+      open.push([-hw2, zb2]);
+      face(open.map(p => [p[0], d + 0.4, p[1]]), [0, 1, 0], [201, 79, 142]);
+      const rim = prof.map(p => P(p[0], d + 0.6, p[1])), sh = [P(-hw * 0.72, d + 0.8, z0 + hs + rise * 0.5), P(-hw * 0.5, d + 0.8, z0 + hs + rise * 0.78), P(-hw * 0.2, d + 0.8, z0 + hs + rise * 0.93)];
+      if (rim.every(Boolean)) { ctx.strokeStyle = "rgba(255, 255, 255, 0.45)"; ctx.lineWidth = Math.max(0.8, 3 * rim[0].k); ctx.lineJoin = "round"; ctx.beginPath(); rim.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.stroke(); }
+      if (sh.every(Boolean)) { ctx.strokeStyle = "rgba(255, 255, 255, 0.75)"; ctx.lineWidth = Math.max(1, 5 * sh[0].k); ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(sh[0].x, sh[0].y); ctx.quadraticCurveTo(sh[1].x, sh[1].y, sh[2].x, sh[2].y); ctx.stroke(); }
+    }
+    if (!flagFar) drawFlag3();
+    // a little twinkle above it, so you notice it
+    const sp = P(0, 0, z0 + hs + rise + 30);
+    if (sp) {
+      const r = 14 * sp.k; ctx.globalAlpha = a * (reduceMotion ? 0.9 : 0.6 + 0.4 * Math.sin(time * 2.2)); ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath(); ctx.moveTo(sp.x, sp.y - r); ctx.lineTo(sp.x + r * 0.24, sp.y - r * 0.24); ctx.lineTo(sp.x + r, sp.y); ctx.lineTo(sp.x + r * 0.24, sp.y + r * 0.24);
+      ctx.lineTo(sp.x, sp.y + r); ctx.lineTo(sp.x - r * 0.24, sp.y + r * 0.24); ctx.lineTo(sp.x - r, sp.y); ctx.lineTo(sp.x - r * 0.24, sp.y - r * 0.24); ctx.closePath(); ctx.fill();
+    }
     ctx.restore();
-    ctx.globalAlpha = a * (reduceMotion ? 0.9 : 0.6 + 0.4 * Math.sin(time * 2.2)); ctx.fillStyle = "#FFFFFF";
-    ctx.fill(new Path2D("M60 8l2.4 5.6 5.6 2.4-5.6 2.4-2.4 5.6-2.4-5.6-5.6-2.4 5.6-2.4z"));
-    ctx.restore();
-    if (a > 0.5 && !BM.on && !BZ.on && !trip && !TG.on && mailCard.hidden) {   // tappable in the plain Playhouse (a long reach, so you can tap it from afar)
-      residentHits.push({ kind: "mailbox", id: "mailbox", ref: MAIL_REF, x: p.x, y: p.y - 100 * S, r: Math.max(24, 52 * S), top: p.y - 170 * S, f: p.f, near: 2600 });
+    const c = P(0, 0, z0 + (hs + rise) / 2), tp = P(0, 0, zTop + 10);
+    if (c && tp && a > 0.5 && !BM.on && !BZ.on && !trip && !TG.on && mailCard.hidden) {   // tappable in the plain Playhouse (a long reach, so you can tap it from afar)
+      residentHits.push({ kind: "mailbox", id: "mailbox", ref: MAIL_REF, x: c.x, y: c.y, r: Math.max(26, 82 * c.k), top: tp.y, f: g.f, near: 2600 });
     }
   }
   function openMail() {
