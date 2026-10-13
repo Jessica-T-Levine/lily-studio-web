@@ -257,6 +257,38 @@
   }
   .gopop a:focus-visible, .gopop button:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
   @keyframes popIn { from { opacity: 0; transform: translate(-50%, calc(-100% - 2px)) scale(0.9); } to { opacity: 1; } }
+  /* v44: the mailbox by the front door opens a little Tuesday Tips sign-up card */
+  .mailcard {
+    position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(92%, 380px); max-height: 94%; overflow: auto;
+    box-sizing: border-box; padding: 22px 20px 18px; border-radius: 22px; background: rgba(255, 253, 248, 0.98); color: #2E2440;
+    text-align: center; box-shadow: 0 18px 50px rgba(40, 28, 70, 0.4); animation: mailIn 0.2s ease-out;
+  }
+  .mailcard[hidden] { display: none; }
+  .mailcard .mx {
+    position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(46, 36, 64, 0.08);
+    color: #2E2440; font: 700 20px/1 var(--body); cursor: pointer; padding: 0;
+  }
+  .mailcard .mico { display: block; margin: 0 auto 6px; }
+  .mailcard .mt { margin: 0 0 6px; font: 800 21px/1.2 var(--display); }
+  .mailcard .mt em { color: #B03B81; font-style: normal; }
+  .mailcard .ms { margin: 0 0 14px; font: 600 14px/1.45 var(--body); color: #5B4B7A; }
+  .mailcard input[type=email] {
+    width: 100%; box-sizing: border-box; padding: 12px 16px; border: 2px solid #E9C6DC; border-radius: 999px; background: #FFFFFF;
+    font: 600 16px var(--body); color: #2E2440; outline: none; text-align: center;
+  }
+  .mailcard input[type=email]:focus { border-color: #B03B81; box-shadow: 0 0 0 3px rgba(176, 59, 129, 0.18); }
+  .mailcard .mgo {
+    width: 100%; margin-top: 10px; padding: 12px 16px; border: 0; border-radius: 999px; background: #B03B81; color: #FFFFFF;
+    font: 800 16px var(--display); cursor: pointer;
+  }
+  .mailcard .mgo:disabled { opacity: 0.6; cursor: wait; }
+  .mailcard .mx:focus-visible, .mailcard .mgo:focus-visible, .mailcard a:focus-visible { outline: 3px solid var(--peach); outline-offset: 2px; }
+  .mailcard .mstat { min-height: 1.3em; margin: 10px 0 0; font: 700 13px/1.4 var(--body); color: #2F7D4F; }
+  .mailcard .mstat.bad { color: #B03B81; }
+  .mailcard .mstat a { color: #B03B81; }
+  .mailcard .mhp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .mailcard .msr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @keyframes mailIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
   /* On the website: the world fills its whole window (the site page around it has the menu and text) */
   html, body { margin: 0; height: 100%; overflow: hidden; }
@@ -292,6 +324,20 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="gopop" id="goPop" hidden>
       <a id="goLink" href="/hophop/">Play Hop Hop?</a>
+    </div>
+    <div class="mailcard" id="mailCard" role="dialog" aria-labelledby="mailTitle" hidden>
+      <button class="mx" id="mailX" type="button" aria-label="Close">&times;</button>
+      <svg class="mico" viewBox="0 0 132 170" width="40" height="52" aria-hidden="true"><rect x="53" y="82" width="14" height="76" rx="7" fill="#F7E9F2"/><path d="M18 48Q18 14 60 14Q102 14 102 48L102 84Q102 90 96 90L24 90Q18 90 18 84Z" fill="#F58FC0"/><path d="M18 48Q18 14 60 14Q102 14 102 48L102 56Q60 46 18 56Z" fill="#F9B2D3"/><rect x="38" y="60" width="44" height="26" rx="13" fill="#C94F8E"/><rect x="100" y="38" width="5" height="32" rx="2.5" fill="#B9A6F2"/><path d="M104 38L128 44L104 54Z" fill="#FFD84D"/></svg>
+      <p class="mt" id="mailTitle">One tiny Claude tip,<br><em>every Tuesday.</em></p>
+      <p class="ms">A 60-second tip and one great skill in your inbox. Unsubscribe anytime.</p>
+      <form id="mailForm" action="https://app.kit.com/forms/9972716/subscriptions" method="post" novalidate>
+        <label class="msr" for="mailEmail">Email address</label>
+        <input id="mailEmail" type="email" name="email_address" placeholder="you@example.com" autocomplete="email" required>
+        <input type="hidden" name="tags[]" value="24064865">
+        <input class="mhp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="mgo" id="mailGo" type="submit">Send me the tips</button>
+      </form>
+      <p class="mstat" id="mailStat" role="status" aria-live="polite"></p>
     </div>
     <button class="hivebtn" id="hiveBtn" type="button" hidden aria-label="Pollen full. Fly to the hive to drop it off">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-3.3 0-6 2.4-6 5.4V9h12v-.6C18 5.4 15.3 3 12 3z" fill="#E5A23A"/><rect x="4.5" y="9" width="15" height="4" rx="2" fill="#F2C46B"/><rect x="3.5" y="13" width="17" height="4.2" rx="2.1" fill="#E5A23A"/><rect x="4.5" y="17.2" width="15" height="3.8" rx="1.9" fill="#F2C46B"/><path d="M10 21v-2.2a2 2 0 0 1 4 0V21z" fill="#5A3A1E"/></svg>
@@ -1667,7 +1713,7 @@
   function residentAt(p) {
     const hits = lastResidentHits;
     let best = null;
-    hits.forEach(h => { if (h.f < ANIMAL_NEAR && Math.hypot(p.sx - h.x, p.sy - h.y) < h.r && (!best || h.f < best.f)) best = h; });
+    hits.forEach(h => { if (h.f < (h.near || ANIMAL_NEAR) && Math.hypot(p.sx - h.x, p.sy - h.y) < h.r && (!best || h.f < best.f)) best = h; });
     return best;
   }
   canvas.addEventListener("pointerdown", e => {
@@ -2022,6 +2068,7 @@
   goLink.addEventListener("click", e => { if (goLink.getAttribute("href") === "#tag") { e.preventDefault(); e.stopPropagation(); const who = popFor; hidePop(); if (who && BM.on) tgStart(who); return; } if (goLink.getAttribute("href") === PAGES.neenee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBunny(); return; } if (goLink.getAttribute("href") === PAGES.bee) { e.preventDefault(); e.stopPropagation(); hidePop(); enterBee(); return; } if (framed) { e.preventDefault(); openPage(goLink.href); } else hidePop(); });
   function visit(h) {
     lastUserAt = time;
+    if (h.kind === "mailbox") { lastTap = null; openMail(); return; }   // v44: the mailbox opens the sign-up card
     const a = h.ref, now = performance.now();
     if (h.kind === "frog") { if (a) { a.wiggle = 1.1; } sfx.ribbit(); }
     else if (h.kind === "bunny" || h.kind === "neenee") {
@@ -2369,6 +2416,71 @@
     const f = camF(FLAGPOLE.x, FLAGPOLE.y), a = clamp((Math.max(5000, farReach() + 1500) - f) / 1500, 0, 1);   // seen from far away, like the playhouse
     drawFlag(a * (f < 120 ? clamp((f - 45) / 75, 0, 1) : 1));
   }
+  // ---------- v44: the mailbox by the front door (the Tuesday Tips sign-up) ----------
+  // A little pink mailbox on a post, just right of the door. Tap it and a small sign-up card opens (same list as the
+  // sign-up at the bottom of the site). It is a flat picture that always faces you, like the flowers. Its flag wiggles when tapped.
+  // One picture unit is 1.8 world units, so it stands about 305 units tall (the door is 340).
+  const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 80, unit: 1.8 };
+  const MAIL_REF = { x: MAILBOX.x, y: MAILBOX.y, z: 120 };
+  const MAIL_FORM_URL = "https://app.kit.com/forms/9972716/subscriptions";
+  let mailWiggleUntil = 0;
+  const mailCard = document.getElementById("mailCard"), mailForm = document.getElementById("mailForm"), mailEmail = document.getElementById("mailEmail");
+  const mailStat = document.getElementById("mailStat"), mailGo = document.getElementById("mailGo");
+  function drawMailbox() {
+    const M = MAILBOX, p = proj(M.x, M.y, 0); if (!p) return;
+    const a = clamp((Math.max(5000, farReach() + 1500) - p.f) / 1500, 0, 1) * (p.f < 120 ? clamp((p.f - 45) / 75, 0, 1) : 1);   // seen from far away, like the playhouse
+    if (a <= 0.01) return;
+    const S = p.k * M.unit, wig = reduceMotion ? 0 : Math.max(0, (mailWiggleUntil - time) / 1.2);
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.scale(S, S); ctx.translate(-60, -160);   // now drawn in picture units, feet at (60, 160)
+    ctx.fillStyle = "rgba(60, 100, 60, 0.22)"; ctx.beginPath(); ctx.ellipse(60, 160, 34, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#F7E9F2"; roundRect(53, 82, 14, 76, 7); ctx.fill();
+    ctx.fillStyle = "#EAD3E4"; roundRect(53, 82, 6, 76, 3); ctx.fill();
+    ctx.fillStyle = "#F58FC0"; ctx.fill(new Path2D("M18 48Q18 14 60 14Q102 14 102 48L102 84Q102 90 96 90L24 90Q18 90 18 84Z"));
+    ctx.fillStyle = "#F9B2D3"; ctx.fill(new Path2D("M18 48Q18 14 60 14Q102 14 102 48L102 56Q60 46 18 56Z"));
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.7)"; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke(new Path2D("M30 30Q42 18 60 18"));
+    ctx.fillStyle = "#C94F8E"; roundRect(38, 60, 44, 26, 13); ctx.fill();
+    ctx.save(); ctx.translate(102, 68); ctx.rotate((reduceMotion ? 0 : Math.sin(time * 1.6) * 0.03) + Math.sin(time * 20) * 0.28 * wig); ctx.translate(-102, -68);   // the flag: a slow sway, and a wiggle when tapped
+    ctx.fillStyle = "#B9A6F2"; roundRect(100, 38, 5, 32, 2.5); ctx.fill();
+    ctx.fillStyle = "#FFD84D"; ctx.fill(new Path2D("M104 38L128 44L104 54Z"));
+    ctx.restore();
+    ctx.globalAlpha = a * (reduceMotion ? 0.9 : 0.6 + 0.4 * Math.sin(time * 2.2)); ctx.fillStyle = "#FFFFFF";
+    ctx.fill(new Path2D("M60 8l2.4 5.6 5.6 2.4-5.6 2.4-2.4 5.6-2.4-5.6-5.6-2.4 5.6-2.4z"));
+    ctx.restore();
+    if (a > 0.5 && !BM.on && !BZ.on && !trip && !TG.on && mailCard.hidden) {   // tappable in the plain Playhouse (a long reach, so you can tap it from afar)
+      residentHits.push({ kind: "mailbox", id: "mailbox", ref: MAIL_REF, x: p.x, y: p.y - 100 * S, r: Math.max(24, 52 * S), top: p.y - 170 * S, f: p.f, near: 2600 });
+    }
+  }
+  function openMail() {
+    hidePop(); mailWiggleUntil = time + 1.2; sfx.friend(); sfx.dust();
+    burst(MAILBOX.x, MAILBOX.y, 150, ["#FF9EC3", "#FFD6E6", "#FFE27A"], 10, 90);
+    mailStat.textContent = ""; mailStat.classList.remove("bad"); mailCard.hidden = false;
+    if (hasKeyboard) setTimeout(() => { try { mailEmail.focus(); } catch (_) {} }, 60);   // on a touch screen the keyboard waits until you tap the box
+  }
+  function closeMail() {
+    if (mailCard.hidden) return;
+    mailCard.hidden = true; try { canvas.focus({ preventScroll: true }); } catch (_) {}
+  }
+  document.getElementById("mailX").addEventListener("click", closeMail);
+  canvas.addEventListener("pointerdown", closeMail, true);   // tapping the meadow puts the card away
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !mailCard.hidden) { e.preventDefault(); e.stopImmediatePropagation(); closeMail(); } }, true);
+  let mailBusy = false;
+  mailForm.addEventListener("submit", e => {
+    e.preventDefault();
+    if (mailForm.website.value || mailBusy) return;   // the hidden box is a bot trap
+    if (!mailEmail.value || !mailEmail.checkValidity()) { mailStat.classList.add("bad"); mailStat.textContent = "Please type your email address."; try { mailEmail.focus(); } catch (_) {} return; }
+    const data = new FormData(mailForm); data.delete("website");
+    mailBusy = true; mailGo.disabled = true; mailStat.classList.remove("bad"); mailStat.textContent = "Adding you to the list…";
+    fetch(MAIL_FORM_URL, { method: "POST", headers: { Accept: "application/json" }, body: data })
+      .then(res => res.json().then(j => ({ ok: res.ok, j }), () => ({ ok: res.ok, j: {} })))
+      .then(r => {
+        if (r.ok && r.j.status === "success") { mailForm.reset(); sfx.dust(); mailStat.textContent = "Almost done! Check your inbox and tap the button in our email to confirm. 💌"; }
+        else if (r.j.status === "quarantined" && r.j.url) {   // Kit's quick "are you human?" check
+          mailStat.textContent = ""; const a = document.createElement("a"); a.href = r.j.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "One quick check: tap here to finish"; mailStat.appendChild(a);
+        } else throw new Error("no");
+      })
+      .catch(() => { mailStat.classList.add("bad"); mailStat.textContent = "That did not go through. Please try again in a moment."; })
+      .then(() => { mailBusy = false; mailGo.disabled = false; });
+  });
   function drawFlag(alpha) {
     if (!FLAGD || alpha <= 0.01) return;
     const D = FLAGD, N = nightness(), B = D.pole.base;
@@ -6804,6 +6916,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     // the playhouse
     { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), d: () => drawHouse() }); }
     if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, d: () => drawFlagpole() }); }
+    { const f = camF(MAILBOX.x, MAILBOX.y); if (f > 40) items.push({ f, d: () => drawMailbox() }); }   // v44: the mailbox by the door
     if (friend) {
       const p = proj(friend.x, friend.y, friend.z);
       if (inView(p, 80)) {
@@ -7542,6 +7655,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     tg: () => ({ on: TG.on, phase: TG.phase, role: TG.role, goShown: !tagGo.hidden, score: TG.score, catches: TG.catches, left: TG.left, cnt: TG.cnt, mode: TG.mode, seekT: TG.seekT, turbo: TG.turbo, hide: TG.hide && { x: TG.hide.x, y: TG.hide.y, s: !!TG.hide.S, S: TG.hide.S && { x: TG.hide.S.x, y: TG.hide.S.y, r: TG.hide.S.r, tree: !!TG.hide.S.tree } },
       f: TG.f && { x: TG.f.x, y: TG.f.y, size: TG.f.size, state: TG.f.state }, you: { x: bun.x, y: bun.y, h: bun.heading }, tummy: bmTummy, cardShown: !tagCard.hidden }),
     tgStart: i => { const l = ANIMALS.filter(a => a.kind === "bunny" && !a.neenee && a.alpha > 0.9); const f = l[i || 0]; if (!f) return false; f.x = bun.x + 400 * Math.cos(bun.heading + 0.4); f.y = bun.y + 400 * Math.sin(bun.heading + 0.4); tgStart(f); return true; },
+    mail: () => ({ hit: lastResidentHits.find(h => h.kind === "mailbox") || null, open: !mailCard.hidden, at: { x: MAILBOX.x, y: MAILBOX.y }, W, H }),
     playBee: () => enterBee(), leaveBee: () => exitBee(),
     bz: () => ({ on: BZ.on, x: bee.x, y: bee.y, z: bee.z, aim: bee.aim, hop: !!bee.hop, hopKind: bee.hop ? bee.hop.kind : null, paused: !!(bee.hop && bee.hop.paused), charging, charge, pollen: pollenFill, delivered, blooms, hops, camH, camYaw, camX, camY,
       trip: trip ? { phase: trip.phase, mode: trip.mode, t: trip.t, load: trip.load } : null, flower: bee.flower ? bee.flower.id : null, hiveBtnHidden: hiveBtn.hidden, backHidden: bmBackBtn.hidden, perch: bee.perch ? true : false }),
