@@ -2421,8 +2421,8 @@
   // sign-up at the bottom of the site). v45: it is a real solid object, not a flat picture. Its opening always looks the same
   // way as the front door (toward +y), so you can walk all the way around it and see its sides and back.
   // Everything is measured in world units (the door is 340 tall). Its flag wiggles when tapped.
-  const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 62, face: 0 };   // face = turn it (in radians) if you ever want it to look another way
-  const MB = { base: 8, baseR: 32, post: 126, postW: 10, hw: 40, hs: 44, rise: 42, d: 48, flagH: 46, flagL: 70 };
+  const MAILBOX = { x: DOOR.x + 215, y: DOOR.y + 92, face: 0 };   // face = turn it (in radians) if you ever want it to look another way
+  const MB = { base: 8, baseR: 32, post: 126, postW: 10, hw: 36, hs: 40, rise: 36, d: 72, flagH: 46, flagL: 70 };   // a long tunnel shape, like a real mailbox (twice as long as it is wide)
   const MAIL_REF = { x: MAILBOX.x, y: MAILBOX.y, z: 170 };
   const MAIL_FORM_URL = "https://app.kit.com/forms/9972716/subscriptions";
   let mailWiggleUntil = 0;
@@ -2465,8 +2465,15 @@
     face([[pw, -pw, BH], [-pw, -pw, BH], [-pw, -pw, z0], [pw, -pw, z0]], [0, -1, 0], PC);
     face([[pw, pw, BH], [pw, -pw, BH], [pw, -pw, z0], [pw, pw, z0]], [1, 0, 0], PC);
     face([[-pw, -pw, BH], [-pw, pw, BH], [-pw, pw, z0], [-pw, -pw, z0]], [-1, 0, 0], PC);
+    // the small support plate the box sits on
+    const qu = 22, qv = 46, qz = z0 - 7, QC = [236, 205, 224];
+    face([[-qu, qv, qz], [qu, qv, qz], [qu, qv, z0], [-qu, qv, z0]], [0, 1, 0], QC);
+    face([[qu, -qv, qz], [-qu, -qv, qz], [-qu, -qv, z0], [qu, -qv, z0]], [0, -1, 0], QC);
+    face([[qu, qv, qz], [qu, -qv, qz], [qu, -qv, z0], [qu, qv, z0]], [1, 0, 0], QC);
+    face([[-qu, -qv, qz], [-qu, qv, qz], [-qu, qv, z0], [-qu, -qv, z0]], [-1, 0, 0], QC);
+    face([[-qu, -qv, qz], [qu, -qv, qz], [qu, qv, qz], [-qu, qv, qz]], [0, 0, -1], QC);
     // the flag: a thin pole beside the box and a big yellow pennant that sways (a flat shape, so it shows from both sides)
-    const flagU = hw + 8, flagV = 14, zBr = z0 + hs - 14, zTop = z0 + hs + rise + 26;
+    const flagU = hw + 8, flagV = 6, zBr = z0 + hs - 14, zTop = z0 + hs + rise + 26;
     const drawFlag3 = () => {
       const pb = P(flagU, flagV, zBr - 6), pt = P(flagU, flagV, zTop), br0 = P(hw - 1, flagV, zBr), br1 = P(flagU, flagV, zBr);
       if (!pb || !pt || !br0 || !br1) return;
