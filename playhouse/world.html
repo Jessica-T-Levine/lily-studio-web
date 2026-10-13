@@ -2510,8 +2510,8 @@
     }
     ctx.restore();
     const c = P(0, 0, z0 + (hs + rise) / 2), tp = P(0, 0, zTop + 10);
-    if (c && tp && a > 0.5 && !BM.on && !BZ.on && !trip && !TG.on && mailCard.hidden) {   // tappable in the plain Playhouse (a long reach, so you can tap it from afar)
-      residentHits.push({ kind: "mailbox", id: "mailbox", ref: MAIL_REF, x: c.x, y: c.y, r: Math.max(26, 82 * c.k), top: tp.y, f: g.f, near: 2600 });
+    if (c && tp && a > 0.5 && !BM.on && !BZ.on && !trip && !TG.on && mailCard.hidden) {   // tappable in the plain Playhouse, only once you are close to it (the same reach as the animals)
+      residentHits.push({ kind: "mailbox", id: "mailbox", ref: MAIL_REF, x: c.x, y: c.y, r: Math.max(26, 82 * c.k), top: tp.y, f: g.f });
     }
   }
   function openMail() {
