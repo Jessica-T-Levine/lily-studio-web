@@ -157,6 +157,18 @@
   .friends a { background: rgba(255, 201, 33, 0.9); color: #5A3B00; border-color: transparent; }
   .friends a:focus-visible, .friends button:focus-visible { outline: 3px solid var(--peach); outline-offset: 3px; }
   .hud { display: none !important; }   /* no words inside the world */
+  /* v45: how the world starts when it opens as a game page (?play=neenee / ?play=buzz), choice ?start=a|b|c */
+  #gsTitle { position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%); z-index: 6; font: 800 26px/1 Grandstander, "Chalkboard SE", "Comic Sans MS", ui-rounded, sans-serif; color: #fff; white-space: nowrap; text-shadow: 0 3px 0 rgba(90, 50, 110, 0.3); pointer-events: none; opacity: 0; transition: opacity 0.6s ease; }
+  #gsTitle.on { opacity: 1; } #gsTitle.off { opacity: 0; transition-duration: 1.2s; }
+  @media (max-width: 700px) { #gsTitle { font-size: 21px; top: calc(env(safe-area-inset-top, 0px) + 112px); } }
+  #gsCard { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; background: rgba(253, 251, 247, 0.28); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  #gsCard .gs-panel { width: min(420px, 100%); box-sizing: border-box; padding: 26px 24px 22px; border-radius: 28px; background: #FDFBF7; border: 2px solid #FFD3EA; box-shadow: 0 18px 50px rgba(11, 30, 63, 0.25); text-align: center; font-family: Grandstander, "Chalkboard SE", "Comic Sans MS", ui-rounded, sans-serif; }
+  #gsCard h2 { margin: 0; font-weight: 800; font-size: 30px; line-height: 1.1; color: #F966BC; }
+  #gsCard p { margin: 8px 0 18px; font-weight: 700; font-size: 15px; color: #0B1E3F; }
+  #gsCard .gs-play { display: inline-block; min-width: 150px; padding: 14px 40px; border: 0; border-radius: 999px; background: #F966BC; color: #fff; font: 800 20px/1 Grandstander, "Chalkboard SE", "Comic Sans MS", ui-rounded, sans-serif; box-shadow: 0 5px 0 #B03B81; cursor: pointer; }
+  #gsCard .gs-play:active { transform: translateY(3px); box-shadow: 0 2px 0 #B03B81; }
+  #gsCard .gs-back { display: block; margin: 16px auto 0; padding: 8px 14px; border: 0; background: none; color: #0B1E3F; opacity: 0.75; font: 700 13px/1 Grandstander, "Chalkboard SE", "Comic Sans MS", ui-rounded, sans-serif; cursor: pointer; text-decoration: underline; }
+  #gsCard button:focus-visible { outline: 3px solid #0B1E3F; outline-offset: 3px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .corner { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); display: flex; gap: 8px; z-index: 6; }
   .cbtn {
@@ -7770,6 +7782,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     tgSet: o => { Object.assign(TG, o); }, tgStop: () => tgStop(), bunnyTap: () => { const fh = tgFriendHit({ sx: W / 2, sy: H / 2 }); return !!fh; },
     solids: (x, y, r) => solidsNear(x, y, r), step: (n, dt) => { for (let i = 0; i < n; i++) update(dt || 0.05); },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
+    gs: () => ({ style: GS.style, t: GS.t, card: !!gsCardEl, title: gsTitleEl ? gsTitleEl.className : null }), gsPlay: () => gsPlay(),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
   let bgTick = null;
@@ -7795,16 +7808,93 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     last = now;
     tunePerf(ms);
     update(dt);
-    draw();
+    if (GS.t < 1) GS.t = Math.min(1, GS.t + dt / GS.dur);   // v45: the swoop-in clock
+    gsDraw();
     requestAnimationFrame(frame);
+  }
+  // ---------- v45: how the world starts when it opens as a game (?play=neenee or ?play=buzz) ----------
+  // Jessica's decision P3: the parting clouds and "Going to the Playhouse..." belong to the Playhouse only. A game page starts like a game.
+  // The start is chosen with ?start=  a: title pop (like Hop Hop)  b: swoop in  c: ready card  0: the old start (animal appears after 0.4 s).
+  // Playing in place from the Playhouse (tap the animal, "Play with ...?") is not a game page and never uses any of this.
+  const GS_DEFAULT = "0";
+  const GS = { style: GS_DEFAULT, t: 1, dur: 1.7, back: 780, up: 430 };
+  { const m = /[?&]start=(0|a|b|c)(?![A-Za-z0-9])/.exec(location.search); if (m) GS.style = m[1]; }
+  const gsName = () => (BZ.fromPage ? "Lily’s Buzz Buzz" : "Lily’s Bun Nee Nee");
+  const gsEnter = () => { if (BZ.fromPage) enterBee(); else enterBunny(); };
+  const gsSkippable = e => !(e.target && e.target.closest && e.target.closest("#bmBack, #gsCard"));
+  let gsTitleEl = null, gsCardEl = null;
+  // one tap or key while the camera glides in jumps straight to the end; the first input also lets the title fade
+  ["pointerdown", "mousedown", "touchstart", "keydown"].forEach(ev => window.addEventListener(ev, e => {
+    if (gsTitleEl && gsTitleEl.classList.contains("on")) { gsTitleEl.classList.remove("on"); gsTitleEl.classList.add("off"); }
+    if (GS.t < 1 && gsSkippable(e)) { GS.t = 1; e.stopImmediatePropagation(); }
+  }, true));
+  function gsShowTitle() {
+    gsTitleEl = document.createElement("div"); gsTitleEl.id = "gsTitle"; gsTitleEl.setAttribute("aria-hidden", "true"); gsTitleEl.textContent = gsName();
+    stage.appendChild(gsTitleEl);
+    requestAnimationFrame(() => requestAnimationFrame(() => gsTitleEl.classList.add("on")));
+    setTimeout(() => { if (gsTitleEl.classList.contains("on")) { gsTitleEl.classList.remove("on"); gsTitleEl.classList.add("off"); } }, 14000);
+  }
+  function gsShowCard() {
+    gsCardEl = document.createElement("div"); gsCardEl.id = "gsCard"; gsCardEl.setAttribute("role", "dialog"); gsCardEl.setAttribute("aria-label", gsName());
+    gsCardEl.innerHTML = '<div class="gs-panel"><h2></h2><p>Ready to play?</p><button type="button" class="gs-play">Play</button><button type="button" class="gs-back">Back to the Playhouse</button></div>';
+    gsCardEl.querySelector("h2").textContent = gsName();
+    stage.appendChild(gsCardEl);
+    const playBtn = gsCardEl.querySelector(".gs-play");
+    ["pointerdown", "mousedown", "touchstart"].forEach(ev => gsCardEl.addEventListener(ev, e => e.stopPropagation()));
+    playBtn.addEventListener("click", gsPlay);
+    gsCardEl.querySelector(".gs-back").addEventListener("click", () => { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } });
+    if (hasKeyboard) { try { playBtn.focus({ preventScroll: true }); } catch (_) {} }   // Enter or Space plays; no focus ring on touch screens
+  }
+  function gsPlay() { if (!gsCardEl) return; gsCardEl.remove(); gsCardEl = null; gsEnter(); }   // a tap is a real touch, so sound can start here
+  function gsBegin() {
+    if (GS.style === "a") { gsEnter(); gsShowTitle(); }
+    else if (GS.style === "b") { gsEnter(); if (!reduceMotion) GS.t = 0; }
+    else if (GS.style === "c") gsShowCard();
+  }
+  // wait until the page around the world has finished its own loading cover (if it has one), then start
+  function gsWhenUncovered(go) {
+    let done = false, sawCover = false, iv = 0, onMsg = null;
+    const fire = delay => { if (done) return; done = true; clearInterval(iv); window.removeEventListener("message", onMsg); setTimeout(go, delay); };
+    onMsg = e => { if (e.origin === location.origin && e.data && e.data.lilyGameStart === true) fire(0); };   // the page around the world can say "go" this way
+    window.addEventListener("message", onMsg);
+    const covered = () => { try { const b = window.parent !== window && window.parent.document.getElementById("phLoading"); return !!(b && b.style.display !== "none" && !b.classList.contains("done")); } catch (_) { return false; } };
+    const t0 = performance.now();
+    iv = setInterval(() => {
+      if (covered()) { sawCover = true; if (performance.now() - t0 > 13000) fire(0); return; }
+      fire(sawCover ? 2200 : 0);   // the clouds take a few seconds to part after they are marked done
+    }, 100);
+    if (!covered()) fire(300);
+  }
+  function gsDraw() {
+    if (GS.t >= 1) { draw(); return; }
+    const u = GS.t, k = Math.pow(1 - u, 3);   // 1 at the start, 0 when you arrive (slows down as it lands)
+    const sx = camX, sy = camY, sh = camH;
+    camX -= Math.cos(camYaw) * GS.back * k; camY -= Math.sin(camYaw) * GS.back * k; camH += GS.up * k;
+    draw();
+    // sparkles around your animal while the camera glides in
+    const px = BZ.on ? bee.x : bun.x, py = BZ.on ? bee.y : bun.y, pz = BZ.on ? bee.z : bun.z + 36;
+    const p = proj(px, py, pz);
+    if (p) {
+      const a = clamp(1 - u * 1.05, 0, 1);
+      for (let i = 0; i < 9; i++) {
+        const ang = i / 9 * Math.PI * 2 + time * 1.6, r = clamp(p.k * 120, 30, 110) * (0.85 + 0.2 * Math.sin(time * 2.3 + i * 1.7));   // a ring that is as big as your animal looks on screen
+        const x = p.x + Math.cos(ang) * r * 1.2, y = p.y + Math.sin(ang) * r * 0.7 - r * 0.2, sz = clamp(p.k * 60, 9, 18) * (i % 3 === 0 ? 1 : 0.65) * (0.8 + 0.2 * Math.sin(time * 4 + i));
+        ctx.save(); ctx.globalAlpha = a * (i % 2 ? 0.95 : 0.7); ctx.fillStyle = i % 2 ? "#FF8AD0" : "#FFFFFF";
+        ctx.beginPath(); ctx.moveTo(x, y - sz); ctx.lineTo(x + sz * 0.26, y - sz * 0.26); ctx.lineTo(x + sz, y); ctx.lineTo(x + sz * 0.26, y + sz * 0.26);
+        ctx.lineTo(x, y + sz); ctx.lineTo(x - sz * 0.26, y + sz * 0.26); ctx.lineTo(x - sz, y); ctx.lineTo(x - sz * 0.26, y - sz * 0.26); ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+    }
+    camX = sx; camY = sy; camH = sh;
   }
   window.__perf = () => ({ dpr, dprBest, avg: Math.round(perf.avg * 10) / 10, chunks: chunks.size });
   resize();
   draw();
   requestAnimationFrame(frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
-  if (BZ.fromPage) setTimeout(enterBee, 400);   // opened as Lily’s Buzz Buzz
-  if (BM.fromPage) setTimeout(enterBunny, 400);   // opened as Lily's Bun Nee Nee
+  if (GS.style === "0") {   // the start we had before v45
+    if (BZ.fromPage) setTimeout(enterBee, 400);   // opened as Lily’s Buzz Buzz
+    if (BM.fromPage) setTimeout(enterBunny, 400);   // opened as Lily's Bun Nee Nee
+  } else if (BZ.fromPage || BM.fromPage) gsWhenUncovered(gsBegin);
 })();
 </script>
 </body>
