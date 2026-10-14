@@ -24,7 +24,6 @@
   <!-- Fonts are hosted on our own site (faster, no third-party stop-and-wait). The two headline/body fonts load first. -->
   <link rel="preload" href="/fonts/playfair-display-latin-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/montserrat-latin-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/grandstander-latin-800.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     /* ---- Self-hosted fonts (latin) + size-matched backups so the page never jumps when a font arrives ---- */
     @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/playfair-display-latin-600.woff2') format('woff2'); }
@@ -36,7 +35,6 @@
     @font-face { font-family: 'Playfair Fallback'; src: local('Georgia'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
     @font-face { font-family: 'Playfair Fallback'; font-style: italic; src: local('Georgia Italic'), local('Georgia-Italic'); size-adjust: 101.4%; ascent-override: 106.7%; descent-override: 24.8%; line-gap-override: 0%; }
     @font-face { font-family: 'Montserrat Fallback'; src: local('Arial'); size-adjust: 112.8%; ascent-override: 85.8%; descent-override: 22.3%; line-gap-override: 0%; }
-    @font-face { font-family: 'Grandstander'; font-style: normal; font-weight: 800; font-display: swap; src: url('/fonts/grandstander-latin-800.woff2') format('woff2'); }
     :root {
       --navy: #0B1E3F;
       --navy-deep: #06122A;
@@ -337,32 +335,11 @@ html.ph-full { background: #8DB6EE; }
 /* full screen: truly edge to edge, under the browser's own bars and the notch */
 html.ph-full .playhouse-stage { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 1000; background: #8DB6EE; }
 html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important; }
-/* loading screen: the live sky with the very same clouds as the Playhouse sky, then they part to show the Playhouse */
-.playhouse-loading { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(#8DB6EE, #B7D2F4 45%, #FFE6C2 80%, #FFE2B0); color: #0B1E3F; transition: background-color 5.75s ease, opacity 5.75s ease; }
-.playhouse-loading.done { background: transparent !important; opacity: 0; pointer-events: none; }
-.playhouse-loading .cl { overflow: visible; position: absolute; top: -3%; height: 106%; width: 72%; animation: phDrift 5s ease-in-out infinite alternate; }
-.playhouse-loading .cl-l { left: -12%; } .playhouse-loading .cl-r { right: -12%; animation-delay: -2.5s; }
-.playhouse-loading .c { transition: transform 5s cubic-bezier(0.65, 0, 0.35, 1); }
-.playhouse-loading .c1 { transition-duration: 5.5s; } .playhouse-loading .c2 { transition-duration: 5.75s; }
-.playhouse-loading.done .cl { animation: none; }
-.playhouse-loading.done .cl-l .c { transform: translateX(-350px); }
-.playhouse-loading.done .cl-r .c { transform: translateX(350px); }
-.ld-bee { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
-.playhouse-loading .ld-msg { position: relative; z-index: 2; text-align: center; transition: opacity 2s ease, transform 2.4s ease; }
-.playhouse-loading .ld-msg { position: relative; }
-.playhouse-loading .sp { position: absolute; width: 18px; height: 18px; pointer-events: none; opacity: 0; background: radial-gradient(circle, #fff 0 12%, transparent 14%), conic-gradient(from 0deg, transparent 0 8%, #fff 9% 16%, transparent 17% 33%, #fff 34% 41%, transparent 42% 58%, #fff 59% 66%, transparent 67% 83%, #fff 84% 91%, transparent 92%); -webkit-mask: radial-gradient(circle, #000 0 28%, transparent 30%), linear-gradient(#000,#000); filter: drop-shadow(0 0 3px rgba(255,255,255,1)) drop-shadow(0 0 6px rgba(249,102,188,0.6)); animation: phTwinkle 2.6s ease-in-out infinite; }
-.playhouse-loading .sp { background: none; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); background-color: #FF8AD0; -webkit-mask: none; }
-.playhouse-loading .sp1 { left: -6px; top: -10px; animation-delay: 0s; }
-.playhouse-loading .sp2 { left: 24%; top: -16px; width: 9px; height: 9px; animation-delay: 1.1s; }
-.playhouse-loading .sp3 { right: 8%; top: -12px; width: 12px; height: 12px; animation-delay: 0.5s; }
-.playhouse-loading .sp4 { right: -8px; bottom: -6px; animation-delay: 1.7s; }
-.playhouse-loading .sp5 { left: 38%; bottom: -14px; width: 8px; height: 8px; animation-delay: 2.1s; }
-@keyframes phTwinkle { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
-.playhouse-loading.done .ld-msg { opacity: 0; transform: scale(0.94); }
-.playhouse-loading p { margin: 0; font-family: 'Grandstander', 'Chalkboard SE', 'Comic Sans MS', ui-rounded, system-ui, sans-serif; font-weight: 800; font-style: normal; font-size: 1.6rem; letter-spacing: 0.01em; color: #FF7FC8; text-shadow: 0 0 6px rgba(255, 255, 255, 0.95), 0 0 16px rgba(255, 255, 255, 0.85), 0 0 30px rgba(249, 102, 188, 0.45); }
-.playhouse-loading.night { color: #FDFBF7; } .playhouse-loading.night p { color: #FF7FC8; }
-@keyframes phDrift { from { margin-top: -8px; } to { margin-top: 8px; } }
-@media (prefers-reduced-motion: reduce) { .playhouse-loading .cl { animation: none; } .playhouse-loading .cl { transition: none; } }
+/* the world starts like a game (it swoops in by itself): the stage shows the live sky behind it, so there is never a white flash while the frame loads */
+.playhouse-stage { background: linear-gradient(#8DB6EE, #B7D2F4 45%, #FFE6C2 80%, #FFE2B0); }
+.playhouse-frame { background: transparent !important; }
+/* the frame stays see-through (sky only) until the world's swoop has begun, so you never see the resting view jump back */
+html.ph-hold .playhouse-frame { opacity: 0; }
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -488,7 +465,6 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
   <main class="playhouse">
     <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Lily’s Buzz Buzz</h1>
     <div class="playhouse-stage">
-      <div class="playhouse-loading" id="phLoading" role="status" aria-live="polite"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="phCloud" fill="rgba(255,244,248,0.97)"><ellipse cx="0" cy="0" rx="50" ry="12"/><ellipse cx="-18" cy="-9" rx="22" ry="13"/><ellipse cx="14" cy="-12" rx="26" ry="16"/></g></defs></svg><svg class="cl cl-l" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="c c0"><use href="#phCloud" transform="translate(175 -1) scale(2.08)"/></g><g class="c c1"><use href="#phCloud" transform="translate(115 72) scale(2.82)"/></g><g class="c c2"><use href="#phCloud" transform="translate(167 140) scale(4.41)"/></g><g class="c c0"><use href="#phCloud" transform="translate(88 209) scale(2.6)"/></g><g class="c c2"><use href="#phCloud" transform="translate(183 265) scale(2.74)"/></g><g class="c c1"><use href="#phCloud" transform="translate(92 338) scale(4.63)"/></g><g class="c c0"><use href="#phCloud" transform="translate(156 409) scale(2.63)"/></g><g class="c c1"><use href="#phCloud" transform="translate(125 470) scale(2.72)"/></g><g class="c c2"><use href="#phCloud" transform="translate(140 529) scale(2.12)"/></g><g class="c c2"><use href="#phCloud" transform="translate(75 610) scale(3.82)"/></g><g class="c c0"><use href="#phCloud" transform="translate(144 665) scale(4.28)"/></g><g class="c c1"><use href="#phCloud" transform="translate(117 734) scale(4.36)"/></g></svg><svg class="cl cl-r" viewBox="0 0 280 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="c c0"><use href="#phCloud" transform="translate(108 8) scale(1.74)"/></g><g class="c c1"><use href="#phCloud" transform="translate(170 72) scale(3.89)"/></g><g class="c c2"><use href="#phCloud" transform="translate(86 128) scale(2.99)"/></g><g class="c c0"><use href="#phCloud" transform="translate(158 205) scale(4.29)"/></g><g class="c c2"><use href="#phCloud" transform="translate(96 270) scale(2.92)"/></g><g class="c c1"><use href="#phCloud" transform="translate(145 340) scale(3.43)"/></g><g class="c c0"><use href="#phCloud" transform="translate(103 408) scale(1.65)"/></g><g class="c c1"><use href="#phCloud" transform="translate(170 478) scale(3.21)"/></g><g class="c c2"><use href="#phCloud" transform="translate(105 537) scale(2.07)"/></g><g class="c c2"><use href="#phCloud" transform="translate(183 612) scale(4.2)"/></g><g class="c c0"><use href="#phCloud" transform="translate(75 662) scale(4.09)"/></g><g class="c c1"><use href="#phCloud" transform="translate(162 738) scale(4.01)"/></g></svg><div class="ld-msg"><p>Buzzing to Buzz Buzz…</p><i class="sp sp1"></i><i class="sp sp2"></i><i class="sp sp3"></i><i class="sp sp4"></i><i class="sp sp5"></i></div></div><canvas class="ld-bee" id="phBee" aria-hidden="true"></canvas>
       <iframe class="playhouse-frame" src="/playhouse/world.html?play=buzz" title="Lily’s Buzz Buzz: hop Buzz Buzz from flower to flower, make the buds bloom, and fly the pollen home to her hive" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
       <div class="playhouse-tip" id="playhouseTip" role="status" aria-live="polite">Press a flower, hold to wind up, and let go to hop. Bloom the buds to gather pollen!</div>
     </div>
@@ -653,53 +629,34 @@ html.ph-full .playhouse-frame { width: 100% !important; height: 100% !important;
 </script>
 <script src="/lily-home-sky-v1.js"></script>
 <script src="/lily-sky-v1.js"></script>
-<script src="/playhouse/lily-creatures-v4.js"></script>
 <script>
-/* Loading screen: shows until the world has loaded and drawn its first picture, then the clouds part and it fades away.
-   (It also gives up after 12 seconds so it can never get stuck.) */
+/* The live sky (Lily's home sky, rule S1) sits behind the world while the frame loads, so there is never a white flash. */
 (function () {
-  var box = document.getElementById('phLoading'), frame = document.querySelector('.playhouse-frame');
-  if (!box || !frame) return;
-  var gone = false;
-  try {   // the loading sky is the live sky (Lily's home sky, Central Time), same as the Playhouse itself
-    var LS = window.LilySky;
-    if (LS) { var c = LS.skyRgb().map(function (v) { return 'rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ')'; }); box.style.background = 'linear-gradient(' + c[0] + ',' + c[1] + ' 40%,' + c[2] + ' 78%,' + c[3] + ')'; if (LS.nightness() > 0.5) box.classList.add('night'); }
+  var st = document.querySelector('.playhouse-stage'), LS = window.LilySky;
+  if (!st || !LS) return;
+  try {
+    var c = LS.skyRgb().map(function (v) { return 'rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ')'; });
+    st.style.background = 'linear-gradient(' + c[0] + ',' + c[1] + ' 40%,' + c[2] + ' 78%,' + c[3] + ')';
   } catch (e) {}
-  function hide() { if (gone) return; gone = true; box.classList.add('done'); setTimeout(function () { box.style.display = 'none'; }, 6000); }
-
-  // A tiny pink bee (the Playhouse's own bee) buzzes in from the left, loops around the words, then flies off to the right as the clouds part.
-  (function () {
-    var cv = document.getElementById('phBee'), LC = window.LilyCreatures;
-    if (!cv || !LC || !LC.bee || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-    var ctx = cv.getContext('2d'), dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0;
-    function size() { W = box.clientWidth; H = box.clientHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    size(); window.addEventListener('resize', size);
-    var t0 = performance.now(), prevX = -40, yaw = Math.PI / 2, exit = null;
-    var ease = function (u) { return u * u * (3 - 2 * u); };
-    function frame(now) {
-      if (box.style.display === 'none' && exit === null) { cv.style.display = 'none'; return; }
-      var t = (now - t0) / 1000, cx = W / 2, cy = H / 2, A = Math.min(W * 0.42, 150), B = 44, x, y;
-      if (exit === null && box.classList.contains('done')) exit = { t: t, x: prevX, y: cy };
-      if (exit !== null) {
-        var u = Math.min(1, (t - exit.t) / 2.6);
-        x = exit.x + (W + 70 - exit.x) * u * u; y = exit.y - 30 * ease(u);
-        if (u >= 1) { cv.style.display = 'none'; return; }
-      } else if (t < 2.8) {
-        var e = ease(t / 2.8); x = -30 + (cx - A + 30) * e; y = cy + Math.sin(t * 4.5) * 8;
-      } else {
-        var th = -Math.PI / 2 + (t - 2.8) * 0.75; x = cx + A * Math.sin(th); y = cy + B * Math.sin(2 * th) + Math.sin(t * 3.5) * 3;
-      }
-      var vx = x - prevX; prevX = x;
-      var target = vx >= 0 ? Math.PI / 2 : -Math.PI / 2; yaw += (target - yaw) * 0.15;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-      try { LC.bee.draw(ctx, x, y, 0.8, yaw, 0.25, { t: t, flying: true, pal: 'pink', lift: 0, shadow: false }); } catch (e2) { return; }
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  })();
-  frame.addEventListener('load', function () { setTimeout(hide, 700); });
-  try { if (frame.contentDocument && frame.contentDocument.readyState === 'complete' && frame.contentWindow.location.href !== 'about:blank') setTimeout(hide, 700); } catch (e) {}
-  setTimeout(hide, 12000);
+})();
+(function () {
+  /* Show the world the moment its swoop begins (the world says so through its own t clock); never later than 9 s, whatever happens. */
+  var root = document.documentElement, frame = document.querySelector('.playhouse-frame');
+  if (!frame) return;
+  root.classList.add('ph-hold');
+  var t0 = Date.now(), iv = 0, loadedAt = 0;
+  function reveal() { clearInterval(iv); root.classList.remove('ph-hold'); }
+  frame.addEventListener('load', function () { loadedAt = Date.now(); });
+  iv = setInterval(function () {
+    var now = Date.now();
+    if (now - t0 > 9000) return reveal();
+    if (!loadedAt) return;
+    try {
+      var g = frame.contentWindow.__playhouse && frame.contentWindow.__playhouse.gs();
+      if (g && g.t < 1) return reveal();          // the swoop has started
+    } catch (e) { return reveal(); }
+    if (now - loadedAt > 900) reveal();           // no swoop (reduced motion, or another start): just show it
+  }, 25);
 })();
 </script>
 <script src="/footer-signup.js" defer></script>
