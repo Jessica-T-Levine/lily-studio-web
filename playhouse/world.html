@@ -7816,7 +7816,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   // Jessica's decision P3: the parting clouds and "Going to the Playhouse..." belong to the Playhouse only. A game page starts like a game.
   // The start is chosen with ?start=  a: title pop (like Hop Hop)  b: swoop in  c: ready card  0: the old start (animal appears after 0.4 s).
   // Playing in place from the Playhouse (tap the animal, "Play with ...?") is not a game page and never uses any of this.
-  const GS_DEFAULT = "0";
+  const GS_DEFAULT = "b";
   const GS = { style: GS_DEFAULT, t: 1, dur: 1.7, back: 780, up: 430 };
   { const m = /[?&]start=(0|a|b|c)(?![A-Za-z0-9])/.exec(location.search); if (m) GS.style = m[1]; }
   const gsName = () => (BZ.fromPage ? "Lily’s Buzz Buzz" : "Lily’s Bun Nee Nee");
