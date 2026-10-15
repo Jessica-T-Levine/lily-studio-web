@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Playhouse speed test</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #CFE6F8; overflow: hidden; font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+  /* the little panel sits at the bottom, small, so the world's own buttons (top right) stay free */
+  #panel { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 10; background: rgba(36, 40, 56, 0.88); color: #fff;
+           border-radius: 16px; padding: 10px 12px; font-size: 13px; line-height: 1.35; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); max-width: 520px; margin: 0 auto; }
+  #panel h1 { font-size: 13px; margin: 0 0 6px; font-weight: 700; letter-spacing: .02em; }
+  #live { font-variant-numeric: tabular-nums; white-space: pre-line; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  button { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 9px 11px; background: #fff; color: #2b2f45; min-height: 40px; }
+  button.on { background: #FFD76A; }
+  button.copy { background: #8FD3A5; }
+  #box { display: none; width: 100%; box-sizing: border-box; margin-top: 8px; height: 120px; font: 12px ui-monospace, Menlo, monospace; border-radius: 10px; border: 0; padding: 8px; }
+  #min { position: absolute; top: 6px; right: 8px; background: transparent; color: #fff; min-height: 0; padding: 2px 8px; font-size: 18px; }
+  #panel.small #body { display: none; }
+</style>
+</head>
+<body>
+<iframe id="w" src="world.html" allow="fullscreen" title="Lily's Playhouse world"></iframe>
+
+<div id="panel">
+  <button id="min" aria-label="Hide or show the numbers">–</button>
+  <h1>Playhouse speed test</h1>
+  <div id="body">
+    <div id="live">Starting…</div>
+    <div class="row" id="modes">
+      <button data-m="A" class="on">A · Normal</button>
+      <button data-m="B">B · 30 frames</button>
+      <button data-m="C">C · Smaller picture</button>
+      <button data-m="D">D · Both</button>
+    </div>
+    <div class="row"><button class="copy" id="copy">Copy my numbers</button></div>
+    <textarea id="box" readonly></textarea>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var frame = document.getElementById("w"), live = document.getElementById("live"), box = document.getElementById("box");
+  var MODES = { A: { cap: 0, dpr: 0, name: "A Normal" }, B: { cap: 30, dpr: 0, name: "B 30 frames" },
+                C: { cap: 0, dpr: 1.5, name: "C Smaller picture" }, D: { cap: 30, dpr: 1.5, name: "D Both" } };
+  var cur = "A", stats = {}, iw = null, realDpr = window.devicePixelRatio || 1, wantDpr = 0, lastRun = 0;
+  Object.keys(MODES).forEach(function (k) { stats[k] = { ms: 0, runs: 0, js: 0, gap: 0, gaps: 0, dprSum: 0, dprN: 0 }; });
+  var recent = [];   // times of the last frames actually drawn, for a live frames-per-second number
+  var t0 = performance.now(), lastTick = t0, lastDraw = 0;
+
+  function hook() {
+    try { iw = frame.contentWindow; } catch (e) { return; }
+    if (!iw || iw.__speedHooked) return;
+    iw.__speedHooked = true;
+    var orig = iw.requestAnimationFrame.bind(iw);
+    // every picture the world draws goes through here: we time it, and (in the 30-frame modes) skip every other one
+    iw.requestAnimationFrame = function (cb) {
+      return orig(function (now) {
+        var cap = MODES[cur].cap;
+        if (cap && lastDraw && now - lastDraw < 1000 / cap - 3) { iw.requestAnimationFrame(cb); return; }
+        var a = performance.now();
+        cb(now);
+        var b = performance.now(), s = stats[cur];
+        s.js += b - a; s.runs++;
+        if (lastDraw) { s.gap += now - lastDraw; s.gaps++; }
+        lastDraw = now; recent.push(b); while (recent.length && b - recent[0] > 2000) recent.shift();
+      });
+    };
+    applyDpr();
+  }
+  function applyDpr() {
+    if (!iw) return;
+    var want = MODES[cur].dpr;
+    try {
+      Object.defineProperty(iw, "devicePixelRatio", { configurable: true, get: function () { return want || realDpr; } });
+      iw.dispatchEvent(new Event("resize"));
+    } catch (e) {}
+  }
+  frame.addEventListener("load", function () { setTimeout(hook, 300); });
+  setInterval(function () { if (!iw || !iw.__speedHooked) hook(); }, 1000);
+
+  document.getElementById("modes").addEventListener("click", function (e) {
+    var m = e.target && e.target.getAttribute && e.target.getAttribute("data-m"); if (!m) return;
+    cur = m; lastDraw = 0;
+    [].forEach.call(document.querySelectorAll("#modes button"), function (b) { b.classList.toggle("on", b.getAttribute("data-m") === m); });
+    applyDpr();
+  });
+  document.getElementById("min").addEventListener("click", function () { document.getElementById("panel").classList.toggle("small"); });
+
+  function line(k) {
+    var s = stats[k], secs = s.ms / 1000;
+    if (!s.runs) return MODES[k].name + ": not tried yet";
+    var gap = s.gaps ? s.gap / s.gaps : 0, js = s.js / s.runs;
+    var fps = gap ? 1000 / gap : 0, busy = gap ? Math.min(100, 100 * js / gap) : 0;
+    return MODES[k].name + ": " + Math.round(secs) + " sec, " + fps.toFixed(0) + " fps, " + js.toFixed(1) + " ms work per picture, busy " + busy.toFixed(0) + "%, picture " + (s.dprN ? (s.dprSum / s.dprN).toFixed(2) : "?") + "x";
+  }
+  function report() {
+    var p = {}; try { p = iw.__perf(); } catch (e) {}
+    var vv = window.visualViewport;
+    var head = "Playhouse speed test · " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC\n" +
+      "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + realDpr + "x · chunks " + (p.chunks || "?") + "\n" +
+      "Tester: " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser");
+    return head + "\n" + Object.keys(MODES).map(line).join("\n");
+  }
+  setInterval(function () {
+    var now = performance.now(), dt = now - lastTick; lastTick = now;
+    stats[cur].ms += dt;
+    var p = {}; try { p = iw.__perf(); } catch (e) {}
+    if (p.dpr) { stats[cur].dprSum += p.dpr; stats[cur].dprN++; }
+    var s = stats[cur], fps = recent.length > 1 ? (recent.length - 1) * 1000 / (recent[recent.length - 1] - recent[0]) : 0;
+    var js = s.runs ? s.js / s.runs : 0;
+    live.textContent = "Now: " + MODES[cur].name + " · " + Math.round((now - t0) / 1000) + " sec total\n" +
+      "Frames per second: " + fps.toFixed(0) + "   Work per picture: " + js.toFixed(1) + " ms\n" +
+      "Picture sharpness: " + (p.dpr ? p.dpr + "x" : "…");
+  }, 500);
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = report(); box.style.display = "block"; box.value = text; box.focus(); box.select();
+    try { navigator.clipboard.writeText(text); } catch (e) { try { document.execCommand("copy"); } catch (_) {} }
+  });
+})();
+</script>
+</body>
+</html>
