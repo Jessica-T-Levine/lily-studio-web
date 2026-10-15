@@ -4,167 +4,200 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Playhouse speed test</title>
+<title>Playhouse heat log</title>
 <style>
   html, body { margin: 0; height: 100%; background: #CFE6F8; overflow: hidden; font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
   iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
-  /* the little panel sits at the bottom, small, so the world's own buttons (top right) stay free */
-  #panel { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 10; background: rgba(36, 40, 56, 0.88); color: #fff;
-           border-radius: 16px; padding: 10px 12px; font-size: 13px; line-height: 1.35; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); max-width: 520px; margin: 0 auto; }
-  #panel h1 { font-size: 13px; margin: 0 0 6px; font-weight: 700; letter-spacing: .02em; }
-  #live { font-variant-numeric: tabular-nums; white-space: pre-line; }
-  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  button { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 9px 11px; background: #fff; color: #2b2f45; min-height: 40px; }
-  button.on { background: #FFD76A; }
-  button.copy { background: #8FD3A5; }
-  #box { display: none; width: 100%; box-sizing: border-box; margin-top: 8px; height: 120px; font: 12px ui-monospace, Menlo, monospace; border-radius: 10px; border: 0; padding: 8px; }
-  #min { position: absolute; top: 6px; right: 8px; background: transparent; color: #fff; min-height: 0; padding: 2px 8px; font-size: 18px; }
-  #panel.small #body { display: none; }
+  /* the four buttons live in a narrow column on the LEFT, a bit above the middle, so the game controls at the bottom and the world's buttons at the top right stay free */
+  #bar { position: fixed; left: calc(6px + env(safe-area-inset-left)); top: 36%; z-index: 10; display: flex; flex-direction: column; gap: 8px; width: 64px;
+         -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+  #bar button { font: inherit; font-size: 13px; font-weight: 800; border: 0; border-radius: 14px; min-height: 46px; padding: 0; color: #fff;
+                box-shadow: 0 2px 6px rgba(0,0,0,.28); opacity: .88; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  #bar button:active, #bar button.hit { opacity: 1; transform: scale(.94); outline: 3px solid #fff; }
+  #bar [data-f="cool"] { background: #3B8FD9; }
+  #bar [data-f="warm"] { background: #E8962B; }
+  #bar [data-f="hot"]  { background: #D8392F; }
+  #bar [data-f="glitch"] { background: #7B4FC4; }
+  #pill { font-size: 11px; line-height: 1.25; text-align: center; color: #fff; background: rgba(36,40,56,.78); border-radius: 10px; padding: 5px 2px; font-variant-numeric: tabular-nums; }
+  #bar button.small { background: rgba(36,40,56,.78); font-size: 11px; min-height: 30px; border-radius: 10px; font-weight: 700; }
+  #sheet { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; background: rgba(20,24,40,.55); }
+  #sheet.open { display: flex; }
+  #card { width: min(92vw, 560px); background: #fff; border-radius: 18px; padding: 12px; box-sizing: border-box; }
+  #card textarea { width: 100%; box-sizing: border-box; height: 46vh; font: 12px ui-monospace, Menlo, monospace; border: 1px solid #ccd; border-radius: 10px; padding: 8px; }
+  #card .row { display: flex; gap: 8px; margin-top: 8px; }
+  #card button { flex: 1; font: inherit; font-weight: 800; border: 0; border-radius: 12px; min-height: 46px; background: #8FD3A5; color: #1f3a2a; }
+  #card button.x { background: #e5e7ee; color: #2b2f45; }
 </style>
 </head>
 <body>
-<iframe id="w" allow="fullscreen" title="Lily's Playhouse world"></iframe>
+<iframe id="w" allow="fullscreen; autoplay" allowfullscreen title="Lily's Playhouse"></iframe>
 
-<div id="panel">
-  <button id="min" aria-label="Hide or show the numbers">–</button>
-  <h1>Playhouse speed test</h1>
-  <div id="body">
-    <div id="live">Starting…</div>
-    <div class="row" id="modes">
-      <button data-m="A" class="on">A · Normal</button>
-      <button data-m="B">B · 30 frames</button>
-      <button data-m="C">C · Smaller picture</button>
-      <button data-m="D">D · Both</button>
-    </div>
-    <div class="row" id="feel"><span style="align-self:center;font-weight:700">Phone feels:</span><button data-f="cool">Cool</button><button data-f="warm">Warm</button><button data-f="hot">Hot</button><button data-f="note">Glitch</button></div>
-    <div class="row"><button class="copy" id="copy">Copy my numbers</button></div>
-    <textarea id="box" readonly></textarea>
-  </div>
+<div id="bar">
+  <button data-f="cool">Cool</button>
+  <button data-f="warm">Warm</button>
+  <button data-f="hot">Hot</button>
+  <button data-f="glitch">Glitch</button>
+  <div id="pill">starting…</div>
+  <button class="small" id="copy">Copy log</button>
 </div>
+
+<div id="sheet"><div id="card">
+  <textarea id="box" readonly></textarea>
+  <div class="row"><button id="doCopy">Copy</button><button class="x" id="close">Close</button></div>
+</div></div>
 
 <script>
 (function () {
   "use strict";
-  var frame = document.getElementById("w"), FIXED = /[?&]world=fix\b/.test(location.search);
-  frame.src = FIXED ? "world-heatfix-test.html" : "world.html";   // ?world=fix opens the heat-fix test copy
-  document.querySelector("#panel h1").textContent = FIXED ? "Playhouse speed test · FIXED copy" : "Playhouse speed test · normal world";
-  var live = document.getElementById("live"), box = document.getElementById("box");
-  var MODES = { A: { cap: 0, dpr: 0, name: "A Normal" }, B: { cap: 30, dpr: 0, name: "B 30 frames" },
-                C: { cap: 0, dpr: 1.5, name: "C Smaller picture" }, D: { cap: 30, dpr: 1.5, name: "D Both" } };
-  var cur = "A", stats = {}, iw = null, realDpr = window.devicePixelRatio || 1, wantDpr = 0, lastRun = 0;
-  Object.keys(MODES).forEach(function (k) { stats[k] = { ms: 0, runs: 0, js: 0, gap: 0, gaps: 0, dprSum: 0, dprN: 0 }; });
-  var G = { runs: 0, js: 0, gap: 0, gaps: 0 }, samples = [], marks = [], byPlace = {}, byAct = {}, lastSamp = { runs: 0, js: 0, gap: 0, gaps: 0, t: performance.now() };
-  var recent = [];   // times of the last frames actually drawn, for a live frames-per-second number
-  var t0 = performance.now(), lastTick = t0, lastDraw = 0;
+  // The test page stays open the whole time. The world (and the games) open INSIDE it, so this page never goes away,
+  // and everything it sees is saved on the phone every few seconds, so a reload or a closed tab loses nothing.
+  window.__heatShell = true;                       // the test copy of the world looks for this and keeps games inside this page
+  var KEY = "playhouseHeatLog.v1", ARCH = "playhouseHeatLog.old", STEP = 5000, RESUME_MS = 30 * 60 * 1000;
+  var NORMAL = /[?&]world=normal\b/.test(location.search);
+  var HOME = NORMAL ? "world.html" : "world-heatfix-test.html";
+  var frame = document.getElementById("w"), pill = document.getElementById("pill");
+  var now = function () { return Date.now(); };
+  var mmss = function (ms) { var t = Math.max(0, Math.round(ms / 1000)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); };
 
-  function hook() {
-    try { iw = frame.contentWindow; } catch (e) { return; }
-    if (!iw || iw.__speedHooked) return;
-    iw.__speedHooked = true;
-    var orig = iw.requestAnimationFrame.bind(iw);
-    // every picture the world draws goes through here: we time it, and (in the 30-frame modes) skip every other one
-    iw.requestAnimationFrame = function (cb) {
-      return orig(function (now) {
-        var cap = MODES[cur].cap;
-        if (cap && lastDraw && now - lastDraw < 1000 / cap - 3) { iw.requestAnimationFrame(cb); return; }
-        var a = performance.now();
-        cb(now);
-        var b = performance.now(), s = stats[cur];
-        s.js += b - a; s.runs++; G.js += b - a; G.runs++;
-        if (lastDraw) { s.gap += now - lastDraw; s.gaps++; G.gap += now - lastDraw; G.gaps++; }
-        lastDraw = now; recent.push(b); while (recent.length && b - recent[0] > 2000) recent.shift();
-      });
-    };
-    applyDpr();
+  // ---------- saved log ----------
+  var S = null, canSave = true, lastSaveOk = false;
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; } }
+  function save() {
+    if (!S) return; S.last = now();
+    try { localStorage.setItem(KEY, JSON.stringify(S)); lastSaveOk = true; } catch (e) { lastSaveOk = false; }
   }
-  function applyDpr() {
-    if (!iw) return;
-    var want = MODES[cur].dpr;
+  function fresh() { return { id: now().toString(36), start: now(), last: now(), rows: [], ev: [], reloads: 0 }; }
+  (function boot() {
+    var old = load();
+    if (old && old.rows && now() - old.last < RESUME_MS) {
+      S = old; S.reloads = (S.reloads || 0) + 1;
+      S.ev.push({ t: now(), k: "reload", s: "PAGE RELOADED (nothing was lost; gap " + mmss(now() - old.last) + ")" });
+    } else {
+      if (old && old.rows && old.rows.length) { try { localStorage.setItem(ARCH, JSON.stringify(old)); } catch (e) {} }
+      S = fresh(); S.ev.push({ t: now(), k: "start", s: "NEW TEST STARTED" });
+    }
+    save();
+  })();
+  function ev(k, s) { S.ev.push({ t: now(), k: k, s: s }); save(); }
+
+  // ---------- finding the world (it may sit inside another page that sits inside our frame) ----------
+  function findWorld(win, depth) {
     try {
-      Object.defineProperty(iw, "devicePixelRatio", { configurable: true, get: function () { return want || realDpr; } });
-      iw.dispatchEvent(new Event("resize"));
+      if (win.__playhouse) return win;
+      if (depth > 3) return null;
+      var fs = win.document.querySelectorAll("iframe");
+      for (var i = 0; i < fs.length; i++) { var r = findWorld(fs[i].contentWindow, depth + 1); if (r) return r; }
     } catch (e) {}
+    return null;
   }
-  frame.addEventListener("load", function () { setTimeout(hook, 300); });
-  setInterval(function () { if (!iw || !iw.__speedHooked) hook(); }, 1000);
-
-  document.getElementById("modes").addEventListener("click", function (e) {
-    var m = e.target && e.target.getAttribute && e.target.getAttribute("data-m"); if (!m) return;
-    cur = m; lastDraw = 0;
-    [].forEach.call(document.querySelectorAll("#modes button"), function (b) { b.classList.toggle("on", b.getAttribute("data-m") === m); });
-    applyDpr();
-  });
-  document.getElementById("min").addEventListener("click", function () { document.getElementById("panel").classList.toggle("small"); });
-
-  function line(k) {
-    var s = stats[k], secs = s.ms / 1000;
-    if (!s.runs) return MODES[k].name + ": not tried yet";
-    var gap = s.gaps ? s.gap / s.gaps : 0, js = s.js / s.runs;
-    var fps = gap ? 1000 / gap : 0, busy = gap ? Math.min(100, 100 * js / gap) : 0;
-    return MODES[k].name + ": " + Math.round(secs) + " sec, " + fps.toFixed(0) + " fps, " + js.toFixed(1) + " ms work per picture, busy " + busy.toFixed(0) + "%, picture " + (s.dprN ? (s.dprSum / s.dprN).toFixed(2) : "?") + "x";
-  }
-  function report() {
-    var p = {}; try { p = iw.__perf(); } catch (e) {}
-    var vv = window.visualViewport;
-    var head = "Playhouse speed test · " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC\n" +
-      "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + realDpr + "x · chunks " + (p.chunks || "?") + "\n" +
-      "World: " + (FIXED ? "FIXED test copy" : "normal (live)") + "\nTester: " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser");
-    return head + "\nTotal time: " + mmss(performance.now() - t0) + "\nTime by place: " + sorted(byPlace) + "\nTime by activity: " + sorted(byAct) + "\n" + Object.keys(MODES).map(line).join("\n") + "\n\nTimeline (a line every 15 sec; place | activity | speed | sharpness | bunnies on screen | map pieces | full screen or page | mode):\n" + timeline();
-  }
-  setInterval(function () {
-    var now = performance.now(), dt = now - lastTick; lastTick = now;
-    stats[cur].ms += dt;
-    var p = {}; try { p = iw.__perf(); } catch (e) {}
-    if (p.dpr) { stats[cur].dprSum += p.dpr; stats[cur].dprN++; }
-    var s = stats[cur], fps = recent.length > 1 ? (recent.length - 1) * 1000 / (recent[recent.length - 1] - recent[0]) : 0;
-    var js = s.runs ? s.js / s.runs : 0;
-    live.textContent = "Now: " + MODES[cur].name + " · " + Math.round((now - t0) / 1000) + " sec total\n" +
-      "Frames per second: " + fps.toFixed(0) + "   Work per picture: " + js.toFixed(1) + " ms\n" +
-      "Picture sharpness: " + (p.dpr ? p.dpr + "x" : "…");
-  }, 500);
-
-
-  var mmss = function (ms) { var t = Math.round(ms / 1000); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); };
-  // where she is and what she's doing, read from the world (all guarded: a missing piece just says "?")
-  function whereNow() {
-    var ph = null; try { ph = iw.__playhouse; } catch (e) {}
-    var o = { place: "?", act: "looking around", bunnies: "?", full: "page", x: "?", y: "?", chunks: "?" };
-    if (!ph) return o;
-    try { var w = ph.where ? ph.where() : null; if (w) { o.place = w.area || "Playhouse yard"; o.x = w.x; o.y = w.y; } else { var c = ph.cam(); o.x = Math.round(c.x); o.y = Math.round(c.y); o.place = "(" + o.x + "," + o.y + ")"; } } catch (e) {}
-    try { if (ph.bz().on) o.act = "bee game"; } catch (e) {}
-    try { if (ph.nee().on) o.act = "playing Nee Nee"; } catch (e) {}
-    try { if (ph.tg().on) o.act = "bunny tag"; } catch (e) {}
-    try { var h = ph.hits().list; o.bunnies = h.filter(function (q) { return q.kind === "bunny" || q.kind === "neenee"; }).length; } catch (e) {}
-    try { if (iw.document.fullscreenElement || document.fullscreenElement) o.full = "full"; } catch (e) {}
-    try { o.chunks = iw.__perf().chunks; } catch (e) {}
+  function pagePath() { try { return frame.contentWindow.location.pathname || "?"; } catch (e) { return "?"; } }
+  function where() {
+    var o = { page: pagePath(), place: "-", act: "-", bun: "-", chunks: "-", dpr: "-", full: "page" };
+    var w = findWorld(frame.contentWindow, 0), ph = null; try { ph = w && w.__playhouse; } catch (e) {}
+    if (ph) {
+      o.act = "looking around";
+      try { var q = ph.where ? ph.where() : null; if (q) o.place = q.area || "Playhouse yard"; else { var c = ph.cam(); o.place = "(" + Math.round(c.x) + "," + Math.round(c.y) + ")"; } } catch (e) {}
+      try { if (ph.bz().on) o.act = "bee game"; } catch (e) {}
+      try { if (ph.nee().on) o.act = "playing Nee Nee"; } catch (e) {}
+      try { if (ph.tg().on) o.act = "bunny tag"; } catch (e) {}
+      try { o.bun = ph.hits().list.filter(function (h) { return h.kind === "bunny" || h.kind === "neenee"; }).length; } catch (e) {}
+      try { var pf = w.__perf(); o.chunks = pf.chunks; o.dpr = pf.dpr; } catch (e) {}
+    } else { o.act = "on page " + o.page; o.place = o.page; }
+    try { if (document.fullscreenElement || document.webkitFullscreenElement || frame.contentWindow.document.fullscreenElement || frame.contentWindow.document.webkitFullscreenElement) o.full = "full screen"; } catch (e) {}
     return o;
   }
-  // every 15 seconds: one line in the timeline, plus time spent in each place and each activity
-  setInterval(function () {
-    var now = performance.now(), dt = (now - lastSamp.t) / 1000, w = whereNow(), p = {}; try { p = iw.__perf(); } catch (e) {}
-    var runs = G.runs - lastSamp.runs, js = G.js - lastSamp.js, gaps = G.gaps - lastSamp.gaps, gap = G.gap - lastSamp.gap;
-    var fps = gaps ? 1000 / (gap / gaps) : 0, ms = runs ? js / runs : 0, busy = gaps ? Math.min(100, 100 * (js / runs) / (gap / gaps)) : 0;
-    samples.push({ t: now - t0, place: w.place, act: w.act, fps: fps, ms: ms, busy: busy, sharp: p.dpr, bun: w.bunnies, chunks: w.chunks, full: w.full, mode: cur });
-    byPlace[w.place] = (byPlace[w.place] || 0) + dt; byAct[w.act] = (byAct[w.act] || 0) + dt;
-    lastSamp = { runs: G.runs, js: G.js, gap: G.gap, gaps: G.gaps, t: now };
-  }, 15000);
-  document.getElementById("feel").addEventListener("click", function (e) {
-    var f = e.target && e.target.getAttribute && e.target.getAttribute("data-f"); if (!f) return;
-    var w = whereNow(); marks.push({ t: performance.now() - t0, f: f, place: w.place, act: w.act });
-    e.target.classList.add("on"); setTimeout(function () { e.target.classList.remove("on"); }, 600);
-  });
-  function sorted(o) { return Object.keys(o).sort(function (a, b) { return o[b] - o[a]; }).map(function (k) { return k + " " + mmss(o[k] * 1000); }).join(", ") || "none yet"; }
-  function timeline() {
-    var rows = samples.map(function (q) { return { t: q.t, s: mmss(q.t) + " " + q.place + " | " + q.act + " | " + q.fps.toFixed(0) + "fps " + q.ms.toFixed(0) + "ms busy " + q.busy.toFixed(0) + "% | sharp " + (q.sharp || "?") + " | bunnies " + q.bun + " | chunks " + q.chunks + " | " + q.full + " | " + q.mode }; })
-      .concat(marks.map(function (m) { return { t: m.t, s: mmss(m.t) + " >>> PHONE FEELS " + m.f.toUpperCase() + " (" + m.place + ", " + m.act + ")" }; }));
-    rows.sort(function (a, b) { return a.t - b.t; });
-    return rows.map(function (r) { return r.s; }).join("\n");
-  }
 
-  document.getElementById("copy").addEventListener("click", function () {
-    var text = report(); box.style.display = "block"; box.value = text; box.focus(); box.select();
-    try { navigator.clipboard.writeText(text); } catch (e) { try { document.execCommand("copy"); } catch (_) {} }
+  // ---------- frames per second (counted here, so the world is not slowed down by the test) ----------
+  var frames = 0, slow = 0, lastF = 0;
+  (function loop(t) {
+    if (lastF) { frames++; if (t - lastF > 50) slow++; }
+    lastF = t; requestAnimationFrame(loop);
+  })(0);
+
+  // ---------- every 5 seconds: one saved row ----------
+  var lastS = now(), lastFrames = 0, lastSlow = 0;
+  setInterval(function () {
+    var t = now(), dt = (t - lastS) / 1000; lastS = t;
+    var df = frames - lastFrames, ds = slow - lastSlow; lastFrames = frames; lastSlow = slow;
+    if (document.hidden) { lastF = 0; return; }
+    var w = where();
+    S.rows.push({ t: t, page: w.page, place: w.place, act: w.act, fps: dt > 0 ? df / dt : 0, slow: ds, bun: w.bun, chunks: w.chunks, dpr: w.dpr, full: w.full });
+    save();
+  }, STEP);
+
+  // ---------- things that happen ----------
+  var lastPage = "";
+  function watchPage() {
+    var p = pagePath();
+    if (p !== lastPage && p !== "?" && p !== "/blank") {
+      // coming "back" from a game lands on the site's Playhouse page, which holds the LIVE world; keep the test on the test copy instead
+      if (!NORMAL && (p === "/playhouse/" || p === "/playhouse/index.html") && lastPage) {
+        ev("page", "BACK TO THE WORLD (from " + lastPage + ")"); lastPage = p; frame.src = HOME; return;
+      }
+      if (lastPage || p) ev("page", "OPENED PAGE " + p);
+      lastPage = p;
+    }
+  }
+  setInterval(watchPage, 700);
+  var leaving = false;
+  document.addEventListener("visibilitychange", function () { lastF = 0; if (leaving) return; ev("screen", document.hidden ? "SCREEN HIDDEN (app switched or screen locked)" : "SCREEN BACK"); });
+  document.addEventListener("fullscreenchange", function () { ev("full", document.fullscreenElement ? "FULL SCREEN ON" : "FULL SCREEN OFF"); });
+  window.addEventListener("pagehide", function () { leaving = true; save(); });
+  window.addEventListener("beforeunload", function () { leaving = true; save(); });
+
+  // ---------- buttons ----------
+  var NAMES = { cool: "COOL", warm: "WARM", hot: "HOT", glitch: "GLITCH" };
+  document.getElementById("bar").addEventListener("click", function (e) {
+    var b = e.target, f = b && b.getAttribute && b.getAttribute("data-f"); if (!f) return;
+    var w = where();
+    ev("feel", "PHONE FEELS " + NAMES[f] + " (" + (w.page !== "/playhouse/world-heatfix-test.html" && w.page !== "/playhouse/world.html" ? w.page : w.place) + ", " + w.act + ")");
+    b.classList.add("hit"); setTimeout(function () { b.classList.remove("hit"); }, 500);
+    flash(NAMES[f] + " saved ✓");
   });
+  var flashUntil = 0, flashText = "";
+  function flash(s) { flashText = s; flashUntil = now() + 1800; tick(); }
+  function tick() {
+    pill.textContent = now() < flashUntil ? flashText : mmss(now() - S.start) + (lastSaveOk ? "\nsaved ✓" : "\nNOT saved");
+  }
+  setInterval(tick, 500); tick();
+  pill.style.whiteSpace = "pre-line";
+
+  // ---------- the report ----------
+  function agg(key) {
+    var o = {};
+    S.rows.forEach(function (r) { var k = r[key]; var a = o[k] || (o[k] = { n: 0, fps: 0, slow: 0 }); a.n++; a.fps += r.fps; a.slow += r.slow; });
+    return Object.keys(o).sort(function (a, b) { return o[b].n - o[a].n; }).map(function (k) { var a = o[k]; return "  " + k + ": " + mmss(a.n * STEP) + " · " + (a.fps / a.n).toFixed(0) + " fps · " + a.slow + " slow frames"; }).join("\n") || "  none yet";
+  }
+  function report() {
+    var vv = window.visualViewport, dprs = (window.devicePixelRatio || 1);
+    var head = "Playhouse heat log · " + new Date(S.start).toISOString().slice(0, 16).replace("T", " ") + " UTC start\n" +
+      "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + dprs + "x · " + (NORMAL ? "LIVE world" : "FIXED test copy") + " · " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser") + "\n" +
+      "Total time: " + mmss(S.last - S.start) + " · screen-on time: " + mmss(S.rows.length * STEP) + " · reloads: " + (S.reloads || 0);
+    var feels = S.ev.filter(function (e) { return e.k === "feel"; }).map(function (e) { return "  " + mmss(e.t - S.start) + " " + e.s; }).join("\n") || "  none tapped";
+    // timeline: one line per 15 seconds (three saved rows averaged), with the events mixed in at the right time
+    var lines = [], i;
+    for (i = 0; i < S.rows.length;) {
+      var g = [S.rows[i]]; i++;
+      while (i < S.rows.length && g.length < 3 && S.rows[i].page === g[0].page) { g.push(S.rows[i]); i++; }   // a new line whenever the page changes
+      var f = 0, sl = 0; g.forEach(function (r) { f += r.fps; sl += r.slow; });
+      var r0 = g[g.length - 1];
+      lines.push({ t: g[0].t, s: mmss(g[0].t - S.start) + "  " + r0.place + " | " + r0.act + " | " + (f / g.length).toFixed(0) + " fps, " + sl + " slow | bunnies " + r0.bun + " | map pieces " + r0.chunks + " | sharp " + r0.dpr + " | " + r0.full });
+    }
+    S.ev.forEach(function (e) { lines.push({ t: e.t, s: mmss(e.t - S.start) + "  >>> " + e.s }); });
+    lines.sort(function (a, b) { return a.t - b.t; });
+    return head + "\n\nPhone feel taps:\n" + feels + "\n\nBy page:\n" + agg("page") + "\n\nBy place:\n" + agg("place") + "\n\nBy activity:\n" + agg("act") +
+      "\n\nTimeline (a line every 15 sec: place | activity | speed | bunnies | map pieces | picture sharpness | full screen or page):\n" + lines.map(function (l) { return l.s; }).join("\n");
+  }
+  var sheet = document.getElementById("sheet"), box = document.getElementById("box");
+  document.getElementById("copy").addEventListener("click", function () { save(); box.value = report(); sheet.classList.add("open"); box.scrollTop = 0; });
+  document.getElementById("close").addEventListener("click", function () { sheet.classList.remove("open"); });
+  document.getElementById("doCopy").addEventListener("click", function () {
+    box.focus(); box.select(); box.setSelectionRange(0, box.value.length);
+    try { navigator.clipboard.writeText(box.value); } catch (e) { try { document.execCommand("copy"); } catch (_) {} }
+    this.textContent = "Copied ✓"; var b = this; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+  });
+
+  frame.src = HOME;
 })();
 </script>
 </body>
