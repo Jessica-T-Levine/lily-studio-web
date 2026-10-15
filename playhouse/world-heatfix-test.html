@@ -7837,6 +7837,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     tgSet: o => { Object.assign(TG, o); }, tgStop: () => tgStop(), bunnyTap: () => { const fh = tgFriendHit({ sx: W / 2, sy: H / 2 }); return !!fh; },
     solids: (x, y, r) => solidsNear(x, y, r), step: (n, dt) => { for (let i = 0; i < n; i++) update(dt || 0.05); },
     hits: () => ({ W, H, list: lastResidentHits.map(h => ({ kind: h.kind, x: h.x, y: h.y, f: h.f })) }),
+    where: () => ({ area: area === null ? null : (AREA_NAMES[area] || String(area)), x: Math.round(bee.x), y: Math.round(bee.y) }),   // speed test: where she is
     gs: () => ({ style: GS.style, t: GS.t, card: !!gsCardEl, title: gsTitleEl ? gsTitleEl.className : null }), gsPlay: () => gsPlay(),
     look: (x, y, yaw, up) => { camYaw = camYawTarget = bee.aim = yaw; camC = Math.cos(yaw); camS = Math.sin(yaw); bee.x = x + camC * CAM_DIST; bee.y = y + camS * CAM_DIST; camX = x; camY = y; lift = liftTarget = up || 0; } };
   // In a background tab the browser stops drawing, but the world keeps going: a little tick every second.
