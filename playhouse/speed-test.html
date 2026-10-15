@@ -23,7 +23,7 @@
 </style>
 </head>
 <body>
-<iframe id="w" src="world.html" allow="fullscreen" title="Lily's Playhouse world"></iframe>
+<iframe id="w" allow="fullscreen" title="Lily's Playhouse world"></iframe>
 
 <div id="panel">
   <button id="min" aria-label="Hide or show the numbers">–</button>
@@ -44,7 +44,10 @@
 <script>
 (function () {
   "use strict";
-  var frame = document.getElementById("w"), live = document.getElementById("live"), box = document.getElementById("box");
+  var frame = document.getElementById("w"), FIXED = /[?&]world=fix\b/.test(location.search);
+  frame.src = FIXED ? "world-heatfix-test.html" : "world.html";   // ?world=fix opens the heat-fix test copy
+  document.querySelector("#panel h1").textContent = FIXED ? "Playhouse speed test · FIXED copy" : "Playhouse speed test · normal world";
+  var live = document.getElementById("live"), box = document.getElementById("box");
   var MODES = { A: { cap: 0, dpr: 0, name: "A Normal" }, B: { cap: 30, dpr: 0, name: "B 30 frames" },
                 C: { cap: 0, dpr: 1.5, name: "C Smaller picture" }, D: { cap: 30, dpr: 1.5, name: "D Both" } };
   var cur = "A", stats = {}, iw = null, realDpr = window.devicePixelRatio || 1, wantDpr = 0, lastRun = 0;
@@ -103,7 +106,7 @@
     var vv = window.visualViewport;
     var head = "Playhouse speed test · " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC\n" +
       "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + realDpr + "x · chunks " + (p.chunks || "?") + "\n" +
-      "Tester: " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser");
+      "World: " + (FIXED ? "FIXED test copy" : "normal (live)") + "\nTester: " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser");
     return head + "\n" + Object.keys(MODES).map(line).join("\n");
   }
   setInterval(function () {
