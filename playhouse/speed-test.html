@@ -36,6 +36,7 @@
       <button data-m="C">C · Smaller picture</button>
       <button data-m="D">D · Both</button>
     </div>
+    <div class="row" id="feel"><span style="align-self:center;font-weight:700">Phone feels:</span><button data-f="cool">Cool</button><button data-f="warm">Warm</button><button data-f="hot">Hot</button><button data-f="note">Glitch</button></div>
     <div class="row"><button class="copy" id="copy">Copy my numbers</button></div>
     <textarea id="box" readonly></textarea>
   </div>
@@ -52,6 +53,7 @@
                 C: { cap: 0, dpr: 1.5, name: "C Smaller picture" }, D: { cap: 30, dpr: 1.5, name: "D Both" } };
   var cur = "A", stats = {}, iw = null, realDpr = window.devicePixelRatio || 1, wantDpr = 0, lastRun = 0;
   Object.keys(MODES).forEach(function (k) { stats[k] = { ms: 0, runs: 0, js: 0, gap: 0, gaps: 0, dprSum: 0, dprN: 0 }; });
+  var G = { runs: 0, js: 0, gap: 0, gaps: 0 }, samples = [], marks = [], byPlace = {}, byAct = {}, lastSamp = { runs: 0, js: 0, gap: 0, gaps: 0, t: performance.now() };
   var recent = [];   // times of the last frames actually drawn, for a live frames-per-second number
   var t0 = performance.now(), lastTick = t0, lastDraw = 0;
 
@@ -68,8 +70,8 @@
         var a = performance.now();
         cb(now);
         var b = performance.now(), s = stats[cur];
-        s.js += b - a; s.runs++;
-        if (lastDraw) { s.gap += now - lastDraw; s.gaps++; }
+        s.js += b - a; s.runs++; G.js += b - a; G.runs++;
+        if (lastDraw) { s.gap += now - lastDraw; s.gaps++; G.gap += now - lastDraw; G.gaps++; }
         lastDraw = now; recent.push(b); while (recent.length && b - recent[0] > 2000) recent.shift();
       });
     };
@@ -107,7 +109,7 @@
     var head = "Playhouse speed test · " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC\n" +
       "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + realDpr + "x · chunks " + (p.chunks || "?") + "\n" +
       "World: " + (FIXED ? "FIXED test copy" : "normal (live)") + "\nTester: " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser");
-    return head + "\n" + Object.keys(MODES).map(line).join("\n");
+    return head + "\nTotal time: " + mmss(performance.now() - t0) + "\nTime by place: " + sorted(byPlace) + "\nTime by activity: " + sorted(byAct) + "\n" + Object.keys(MODES).map(line).join("\n") + "\n\nTimeline (a line every 15 sec; place | activity | speed | sharpness | bunnies on screen | map pieces | full screen or page | mode):\n" + timeline();
   }
   setInterval(function () {
     var now = performance.now(), dt = now - lastTick; lastTick = now;
@@ -120,6 +122,44 @@
       "Frames per second: " + fps.toFixed(0) + "   Work per picture: " + js.toFixed(1) + " ms\n" +
       "Picture sharpness: " + (p.dpr ? p.dpr + "x" : "…");
   }, 500);
+
+
+  var mmss = function (ms) { var t = Math.round(ms / 1000); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); };
+  // where she is and what she's doing, read from the world (all guarded: a missing piece just says "?")
+  function whereNow() {
+    var ph = null; try { ph = iw.__playhouse; } catch (e) {}
+    var o = { place: "?", act: "looking around", bunnies: "?", full: "page", x: "?", y: "?", chunks: "?" };
+    if (!ph) return o;
+    try { var w = ph.where ? ph.where() : null; if (w) { o.place = w.area || "Playhouse yard"; o.x = w.x; o.y = w.y; } else { var c = ph.cam(); o.x = Math.round(c.x); o.y = Math.round(c.y); o.place = "(" + o.x + "," + o.y + ")"; } } catch (e) {}
+    try { if (ph.bz().on) o.act = "bee game"; } catch (e) {}
+    try { if (ph.nee().on) o.act = "playing Nee Nee"; } catch (e) {}
+    try { if (ph.tg().on) o.act = "bunny tag"; } catch (e) {}
+    try { var h = ph.hits().list; o.bunnies = h.filter(function (q) { return q.kind === "bunny" || q.kind === "neenee"; }).length; } catch (e) {}
+    try { if (iw.document.fullscreenElement || document.fullscreenElement) o.full = "full"; } catch (e) {}
+    try { o.chunks = iw.__perf().chunks; } catch (e) {}
+    return o;
+  }
+  // every 15 seconds: one line in the timeline, plus time spent in each place and each activity
+  setInterval(function () {
+    var now = performance.now(), dt = (now - lastSamp.t) / 1000, w = whereNow(), p = {}; try { p = iw.__perf(); } catch (e) {}
+    var runs = G.runs - lastSamp.runs, js = G.js - lastSamp.js, gaps = G.gaps - lastSamp.gaps, gap = G.gap - lastSamp.gap;
+    var fps = gaps ? 1000 / (gap / gaps) : 0, ms = runs ? js / runs : 0, busy = gaps ? Math.min(100, 100 * (js / runs) / (gap / gaps)) : 0;
+    samples.push({ t: now - t0, place: w.place, act: w.act, fps: fps, ms: ms, busy: busy, sharp: p.dpr, bun: w.bunnies, chunks: w.chunks, full: w.full, mode: cur });
+    byPlace[w.place] = (byPlace[w.place] || 0) + dt; byAct[w.act] = (byAct[w.act] || 0) + dt;
+    lastSamp = { runs: G.runs, js: G.js, gap: G.gap, gaps: G.gaps, t: now };
+  }, 15000);
+  document.getElementById("feel").addEventListener("click", function (e) {
+    var f = e.target && e.target.getAttribute && e.target.getAttribute("data-f"); if (!f) return;
+    var w = whereNow(); marks.push({ t: performance.now() - t0, f: f, place: w.place, act: w.act });
+    e.target.classList.add("on"); setTimeout(function () { e.target.classList.remove("on"); }, 600);
+  });
+  function sorted(o) { return Object.keys(o).sort(function (a, b) { return o[b] - o[a]; }).map(function (k) { return k + " " + mmss(o[k] * 1000); }).join(", ") || "none yet"; }
+  function timeline() {
+    var rows = samples.map(function (q) { return { t: q.t, s: mmss(q.t) + " " + q.place + " | " + q.act + " | " + q.fps.toFixed(0) + "fps " + q.ms.toFixed(0) + "ms busy " + q.busy.toFixed(0) + "% | sharp " + (q.sharp || "?") + " | bunnies " + q.bun + " | chunks " + q.chunks + " | " + q.full + " | " + q.mode }; })
+      .concat(marks.map(function (m) { return { t: m.t, s: mmss(m.t) + " >>> PHONE FEELS " + m.f.toUpperCase() + " (" + m.place + ", " + m.act + ")" }; }));
+    rows.sort(function (a, b) { return a.t - b.t; });
+    return rows.map(function (r) { return r.s; }).join("\n");
+  }
 
   document.getElementById("copy").addEventListener("click", function () {
     var text = report(); box.style.display = "block"; box.value = text; box.focus(); box.select();
