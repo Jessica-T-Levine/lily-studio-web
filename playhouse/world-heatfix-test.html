@@ -1994,6 +1994,9 @@
   // "Go to page?". Tapping it twice quickly (a double tap or double click) goes straight there.
   const PAGES = { frog: "/hophop/", neenee: "/neenee/", bee: "/buzzbuzz/" };   // v38: Nee Nee's game; v39: Buzz Buzz's game
   const framed = (() => { try { return window.top !== window; } catch (_) { return true; } })();
+  // TEST COPY ONLY: when the hidden heat-log page holds this world, pages that would normally take over the whole screen open inside that page instead, so the log keeps running
+  const inShell = (() => { try { return !!window.parent.__heatShell; } catch (_) { return false; } })();
+  function leaveTo(url) { if (inShell) { location.href = url; return; } try { window.top.location.href = url; } catch (_) { location.href = url; } }
   if (framed) document.documentElement.classList.add("in-frame");
   // On a wide screen the site's big logo flower hangs down over the top-left corner of the world. The left column
   // (Back button, honey count, Stop tag) sits just below it, wherever the logo is. If it can't be measured, it stays at 58px.
@@ -2024,9 +2027,10 @@
     return go;
   })();
   const goPop = document.getElementById("goPop"), goLink = document.getElementById("goLink");
-  goLink.target = framed ? "_top" : "_self"; goLink.rel = "noopener";
+  goLink.target = framed && !inShell ? "_top" : "_self"; goLink.rel = "noopener";
   let lastTap = null, popTimer = 0;
   function openPage(url) { hidePop(); if (url === PAGES.neenee) { enterBunny(); return; } if (url === PAGES.bee) { enterBee(); return; }   // Nee Nee: you play her right here
+    if (inShell) { location.href = url; return; }
     if (framed) { try { window.top.location.href = url; } catch (_) { window.open(url, "_blank", "noopener"); } } else location.href = url; }
   // The popup shows while the mouse is on a frog ("hover"), or after a tap on a touch screen ("tap").
   // It rides along above him as he moves.
@@ -4014,7 +4018,7 @@
   BM.fromPage = /[?&]play=neenee\b/.test(location.search);
   BZ.fromPage = /[?&]play=buzz\b/.test(location.search);   // opened from Lily's Buzz Buzz's own page: you start as her
   bmBackBtn.addEventListener("click", () => {
-    if (BM.fromPage || BZ.fromPage) { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } return; }
+    if (BM.fromPage || BZ.fromPage) { leaveTo("/playhouse/"); return; }
     if (BZ.on) exitBee(); else exitBunny();
   });
 
@@ -7898,7 +7902,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const playBtn = gsCardEl.querySelector(".gs-play");
     ["pointerdown", "mousedown", "touchstart"].forEach(ev => gsCardEl.addEventListener(ev, e => e.stopPropagation()));
     playBtn.addEventListener("click", gsPlay);
-    gsCardEl.querySelector(".gs-back").addEventListener("click", () => { try { window.top.location.href = "/playhouse/"; } catch (_) { location.href = "/playhouse/"; } });
+    gsCardEl.querySelector(".gs-back").addEventListener("click", () => { leaveTo("/playhouse/"); });
     if (hasKeyboard) { try { playBtn.focus({ preventScroll: true }); } catch (_) {} }   // Enter or Space plays; no focus ring on touch screens
   }
   function gsPlay() { if (!gsCardEl) return; gsCardEl.remove(); gsCardEl = null; gsEnter(); }   // a tap is a real touch, so sound can start here
