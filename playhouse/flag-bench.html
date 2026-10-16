@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Playhouse flag test</title>
+<style>
+  html, body { margin: 0; background: #CFE6F8; font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; color: #2b2f45; }
+  main { max-width: 520px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 18px; margin: 4px 0 6px; }
+  p { font-size: 14px; line-height: 1.4; margin: 6px 0; }
+  button { font: inherit; font-weight: 800; border: 0; border-radius: 14px; min-height: 52px; padding: 0 18px; background: #8FD3A5; color: #1f3a2a; margin: 8px 8px 8px 0; }
+  button:disabled { opacity: .5; }
+  textarea { width: 100%; box-sizing: border-box; height: 230px; font: 12px ui-monospace, Menlo, monospace; border: 1px solid #ccd; border-radius: 10px; padding: 8px; margin-top: 6px; }
+  canvas { position: fixed; left: -9999px; top: 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Playhouse flag test</h1>
+  <p>This takes about 20 seconds. It draws the waving flag three different ways, over and over, and times each one on your phone. Keep the screen on and don't switch apps while it runs.</p>
+  <button id="run">Run the test</button><button id="copy" disabled>Copy the numbers</button>
+  <textarea id="out" readonly placeholder="The numbers will show here."></textarea>
+</main>
+<canvas id="cv"></canvas>
+<script src="lily-flag-design.js"></script>
+<script>
+(function () {
+  "use strict";
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d"), out = document.getElementById("out"), runBtn = document.getElementById("run"), copyBtn = document.getElementById("copy");
+  var D = window.LilyFlag.design;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
+  var tex = document.createElement("canvas"); tex.width = 640; tex.height = Math.round(640 * D.flag.height / D.flag.width);
+  window.LilyFlag.paint(tex, 0, false);
+  var NX = 14, NY = 7, TW = tex.width, TH = tex.height;
+
+  // the same triangle drawing the world uses today (copied from world.html)
+  function texTri(img, s0, s1, s2, d0, d1, d2) {
+    var den = (s1[0] - s0[0]) * (s2[1] - s0[1]) - (s2[0] - s0[0]) * (s1[1] - s0[1]); if (!den) return;
+    var a = ((d1.x - d0.x) * (s2[1] - s0[1]) - (d2.x - d0.x) * (s1[1] - s0[1])) / den;
+    var b = ((d1.y - d0.y) * (s2[1] - s0[1]) - (d2.y - d0.y) * (s1[1] - s0[1])) / den;
+    var c = ((d2.x - d0.x) * (s1[0] - s0[0]) - (d1.x - d0.x) * (s2[0] - s0[0])) / den;
+    var d = ((d2.y - d0.y) * (s1[0] - s0[0]) - (d1.y - d0.y) * (s2[0] - s0[0])) / den;
+    var e = d0.x - a * s0[0] - c * s0[1], f = d0.y - b * s0[0] - d * s0[1];
+    var mx = (d0.x + d1.x + d2.x) / 3, my = (d0.y + d1.y + d2.y) / 3, g = function (p) { var vx = p.x - mx, vy = p.y - my, l = Math.hypot(vx, vy) || 1; return [p.x + vx / l * 1.1, p.y + vy / l * 1.1]; };
+    ctx.save(); ctx.beginPath(); var A = g(d0), B = g(d1), C = g(d2); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(C[0], C[1]); ctx.closePath(); ctx.clip();
+    ctx.transform(a, b, c, d, e, f); ctx.drawImage(img, 0, 0); ctx.restore();
+  }
+  var grid;
+  function wave(t) {
+    grid = [];
+    for (var j = 0; j <= NY; j++) { var row = []; for (var i = 0; i <= NX; i++) { var u = i / NX, v = j / NY; row.push({ x: 40 + u * 280 + Math.sin(t * 3 - u * 4.6) * 8 * u, y: 120 + v * 150 + Math.sin(t * 2.4 - u * 4.6) * 14 * u }); } grid.push(row); }
+  }
+  function shade(t, i, j) {   // the little light and shade on each cell, same as the world
+    var p00 = grid[j][i], p10 = grid[j][i + 1], p01 = grid[j + 1][i], p11 = grid[j + 1][i + 1];
+    var sl = Math.cos(t * 2.4 - (i + 0.5) / NX * 4.6) * ((i + 0.5) / NX);
+    ctx.beginPath(); ctx.moveTo(p00.x, p00.y); ctx.lineTo(p10.x, p10.y); ctx.lineTo(p11.x, p11.y); ctx.lineTo(p01.x, p01.y); ctx.closePath();
+    ctx.fillStyle = sl > 0 ? "rgba(255,255,255," + (0.14 * sl) + ")" : "rgba(90,60,120," + (-0.12 * sl) + ")"; ctx.fill();
+  }
+  var METHODS = {
+    // 0: nothing but the shade, to see what the rest costs
+    base: function (t) { for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) shade(t, i, j); },
+    // 1: how the world draws it today: two clipped full-size picture draws per cell
+    now: function (t) {
+      for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) {
+        var p00 = grid[j][i], p10 = grid[j][i + 1], p01 = grid[j + 1][i], p11 = grid[j + 1][i + 1];
+        var s00 = [i / NX * TW, j / NY * TH], s10 = [(i + 1) / NX * TW, j / NY * TH], s01 = [i / NX * TW, (j + 1) / NY * TH], s11 = [(i + 1) / NX * TW, (j + 1) / NY * TH];
+        texTri(tex, s00, s10, s11, p00, p10, p11); texTri(tex, s00, s11, s01, p00, p11, p01); shade(t, i, j);
+      }
+    },
+    // 2: one small piece of the picture per cell, no clipping
+    cells: function (t) {
+      var e = 0.5;
+      for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) {
+        var p00 = grid[j][i], p10 = grid[j][i + 1], p01 = grid[j + 1][i];
+        var sx = i / NX * TW, sy = j / NY * TH, sw = TW / NX, sh = TH / NY;
+        var ux = (p10.x - p00.x) / sw, uy = (p10.y - p00.y) / sw, vx = (p01.x - p00.x) / sh, vy = (p01.y - p00.y) / sh;
+        ctx.save(); ctx.transform(ux, uy, vx, vy, p00.x - ux * sx - vx * sy, p00.y - uy * sx - vy * sy);
+        ctx.drawImage(tex, sx - e, sy - e, sw + 2 * e, sh + 2 * e, sx - e, sy - e, sw + 2 * e, sh + 2 * e); ctx.restore();
+        shade(t, i, j);
+      }
+    }
+  };
+  function frameMs(name, frames) {   // time for `frames` pictures, each finished (flushed) before the next
+    var t0 = performance.now();
+    for (var k = 0; k < frames; k++) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+      wave(k * 0.05); METHODS[name](k * 0.05);
+      ctx.getImageData(0, 0, 1, 1);   // makes the phone finish the drawing now, so the time is real
+    }
+    return (performance.now() - t0) / frames;
+  }
+  function median(a) { a = a.slice().sort(function (x, y) { return x - y; }); return a[Math.floor(a.length / 2)]; }
+  function run() {
+    runBtn.disabled = true; out.value = "Running… (about 20 seconds)";
+    var names = ["base", "now", "cells"], res = { base: [], now: [], cells: [] }, round = 0, paints = [];
+    function step() {
+      if (round >= 5) { finish(); return; }
+      names.forEach(function (n) { frameMs(n, 4); res[n].push(frameMs(n, 40)); });   // 4 warm-up pictures, then 40 timed
+      var p0 = performance.now(); for (var q = 0; q < 8; q++) window.LilyFlag.paint(tex, round + q * 0.1, false); paints.push((performance.now() - p0) / 8);
+      round++; out.value = "Running… round " + round + " of 5"; setTimeout(step, 30);
+    }
+    function finish() {
+      var base = median(res.base), now = median(res.now), cells = median(res.cells), paint = median(paints);
+      var vv = window.visualViewport;
+      out.value = "Playhouse flag test · " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC\n" +
+        "Screen " + Math.round(vv ? vv.width : innerWidth) + "x" + Math.round(vv ? vv.height : innerHeight) + " at " + (window.devicePixelRatio || 1) + "x, drawing at " + dpr + "x · " + (/iPhone|iPad/.test(navigator.userAgent) ? "iPhone/iPad Safari" : "other browser") + "\n\n" +
+        "Time to draw one picture of the flag (milliseconds, middle of 5 rounds):\n" +
+        "  Nothing but the shading: " + base.toFixed(1) + "\n" +
+        "  How the world draws it today: " + now.toFixed(1) + "\n" +
+        "  One small piece per cell (no clipping): " + cells.toFixed(1) + "\n" +
+        "  Repainting the flag's own picture (happens about 8 times a second): " + paint.toFixed(1) + "\n\n" +
+        "All 5 rounds, today: " + res.now.map(function (x) { return x.toFixed(1); }).join(", ") + "\n" +
+        "All 5 rounds, small pieces: " + res.cells.map(function (x) { return x.toFixed(1); }).join(", ") + "\n";
+      runBtn.disabled = false; copyBtn.disabled = false;
+    }
+    setTimeout(step, 50);
+  }
+  runBtn.addEventListener("click", run);
+  copyBtn.addEventListener("click", function () {
+    out.focus(); out.select(); out.setSelectionRange(0, out.value.length);
+    try { navigator.clipboard.writeText(out.value); } catch (e) { try { document.execCommand("copy"); } catch (_) {} }
+    copyBtn.textContent = "Copied ✓"; setTimeout(function () { copyBtn.textContent = "Copy the numbers"; }, 1500);
+  });
+})();
+</script>
+</body>
+</html>
