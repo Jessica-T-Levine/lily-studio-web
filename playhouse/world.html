@@ -2700,8 +2700,15 @@
       const p00 = grid[j][i], p10 = grid[j][i + 1], p01 = grid[j + 1][i], p11 = grid[j + 1][i + 1];
       if (!p00 || !p10 || !p01 || !p11) continue;
       const s00 = [tx(i), j / NY * TH], s10 = [tx(i + 1), j / NY * TH], s01 = [tx(i), (j + 1) / NY * TH], s11 = [tx(i + 1), (j + 1) / NY * TH];
-      texTri(tex, s00, s10, s11, p00, p10, p11);
-      texTri(tex, s00, s11, s01, p00, p11, p01);
+      // v48 (heat): one small piece of the flag picture per cell, slanted to fit, no clipping. The old way drew the whole
+      // picture twice per cell inside a clip (about 196 big draws a frame), which cost about 10 ms on an iPhone 16; this is about half.
+      {
+        const sw = TW / NX, sh = TH / NY, sx = (back ? NX - 1 - i : i) * sw, sy = j * sh, e = 0.5;
+        const ux = (p10.x - p00.x) / (back ? -sw : sw), uy = (p10.y - p00.y) / (back ? -sw : sw), vx = (p01.x - p00.x) / sh, vy = (p01.y - p00.y) / sh;
+        const ox = back ? sx + sw : sx;   // the picture is read mirrored when you see the flag from behind
+        ctx.save(); ctx.transform(ux, uy, vx, vy, p00.x - ux * ox - vx * sy, p00.y - uy * ox - vy * sy);
+        ctx.drawImage(tex, sx - e, sy - e, sw + 2 * e, sh + 2 * e, sx - e, sy - e, sw + 2 * e, sh + 2 * e); ctx.restore();
+      }
       // soft light and shade on the ripples
       const sl = Math.cos(time * 2.4 - (i + 0.5) / NX * 4.6) * ((i + 0.5) / NX);
       ctx.beginPath(); ctx.moveTo(p00.x, p00.y); ctx.lineTo(p10.x, p10.y); ctx.lineTo(p11.x, p11.y); ctx.lineTo(p01.x, p01.y); ctx.closePath();
