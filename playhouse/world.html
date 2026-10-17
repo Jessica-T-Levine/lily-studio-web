@@ -379,6 +379,7 @@
 <script src="lily-bee-home-v1.js"></script>
 <script src="lily-halloween-v2.js"></script>
 <script src="lily-fish-2d-v6.js"></script>
+<script src="lily-fish-moves-v2.js"></script>
 <script>
 (() => {
   "use strict";
@@ -6260,6 +6261,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   }
   let fish = [], nextFish = rand(6, 10), turtle = null, nextTurtle = rand(12, 20);
   const FISH_KINDS = ["goldfish", "koi", "stripe", "rainbow", "puffer", "angel", "clown"];
+  // The jump is the approved move from the Pond chat (lily-fish-moves-v2.js), drawn 2D in the 3D world. Measure it once:
+  // when the fish leaves the water, when it is back in, and how far it has swum sideways by then (body units).
+  const FISH_JUMP = { at: 0, depth: 14, peak: 15 };
+  let fishJI = null;
+  function fishJumpInfo() {
+    if (fishJI) return fishJI;
+    let out = -1, back = -1, dxIn = 0;
+    for (let t = 0; t < 6; t += 1 / 120) {
+      const p = LilyFishMoves.jump(t, FISH_JUMP);
+      if (out < 0 && p.dy < 0) out = t;
+      if (out >= 0 && back < 0 && p.dy >= 0) { back = t; dxIn = p.dx; break; }
+    }
+    return (fishJI = { out, back, dxIn });
+  }
   const SHELLS = [
     { shell: "#7FBF7A", plate: "#5E9E62", rim: "#4E8A58", skin: "#A8D98A" },
     { shell: "#6FB9B0", plate: "#4F9990", rim: "#3F7F78", skin: "#A6DCC9" },
@@ -6281,21 +6296,23 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         // try a few spots: both where it jumps out and where it lands must be open water
         for (let tries = 0; tries < 12 && !jumped; tries++) {
           const p = pick(ponds), a = openWaterIn(p, 26); if (!a) continue;
-          const ang = rand(0, Math.PI * 2), d = rand(26, 42), bx = a.x + Math.cos(ang) * d, by = a.y + Math.sin(ang) * d;
+          const ang = rand(0, Math.PI * 2), size = rand(0.85, 1.2), d = fishJumpInfo().dxIn * 0.95 * size, bx = a.x + Math.cos(ang) * d, by = a.y + Math.sin(ang) * d;
           if (!inPond(p, bx, by, -12) || p.pads.some(pd => Math.hypot(pd.x - bx, pd.y - by) < pd.r + 20)) continue;
-          fish.push({ kind: pick(FISH_KINDS), size: rand(0.85, 1.2), x0: a.x, y0: a.y, dx: bx - a.x, dy: by - a.y, h: rand(30, 48), t: 0, dur: rand(1.0, 1.3), landed: false });
-          waterSplash(a.x, a.y, 5); sfx.plip(); jumped = true;
+          fish.push({ kind: pick(FISH_KINDS), size, x0: a.x, y0: a.y, ux: Math.cos(ang), uy: Math.sin(ang), t: 0, x: a.x, y: a.y, z: -50, pose: null, out: false, back: false });
+          jumped = true;
         }
       }
       nextFish = jumped ? rand(8, 16) : 1.5;
     }
+    const ji = fishJumpInfo();
     fish.forEach(f => {
-      f.t += dt / f.dur;
-      const t = Math.min(f.t, 1);
-      f.x = f.x0 + f.dx * t; f.y = f.y0 + f.dy * t; f.z = f.h * 4 * t * (1 - t);
-      if (f.t >= 1 && !f.landed) { f.landed = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
+      f.t += dt;   // plain time: the leap already plays faster inside the move (lily-fish-moves-v2.js)
+      const pose = f.pose = LilyFishMoves.jump(f.t, FISH_JUMP), u = 0.95 * f.size;   // 1 body unit = u world units
+      f.x = f.x0 + f.ux * pose.dx * u; f.y = f.y0 + f.uy * pose.dx * u; f.z = -pose.dy * u;
+      if (f.t >= ji.out && !f.out) { f.out = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
+      if (f.t >= ji.back && !f.back) { f.back = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
     });
-    fish = fish.filter(f => f.t < 1.05);
+    fish = fish.filter(f => f.t < ji.back + 0.25);
     if (!turtle) {
       nextTurtle -= dt;
       if (nextTurtle <= 0) {
@@ -6745,14 +6762,14 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     ctx.restore();
   }
   function drawJumpFish(f) {
-    const P = proj(f.x, f.y, f.z), P2 = proj(f.x + f.dx * 0.05, f.y + f.dy * 0.05, f.h * 4 * Math.min(f.t + 0.05, 1) * (1 - Math.min(f.t + 0.05, 1)));
-    if (!P || !P2 || f.z < 1) return;
+    const P = proj(f.x, f.y, f.z), P2 = proj(f.x + f.ux * 3, f.y + f.uy * 3, f.z);
+    if (!P || !P2 || f.z < 1 || !f.pose) return;
     const dir = P2.x >= P.x ? 1 : -1;
-    const angle = Math.atan2(P2.y - P.y, Math.abs(P2.x - P.x) + 0.001);
     ctx.save(); ctx.globalAlpha = fadeFor(P.f);
-    ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k); ctx.rotate(angle);
-    // the new approved fish (Pond chat, lily-fish-2d-v6). Same 24 x 13 body, faces right, origin mid-body.
-    LilyFish2D.draw(ctx, f.kind, { ripple: (time / 0.9) % 1, rippleAmt: 1, time: time });
+    ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k);
+    // the approved fish and move (Pond chat). Same 24 x 13 body, faces right, origin mid-body; the move tips and stretches it.
+    const q = f.pose;
+    LilyFishMoves.draw(ctx, f.kind, { dx: 0, dy: 0, rot: q.rot, sa: q.sa, sc: q.sc, eyeTurn: q.eyeTurn, opt: Object.assign({ time }, q.opt) }, 0, 0, 1, 1);
     ctx.restore();
   }
   function drawPondTurtle(T) {
