@@ -6260,6 +6260,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   }
   let fish = [], nextFish = rand(6, 10), turtle = null, nextTurtle = rand(12, 20);
   const FISH_KINDS = ["goldfish", "koi", "stripe", "rainbow", "puffer", "angel", "clown"];
+  const FISH_JUMP_FAST = 1.32; // jumps last 1.0-1.3 s at normal speed; 1.32x makes them about 0.87 s
   const SHELLS = [
     { shell: "#7FBF7A", plate: "#5E9E62", rim: "#4E8A58", skin: "#A8D98A" },
     { shell: "#6FB9B0", plate: "#4F9990", rim: "#3F7F78", skin: "#A6DCC9" },
@@ -6290,7 +6291,8 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       nextFish = jumped ? rand(8, 16) : 1.5;
     }
     fish.forEach(f => {
-      f.t += dt / f.dur;
+      // leap speed (Jessica, Oct 17): about 0.87 s in the air on average, the same as the Hop Hop app's faster fish jump
+      f.t += FISH_JUMP_FAST * dt / f.dur;
       const t = Math.min(f.t, 1);
       f.x = f.x0 + f.dx * t; f.y = f.y0 + f.dy * t; f.z = f.h * 4 * t * (1 - t);
       if (f.t >= 1 && !f.landed) { f.landed = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
