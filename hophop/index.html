@@ -753,7 +753,7 @@
 <script src="/lily-sky-v1.js"></script>
 <script src="../playhouse/lily-halloween-v1.js"></script>
 <script src="../playhouse/lily-fish-2d-v6.js"></script>
-<script src="../playhouse/lily-fish-moves-v2.js"></script>
+<script src="../playhouse/lily-fish-moves-v3.js"></script>
 <script>
 (() => {
   "use strict";
@@ -1238,25 +1238,39 @@
   function clearWater(wx) {
     return pads.every(p => Math.abs(wx - p.x) > p.r + 34);
   }
-  // The approved jump (lily-fish-moves-v2): a quick leap from the water, an arc, and a splash back in. Body units, measured from the surface.
+  // The approved jump (lily-fish-moves-v3): a quick leap from the water, an arc, and a splash back in. Body units, measured from the surface.
+  // Plain time: the move has its own quicker leap built in. Each fish waits and rests deep enough to hide its own tail (the move does it).
   const JUMP = { at: 0.1, depth: 14, peak: 15 };
-  const JUMP_OUT = 5, JUMP_IN = 25.83, JUMP_END = 3.8, JUMP_BACK = 1.55;   // where he leaves and re-enters the water (body units), and when the splash is done (seconds)
+  const JUMP_OUT = 5, JUMP_IN = 25.83;   // where he leaves and re-enters the water (body units)
   // ---- the rule: a jumping fish never goes through anything ----
   // Every fish keeps a box around its whole jump (where it leaves the water, the arc, the splash back in). A jump only starts when that box
   // touches no lily pad (or the frog on it), no turtle, no pumpkin, no butterfly or other flyer, and no other fish.
   // The outline of each drawn fish (body units from his middle, measured from the drawing; the koi's long tail reaches farthest).
   const FISH_HULL = { goldfish: [[11.8,-1.2],[11.8,0.6],[10.6,3],[2.2,7.8],[-25.4,12.6],[-25.4,10.8],[-24.2,-13.8],[-2.6,-9.6],[10,-3.6],[10.6,-3]], koi: [[14.2,-1.2],[14.2,0.6],[13.6,2.4],[11.2,4.8],[3.4,9.6],[-39.2,18.6],[-41.6,15],[-44.6,-18],[-44.6,-18.6],[-38.6,-19.2],[-2.6,-12],[11.2,-4.8],[13.6,-2.4]], stripe: [[14.2,-0.6],[14.2,0.6],[13,1.8],[10.6,3],[-30.8,7.2],[-29.6,-7.8],[-29,-8.4],[8.8,-3.6],[13,-1.8]], rainbow: [[11.8,-1.2],[11.8,1.2],[11.2,2.4],[-14.6,25.8],[-27.8,28.8],[-32.6,24.6],[-34.4,21.6],[-34.4,-5.4],[-34.4,-6],[-25.4,-21.6],[-24.2,-21.6],[-21.8,-21.6],[10,-4.2],[10.6,-3.6]], angel: [[8.8,-1.2],[8.8,1.2],[-3.2,18.6],[-8.6,24.6],[-9.2,24.6],[-24.8,23.4],[-25.4,22.2],[-25.4,-20.4],[-23.6,-22.8],[-22.4,-23.4],[-19.4,-22.8],[-5.6,-15.6],[8.2,-2.4]], puffer: [[9.4,-1.2],[9.4,1.2],[6.4,6],[1,7.2],[-14,4.2],[-15.2,3],[-15.8,1.8],[-15.8,-0.6],[-15.2,-2.4],[-13.4,-4.2],[1.6,-7.2],[4,-6.6],[7,-5.4]], clown: [[7,-0.6],[7,0.6],[6.4,1.8],[5.8,2.4],[0.4,5.4],[-0.8,5.4],[-12.8,3],[-14,1.8],[-14,-1.2],[-13.4,-2.4],[-12.8,-3],[-1.4,-5.4],[-0.8,-5.4],[5.2,-3],[6.4,-1.8]] };
-  function jumpPose(t) {
-    const p = LilyFishMoves.jump(t, JUMP);
-    // Back in the water he keeps swimming down, so his tail never hangs out of the surface (the game shows nothing under the water)
-    const under = t - JUMP_BACK;
-    if (under > 0) p.dy += 34 * (1 - Math.exp(-6 * under));
-    return p;
+  const jumpOf = kind => Object.assign({ fish: kind }, JUMP);   // the jump, with the fish's name so the move knows whose tail to hide
+  // Each fish's jump, worked out once: the move's own timings (jumpTimes), where he is every 0.05 seconds, and when he is done
+  // (his splash and bubbles are over and every bit of him is back under the water, so he can go without a pop).
+  const JUMP_INFO = {};
+  function hullTop(kind, p) {   // how high the fish's outline reaches in this pose (body units; the surface is 0, + is under)
+    const cs = Math.cos(p.rot), sn = Math.sin(p.rot); let top = Infinity;
+    (FISH_HULL[kind] || FISH_HULL.koi).forEach(([ux, uy]) => { top = Math.min(top, p.dy + ux * p.sa * sn + uy * p.sc * cs); });
+    return top;
   }
-  let jumpSamples = null;   // the approved jump, sampled once: where he is and how he is turned, every 0.05 seconds
-  function getJumpSamples() {
-    if (!jumpSamples) { jumpSamples = []; for (let t = 0; t <= JUMP_END; t += 0.05) { const p = jumpPose(t); jumpSamples.push({ dx: p.dx, dy: p.dy, rot: p.rot, sa: p.sa, sc: p.sc }); } }
-    return jumpSamples;
+  function jumpInfo(kind) {
+    if (JUMP_INFO[kind]) return JUMP_INFO[kind];
+    const J = jumpOf(kind), times = LilyFishMoves.jumpTimes(J), samples = [];
+    let end = times.backIn;
+    for (let t = 0; t < times.backIn + 12; t += 0.05) {
+      const p = LilyFishMoves.jump(t, J);
+      samples.push({ dx: p.dx, dy: p.dy, rot: p.rot, sa: p.sa, sc: p.sc });
+      end = t;
+      if (t > times.backIn && !p.splashes.length && !p.bubbles && hullTop(kind, p) > 0) break;
+    }
+    return (JUMP_INFO[kind] = { J, times, samples, end });
+  }
+  // Measure the fish while the game loads (one fish at a time, so the page never stalls), so the first jump never pauses the game.
+  if (typeof LilyFishMoves !== "undefined" && LilyFishMoves.prepare && typeof LilyFish2D !== "undefined") {
+    FISH_KINDS.forEach((k, i) => setTimeout(() => { LilyFishMoves.prepare([k], JUMP); jumpInfo(k); }, 60 + i * 80));
   }
   // Every spot the drawn fish (and his splashes) will cover during the whole jump, in world coordinates. Only what is above his water spot counts, because nothing shows under it.
   function fishSweep(kind, x0, y0, s, dir) {
@@ -1264,9 +1278,9 @@
     for (let i = 0; i < hull.length; i++) { const a = hull[i], b = hull[(i + 1) % hull.length]; for (let k = 0; k < 4; k++) outline.push([a[0] + (b[0] - a[0]) * k / 4, a[1] + (b[1] - a[1]) * k / 4]); }
     const pts = [], box = { l: 1e9, r: -1e9, t: 1e9, b: -1e9 };
     const add = (wx, wy) => { pts.push(wx, wy); if (wx < box.l) box.l = wx; if (wx > box.r) box.r = wx; if (wy < box.t) box.t = wy; if (wy > box.b) box.b = wy; };
-    getJumpSamples().forEach(p => {
+    jumpInfo(kind).samples.forEach(p => {
       const cs = Math.cos(p.rot), sn = Math.sin(p.rot), bx = x0 + p.dx * s * dir, by = y0 + p.dy * s;
-      outline.forEach(([ux, uy]) => { const px = ux * s * p.sa, py = uy * s * p.sc, wy = by + px * sn + py * cs; if (wy < y0 + 4) add(bx + dir * (px * cs - py * sn), wy); });
+      outline.forEach(([ux, uy]) => { const px = ux * s * p.sa, py = uy * s * p.sc, wy = by + px * sn + py * cs; if (wy < y0) add(bx + dir * (px * cs - py * sn), wy); });
     });
     const splashes = [JUMP_OUT, JUMP_IN].map(u => ({ l: x0 + dir * u * s - 10 * s, r: x0 + dir * u * s + 10 * s, t: y0 - 12 * s, b: y0 + 8 }));
     splashes.forEach(q => { box.l = Math.min(box.l, q.l); box.r = Math.max(box.r, q.r); box.t = Math.min(box.t, q.t); box.b = Math.max(box.b, q.b); });
@@ -1306,7 +1320,8 @@
       if (box.l - camX < 6 || box.r - camX > W - 6) continue;             // the whole jump stays on screen
       const front = fishInFront(y0);
       if (obstacles.some(o => !(front && o.backRow) && (o.fishBox ? boxesTouch(box, o) : sweepHits(sw, o)))) continue;
-      fish.push({ mv: true, front, kind, size, s, x0, y0, dir, t: 0, box, x: x0, y: y0 + JUMP.depth * s, pose: null });
+      const info = jumpInfo(kind);
+      fish.push({ mv: true, front, kind, size, s, x0, y0, dir, t: 0, box, info, x: x0, y: y0 + info.times.waitDepth * s, pose: null });
       return true;
     }
     return false; // nothing but room right now; try again shortly
@@ -1342,10 +1357,10 @@
     fish.forEach(f => {
       if (f.mv) {
         f.t += dt;
-        f.pose = jumpPose(f.t);
+        f.pose = LilyFishMoves.jump(f.t, f.info.J);
         f.x = f.x0 + f.dir * f.pose.dx * f.s; f.y = f.y0 + f.pose.dy * f.s;
-        // if the frog starts a hop through his spot while he is still under the water, he simply stays down
-        if (!f.front && f.t < 0.6 && (charging || frog.jump || state !== "play")) {
+        // if the frog starts a hop through his spot while he is still all under the water, he simply stays down
+        if (!f.front && f.t < f.info.times.noseOut && (charging || frog.jump || state !== "play")) {
           const fx0 = frog.jump ? Math.min(frog.x, frog.jump.x0 + frog.jump.d) : frog.x, fx1 = frog.jump ? Math.max(frog.x, frog.jump.x0 + frog.jump.d) : frog.x + 330;
           if (boxesTouch(f.box, { l: fx0 - 100, r: fx1 + 100, t: WATER_Y - 200, b: WATER_Y + 60 })) f.t = 99;
         }
@@ -1359,7 +1374,7 @@
       f.angle = Math.atan2(vy, Math.abs(vx));
       if (f.t >= 1 && !f.landed) { f.landed = true; fishSplash(f.x); }
     });
-    fish = fish.filter(f => f.mv ? f.t < JUMP_END : f.t < 1.05);
+    fish = fish.filter(f => f.mv ? f.t < f.info.end : f.t < 1.05);
   }
   function drawOneFish(f) {
     ctx.save();
@@ -1431,8 +1446,8 @@
       ctx.restore();
     }
     fish.filter(f => f.mv && f.pose && !!f.front === (layer === "front")).sort((a, b) => a.y0 - b.y0).forEach(f => {
-      // the approved fish and jump (moves v2): only the part above his own water spot shows
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, f.y0 + 4); ctx.clip();
+      // the approved fish and jump (moves v3): only the part above his own water spot shows
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, f.y0); ctx.clip();   // exactly at his water's surface: nothing under it shows
       LilyFishMoves.draw(ctx, f.kind, f.pose, f.x0 - camX, f.y0, f.s, f.dir);
       ctx.restore();
       // the splashes sit just under his water spot so their rings never spill onto the hills
