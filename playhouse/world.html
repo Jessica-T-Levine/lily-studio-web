@@ -378,6 +378,7 @@
 <script src="lily-flag-design.js"></script>
 <script src="lily-bee-home-v1.js"></script>
 <script src="lily-halloween-v2.js"></script>
+<script src="lily-fish-2d-v6.js"></script>
 <script>
 (() => {
   "use strict";
@@ -6743,6 +6744,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     if (wet > 0.05) { ctx.strokeStyle = `rgba(255, 255, 255, ${0.45 * wet})`; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.ellipse(0, 1, 21, 3.5, 0, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
+  // v50: the new 2D fish (Pond chat, lily-fish-2d-v6.js). Each fish and swim-wave step is drawn once into a small picture and reused,
+  // so a jump costs almost nothing. The old simple drawing below stays as the fallback if the fish file ever fails to load.
+  const FISH_PX = 4, FISH_STEPS = 12;
+  const FISH_BOX = { goldfish: [-28, -18, 14, 16], koi: [-47, -24, 17, 23], stripe: [-34, -12, 17, 11] };   // the part of each fish's drawing that shows (body units)
+  const fishPics = {};
+  function fishPic(kind, step) {
+    const key = kind + step; let c = fishPics[key]; if (c) return c;
+    const B = FISH_BOX[kind], w = Math.ceil((B[2] - B[0]) * FISH_PX), h = Math.ceil((B[3] - B[1]) * FISH_PX);
+    c = document.createElement("canvas"); c.width = w; c.height = h;
+    const g = c.getContext("2d"); g.translate(-B[0] * FISH_PX, -B[1] * FISH_PX); g.scale(FISH_PX, FISH_PX);
+    window.LilyFish2D.draw(g, kind, { ripple: step / FISH_STEPS, rippleAmt: 0.85 });
+    c.ox = B[0]; c.oy = B[1]; c.bw = B[2] - B[0]; c.bh = B[3] - B[1];
+    return (fishPics[key] = c);
+  }
   function drawJumpFish(f) {
     const P = proj(f.x, f.y, f.z), P2 = proj(f.x + f.dx * 0.05, f.y + f.dy * 0.05, f.h * 4 * Math.min(f.t + 0.05, 1) * (1 - Math.min(f.t + 0.05, 1)));
     if (!P || !P2 || f.z < 1) return;
@@ -6750,6 +6765,11 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const angle = Math.atan2(P2.y - P.y, Math.abs(P2.x - P.x) + 0.001);
     ctx.save(); ctx.globalAlpha = fadeFor(P.f);
     ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k); ctx.rotate(angle);
+    if (window.LilyFish2D && FISH_BOX[f.kind]) {
+      const pic = fishPic(f.kind, Math.floor((((time * 1.6) % 1) + 1) % 1 * FISH_STEPS) % FISH_STEPS);   // a fast tail beat while he flies
+      ctx.drawImage(pic, pic.ox, pic.oy, pic.bw, pic.bh);
+      ctx.restore(); return;
+    }
     const wag = Math.sin(time * 18) * 0.25;
     let body, bodyLight, tail, fin;
     if (f.kind === "goldfish") { body = "#FF8F52"; bodyLight = "#FFC08A"; tail = "rgba(255, 170, 110, 0.85)"; fin = "#FFB27A"; }
