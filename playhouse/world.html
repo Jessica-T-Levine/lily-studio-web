@@ -2986,7 +2986,7 @@
       const a = rand(0, Math.PI * 2), d = rand(minD, maxD), x = bee.x + Math.cos(a) * d, y = bee.y + Math.sin(a) * d;
       const f = camF(x, y), side = -(x - camX) * camS + (y - camY) * camC;
       const seen = f > 60 && f < FAR && Math.abs(side) / f < 0.75;
-      if (seen || pondAt(x, y) || insideHouse(x, y, 80)) continue;
+      if (seen || pondAt(x, y) || insideHouse(x, y, 80) || inPumpkin(x, y, 20)) continue;
       return { x, y };
     }
     return null;
@@ -3003,7 +3003,7 @@
     if (near("bee") < BEES_NEAR) { const s = hiddenSpot(700, NEAR_R); if (s) ANIMALS.push(newBee(s.x, s.y, rand(90, 240), pick(BEE_PALS), pick([0.45, 0.55, 0.6, 0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75]))); }
   }
   function bunnySpotOk(x, y) {
-    if (pondAt(x, y) || insideHouse(x, y, 30)) return false;
+    if (pondAt(x, y) || insideHouse(x, y, 30) || inPumpkin(x, y, 14)) return false;
     if (ANIMALS.some(o => o.kind === "bunny" && Math.hypot(o.x - x, o.y - y) < 150)) return false;
     if (Math.hypot(HOME_POND.x - x, HOME_POND.y - y) < 150) return false;
     const bf = camF(bee.x, bee.y), side = -(x - camX) * camS + (y - camY) * camC;
@@ -3057,9 +3057,20 @@
           if (n.idle === "ear") n.earSide = Math.random() < 0.5 ? 1 : -1;
         }
       } else {
-        const len = Math.min(d, rand(13, 20) * n.size), tx = n.x + dx / d * len, ty = n.y + dy / d * len;
-        if (Math.hypot(bee.x - tx, bee.y - ty) < 170 || pondAt(tx, ty) || (!n.toHouse && insideHouse(tx, ty, 30)) || ANIMALS.some(o => o !== n && o.kind === "bunny" && Math.hypot(o.x - tx, o.y - ty) < 11 * (o.size + n.size))) { n.state = "idle"; n.idle = "look"; n.timer = 1.5; n.faceCam = false; n.toHouse = false; }
-        else { n.from = { x: n.x, y: n.y }; n.to = { x: tx, y: ty }; n.u = 0; n.state = "hop"; n.headingT = Math.atan2(dy, dx); }
+        const len = Math.min(d, rand(13, 20) * n.size), hd0 = Math.atan2(dy, dx);
+        const spotBad = (tx, ty) => Math.hypot(bee.x - tx, bee.y - ty) < 170 || pondAt(tx, ty) || (!n.toHouse && insideHouse(tx, ty, 30)) || ANIMALS.some(o => o !== n && o.kind === "bunny" && Math.hypot(o.x - tx, o.y - ty) < 11 * (o.size + n.size));
+        let tx = n.x + dx / d * len, ty = n.y + dy / d * len, hd = hd0, bad = spotBad(tx, ty);
+        // v49: a pumpkin in the way? hop around it (someone already standing in one is never trapped)
+        const pp = 12 + 2 * n.size;
+        if (!bad && !inPumpkin(n.x, n.y, pp) && pumpkinLeg(n.x, n.y, tx, ty, pp)) {
+          bad = true;
+          for (const off of [0.6, -0.6, 1.2, -1.2, 1.8, -1.8]) {
+            const h = hd0 + off, qx = n.x + Math.cos(h) * len, qy = n.y + Math.sin(h) * len;
+            if (!spotBad(qx, qy) && !pumpkinLeg(n.x, n.y, qx, qy, pp)) { tx = qx; ty = qy; hd = h; bad = false; break; }
+          }
+        }
+        if (bad) { n.state = "idle"; n.idle = "look"; n.timer = 1.5; n.faceCam = false; n.toHouse = false; }
+        else { n.from = { x: n.x, y: n.y }; n.to = { x: tx, y: ty }; n.u = 0; n.state = "hop"; n.headingT = hd; }
       }
     } else if (n.state === "hop") {
       n.u = Math.min(1, n.u + dt / 0.5);
@@ -4039,6 +4050,19 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   const bmBoosting = () => TG.on && TG.phase !== "over" && bmTummy >= 2;
   const tgBest = () => Math.max(0, parseInt(store.get(TG_BEST_KEY, "0"), 10) || 0);
 
+  const pumpkinR = m => 36 * m.shape.w * PUMPKIN_UNITS * m.s;   // a pumpkin's footprint: half the width it is drawn at
+  // is this spot inside a showing pumpkin (plus pad)? Used by the meadow bunnies, who do not look at trees at all.
+  function inPumpkin(x, y, pad) {
+    if (!(HW_LEVEL > 0)) return false;
+    return chunksAround(x, y, 100 + pad).some(ch => ch.pumpkins.some(m => m.th <= HW_LEVEL && !inPlanter(m.x, m.y, 30) && Math.hypot(m.x - x, m.y - y) < pumpkinR(m) + pad));
+  }
+  // does a short hop from (x0,y0) to (x1,y1) cross a showing pumpkin? (checked every few units, so a long hop cannot jump into one)
+  function pumpkinLeg(x0, y0, x1, y1, pad) {
+    if (!(HW_LEVEL > 0)) return false;
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 10));
+    for (let i = 1; i <= n; i++) if (inPumpkin(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, pad)) return true;
+    return false;
+  }
   // trunks and big bushes are solid: she hops around them, and a friend can really hide behind one
   function solidsNear(x, y, rad) {
     const out = [];
@@ -4046,6 +4070,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       ch.trees.forEach(t => out.push({ x: t.x, y: t.y, r: t.w * 0.55, tree: true }));
       ch.bushes.forEach(b => out.push({ x: b.x, y: b.y, r: b.br * 0.7, bush: true, big: b.br >= 100 }));
     });
+    // v49: pumpkins that are showing are solid too (the same rule the drawing uses), so nobody stands or naps inside one.
+    // A big pumpkin can spill over the edge of its patch, so look a little wider for these.
+    if (HW_LEVEL > 0) chunksAround(x, y, rad + 100).forEach(ch => ch.pumpkins.forEach(m => { if (m.th > HW_LEVEL || inPlanter(m.x, m.y, 30)) return; out.push({ x: m.x, y: m.y, r: pumpkinR(m), pumpkin: true }); }));
     return out.filter(o => Math.abs(o.x - x) < rad + 220 && Math.abs(o.y - y) < rad + 220);
   }
   // a solid never blocks someone who is already standing in it (so nobody gets stuck)
@@ -4110,7 +4137,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     let best = null, bs = -1e9;
     sol.forEach(S => {
       const d = Math.hypot(S.x - px, S.y - py);
-      if (d < 380 || d > 1500 || S.r < 26) return;
+      if (S.pumpkin || d < 380 || d > 1500 || S.r < 26) return;   // (a pumpkin is solid but not a hiding place: that stays as before)
       const u = Math.atan2(S.y - camY, S.x - camX), off = S.r + 12 * f.size, hx = S.x + Math.cos(u) * off, hy = S.y + Math.sin(u) * off;
       if (pondAt(hx, hy) || insideHouse(hx, hy, 60) || solidIn(sol, hx, hy, 14, S.x, S.y)) return;
       const ang = Math.abs(angDiff(Math.atan2(S.y - py, S.x - px), bun.heading));
