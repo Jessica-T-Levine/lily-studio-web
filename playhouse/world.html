@@ -6259,7 +6259,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     return null;
   }
   let fish = [], nextFish = rand(6, 10), turtle = null, nextTurtle = rand(12, 20);
-  const FISH_KINDS = ["goldfish", "koi", "stripe"];
+  const FISH_KINDS = ["goldfish", "koi", "stripe", "rainbow", "puffer", "angel", "clown"];
   const SHELLS = [
     { shell: "#7FBF7A", plate: "#5E9E62", rim: "#4E8A58", skin: "#A8D98A" },
     { shell: "#6FB9B0", plate: "#4F9990", rim: "#3F7F78", skin: "#A6DCC9" },
@@ -6752,7 +6752,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     ctx.save(); ctx.globalAlpha = fadeFor(P.f);
     ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k); ctx.rotate(angle);
     // the new approved fish (Pond chat, lily-fish-2d-v6). Same 24 x 13 body, faces right, origin mid-body.
-    LilyFish2D.draw(ctx, f.kind, { ripple: (time / 0.9) % 1, rippleAmt: 1 });
+    LilyFish2D.draw(ctx, f.kind, { ripple: (time / 0.9) % 1, rippleAmt: 1, time: time });
     ctx.restore();
   }
   function drawPondTurtle(T) {
