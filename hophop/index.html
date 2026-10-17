@@ -1258,6 +1258,7 @@
     }
     return false; // no open water right now; try again shortly
   }
+  const FISH_JUMP_FAST = 1.24; // jumps last 0.95-1.2 s at normal speed; 1.24x makes them about 0.87 s
   function updateFish(dt) {
     nextFish -= dt;
     if (nextFish <= 0) {
@@ -1265,7 +1266,9 @@
       nextFish = jumped ? rand(8, 16) : 1.5;
     }
     fish.forEach(f => {
-      f.t += dt / f.dur;
+      // leap speed (Jessica, Oct 17): about 0.87 s in the air on average, the same as the Hop Hop app's faster fish jump.
+      // Only the jump itself is faster; the splash, the gap between jumps and everything else are unchanged.
+      f.t += FISH_JUMP_FAST * dt / f.dur;
       const t = Math.min(f.t, 1);
       f.x = f.x0 + f.dx * t;
       f.y = WATER_Y + 6 - f.h * 4 * t * (1 - t);
