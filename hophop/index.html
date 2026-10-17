@@ -859,6 +859,7 @@
     },
     plop() { tone("sine", 520, 90, 0.32, 0.22); tone("sine", 180, 60, 0.25, 0.12, 0.08); },
     bloop() { tone("sine", 240, 520, 0.16, 0.14); },
+    plip(low) { tone("sine", low ? 820 : 1020, low ? 560 : 700, 0.07, 0.035, 0, pondBus); },   // a fish leaving (and going back into) the water: soft, under the pond sounds
     twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
     lick() { tone("sine", 900, 1500, 0.07, 0.06); },
     gulp() { tone("sine", 520, 260, 0.12, 0.14); tone("sine", 700, 350, 0.1, 0.08, 0.1); },
@@ -1225,8 +1226,14 @@
     ctx.beginPath(); ctx.ellipse(c.x, c.y - 2, 2, 1, 0, 0, Math.PI * 2); ctx.fill();
   }
   // ---------- jumping fish (goldfish, koi, blue striped) ----------
-  let fish = [], nextFish = rand(5, 9);
-  const FISH_KINDS = ["goldfish", "koi", "stripe"];
+  // Fish Rules v2 (place note, website Hop Hop game): the same fish and timing as the Hop Hop app.
+  // Goldfish most often, then koi and stripe (the shared mix: 30 / 18 / 18). A jump every 20 to 35 seconds:
+  // half as often at night (the game's own sky), half as often with Reduce Motion (a quarter with both).
+  const FISH_KINDS = ["goldfish", "koi", "stripe"], FISH_MIX = { goldfish: 30, koi: 18, stripe: 18 };
+  function pickFish() { let r = Math.random() * FISH_KINDS.reduce((a, k) => a + FISH_MIX[k], 0); for (const k of FISH_KINDS) { r -= FISH_MIX[k]; if (r < 0) return k; } return FISH_KINDS[0]; }
+  const isNight = () => !!(window.LilySky && window.LilySky.nightness && window.LilySky.nightness(skyHour) > 0.5);
+  const fishGap = () => rand(20, 35) * (isNight() ? 2 : 1) * (reduceMotion ? 2 : 1);
+  let fish = [], nextFish = fishGap(), lastJump = null, nextKind = null, nextKindTries = 0;
   function fishSplash(x) {
     for (let i = 0; i < 9; i++) {
       const a = rand(-Math.PI * 0.9, -Math.PI * 0.1), sp = rand(50, 140);
@@ -1294,37 +1301,53 @@
     return false;
   }
   function boxesTouch(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
-  // A fish whose water spot is past the pads is closer to you than the pads, the flowers and the frog: he is drawn on top of them and may rise in front of them in the picture.
-  // Turtles, pumpkins, bugs and other fish he must never touch, wherever he is.
+  // Fish Rules v2, rule 7: the picture has depth. A fish whose water spot is past the pads is closer to you than the pads and
+  // their flowers: he is drawn on top of them and may rise in front of them. He never goes through anything at his own distance,
+  // and he never covers Hop Hop (or anywhere Hop Hop's next hop could take him), even from the front of the pond.
+  // Turtles, pumpkins, bugs, butterflies and anything flying low he never touches, wherever he is. (The reeds are the closest
+  // thing in the picture, along the bottom: a fish is always farther back and passes behind them.)
   function fishInFront(y0) { return y0 > WATER_Y + 46; }
   function fishObstacles() {
     const o = [];
-    pads.forEach(p => o.push({ backRow: true, l: p.x - Math.max(p.r + 14, 50), r: p.x + Math.max(p.r + 14, 50), t: WATER_Y - 120, b: WATER_Y + 4 + 9 + p.r * 0.32 + 6 }));   // the pad, its flower and the frog on it
-    // the frog, and everywhere his next hop could take him while a fish is in the air (the longest hop is 330 forward and about 152 high)
-    o.push({ backRow: true, l: frog.x - 70, r: frog.x + 330 + 70, t: WATER_Y - 175, b: WATER_Y + 40 });
+    pads.forEach(p => o.push({ backRow: true, l: p.x - Math.max(p.r + 14, 50), r: p.x + Math.max(p.r + 14, 50), t: WATER_Y - 120, b: WATER_Y + 4 + 9 + p.r * 0.32 + 6 }));   // the pad and its flower
+    // Hop Hop, and everywhere his next hop could take him while a fish is in the air (the longest hop is 330 forward and about 152 high): for every fish.
+    // (The lowest he is ever drawn is 17 below the water line, floating after a missed hop; 24 leaves a little room.)
+    o.push({ l: frog.x - 70, r: frog.x + 330 + 70, t: WATER_Y - 175, b: WATER_Y + 24 });
     if (turtle) { const a = Math.min(turtle.x0, turtle.x1), b = Math.max(turtle.x0, turtle.x1), z = turtle.size; o.push({ l: a - 30 * z, r: b + 30 * z, t: turtle.y - 24 * z, b: turtle.y + 14 * z }); }
     hwPumpkins().forEach(m => { const top = WATER_Y + 62, bot = H - 36; if (bot <= top) return; const sc = lerp(0.42, 0.8, m.depth), by = top + m.depth * (bot - top); o.push({ l: m.x - 75 * sc, r: m.x + 75 * sc, t: by - 95 * sc, b: by + 16 }); });
     fish.forEach(f => { if (f.mv) o.push(Object.assign({ fishBox: true }, f.box)); });
     critters.concat(flyers).forEach(c => o.push({ l: c.x + camX - 50, r: c.x + camX + 50, t: c.y - 50, b: c.y + 50 }));
     return o;
   }
+  // Fish Rules v2, rule 2: a fish's body (24 body units) is 1/18 to 1/8 of the pond's width, a little bigger closer to you (d: 0 = back row, 1 = front)
+  const fishScale = d => { const lo = W / 18 / 24, hi = W / 8 / 24; return lerp(lo, hi, Math.min(1, 0.65 * d + 0.35 * Math.random())); };
+  // One try at a jump for this fish and row; returns true if he jumps. Every rule is checked on his whole jump before he goes.
+  function tryJump(kind, d, x0) {
+    const dir = Math.random() < 0.5 ? 1 : -1, s = fishScale(d), len = 24 * s;
+    const y0 = WATER_Y + (H - 42 - WATER_Y) * d;
+    if (x0 === undefined) x0 = camX + rand(40, W - 40);
+    const sw = fishSweep(kind, x0, y0, s, dir), box = sw.box;
+    if (box.l - camX < len || box.r - camX > W - len) return false;          // the whole jump stays one fish length from the edges of the pond on screen
+    if (lastJump && Math.abs(x0 - lastJump.x) < 2 * len && Math.abs(y0 - lastJump.y) < 30) return false;   // never twice in a row from the same spot
+    const front = fishInFront(y0);
+    if (fishObstacles().some(o => !(front && o.backRow) && (o.fishBox ? boxesTouch(box, o) : sweepHits(sw, o)))) return false;
+    const info = jumpInfo(kind);
+    fish.push({ mv: true, front, kind, s, x0, y0, dir, t: 0, sw, box, info, x: x0, y: y0 + info.times.waitDepth * s, pose: null });
+    lastJump = { x: x0, y: y0 };
+    return true;
+  }
   function spawnFish() {
     if (typeof LilyFishMoves === "undefined" || typeof LilyFish2D === "undefined") return spawnFishOld();
     if (state !== "play" || charging || frog.jump) return false;   // not while the frog is winding up, hopping or floating
-    const obstacles = fishObstacles();
-    for (let tries = 0; tries < 60; tries++) {
-      const dir = Math.random() < 0.5 ? 1 : -1, size = critterSize() * 0.85, kind = FISH_KINDS[Math.floor(Math.random() * FISH_KINDS.length)];
-      const d = Math.random() < 0.3 ? 0 : Math.random();                 // 0 = the back row (the water line), 1 = the front of the pond
-      const y0 = WATER_Y + (H - 42 - WATER_Y) * d, s = 1.3 * size * lerp(1, 1.6, d);   // closer to you = bigger, and he jumps bigger too
-      const x0 = camX + rand(40, W - 40), sw = fishSweep(kind, x0, y0, s, dir), box = sw.box;
-      if (box.l - camX < 6 || box.r - camX > W - 6) continue;             // the whole jump stays on screen
-      const front = fishInFront(y0);
-      if (obstacles.some(o => !(front && o.backRow) && (o.fishBox ? boxesTouch(box, o) : sweepHits(sw, o)))) continue;
-      const info = jumpInfo(kind);
-      fish.push({ mv: true, front, kind, size, s, x0, y0, dir, t: 0, box, info, x: x0, y: y0 + info.times.waitDepth * s, pose: null });
-      return true;
+    // The mix picks who jumps next, and he waits his turn until he finds a clear spot (a big koi needs more room),
+    // so the mix stays true. If nowhere is clear for about 15 seconds, the mix picks again.
+    if (!nextKind || nextKindTries >= 10) { nextKind = pickFish(); nextKindTries = 0; }
+    for (let tries = 0; tries < 80; tries++) {
+      const d = Math.random() < 0.3 ? 0 : Math.random();             // 0 = the back row (the water line), 1 = the front of the pond
+      if (tryJump(nextKind, d)) { nextKind = null; return true; }
     }
-    return false; // nothing but room right now; try again shortly
+    nextKindTries++;
+    return false; // nowhere clear right now; try again a moment later
   }
   function spawnFishOld() {
 
@@ -1351,19 +1374,20 @@
   function updateFish(dt) {
     nextFish -= dt;
     if (nextFish <= 0) {
-      const jumped = fish.length < 2 && spawnFish();
-      nextFish = jumped ? rand(8, 16) : 1.5;
+      const jumped = fish.length === 0 && spawnFish();   // only one fish jumps at a time
+      nextFish = jumped ? fishGap() : 1.5;
     }
     fish.forEach(f => {
       if (f.mv) {
         f.t += dt;
         f.pose = LilyFishMoves.jump(f.t, f.info.J);
         f.x = f.x0 + f.dir * f.pose.dx * f.s; f.y = f.y0 + f.pose.dy * f.s;
-        // if the frog starts a hop through his spot while he is still all under the water, he simply stays down
-        if (!f.front && f.t < f.info.times.noseOut && (charging || frog.jump || state !== "play")) {
-          const fx0 = frog.jump ? Math.min(frog.x, frog.jump.x0 + frog.jump.d) : frog.x, fx1 = frog.jump ? Math.max(frog.x, frog.jump.x0 + frog.jump.d) : frog.x + 330;
-          if (boxesTouch(f.box, { l: fx0 - 100, r: fx1 + 100, t: WATER_Y - 200, b: WATER_Y + 60 })) f.t = 99;
-        }
+        // just before the leap: if anything has moved into his path while he is still all under the water, he stays down
+        if (f.t < f.info.times.noseOut && (state !== "play" || fishObstacles().some(o => !o.fishBox && !(f.front && o.backRow) && sweepHits(f.sw, o)))) f.t = 99;
+        // a soft plip as he leaves the water and another as he goes back in
+        const T = f.info.times, before = f.t - dt;
+        if (before < T.leave && f.t >= T.leave) sfx.plip(false);
+        if (before < T.backIn && f.t >= T.backIn) sfx.plip(true);
         return;
       }
       f.t += dt / f.dur;
@@ -1451,7 +1475,9 @@
       LilyFishMoves.draw(ctx, f.kind, f.pose, f.x0 - camX, f.y0, f.s, f.dir);
       ctx.restore();
       // the splashes sit just under his water spot so their rings never spill onto the hills
+      ctx.save(); if (isNight()) ctx.globalAlpha = 0.55;   // a softer splash at night
       f.pose.splashes.forEach(sp => LilyFishMoves.drawSplash(ctx, f.x0 - camX + f.dir * sp.x * f.s, f.y0 + 4, f.s, sp));
+      ctx.restore();
     });
   }
   // ---------- shooting star: rare, quiet, a little magic ----------
@@ -1527,8 +1553,10 @@
     else if (frog.lick) frog.lookAt = { x: frog.lick.bug.x, y: frog.lick.bug.y };
     else {
       const m = frogMouth(); let bestD = 230;
+      const jf = fish.find(f => f.mv && f.pose && f.t >= f.info.times.noseOut && f.t <= f.info.times.backIn);
+      if (jf) { frog.lookAt = { x: jf.x - camX, y: jf.y }; bestD = -1; }   // Fish Rules v2, rule 9: Hop Hop watches a jumping fish
       critters.forEach(c => { const d = Math.hypot(c.x - m.x, c.y - m.y); if (d < bestD) { bestD = d; frog.lookAt = { x: c.x, y: c.y }; } });
-      fish.forEach(f => { if (f.y > WATER_Y) return; const fx = f.x - camX, d = Math.hypot(fx - m.x, f.y - m.y); if (d < 260 && d < bestD) { bestD = d; frog.lookAt = { x: fx, y: f.y }; } });
+      fish.forEach(f => { if (f.mv || f.y > WATER_Y) return; const fx = f.x - camX, d = Math.hypot(fx - m.x, f.y - m.y); if (d < 260 && d < bestD) { bestD = d; frog.lookAt = { x: fx, y: f.y }; } });
       if (!frog.lookAt && turtle) frog.lookAt = { x: turtle.x - camX, y: turtle.y };
       if (!frog.lookAt && flyers.length) frog.lookAt = { x: flyers[0].x, y: flyers[0].y };
     }
