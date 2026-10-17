@@ -6272,7 +6272,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       const k = FISH_KINDS[i], d = Object.assign({ fish: k }, FISH_JUMP);
       LilyFishMoves.prepare([k], FISH_JUMP);
       const T = LilyFishMoves.jumpTimes(d);
-      fishJT[k] = { leave: T.leave, backIn: T.backIn, dxIn: LilyFishMoves.jump(T.backIn, d).dx };
+      fishJT[k] = { noseOut: T.noseOut, leave: T.leave, backIn: T.backIn, dxIn: LilyFishMoves.jump(T.backIn, d).dx };
       prepareFish(i + 1);
     }, i ? 60 : 400);
   })(0);
@@ -6288,26 +6288,62 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     }
     ripples.push({ x, y, r: 6, life: 0.9 });
   }
+  // Fish Rules v2, rule 2 cap and rule 7. Sizes: a fish's length (24 body units) is 1/18 to 1/8 of its pond's width.
+  function fishSizeFor(p) {
+    const W = 2 * Math.min(p.rx, p.ry), per = 24 * 0.95;   // world units per size step of fish length
+    return Math.min(W / 8 / per, Math.max(W / 18 / per, rand(0.85, 1.2)));   // never bigger than 1/8, even in a tiny pond
+  }
+  // The whole jump at the fish's own distance must be clear: the spot he leaves from, the air he arcs through and the
+  // spot he goes back in, plus a little room. Clear of lily pads (and the flowers and frogs on them), the turtle and
+  // anything flying low; at least one fish length from the bank; and never in front of Hop Hop or any frog, seen from
+  // the camera right now. Reeds, rocks and pumpkins are on the bank, so the bank distance keeps him clear of them.
+  function fishPathClear(f) {
+    const p = f.pond, J = fishJT[f.kind], u = 0.95 * f.size, L = 24 * u, top = 15 * u + 7 * u;   // peak plus half his height
+    const s0 = -0.6 * L, s1 = J.dxIn * u + 0.6 * L, pts = [];
+    for (let s = s0; s <= s1 + 0.01; s += L / 4) pts.push([f.x0 + f.ux * s, f.y0 + f.uy * s]);
+    for (const [x, y] of pts) {
+      if (!inPond(p, x, y, -L)) return false;                                                    // a fish length from the bank
+      if (p.pads.some(pd => Math.hypot(pd.x - x, pd.y - y) < pd.r + 0.5 * L)) return false;        // pads, their flowers and frogs
+      if (turtle && Math.hypot(turtle.x - x, turtle.y - y) < 40 * turtle.size + 0.5 * L) return false;
+      if (critters.some(c => (c.z || 0) < top + 25 && Math.hypot(c.x - x, c.y - y) < 0.6 * L + 15)) return false;
+      if (ANIMALS.some(c => c.kind === "bee" && (c.z || 0) < top + 25 && Math.hypot(c.x - x, c.y - y) < 0.6 * L + 20)) return false;   // a bee friend flying low over the water
+    }
+    // never in front of a frog (Hop Hop above all): if any part of the jump is nearer the camera than a frog and overlaps him on screen
+    for (const F of p.frogs || []) {
+      const fh = frogTop(F), fp = proj(F.x, F.y, fh * 0.5); if (!fp) continue;
+      const fr = fh * 0.7 * fp.k;
+      for (const [x, y] of pts) for (const z of [0, top * 0.5, top]) {
+        const q = proj(x, y, z); if (!q || q.f >= fp.f) continue;
+        const rr = fr + 0.6 * L * q.k;
+        if (Math.abs(q.x - fp.x) < rr && Math.abs(q.y - fp.y) < rr) return false;
+      }
+    }
+    return true;
+  }
   function updatePondLife(dt) {
     nextFish -= dt;
     if (nextFish <= 0) {
       let jumped = false;
       const ponds = visiblePonds();
       if (ponds.length && fish.length < 2) {
-        // try a few spots: both where it jumps out and where it lands must be open water
-        for (let tries = 0; tries < 12 && !jumped; tries++) {
-          const p = pick(ponds), a = openWaterIn(p, 26); if (!a) continue;
+        // Fish Rules v2, rule 7: a spot is used only if the whole jump is clear (see fishPathClear)
+        for (let tries = 0; tries < 16 && !jumped; tries++) {
+          const p = pick(ponds); if (fish.some(o => o.pond === p)) continue;   // one jump per pond at a time
           const ready = FISH_KINDS.filter(k => fishJT[k]); if (!ready.length) break;
-          const kind = pick(ready), J = fishJT[kind], size = rand(0.85, 1.2), u = 0.95 * size;   // 1 body unit = u world units
-          const ang = rand(0, Math.PI * 2), ux = Math.cos(ang), uy = Math.sin(ang);
-          const ox = a.x + ux * 5 * u, oy = a.y + uy * 5 * u, bx = a.x + ux * J.dxIn * u, by = a.y + uy * J.dxIn * u;   // leaves the water 5 body units ahead
-          if (!inPond(p, ox, oy, -12) || !inPond(p, bx, by, -12) || p.pads.some(pd => Math.hypot(pd.x - bx, pd.y - by) < pd.r + 20 || Math.hypot(pd.x - ox, pd.y - oy) < pd.r + 20)) continue;
-          fish.push({ kind, size, x0: a.x, y0: a.y, ux, uy, t: 0, x: a.x, y: a.y, z: -50, pose: null, out: false, back: false });
+          const kind = pick(ready), size = fishSizeFor(p), L = 24 * 0.95 * size;
+          const a = openWaterIn(p, L); if (!a) continue;
+          if (p.lastFish && Math.hypot(p.lastFish.x - a.x, p.lastFish.y - a.y) < 1.5 * L) continue;   // never twice in a row from the same spot
+          const ang = rand(0, Math.PI * 2), f = { kind, size, pond: p, x0: a.x, y0: a.y, ux: Math.cos(ang), uy: Math.sin(ang), t: 0, x: a.x, y: a.y, z: -50, pose: null, out: false, back: false };
+          if (!fishPathClear(f)) continue;
+          fish.push(f); p.lastFish = { x: a.x, y: a.y };
           jumped = true;
         }
       }
       nextFish = jumped ? rand(8, 16) : 1.5;
     }
+    // things that move (a turtle, a frog seen from the camera, something flying low): checked again until his nose is
+    // out. If the path is no longer clear, the jump is called off and he stays under (nothing of him has shown yet).
+    fish = fish.filter(f => f.t >= fishJT[f.kind].noseOut || fishPathClear(f));
     fish.forEach(f => {
       f.t += dt;   // plain time (moves v3)
       const J = fishJT[f.kind], pose = f.pose = LilyFishMoves.jump(f.t, Object.assign({ fish: f.kind }, FISH_JUMP)), u = 0.95 * f.size;
