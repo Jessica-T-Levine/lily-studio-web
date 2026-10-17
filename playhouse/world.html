@@ -6315,7 +6315,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       if (f.t >= J.leave && !f.out) { f.out = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
       if (f.t >= J.backIn && !f.back) { f.back = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
     });
-    fish = fish.filter(f => f.t < fishJT[f.kind].backIn + 0.25);   // the pond surface is solid, so he is gone once back in
+    fish = fish.filter(f => f.t < fishJT[f.kind].backIn + 1.2);   // kept until his tail has slid under (he is cut off at the water line)
     if (!turtle) {
       nextTurtle -= dt;
       if (nextTurtle <= 0) {
@@ -6765,12 +6765,16 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     ctx.restore();
   }
   function drawJumpFish(f) {
-    // only the part of the jump above the water is drawn (the pond surface is not see-through)
+    // The pond surface is not see-through, so the fish is cut off at the water line: only the part above the surface
+    // shows. The nose comes out first, and he goes back in nose first, into his splash.
+    const q = f.pose; if (!q || q.dy > 32) return;   // more than 32 body units deep: nothing of him can reach the surface
     const P = proj(f.x, f.y, f.z), P2 = proj(f.x + f.ux * 3, f.y + f.uy * 3, f.z);
-    if (!P || !P2 || f.z < 1 || !f.pose) return;
-    const dir = P2.x >= P.x ? 1 : -1, q = f.pose;
+    if (!P || !P2) return;
+    const dir = P2.x >= P.x ? 1 : -1;
     ctx.save(); ctx.globalAlpha = fadeFor(P.f);
     ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k);
+    // in these units the water line is -q.dy below his middle (q.dy is his depth in body units, up is negative)
+    ctx.beginPath(); ctx.rect(-60, -80, 120, 80 - q.dy); ctx.clip();
     // the approved fish and move (Pond chat): 24 x 13 body, faces right, origin mid-body; the move tips and stretches it
     LilyFishMoves.draw(ctx, f.kind, { dx: 0, dy: 0, rot: q.rot, sa: q.sa, sc: q.sc, eyeTurn: q.eyeTurn, opt: Object.assign({ time }, q.opt) }, 0, 0, 1, 1);
     ctx.restore();
