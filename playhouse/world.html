@@ -584,6 +584,14 @@
     dust() { [2093, 2637, 3136].forEach((f, i) => tone("sine", f, f * 1.02, 0.28, 0.022, 0.05 + i * 0.07)); },
     twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
     plip() { tone("sine", 760, 320, 0.12, 0.05); tone("sine", 1200, 1700, 0.08, 0.02, 0.06); },
+    // Fish Rules v4, rule 6: the one light plip as a jumping fish goes back in (never as it leaves). Two quick sine tones,
+    // on the meadow (nature and pond) sounds slider, never the game sounds. Rule 8: half as loud when the sky is more than half dark.
+    fishPlip(night) {
+      if (!audio()) return;   // wakes the sound up first, so the meadow slider exists
+      const v = night ? 0.5 : 1;
+      tone("sine", 912, 396, 0.11, 0.0244 * v, 0, meadowBus);
+      tone("sine", 1416, 720, 0.06, 0.0089 * v, 0.045, meadowBus);
+    },
     splash() { tone("sine", 620, 150, 0.28, 0.13); tone("sine", 900, 1500, 0.12, 0.04, 0.09); tone("triangle", 1320, 1320, 0.2, 0.04, 0.16); },
     thud() { tone("sine", 260, 110, 0.18, 0.12); },
     friend() { tone("sine", 880, 1320, 0.12, 0.06); tone("sine", 1320, 1760, 0.14, 0.05, 0.12); },
@@ -6265,14 +6273,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   // the faster leap, hiding each fish's tail under the water, and every timing live inside the move. Each fish is measured
   // once (LilyFishMoves.prepare), one fish at a time while the world loads, and only a measured fish jumps.
   const FISH_JUMP = { at: 0, depth: 14, peak: 15 };
-  const fishJT = {};   // per fish: { leave, backIn, dxIn } from LilyFishMoves.jumpTimes
+  const fishJT = {};   // per fish: { noseOut, leave, backIn, plip, dxIn } from LilyFishMoves.jumpTimes
   (function prepareFish(i) {
     if (typeof LilyFishMoves === "undefined" || i >= FISH_KINDS.length) return;
     setTimeout(() => {
       const k = FISH_KINDS[i], d = Object.assign({ fish: k }, FISH_JUMP);
       LilyFishMoves.prepare([k], FISH_JUMP);
       const T = LilyFishMoves.jumpTimes(d);
-      fishJT[k] = { noseOut: T.noseOut, leave: T.leave, backIn: T.backIn, dxIn: LilyFishMoves.jump(T.backIn, d).dx };
+      // when his nose touches the water again: the first moment after he leaves that the tip of his nose (12 body units
+      // ahead of his middle, along his body) is back at or under the surface
+      const noseY = t => { const q = LilyFishMoves.jump(t, d); return q.dy + 12 * q.sa * Math.sin(q.rot); };
+      let noseIn = T.backIn;
+      for (let t = T.leave; t < T.backIn; t += 1 / 240) if (noseY(t) >= 0) { noseIn = t; break; }
+      // rule 6: the plip plays at nose-in plus 20% of his time from nose-out to nose-in, just before the splash
+      fishJT[k] = { noseOut: T.noseOut, leave: T.leave, backIn: T.backIn, plip: noseIn + 0.2 * (noseIn - T.noseOut), dxIn: LilyFishMoves.jump(T.backIn, d).dx };
       prepareFish(i + 1);
     }, i ? 60 : 400);
   })(0);
@@ -6288,10 +6302,18 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     }
     ripples.push({ x, y, r: 6, life: 0.9 });
   }
-  // Fish Rules v2, rule 2 cap and rule 7. Sizes: a fish's length (24 body units) is 1/18 to 1/8 of its pond's width.
+  // Fish Rules v4, rule 2. Sizes: a fish's length (24 body units) is 1/18 to 1/8 of its pond's width. A small fish fades
+  // out completely on the way down to 1/18 (fully seen at 1.3 times 1/18, gone at 1/18), so nothing is ever held at 1/18.
+  // In the Playhouse the camera shrinks the fish and its pond together, so distance never changes this share: a jumping
+  // fish is simply always picked big enough to be fully seen (1.3/18 to 1/8 of its pond).
+  const FISH_PER = 24 * 0.95;   // world units of fish length per size step
+  function fishShare(f) { return 24 * 0.95 * f.size / (2 * Math.min(f.pond.rx, f.pond.ry)); }
+  function fishFarFade(share) { return clamp((share - 1 / 18) / (0.3 / 18), 0, 1); }
   function fishSizeFor(p) {
-    const W = 2 * Math.min(p.rx, p.ry), per = 24 * 0.95;   // world units per size step of fish length
-    return Math.min(W / 8 / per, Math.max(W / 18 / per, rand(0.85, 1.2)));   // never bigger than 1/8, even in a tiny pond
+    const W = 2 * Math.min(p.rx, p.ry), lo = W * 1.3 / 18 / FISH_PER, hi = W / 8 / FISH_PER;
+    let s = rand(0.85, 1.2);
+    if (s < lo) s = rand(lo, Math.min(hi, lo * 1.3));   // a big pond: still many sizes, never a fading one
+    return Math.min(hi, s);                           // never bigger than 1/8, even in a tiny pond
   }
   // The whole jump at the fish's own distance must be clear: the spot he leaves from, the air he arcs through and the
   // spot he goes back in, plus a little room. Clear of lily pads (and the flowers and frogs on them), the turtle and
@@ -6339,7 +6361,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
           jumped = true;
         }
       }
-      nextFish = jumped ? rand(8, 16) : 1.5;
+      // Fish Rules v4, rule 8: every 8 to 16 s per the place note; half as often at night (sky more than half dark) and
+      // half as often with Reduce Motion (a quarter with both)
+      nextFish = jumped ? rand(8, 16) * (nightness() > 0.5 ? 2 : 1) * (reduceMotion ? 2 : 1) : 1.5;
     }
     // things that move (a turtle, a frog seen from the camera, something flying low): checked again until his nose is
     // out. If the path is no longer clear, the jump is called off and he stays under (nothing of him has shown yet).
@@ -6348,8 +6372,10 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       f.t += dt;   // plain time (moves v3)
       const J = fishJT[f.kind], pose = f.pose = LilyFishMoves.jump(f.t, Object.assign({ fish: f.kind }, FISH_JUMP)), u = 0.95 * f.size;
       f.x = f.x0 + f.ux * pose.dx * u; f.y = f.y0 + f.uy * pose.dx * u; f.z = -pose.dy * u;   // up is +z
-      if (f.t >= J.leave && !f.out) { f.out = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
-      if (f.t >= J.backIn && !f.back) { f.back = true; waterSplash(f.x, f.y, 5); sfx.plip(); }
+      const night = nightness() > 0.5, drops = night ? 3 : 5;   // rule 8: a softer splash at night
+      if (f.t >= J.leave && !f.out) { f.out = true; waterSplash(f.x, f.y, drops); }      // rule 6: no sound as he leaves
+      if (f.t >= J.plip && !f.plipped) { f.plipped = true; sfx.fishPlip(night); }        // the one plip, just before the splash
+      if (f.t >= J.backIn && !f.back) { f.back = true; waterSplash(f.x, f.y, drops); }
     });
     fish = fish.filter(f => f.t < fishJT[f.kind].backIn + 1.2);   // kept until his tail has slid under (he is cut off at the water line)
     if (!turtle) {
@@ -6807,7 +6833,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const P = proj(f.x, f.y, f.z), P2 = proj(f.x + f.ux * 3, f.y + f.uy * 3, f.z);
     if (!P || !P2) return;
     const dir = P2.x >= P.x ? 1 : -1;
-    ctx.save(); ctx.globalAlpha = fadeFor(P.f);
+    ctx.save(); ctx.globalAlpha = fadeFor(P.f) * fishFarFade(fishShare(f));
     ctx.translate(P.x, P.y); ctx.scale(dir * 0.95 * f.size * P.k, 0.95 * f.size * P.k);
     // in these units the water line is -q.dy below his middle (q.dy is his depth in body units, up is negative)
     ctx.beginPath(); ctx.rect(-60, -80, 120, 80 - q.dy); ctx.clip();
