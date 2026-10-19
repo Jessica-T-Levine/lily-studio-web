@@ -859,7 +859,8 @@
     },
     plop() { tone("sine", 520, 90, 0.32, 0.22); tone("sine", 180, 60, 0.25, 0.12, 0.08); },
     bloop() { tone("sine", 240, 520, 0.16, 0.14); },
-    plip(low) { tone("sine", low ? 820 : 1020, low ? 560 : 700, 0.07, 0.035, 0, pondBus); },   // a fish leaving (and going back into) the water: soft, under the pond sounds
+    // Fish Rules v4, rule 6: one light plip as a fish goes back into the water (the recipe in the rules), on the pond sounds slider; half as loud at night
+    plip(night) { const k = night ? 0.5 : 1; tone("sine", 912, 396, 0.11, 0.0244 * k, 0, pondBus); tone("sine", 1416, 720, 0.06, 0.0089 * k, 0.045, pondBus); },
     twinkle() { tone("sine", 1568, 1568, 0.5, 0.035); tone("sine", 2093, 2093, 0.6, 0.03, 0.12); tone("sine", 2637, 2637, 0.7, 0.025, 0.24); },
     lick() { tone("sine", 900, 1500, 0.07, 0.06); },
     gulp() { tone("sine", 520, 260, 0.12, 0.14); tone("sine", 700, 350, 0.1, 0.08, 0.1); },
@@ -1273,7 +1274,15 @@
       end = t;
       if (t > times.backIn && !p.splashes.length && !p.bubbles && hullTop(kind, p) > 0) break;
     }
-    return (JUMP_INFO[kind] = { J, times, samples, end });
+    // when his nose touches the water again (his drawing's front-most point), and the plip just after it
+    const hull = FISH_HULL[kind] || FISH_HULL.koi, nosePt = hull.reduce((a, b) => (b[0] > a[0] ? b : a));
+    let noseIn = times.backIn;
+    for (let t = times.leave; t < times.backIn + 0.3; t += 1 / 240) {
+      const p = LilyFishMoves.jump(t, J), cs = Math.cos(p.rot), sn = Math.sin(p.rot);
+      if (p.dy + nosePt[0] * p.sa * sn + nosePt[1] * p.sc * cs >= 0) { noseIn = t; break; }
+    }
+    const plipAt = noseIn + 0.2 * (noseIn - times.noseOut);
+    return (JUMP_INFO[kind] = { J, times, samples, end, noseIn, plipAt });
   }
   // Measure the fish while the game loads (one fish at a time, so the page never stalls), so the first jump never pauses the game.
   if (typeof LilyFishMoves !== "undefined" && LilyFishMoves.prepare && typeof LilyFish2D !== "undefined") {
@@ -1320,7 +1329,9 @@
     return o;
   }
   // Fish Rules v2, rule 2: a fish's body (24 body units) is 1/18 to 1/8 of the pond's width, a little bigger closer to you (d: 0 = back row, 1 = front)
-  const fishScale = d => { const lo = W / 18 / 24, hi = W / 8 / 24; return lerp(lo, hi, Math.min(1, 0.65 * d + 0.35 * Math.random())); };
+  // (Rule 2, v4: a fish is never shown held at 1/18; a far fish has faded out completely by then. These fish don't swim off into the
+  // distance, so the smallest one here is fully visible: 1.3 x 1/18, where the fade in the other places is still at full strength.)
+  const fishScale = d => { const lo = 1.3 * W / 18 / 24, hi = W / 8 / 24; return lerp(lo, hi, Math.min(1, 0.65 * d + 0.35 * Math.random())); };
   // One try at a jump for this fish and row; returns true if he jumps. Every rule is checked on his whole jump before he goes.
   function tryJump(kind, d, x0) {
     const dir = Math.random() < 0.5 ? 1 : -1, s = fishScale(d), len = 24 * s;
@@ -1383,11 +1394,9 @@
         f.pose = LilyFishMoves.jump(f.t, f.info.J);
         f.x = f.x0 + f.dir * f.pose.dx * f.s; f.y = f.y0 + f.pose.dy * f.s;
         // just before the leap: if anything has moved into his path while he is still all under the water, he stays down
-        if (f.t < f.info.times.noseOut && (state !== "play" || fishObstacles().some(o => !o.fishBox && !(f.front && o.backRow) && sweepHits(f.sw, o)))) f.t = 99;
-        // a soft plip as he leaves the water and another as he goes back in
-        const T = f.info.times, before = f.t - dt;
-        if (before < T.leave && f.t >= T.leave) sfx.plip(false);
-        if (before < T.backIn && f.t >= T.backIn) sfx.plip(true);
+        if (f.t < f.info.times.noseOut && (state !== "play" || fishObstacles().some(o => !o.fishBox && !(f.front && o.backRow) && sweepHits(f.sw, o)))) { f.off = true; f.t = 99; }
+        // one light plip as he goes back in (nothing as he leaves, and nothing if the jump was called off)
+        if (!f.off && f.t - dt < f.info.plipAt && f.t >= f.info.plipAt) sfx.plip(isNight());
         return;
       }
       f.t += dt / f.dur;
