@@ -772,19 +772,20 @@
   const soundBtn = document.getElementById("soundBtn");
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  let scale = 1, dpr = 1;
+  let scale = 1, dpr = 1, redrawNow = false; // redrawNow: the canvas was just resized (it clears), so draw right away
   function resize() {
     const rect = stage.getBoundingClientRect();
     const vw = Math.max(1, rect.width), vh = Math.max(1, rect.height);
     if (400 * vh / vw >= 580) { W = 400; H = 400 * vh / vw; }   // phone / portrait
     else { H = 580; W = 580 * vw / vh; }                         // tablet / desktop / landscape
     WATER_Y = Math.round(H - Math.max(176, H * 0.3));
-    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);   // 2x is plenty for these soft flat shapes (2.5x was about a third more pixels)
     canvas.width = Math.round(vw * dpr);
     canvas.height = Math.round(vh * dpr);
     scale = canvas.width / W;
     if (typeof layoutSky === "function") layoutSky();
     try { if (frog && !frog.jump && state === "play") frog.y = WATER_Y; } catch (_) { /* not started yet */ }
+    redrawNow = true;
   }
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", () => { setTimeout(resize, 250); setTimeout(resize, 700); });
@@ -2742,12 +2743,26 @@
   }
 
   // ---------- loop ----------
-  let last = performance.now();
+  // The game updates on every screen refresh (so timing, hops, tongue, glides and jumps feel exactly the same);
+  // only the DRAWING is lighter, to keep phones and tablets cooler:
+  //   - at most 60 pictures a second (this also caps 90 and 120 Hz screens),
+  //   - 30 a second while the pond is calm,
+  //   - back to 60 the moment anything moves, and it stays at 60 for 0.4 s after it stops so nothing looks choppy.
+  const DRAW_BUSY_MS = 14, DRAW_CALM_MS = 30, DRAW_HOLD_MS = 400; // 14 ms (not 16.7) so a 60 Hz screen never skips a beat
+  let last = performance.now(), lastDraw = 0, busyUntil = 0;
+  function busyNow() {
+    if (state !== "play" || charging || ring || particles.length || popups.length || ripples.length) return true;
+    if (frog && (frog.jump || frog.glide || frog.lick || frog.squash > 0.02 || frog.gulp > 0 || frog.wiggle > 0)) return true;
+    if (Math.abs(camTarget - camX) > 0.5) return true;
+    if (fish.length) return true; // a fish only exists while it is jumping, so a jump is always drawn at 60
+    return false;
+  }
   function frame(now) {
     const dt = clamp((now - last) / 1000, 0, 0.05); // never negative (first frame can be stamped early)
     last = now;
     update(dt);
-    draw();
+    if (busyNow()) busyUntil = now + DRAW_HOLD_MS;
+    if (redrawNow || now - lastDraw >= (now < busyUntil ? DRAW_BUSY_MS : DRAW_CALM_MS)) { redrawNow = false; lastDraw = now; draw(); }
     requestAnimationFrame(frame);
   }
 
