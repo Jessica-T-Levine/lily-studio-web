@@ -2308,6 +2308,11 @@
     sg.addColorStop(0, "rgba(255, 244, 214, 0.9)");
     sg.addColorStop(1, "rgba(255, 210, 170, 0)");
     ctx.fillStyle = sg; ctx.fillRect(0, WATER_Y - 140, W, 140);
+  }
+  // Everything that floats across the sky is drawn AFTER sun() (the stars, the sun and the moon), so nothing ever drifts
+  // behind the moon or the sun: only sky and stars are behind them. Order stays the same as before: shooting star, then
+  // the far-away flyers, then the clouds in front of both.
+  function skyFront() {
     drawStar(); // shooting star sits behind the clouds
     drawFlyers(); // rare storybook flyers, far away behind the clouds
     // clouds
@@ -2722,7 +2727,7 @@
   function draw() {
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     if (window.LilySky) skyHour = window.LilySky.hour();
-    sky(); sun(); hills(); drawFireflies(); water(); drawRipples(); drawTurtle();
+    sky(); sun(); skyFront(); hills(); drawFireflies(); water(); drawRipples(); drawTurtle();
     pads.forEach(p => { if (p.x - camX > -80 && p.x - camX < W + 80) drawPad(p); });
     drawFish("back");
     drawHwPumpkins();
