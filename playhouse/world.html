@@ -4655,16 +4655,8 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   // the sun crosses the sky from sunrise to sunset, and the moon crosses it at night
   function drawSunMoon() {
     const h = HOUR, dayLen = SET - RISE;
-    if (h > RISE - 0.4 && h < SET + 0.4) {
-      const p = (h - RISE) / dayLen, x = skyX(SKY_MID + (p - 0.5) * SKY_SPREAD);
-      if (x !== null) {
-        const G = goldness(), y = HORIZON - 14 - Math.sin(clamp(p, 0, 1) * Math.PI) * (HORIZON - 70);
-        const sg = ctx.createRadialGradient(x, y, 20, x, y, 120);
-        sg.addColorStop(0, `rgba(255, 244, 214, ${0.4 + 0.3 * G})`); sg.addColorStop(1, "rgba(255, 220, 180, 0)");
-        ctx.fillStyle = sg; ctx.fillRect(x - 120, y - 120, 240, 240);
-        ctx.fillStyle = G > 0.1 ? "#FFF1D2" : "#FFF8E6"; ctx.beginPath(); ctx.arc(x, y, 28 + 6 * G, 0, Math.PI * 2); ctx.fill();
-      }
-    }
+    // Only the sky and the stars are behind the moon: the moon is drawn first, and the sun, the shooting star, the flyers and
+    // the clouds all come after it, in front (the sun is opaque, so around a new moon it covers the moon instead of showing through it).
     // v24: the real moon. Its shape is today's shape, and it rises and sets about when the real one does
     // (so sometimes it's up in the daytime, pale, just like outside, and on a new moon it isn't there).
     const M = moonNow();
@@ -4680,6 +4672,16 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
           ctx.fillStyle = mg; ctx.fillRect(x - 70, y - 70, 140, 140);
           drawMoonShape(x, y, 18, M, vis);
         }
+      }
+    }
+    if (h > RISE - 0.4 && h < SET + 0.4) {
+      const p = (h - RISE) / dayLen, x = skyX(SKY_MID + (p - 0.5) * SKY_SPREAD);
+      if (x !== null) {
+        const G = goldness(), y = HORIZON - 14 - Math.sin(clamp(p, 0, 1) * Math.PI) * (HORIZON - 70);
+        const sg = ctx.createRadialGradient(x, y, 20, x, y, 120);
+        sg.addColorStop(0, `rgba(255, 244, 214, ${0.4 + 0.3 * G})`); sg.addColorStop(1, "rgba(255, 220, 180, 0)");
+        ctx.fillStyle = sg; ctx.fillRect(x - 120, y - 120, 240, 240);
+        ctx.fillStyle = G > 0.1 ? "#FFF1D2" : "#FFF8E6"; ctx.beginPath(); ctx.arc(x, y, 28 + 6 * G, 0, Math.PI * 2); ctx.fill();
       }
     }
   }
