@@ -6485,10 +6485,14 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
   // In the Playhouse the camera shrinks the fish and its pond together, so distance never changes this share: a jumping
   // fish is simply always picked big enough to be fully seen (1.3/18 to 1/8 of its pond).
   const FISH_PER = 24 * 0.95;   // world units of fish length per size step
-  function fishShare(f) { return 24 * 0.95 * f.size / (2 * Math.min(f.pond.rx, f.pond.ry)); }
+  // v53: a fish is measured against its pond's width, but a big lake counts as no wider than FISH_POND_CAP, so a fish in a
+  // map-sized lake stays a little fish beside the frogs (it was gigantic: 1/8 of a 1,440-wide lake is as big as a frog twice over)
+  const FISH_POND_CAP = 360, FISH_MAX_LEN = 34;   // (Jessica, Oct 21: about 34 units long is the biggest a fish should ever be, next to the frogs)
+  const fishPondW = p => Math.min(2 * Math.min(p.rx, p.ry), FISH_POND_CAP);
+  function fishShare(f) { return 24 * 0.95 * f.size / fishPondW(f.pond); }
   function fishFarFade(share) { return clamp((share - 1 / 18) / (0.3 / 18), 0, 1); }
   function fishSizeFor(p) {
-    const W = 2 * Math.min(p.rx, p.ry), lo = W * 1.3 / 18 / FISH_PER, hi = W / 8 / FISH_PER;
+    const W = fishPondW(p), lo = W * 1.3 / 18 / FISH_PER, hi = Math.min(W / 8, FISH_MAX_LEN) / FISH_PER;
     let s = rand(0.85, 1.2);
     if (s < lo) s = rand(lo, Math.min(hi, lo * 1.3));   // a big pond: still many sizes, never a fading one
     return Math.min(hi, s);                           // never bigger than 1/8, even in a tiny pond
