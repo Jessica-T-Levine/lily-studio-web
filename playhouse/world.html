@@ -743,18 +743,26 @@
   let HIVE_PT = null, HIVE_BRANCH = null, HIVE_TREE = null;
   const HIVE_CHUNK = { cx: -1, cy: -1 };   // the chunk the hive tree grows in
   const insideHouse = (x, y, pad) => Math.abs(x - HOUSE.x) < HOUSE.w / 2 + pad && Math.abs(y - HOUSE.y) < HOUSE.d / 2 + pad;
-  const HOME_POND = Object.assign(spreadOut(350, 40), { rx: 88 * 2.3, ry: 62 * 2.3 });   // v25: bigger (v30: bigger again, for bigger lily pads)
-  // v21: big ponds that are always there: one on each side of the start, and two huge ones farther out
-  const BIG_PONDS = { "-2,-1": 2.35, "2,-1": 2.6, "0,-6": 3, "3,-4": 2.8 };
+  // v51: LAKES FROM JESSICA'S FUTURE WORLD MAP v2. The map is 41 x 41 squares of 700 units and its middle (square U21) is the
+  // start, so a spot on the map is START + ((column - 21) * 700, (row - 21) * 700). The two lakes below were traced from the map
+  // picture (Duck Lake is a circle; Hop Hop's home is an outline: how far its edge is from its middle, every 5.625 degrees).
+  // More mapped lakes can be added here later, the same way.
+  const MAP_DUCK = { x: 296, y: -3710, r: 995 };
+  const MAP_HOP = { x: 1330, y: -229, r0: 600, edge: [712, 688, 660, 633, 612, 595, 583, 574, 568, 561, 552, 540, 529, 533, 551, 509, 485, 481, 480, 482, 489, 493, 504, 531, 544, 572, 587, 610, 627, 643, 661, 682, 700, 717, 725, 724, 696, 675, 642, 600, 562, 530, 497, 473, 464, 459, 457, 457, 461, 466, 474, 487, 499, 504, 514, 539, 565, 590, 619, 650, 680, 703, 715, 723] };
+  const HOME_POND = { x: MAP_HOP.x, y: MAP_HOP.y, rx: MAP_HOP.r0, ry: MAP_HOP.r0, rot: 0 };   // v51: Hop Hop's home is where the map puts it, and the size the map draws it (its outline is added below, once the shape helpers exist)
+  // v21: big ponds that are always there (v51: the one east of the start is gone: Hop Hop's new home takes its place)
+  const BIG_PONDS = { "-2,-1": 2.35, "0,-6": 3, "3,-4": 2.8 };
   const bigPondAt = (cx, cy) => BIG_PONDS[cx + "," + cy] || 0;
   const NEE_HOME = spreadOut(40, 60);
   const NEE_SIZE = 7;             // the bee game's bunny is size 6 to 8
   const FROG_SIZE = 2;            // the bee game's pond frog is drawn at 2 x its size
   const CARROTS = [[-240, 60], [-60, 170], [110, -60], [150, -300]].map(([x, y]) => Object.assign(spreadOut(x, y), { grown: 1, regrow: 0 }));
-  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 260 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
+  const KEEP_CLEAR = [{ x: HOUSE.x, y: HOUSE.y, r: HOUSE.r }, { x: HOME_POND.x, y: HOME_POND.y, r: 300 }, { x: NEE_HOME.x, y: NEE_HOME.y, r: 100 }, { x: START.x, y: START.y, r: 100 }]
     .concat(CARROTS.map(c => ({ x: c.x, y: c.y, r: 70 })), [{ x: HIVE_TREE_AT.x, y: HIVE_TREE_AT.y, r: 190 }]);
   const clearOf = (x, y, pad) => !KEEP_CLEAR.some(o => Math.hypot(o.x - x, o.y - y) < o.r + pad);
-  const nearHome = (cx, cy) => (cx === 0 && cy === 0) || (Math.abs(cx) <= 1 && cy >= -4 && cy <= -2);   // Hop Hop's pond and the playhouse ground   // no surprise ponds right around the playhouse
+  const HOME_CH = { cx: Math.floor(HOME_POND.x / CS), cy: Math.floor(HOME_POND.y / CS) };   // v51: the patch of meadow Hop Hop's home belongs to
+  const DUCK_CH = { cx: Math.floor(MAP_DUCK.x / CS), cy: Math.floor(MAP_DUCK.y / CS) };   // v51: and Duck Lake's
+  const nearHome = (cx, cy) => (cx === 0 && cy === 0) || (Math.abs(cx) <= 1 && cy >= -4 && cy <= -2) || (cx === HOME_CH.cx && cy === HOME_CH.cy);   // Hop Hop's pond and the playhouse ground   // no surprise ponds right around the playhouse
   function pickFrom(r) { return PETALS[Math.floor(r() * PETALS.length)]; }
   // v24: ponds come in different shapes. Each pond's edge is its oval (rx, ry, turned by rot) pushed in
   // and out by a gentle shape: a bean, a clover, a teardrop, a long pond... sh.max is how far out it
@@ -834,6 +842,40 @@
   })();
   // a flower: 5 round petals around a round middle
   const FLOWER5_TAB = shapeTable(bubbleEdge([[0, 0, 0.62]].concat(Array.from({ length: 5 }, (_, i) => { const a = Math.PI / 2 + i / 5 * TAU; return [Math.cos(a) * 0.56, Math.sin(a) * 0.56, 0.42]; }))));
+  // v51: shapes for the lakes traced from the map. A traced lake is a round pond whose edge is pushed in and out by its outline
+  // (the same way the heart and the flower work), softened a little so the shore has no tiny kinks.
+  function mapLakeShape(edge, r0) {
+    const n = edge.length, t = new Float32Array(SHAPE_N);
+    for (let i = 0; i < SHAPE_N; i++) { const u = i / SHAPE_N * n, k = Math.floor(u) % n, f = u - Math.floor(u); t[i] = (edge[k] * (1 - f) + edge[(k + 1) % n] * f) / r0; }
+    let v = t;
+    for (let pass = 0; pass < 3; pass++) {
+      const w = new Float32Array(SHAPE_N);
+      for (let i = 0; i < SHAPE_N; i++) w[i] = (v[(i + SHAPE_N - 2) % SHAPE_N] + 2 * v[(i + SHAPE_N - 1) % SHAPE_N] + 3 * v[i] + 2 * v[(i + 1) % SHAPE_N] + v[(i + 2) % SHAPE_N]) / 9;
+      v = w;
+    }
+    const sh = { kind: "map", st: 1, rot: 0, a1: 0, p1: 0, a2: 0, p2: 0, a3: 0, p3: 0, a5: 0, p5: 0, dent: 0, pd: 0, round: true, tab: v, max: 1 };
+    let mx = 0; for (let i = 0; i < 72; i++) mx = Math.max(mx, shapeR(sh, i / 72 * TAU)); sh.max = mx;
+    return sh;
+  }
+  HOME_POND.sh = mapLakeShape(MAP_HOP.edge, MAP_HOP.r0);   // Hop Hop's home, as the map draws it
+  const DUCK_SH = { kind: "round", st: 1, rot: 0, a1: 0, p1: 0, a2: 0, p2: 0, a3: 0, p3: 0, a5: 0, p5: 0, dent: 0, pd: 0, round: true, max: 1 };   // Duck Lake is truly round
+  // the lakes the planner has to know about (a lake is built by the patch of meadow its middle is in)
+  const MAP_LAKES = [
+    { id: "duck", x: MAP_DUCK.x, y: MAP_DUCK.y, rx: MAP_DUCK.r, ry: MAP_DUCK.r, rot: 0, sh: DUCK_SH, scale: 3, designed: true, cx: DUCK_CH.cx, cy: DUCK_CH.cy },
+    { id: "hop", x: HOME_POND.x, y: HOME_POND.y, rx: HOME_POND.rx, ry: HOME_POND.ry, rot: 0, sh: HOME_POND.sh, scale: 1, designed: true, home: true, cx: HOME_CH.cx, cy: HOME_CH.cy }
+  ];
+  // v51: a spot that is in (or too near) a mapped lake is moved straight away from that lake's middle until it is on dry land (for things that start at a fixed place)
+  function awayFromMapLakes(p, pad) {
+    for (let k = 0; k < 60; k++) {
+      const L = MAP_LAKES.find(M => inPond(M, p.x, p.y, pad)); if (!L) break;
+      const dx = p.x - L.x, dy = p.y - L.y, d = Math.hypot(dx, dy) || 1;
+      p = { x: p.x + dx / d * 40, y: p.y + dy / d * 40 };
+    }
+    return p;
+  }
+  const mapLakeAt = (cx, cy) => MAP_LAKES.find(L => L.cx === cx && L.cy === cy) || null;
+  // is this spot in (or within pad of) a mapped lake? (cheap: only two lakes)
+  const inMapLake = (x, y, pad) => MAP_LAKES.some(L => Math.abs(x - L.x) < L.rx * L.sh.max + pad + 5 && Math.abs(y - L.y) < L.ry * L.sh.max + pad + 5 && inPond(L, x, y, pad));
   function shapeR(sh, a) {
     let s = 1 + sh.a1 * Math.cos(a - sh.p1) + sh.a2 * Math.cos(2 * (a - sh.p2)) + sh.a3 * Math.cos(3 * (a - sh.p3)) + sh.a5 * Math.cos(5 * (a - sh.p5));
     if (sh.a7) s += sh.a7 * Math.cos(7 * (a - sh.p7)) + sh.a9 * Math.cos(9 * (a - sh.p9));
@@ -972,7 +1014,7 @@
   function makeChunk(cx, cy) {
     const r = seeded(hash2(cx, cy));
     const x0 = cx * CS, y0 = cy * CS;
-    const home = cx === 0 && cy === 0;
+    const home = cx === HOME_CH.cx && cy === HOME_CH.cy;   // v51: Hop Hop's home chunk is where the map puts his lake
     const biome = biomeOf(cx, cy);
     const ch = { cx, cy, biome, patches: [], tufts: [], flowers: [], rocks: [], shrooms: [], pond: null, lavender: [], clovers: [], puffs: [], trees: [], reeds: [], bushes: [], pumpkins: [] };
     // a large pond next door can reach into this patch of meadow: nothing grows in its water
@@ -982,7 +1024,7 @@
       const sp = pondSpec(cx + dx, cy + dy);
       if (sp && sp.scale > 1.5) nbPonds.push(sp);
     }
-    const wet = (x, y, pad) => inPond(ch.pond, x, y, pad) || nbPonds.some(p => inPond(p, x, y, pad + 20));
+    const wet = (x, y, pad) => inPond(ch.pond, x, y, pad) || nbPonds.some(p => inPond(p, x, y, pad + 20)) || inMapLake(x, y, pad + 20);   // v51: mapped lakes count too
     const free = (x, y, pad) => !wet(x, y, pad) && clearOf(x, y, pad) && !ch.trees.some(t => Math.hypot(t.x - x, t.y - y) < t.w + pad);
     // ponds (lots of them in the Lily Ponds)
     const pondChance = bigPondAt(cx, cy) ? 2 : biome === "pondland" ? 0.65 : biome === "meadow" || biome === "clover" ? 0.3 : 0.15;
@@ -993,7 +1035,9 @@
       const rx = (big ? 110 + r() * 35 : 90 + r() * 45) * scale, ry = (big ? 90 + r() * 35 : 70 + r() * 35) * scale;
       const ux = r(), uy = r();
       const shp = sp.sh || pondShapeOf(cx, cy), dims = pondDims(rx / scale, ry / scale, scale, shp);   // (the same size the planner worked out)
-      const p = { x: sp.x, y: sp.y, rx: dims.rx * (sp.grow || 1), ry: dims.ry * (sp.grow || 1), rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
+      const p = sp.designed   // v51: a lake from the map keeps its drawn size and shape (the random numbers above are still used, so the rest of this patch stays as it was)
+        ? { x: sp.x, y: sp.y, rx: sp.rx, ry: sp.ry, rot: sp.rot, sh: sp.sh, scale, pads: [], frogPad: -1, said: false, mapLake: sp.id }
+        : { x: sp.x, y: sp.y, rx: dims.rx * (sp.grow || 1), ry: dims.ry * (sp.grow || 1), rot: shp.rot, sh: shp, scale, pads: [], frogPad: -1, said: false };
       const n = 4 + Math.floor(r() * (big ? 3 : 2));
       const keep = scale < 0.6 ? 2 : scale < 0.75 ? 3 : n;          // little ponds get fewer lily pads
       const ring = scale < 0.75 ? 0.5 : 0.55, padS = clamp(0.55 + 0.45 * scale, 0.72, 1.12);
@@ -1227,12 +1271,27 @@
     return pt;
   }
   function makeHomePond(ch) {
-    const P = HOME_POND, p = { x: P.x, y: P.y, rx: P.rx, ry: P.ry, scale: 1, pads: [], frogPad: 0, said: false, home: true };
+    const P = HOME_POND, p = { x: P.x, y: P.y, rx: P.rx, ry: P.ry, rot: P.rot, sh: P.sh, scale: 1, pads: [], frogPad: 0, said: false, home: true, mapLake: "hop" };
+    // v51: the same six pads as before, spread out to fit the bigger pond (and kept on the water); then more pads around them, like the other big ponds
+    const HOP_SPREAD = 2.6;
     [[-40, -12, 30, null], [24, 22, 27, PETALS[0]], [48, -22, 24, null], [-12, 34, 22, PETALS[2]], [-60, 22, 21, null], [8, -36, 20, null]]
-      .forEach(([dx, dy, r, bloom], i) => p.pads.push({ x: P.x + dx * 2.2, y: P.y + dy * 2.2, r: r * 1.75, notch: i * 1.7, bloom }));
+      .forEach(([dx, dy, r, bloom], i) => {
+        let x = P.x + dx * 2.2 * HOP_SPREAD, y = P.y + dy * 2.2 * HOP_SPREAD;
+        for (let k = 0; k < 8 && !inPond(p, x, y, -r * 1.75 * 0.9); k++) { x = P.x + (x - P.x) * 0.85; y = P.y + (y - P.y) * 0.85; }
+        p.pads.push({ x, y, r: r * 1.75, notch: i * 1.7, bloom });
+      });
+    {
+      const e = seeded(5151);
+      for (let i = 0, tries = 0; i < 12 && tries < 120; tries++) {
+        const a = e() * TAU, rr = 0.2 + e() * 0.65, pr = (20 + e() * 12) * PAD_GROW * 0.95, { x, y } = pondPoint(p, a, rr);
+        if (!inPond(p, x, y, -pr * 0.9)) continue;
+        if (p.pads.some(pd => Math.hypot(pd.x - x, pd.y - y) < pd.r + pr + 14)) continue;
+        p.pads.push({ x, y, r: pr, notch: e() * 6, bloom: e() < 0.4 ? pickFrom(e) : null }); i++;
+      }
+    }
     ch.pond = p;
     const q = seeded(4242);
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 28; i++) {
       const a = Math.PI + q() * Math.PI, out = 6 + q() * 14;   // reeds only along the far bank, so they never hide Hop Hop
       ch.reeds.push({ ...pondPoint(p, a, 1, out), h: 80 + q() * 90, ph: q() * 6, cat: q() < 0.5 });
     }
@@ -1318,6 +1377,7 @@
   }
   const pondReach = p => Math.max(p.rx, p.ry) * (p.sh ? p.sh.max : 1);
   function largePond(cx, cy) {
+    const D = mapLakeAt(cx, cy); if (D && !D.home) return D;   // v51: Duck Lake is placed by the map, not by chance
     const raw = rawPond(cx, cy);
     if (!raw || raw.scale <= 1.5 || (Math.abs(cx) <= 2 && Math.abs(cy) <= 2 && !bigPondAt(cx, cy))) return null;   // never right next to where she starts (except the planned big ones)
     const me = placePond(raw, raw.scale);
@@ -1325,7 +1385,7 @@
       if (!dx && !dy) continue;
       const n = rawPond(cx + dx, cy + dy);
       if (n && n.scale > 1.5 && (bigPondAt(n.cx, n.cy) || n.h > raw.h)) {   // two large ponds close together: only one of them gets to be large
-        const o = placePond(n, n.scale);
+        const o = mapLakeAt(n.cx, n.cy) || placePond(n, n.scale);
         if (Math.hypot(o.x - me.x, o.y - me.y) < pondReach(o) + pondReach(me) + 60) return null;
       }
     }
@@ -1335,6 +1395,8 @@
     const key = cx + "," + cy;
     if (pondSpecs.has(key)) return pondSpecs.get(key);
     let sp = null;
+    const D = mapLakeAt(cx, cy);
+    if (D && !D.home) { pondSpecs.set(key, D); return D; }   // v51: a mapped lake
     const raw = rawPond(cx, cy);
     if (raw) {
       sp = largePond(cx, cy);
@@ -1349,6 +1411,7 @@
       }
     }
     if (sp && !clearOf(sp.x, sp.y, pondReach(sp) + 40)) sp = null;   // ponds never land on the playhouse, the hive tree or the start
+    if (sp && MAP_LAKES.some(L => Math.hypot(L.x - sp.x, L.y - sp.y) < pondReach(L) + pondReach(sp) + 60)) sp = null;   // v51: nor on a lake from the map
     if (sp && sp.scale < 0.9 && !bigPondAt(cx, cy) && seeded(hash2(cx * 13 + 5, cy * 7 - 3))() < 0.65) sp = null;   // v27: fewer little ponds (Jessica)
     if (sp && !bigPondAt(cx, cy) && seeded(hash2(cx * 17 + 11, cy * 5 - 7))() < 0.15) sp = null;   // v31: 15% fewer ponds (Jessica)
     if (sp && !bigPondAt(cx, cy) && seeded(hash2(cx * 19 - 3, cy * 23 + 9))() < 0.10) {   // v31: one pond in ten is 15% larger, if it still fits
@@ -1359,7 +1422,7 @@
         const o = largePond(cx + dx, cy + dy);
         if (o && Math.hypot(o.x - sp.x, o.y - sp.y) < pondReach(o) + reach + 60) { ok = false; break; }
       }
-      if (ok && clearOf(sp.x, sp.y, reach + 40)) sp = { ...sp, rx: sp.rx * g, ry: sp.ry * g, grow: g };
+      if (ok && clearOf(sp.x, sp.y, reach + 40) && !MAP_LAKES.some(L => Math.hypot(L.x - sp.x, L.y - sp.y) < pondReach(L) + reach + 60)) sp = { ...sp, rx: sp.rx * g, ry: sp.ry * g, grow: g };
     }
     pondSpecs.set(key, sp);
     return sp;
@@ -1399,6 +1462,9 @@
     return !ch.flowers.some(f => Math.hypot(f.x - x, f.y - y) < 22);
   }
   function pondAt(x, y) {
+    for (const L of MAP_LAKES) {   // v51: mapped lakes can reach more than one patch from the patch that builds them
+      if (Math.abs(x - L.x) < L.rx * L.sh.max + 5 && Math.abs(y - L.y) < L.ry * L.sh.max + 5) { const c = chunkAt(L.cx, L.cy); if (c.pond && inPond(c.pond, x, y, 0)) return c.pond; }
+    }
     const cx = Math.floor(x / CS), cy = Math.floor(y / CS);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
       const ch = chunkAt(cx + dx, cy + dy);
@@ -2985,7 +3051,7 @@
   // the first animals you meet
   // v32: Nee Nee first (cream, both ears up), then friends of every size, including two very small ones
   [[40, 60, 4, 1, "ours", null], [-320, 260, 3.3, 0, "caramel"], [520, -420, 5, 0, "gray"], [-120, -560, 2.1, 0, "spotted"], [760, 150, 4, 0, "pink"], [-520, 420, 5.8, 0, "cocoa"], [640, 520, 1.9, 0, "lavender"]]
-    .forEach(([x, y, s, sx, pal, ears], i) => { const q = spreadOut(x, y), b = newBunny(q.x, q.y, s, sx || 0, pal, ears); if (i === 0) b.neenee = true; ANIMALS.push(b); });   // v38: the first one is the real Nee Nee
+    .forEach(([x, y, s, sx, pal, ears], i) => { const q = awayFromMapLakes(spreadOut(x, y), 90),  /* v51: nobody starts in a mapped lake */ b = newBunny(q.x, q.y, s, sx || 0, pal, ears); if (i === 0) b.neenee = true; ANIMALS.push(b); });   // v38: the first one is the real Nee Nee
   { const b = newBee(START.x, START.y, 101, "ours", 1); b.sit = 7; b.sx = 1; b.buzz = true; ANIMALS.push(b); }   // the real Buzz Buzz: the one you play   // on the flower right in front of you
   [["pink", 250, 60, 170, 0.8], ["mint", 40, 150, 130, 0.8], ["lavender", 420, -300, 200, 1.2], ["blue", -200, -200, 150, 0.65],
    ["peach", 120, -700, 260, 1.05], ["strawberry", 600, -150, 120, 0.72], ["ours", -60, -900, 220, 1.3], ["mint", 700, -800, 180, 0.6], ["pink", -380, 120, 200, 1.75], ["blue", 330, 180, 140, 0.45]]
