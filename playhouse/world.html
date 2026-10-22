@@ -976,7 +976,9 @@
   // v51: a spot that is in (or too near) a mapped lake is moved straight away from that lake's middle until it is on dry land (for things that start at a fixed place)
   function awayFromMapLakes(p, pad) {
     for (let k = 0; k < 60; k++) {
-      const L = lakesAt(p.x, p.y).find(M => inPond(M, p.x, p.y, pad)); if (!L) break;
+      let L = lakesAt(p.x, p.y).find(M => inPond(M, p.x, p.y, pad));
+      if (!L && riverIn(p.x, p.y, pad)) { let b = null, bd = 1e9; RIVER.forEach(q => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; b = q; } }); L = b; }   // v54: and out of the river
+      if (!L) break;
       const dx = p.x - L.x, dy = p.y - L.y, d = Math.hypot(dx, dy) || 1;
       p = { x: p.x + dx / d * 40, y: p.y + dy / d * 40 };
     }
@@ -986,6 +988,56 @@
   const MAP_LAKE_OWNER = new Map(MAP_LAKES.map(L => [L.cx + "," + L.cy, L]));
   // is this spot in (or within pad of) a mapped lake?
   const inMapLake = (x, y, pad) => lakesAt(x, y).some(L => Math.abs(x - L.x) < L.rx * L.sh.max + pad + 5 && Math.abs(y - L.y) < L.ry * L.sh.max + pad + 5 && inPond(L, x, y, pad));
+  // ---------- v54: THE RIVER (part 1: the Waterfall, past Duck Lake, down beside Hop Hop's home) ----------
+  // Traced from the map: its middle line, and how wide it is there (the middle line runs on through the lakes it flows into; the lakes are drawn on top).
+  // RIVER_DATA is x, y, width for each point, about 70 units apart. Part 2 (under the forests) comes with the forests.
+  const RIVER_DATA = [-12171,-12386,212,-12190,-12319,204,-12212,-12252,202,-12232,-12185,199,-12241,-12116,196,-12225,-12048,194,-12184,-11992,196,-12130,-11948,195,-12070,-11911,194,-12009,-11878,192,-11947,-11844,190,-11888,-11808,199,-11831,-11767,205,-11778,-11721,212,-11728,-11671,219,-11682,-11619,226,-11639,-11564,233,-11599,-11507,241,-11559,-11449,246,-11521,-11390,247,-11484,-11331,248,-11448,-11271,250,-11412,-11211,250,-11376,-11151,246,-11338,-11091,246,-11300,-11033,246,-11260,-10975,246,-11220,-10918,246,-11180,-10861,246,-11141,-10802,246,-11105,-10742,246,-11074,-10680,246,-11048,-10615,246,-11025,-10549,246,-11005,-10482,247,-10985,-10415,247,-10964,-10348,247,-10944,-10280,247,-10926,-10213,247,-10908,-10145,248,-10891,-10077,248,-10872,-10010,247,-10853,-9943,247,-10831,-9876,247,-10809,-9810,247,-10787,-9743,246,-10765,-9677,246,-10743,-9610,246,-10723,-9543,246,-10703,-9476,246,-10685,-9409,245,-10666,-9341,245,-10647,-9274,245,-10628,-9207,246,-10607,-9140,250,-10586,-9073,252,-10564,-9006,252,-10541,-8940,253,-10515,-8875,253,-10486,-8811,253,-10455,-8749,252,-10422,-8687,252,-10388,-8626,254,-10354,-8565,253,-10321,-8503,254,-10290,-8440,253,-10260,-8377,253,-10230,-8314,253,-10198,-8251,252,-10163,-8191,252,-10123,-8133,250,-10078,-8080,246,-10029,-8030,243,-9976,-7984,242,-9923,-7939,241,-9870,-7893,240,-9819,-7845,240,-9773,-7792,239,-9732,-7736,239,-9692,-7678,238,-9652,-7621,237,-9609,-7566,237,-9561,-7515,236,-9507,-7470,235,-9450,-7430,234,-9388,-7396,235,-9325,-7367,235,-9260,-7341,235,-9193,-7319,235,-9126,-7301,235,-9057,-7286,235,-8988,-7274,236,-8919,-7266,236,-8849,-7261,238,-8779,-7258,239,-8709,-7256,239,-8639,-7256,239,-8569,-7257,239,-8499,-7259,239,-8429,-7261,240,-8359,-7264,240,-8289,-7266,241,-8219,-7270,240,-8149,-7273,236,-8079,-7277,231,-8010,-7281,226,-7940,-7284,224,-7870,-7286,222,-7800,-7286,221,-7730,-7284,220,-7660,-7281,219,-7590,-7277,219,-7520,-7275,219,-7450,-7275,219,-7380,-7278,219,-7310,-7283,220,-7240,-7290,219,-7171,-7298,219,-7101,-7306,217,-7032,-7316,213,-6963,-7326,211,-6894,-7338,211,-6825,-7350,213,-6756,-7363,216,-6687,-7375,216,-6618,-7387,214,-6549,-7398,214,-6480,-7411,214,-6412,-7426,214,-6344,-7442,214,-6275,-7457,214,-6207,-7471,215,-6138,-7481,215,-6068,-7489,216,-5998,-7497,217,-5929,-7508,220,-5861,-7522,226,-5793,-7539,232,-5725,-7555,237,-5656,-7570,239,-5587,-7582,239,-5518,-7592,241,-5449,-7602,243,-5379,-7612,243,-5311,-7624,243,-5242,-7638,242,-5174,-7653,241,-5105,-7669,241,-5037,-7683,241,-4968,-7698,240,-4900,-7711,240,-4831,-7724,240,-4762,-7737,237,-4693,-7750,233,-4624,-7761,232,-4555,-7771,232,-4485,-7780,232,-4416,-7786,233,-4346,-7788,233,-4276,-7788,233,-4206,-7786,234,-4136,-7783,235,-4066,-7779,236,-3996,-7774,236,-3927,-7764,237,-3858,-7752,237,-3789,-7738,237,-3721,-7723,237,-3653,-7708,237,-3584,-7694,239,-3516,-7679,242,-3448,-7662,242,-3381,-7642,242,-3314,-7619,242,-3249,-7595,243,-3184,-7570,242,-3118,-7544,242,-3053,-7518,242,-2989,-7491,242,-2925,-7461,242,-2864,-7428,241,-2805,-7391,241,-2748,-7350,241,-2694,-7306,240,-2641,-7260,240,-2590,-7212,240,-2539,-7163,239,-2490,-7114,241,-2441,-7063,241,-2394,-7012,241,-2348,-6959,241,-2303,-6905,241,-2260,-6850,242,-2218,-6794,242,-2177,-6738,242,-2136,-6681,242,-2095,-6624,242,-2056,-6566,242,-2017,-6508,241,-1980,-6448,241,-1946,-6387,242,-1914,-6325,242,-1884,-6261,242,-1854,-6198,242,-1824,-6135,240,-1791,-6073,240,-1758,-6012,240,-1723,-5951,239,-1688,-5890,237,-1654,-5829,236,-1619,-5769,234,-1584,-5708,230,-1550,-5647,227,-1516,-5585,224,-1482,-5524,222,-1449,-5463,219,-1415,-5401,215,-1381,-5340,209,-1347,-5279,203,-1312,-5218,195,-1277,-5158,187,-1243,-5096,184,-1212,-5034,183,-1186,-4969,183,-1165,-4902,183,-1150,-4834,185,-1135,-4765,188,-1114,-4699,190,-1083,-4636,189,-1043,-4579,188,-996,-4526,187,-947,-4477,185,-897,-4428,185,-847,-4379,186,-797,-4330,188,-746,-4282,191,-693,-4236,195,-638,-4193,200,-579,-4156,201,-517,-4123,198,-452,-4095,196,-387,-4071,194,-321,-4047,191,-255,-4024,188,-190,-3998,185,-126,-3970,188,-64,-3937,191,-3,-3903,194,57,-3866,196,116,-3829,199,177,-3794,202,238,-3760,204,300,-3728,207,361,-3694,210,420,-3657,212,477,-3616,215,532,-3572,218,584,-3525,220,635,-3477,223,685,-3429,226,735,-3379,228,784,-3329,231,833,-3279,233,882,-3230,235,932,-3181,236,983,-3132,238,1035,-3086,240,1089,-3041,241,1143,-2997,243,1199,-2955,243,1255,-2913,242,1310,-2870,242,1364,-2825,242,1417,-2779,242,1469,-2732,242,1519,-2683,242,1570,-2635,242,1622,-2588,242,1674,-2541,241,1727,-2496,241,1780,-2450,241,1832,-2403,242,1882,-2354,242,1930,-2303,242,1977,-2251,242,2022,-2198,242,2065,-2142,243,2106,-2086,244,2144,-2027,244,2179,-1966,244,2211,-1904,245,2240,-1840,245,2268,-1776,245,2296,-1712,245,2324,-1648,246,2352,-1584,246,2378,-1519,247,2403,-1453,247,2425,-1387,246,2444,-1320,247,2461,-1252,246,2476,-1183,246,2492,-1115,247,2509,-1047,247,2528,-980,247,2548,-913,248,2568,-846,248,2587,-778,248,2605,-711,247,2622,-643,247,2641,-575,246,2661,-508,246,2682,-441,245,2700,-374,245,2712,-305,245,2714,-235,247,2708,-165,247,2695,-97,242,2681,-28,234,2668,41,226,2658,110,218,2652,180,212,2650,250,209,2651,320,210,2654,390,208,2656,460,207,2654,530,205,2646,599,203,2628,667,202,2603,732,200,2574,796,197,2543,859,194,2515,923,191,2491,988,188,2473,1056,192,2458,1124,200,2444,1193,209,2427,1261,217,2407,1328,224,2384,1394,227,2360,1460,224,2335,1525,225,2311,1591,227,2288,1657,229,2263,1722,230,2236,1787,232,2207,1851,234,2177,1914,236,2147,1977,238,2119,2041,241,2096,2107,243,2080,2176,243,2076,2245,243,2084,2315,242];
+  const RIVER = [];
+  for (let i = 0; i < RIVER_DATA.length; i += 3) RIVER.push({ x: RIVER_DATA[i], y: RIVER_DATA[i + 1], w: RIVER_DATA[i + 2] });
+  // the river is looked up by patch of meadow: patch -> the pieces of river that reach into it
+  const RIVER_GRID = new Map();
+  for (let i = 0; i < RIVER.length - 1; i++) {
+    const a = RIVER[i], b = RIVER[i + 1], m = Math.max(a.w, b.w) / 2 + 520;
+    for (let cy = Math.floor((Math.min(a.y, b.y) - m) / CS); cy <= Math.floor((Math.max(a.y, b.y) + m) / CS); cy++) for (let cx = Math.floor((Math.min(a.x, b.x) - m) / CS); cx <= Math.floor((Math.max(a.x, b.x) + m) / CS); cx++) {
+      const k = cx + "," + cy; if (!RIVER_GRID.has(k)) RIVER_GRID.set(k, []); RIVER_GRID.get(k).push(i);
+    }
+  }
+  // how far a spot is from the water's edge: below 0 is in the river (always the real edge, shallow spots and bridges included)
+  function riverEdge(x, y) {
+    const segs = RIVER_GRID.get(Math.floor(x / CS) + "," + Math.floor(y / CS)); if (!segs) return 1e9;
+    let best = 1e9;
+    for (let k = 0; k < segs.length; k++) {
+      const a = RIVER[segs[k]], b = RIVER[segs[k] + 1], dx = b.x - a.x, dy = b.y - a.y, t = clamp(((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy), 0, 1);
+      const e = Math.hypot(x - a.x - dx * t, y - a.y - dy * t) - (a.w + (b.w - a.w) * t) / 2;
+      if (e < best) best = e;
+    }
+    return best;
+  }
+  const riverIn = (x, y, pad) => riverEdge(x, y) < pad;
+  // the crossings: a shallow spot, a line of big stones, or a cottage bridge. A crossing is a strip across the river where bunnies and Nee Nee may walk.
+  const CROSSINGS = [
+    { i: 18, kind: "shallow" }, { i: 58, kind: "stones" }, { i: 108, kind: "bridge" }, { i: 150, kind: "stones" },
+    { i: 220, kind: "shallow" }, { i: 292, kind: "bridge" }, { i: 320, kind: "stones" }
+  ];
+  CROSSINGS.forEach(c => {
+    const p = RIVER[c.i], q = RIVER[c.i + 1], o = RIVER[c.i - 1], l = Math.hypot(q.x - o.x, q.y - o.y);
+    c.x = p.x; c.y = p.y; c.w = p.w; c.tx = (q.x - o.x) / l; c.ty = (q.y - o.y) / l;     // along the river
+    c.ah = c.kind === "bridge" ? 95 : c.kind === "stones" ? 120 : 150;                       // how long the strip is, along the river
+  });
+  // is this spot on a crossing (pad makes the strip a little bigger)?
+  function riverCross(x, y, pad = 0) {
+    for (let k = 0; k < CROSSINGS.length; k++) {
+      const c = CROSSINGS[k], dx = x - c.x, dy = y - c.y;
+      if (Math.abs(dx) > 600 || Math.abs(dy) > 600) continue;
+      if (Math.abs(dx * c.tx + dy * c.ty) < c.ah + pad && Math.abs(-dx * c.ty + dy * c.tx) < c.w / 2 + 90 + pad) return c;
+    }
+    return null;
+  }
+  // water bunnies and bees must stay out of: the river except on a crossing
+  const riverWater = (x, y, pad = 0) => riverIn(x, y, pad) && !riverCross(x, y);
+  const RIVER_WATER = { river: true, x: 0, y: 0, rx: 1, ry: 1, rot: 0, scale: 1, pads: [], frogs: [], residents: [], sh: { max: 1 } };
+  // anything that must stay out of water: the lakes and the river (crossings count as water for planting, not for walking)
+  const inMapWater = (x, y, pad) => inMapLake(x, y, pad) || riverIn(x, y, pad);
   function shapeR(sh, a) {
     let s = 1 + sh.a1 * Math.cos(a - sh.p1) + sh.a2 * Math.cos(2 * (a - sh.p2)) + sh.a3 * Math.cos(3 * (a - sh.p3)) + sh.a5 * Math.cos(5 * (a - sh.p5));
     if (sh.a7) s += sh.a7 * Math.cos(7 * (a - sh.p7)) + sh.a9 * Math.cos(9 * (a - sh.p9));
@@ -1008,6 +1060,7 @@
   function pondAngle(p, x, y) { const [lx, ly] = pondLocal(p, x, y); return Math.atan2(ly / p.ry, lx / p.rx); }
   // how far out a spot is: under 1 is in the water
   function pondDist(p, x, y, pad = 0) {
+    if (p.river) return riverIn(x, y, pad) && !riverCross(x, y) ? 0.5 : 2;   // v54: the river counts as water, except where it can be crossed
     const [lx, ly] = pondLocal(p, x, y), s = pondS(p, Math.atan2(ly / p.ry, lx / p.rx));
     const u = lx / Math.max(1, p.rx * s + pad), v = ly / Math.max(1, p.ry * s + pad);
     return Math.sqrt(u * u + v * v);
@@ -1134,7 +1187,7 @@
       const sp = pondSpec(cx + dx, cy + dy);
       if (sp && sp.scale > 1.5) nbPonds.push(sp);
     }
-    const wet = (x, y, pad) => inPond(ch.pond, x, y, pad) || nbPonds.some(p => inPond(p, x, y, pad + 20)) || inMapLake(x, y, pad + 20);   // v51: mapped lakes count too
+    const wet = (x, y, pad) => inPond(ch.pond, x, y, pad) || nbPonds.some(p => inPond(p, x, y, pad + 20)) || inMapWater(x, y, pad + 20);   // v51: mapped lakes count too (v54: and the river)
     const free = (x, y, pad) => !wet(x, y, pad) && clearOf(x, y, pad) && !ch.trees.some(t => Math.hypot(t.x - x, t.y - y) < t.w + pad);
     // ponds (lots of them in the Lily Ponds)
     const pondChance = bigPondAt(cx, cy) ? 2 : biome === "pondland" ? 0.65 : biome === "meadow" || biome === "clover" ? 0.3 : 0.15;
@@ -1197,6 +1250,7 @@
       if (sp.gone) { ch.pond = null; ch.reeds = []; }
     }
     if (home) makeHomePond(ch);   // Hop Hop's lily pond
+    addRiverBits(ch, cx, cy);     // v54: reeds along the river's banks and the stepping stones
     // a big old tree now and then (a whole grove of them in the Mushroom Glade)
     if (biome === "woods") {
       // the woods: several big trees, each with branches she can land on
@@ -1582,6 +1636,7 @@
       const ch = chunkAt(cx + dx, cy + dy);
       if (ch.pond && inPond(ch.pond, x, y, 0)) return ch.pond;
     }
+    if (riverWater(x, y)) return RIVER_WATER;   // v54: the river
     return null;
   }
   function chunkAt(cx, cy) {
@@ -5292,6 +5347,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         canopy.push([b.x - cw * 0.1, top, cw]);
       });
     }
+    riverFar(water, reach);   // v54
     ctx.save();
     // colored meadows first (lavender, clover, sunflower gold...), then the ponds, then everything standing up
     const fillGroup = (g, col) => {
@@ -5366,8 +5422,9 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       if (ch.pond) items.push({ d: Math.hypot(ch.pond.x - camX, ch.pond.y - camY), p: ch.pond, kind: "pond" });
     });
     items.sort((a, b) => b.d - a.d);
-    items.forEach(it => {
-      if (it.d > 2400) return;
+    // v54: meadow colors and shadows first, then the river, then the lakes (so a lake covers the river where it flows in)
+    const pass = (wantPond) => items.forEach(it => {
+      if (it.d > 2400 || (it.kind === "pond") !== wantPond) return;
       const p = it.p;
       if (it.kind === "shade") {
         softGround(p.x, p.y, p.w * 3.8, p.w * 3.1, 0, "60, 110, 60", 0.16);
@@ -5404,6 +5461,169 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
         }
       });
       ctx.restore();
+    });
+    pass(false); drawRiver(); pass(true);
+  }
+  // reeds and cattails along the banks, and the big stepping stones of a stone crossing (their own random stream, so nothing else in the world moves)
+  function addRiverBits(ch, cx, cy) {
+    const segs = RIVER_GRID.get(cx + "," + cy), inMe = (x, y) => Math.floor(x / CS) === cx && Math.floor(y / CS) === cy;
+    if (ch.reeds.length && RIVER_GRID.has(cx + "," + cy)) ch.reeds = ch.reeds.filter(o => !riverIn(o.x, o.y, 4));   // a lake's reeds never stand in the river where it flows in
+    if (segs) segs.forEach(i => {
+      const p = RIVER[i], q = RIVER[i + 1]; if (!inMe(p.x, p.y)) return;
+      const r = seeded(hash2(i * 13 + 5, 6161)), tx = q.x - p.x, ty = q.y - p.y, l = Math.hypot(tx, ty) || 1, nx = -ty / l, ny = tx / l;
+      [-1, 1].forEach(sd => {
+        if (r() < 0.45) { r(); r(); r(); r(); return; }
+        const u = r(), out = p.w / 2 + 6 + r() * 16, x = p.x + tx * u + nx * out * sd, y = p.y + ty * u + ny * out * sd, h = 80 + r() * 90, ph = r() * 6, cat = r() < 0.5;
+        if (inMapLake(x, y, 24) || riverIn(x, y, 6) || riverCross(x, y, 40) || !inMe(x, y)) return;
+        ch.reeds.push({ x, y, h, ph, cat });
+      });
+    });
+    CROSSINGS.forEach(c => {
+      if (c.kind === "bridge") return;
+      const r = seeded(hash2(c.i * 17 + 3, 9191)), n = c.kind === "stones" ? 6 : 0;
+      for (let k = 0; k < n; k++) {   // stones across the river, a hop apart
+        const v = ((k + 0.5) / n - 0.5) * (c.w + 150), u = (r() - 0.5) * 36, x = c.x + u * c.tx - v * c.ty, y = c.y + u * c.ty + v * c.tx, sz = 31 + r() * 11;
+        if (inMe(x, y)) ch.rocks.push({ x, y, s: sz, step: true });
+      }
+      if (c.kind === "shallow") for (let k = 0; k < 7; k++) {   // a few small pebbles on a shallow spot
+        const u = (r() - 0.5) * c.ah * 1.6, v = (r() - 0.5) * (c.w + 100), x = c.x + u * c.tx - v * c.ty, y = c.y + u * c.ty + v * c.tx, sz = 10 + r() * 9;
+        if (inMe(x, y)) ch.rocks.push({ x, y, s: sz, step: true });
+      }
+    });
+  }
+  // ---------- v54: a little cottage bridge (a low, gently arched wooden deck with painted rails and lantern posts) ----------
+  // The bridge lies across the river: u runs along the river, v runs across it. It is built from simple solid boxes, drawn far to near.
+  function drawBridge(c) {
+    const f0 = camF(c.x, c.y), a = clamp((3600 - f0) / 900, 0, 1) * clamp((f0 - 40) / 80, 0, 1); if (a <= 0.01) return;
+    const HL = c.w / 2 + 70, HW = 56, arch = v => 4 + 20 * (1 - Math.min(1, Math.abs(v) / HL) ** 2);   // half length, half width, deck height at v
+    const W3 = (u, v) => [c.x + u * c.tx - v * c.ty, c.y + u * c.ty + v * c.tx];
+    const P = (u, v, z) => { const w = W3(u, v); return proj(w[0], w[1], z); };
+    const LX = -0.55, LY = 0.5, LZ = 0.7, LL = Math.hypot(LX, LY, LZ);
+    const face = (pts, n, base) => {
+      const nx = n[0] * c.tx - n[1] * c.ty, ny = n[0] * c.ty + n[1] * c.tx, nz = n[2], w0 = W3(pts[0][0], pts[0][1]);
+      if (nx * (camX - w0[0]) + ny * (camY - w0[1]) + nz * (camH - pts[0][2]) <= 0) return;
+      const q = pts.map(p => P(p[0], p[1], p[2])); if (!q.every(Boolean)) return;
+      const lam = clamp((nx * LX + ny * LY + nz * LZ) / LL, -0.2, 1), m = 0.8 + 0.3 * ((lam + 0.2) / 1.2);
+      ctx.fillStyle = "rgb(" + [0, 1, 2].map(i => Math.min(255, base[i] * m) | 0).join(",") + ")";
+      ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.7; ctx.stroke();
+    };
+    const box = (u0, u1, v0, v1, z0, z1, col) => {   // all five outer faces (the ones turned away are skipped)
+      face([[u0, v0, z1], [u1, v0, z1], [u1, v1, z1], [u0, v1, z1]], [0, 0, 1], col);
+      face([[u1, v0, z0], [u1, v1, z0], [u1, v1, z1], [u1, v0, z1]], [1, 0, 0], col);
+      face([[u0, v1, z0], [u0, v0, z0], [u0, v0, z1], [u0, v1, z1]], [-1, 0, 0], col);
+      face([[u1, v1, z0], [u0, v1, z0], [u0, v1, z1], [u1, v1, z1]], [0, 1, 0], col);
+      face([[u0, v0, z0], [u1, v0, z0], [u1, v0, z1], [u0, v0, z1]], [0, -1, 0], col);
+    };
+    const parts = [], N = 16, DECK = [226, 188, 146], RAIL = [247, 214, 232], POST = [236, 190, 214], LAMP = [255, 226, 122];
+    for (let k = 0; k < N; k++) {   // deck boards, one slab each, following the arch
+      const v0 = -HL + k * 2 * HL / N, v1 = v0 + 2 * HL / N, h = arch((v0 + v1) / 2);
+      parts.push({ v: (v0 + v1) / 2, u: 0, d: () => box(-HW, HW, v0 - 0.5, v1 + 0.5, 0, h, k % 2 ? DECK : [236, 200, 160]) });
+    }
+    [-1, 1].forEach(sd => {
+      const u = sd * (HW - 5);
+      for (let k = 0; k <= 8; k++) {   // posts, with a lantern on the four end ones
+        const v = -HL + 6 + k * (2 * HL - 12) / 8, h = arch(v), top = h + 46, end = k === 0 || k === 8;
+        parts.push({ v, u, d: () => { box(u - 5, u + 5, v - 5, v + 5, h - 2, top, POST); if (end) box(u - 7, u + 7, v - 7, v + 7, top, top + 14, LAMP); } });
+      }
+      for (let k = 0; k < 8; k++) {    // the rail between posts, in short pieces that follow the arch
+        const va = -HL + 6 + k * (2 * HL - 12) / 8, vb = va + (2 * HL - 12) / 8, ha = arch(va), hb = arch(vb);
+        parts.push({ v: (va + vb) / 2, u, d: () => {
+          const m = (z) => (ha + hb) / 2 + z;
+          box(u - 3.5, u + 3.5, va, vb, m(36), m(42), RAIL); box(u - 3, u + 3, va, vb, m(18), m(23), RAIL);
+        } });
+      }
+    });
+    parts.sort((p, q) => { const A = W3(p.u, p.v), B = W3(q.u, q.v); return Math.hypot(B[0] - camX, B[1] - camY) - Math.hypot(A[0] - camX, A[1] - camY); });
+    ctx.save(); ctx.globalAlpha = a;
+    parts.forEach(p => p.d());
+    ctx.restore();
+  }
+  // ---------- v54: drawing the river ----------
+  // the two banks of a run of the river (points a to b), pad units out from the water
+  function riverSides(a, b, pad) {
+    const L = [], R = [], n = RIVER.length;
+    for (let i = a; i <= b; i++) {
+      const p = RIVER[i], q = RIVER[Math.min(i + 1, n - 1)], o = RIVER[Math.max(i - 1, 0)];
+      let tx = q.x - o.x, ty = q.y - o.y; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
+      const h = p.w / 2 + pad;
+      L.push([p.x - ty * h, p.y + tx * h]); R.push([p.x + ty * h, p.y - tx * h]);
+    }
+    return [L, R];
+  }
+  // a line along the ground (cut where it passes behind the camera)
+  function groundLine(pts) {
+    ctx.beginPath(); let pen = false;
+    for (let i = 0; i < pts.length; i++) {
+      const dx = pts[i][0] - camX, dy = pts[i][1] - camY, f = dx * camC + dy * camS;
+      if (f < 8) { pen = false; continue; }
+      const k = F / f, X = W / 2 + (-dx * camS + dy * camC) * k, Y = HORIZON + camH * k;
+      if (pen) ctx.lineTo(X, Y); else { ctx.moveTo(X, Y); pen = true; }
+    }
+  }
+  // runs of the river within maxD of the camera (and beyond minD)
+  function riverRuns(minD, maxD, fwdMin) {
+    const runs = []; let a = -1;
+    for (let i = 0; i < RIVER.length; i++) {
+      const p = RIVER[i], dx = p.x - camX, dy = p.y - camY, d = Math.hypot(dx, dy), f = dx * camC + dy * camS;
+      const on = d < maxD + p.w / 2 && d > minD - p.w / 2 && (fwdMin == null || f > fwdMin);
+      if (on && a < 0) a = i;
+      if (!on && a >= 0) { runs.push([Math.max(0, a - 1), Math.min(RIVER.length - 1, i)]); a = -1; }
+    }
+    if (a >= 0) runs.push([Math.max(0, a - 1), RIVER.length - 1]);
+    return runs;
+  }
+  function drawRiver() {
+    const runs = riverRuns(0, 2400, null); if (!runs.length) return;
+    runs.forEach(([a, b]) => {
+      if (b - a < 1) return;
+      const far = Math.min(...[a, b].map(i => Math.hypot(RIVER[i].x - camX, RIVER[i].y - camY)));
+      // the soft, sandy bank, like a lake's
+      [38, 24, 11].forEach(pad => { const [L, R] = riverSides(a, b, pad); if (groundPath(L.concat(R.slice().reverse()))) { ctx.fillStyle = "rgba(214, 236, 176, 0.32)"; ctx.fill(); } });
+      const [L, R] = riverSides(a, b, 0), ring = L.concat(R.slice().reverse());
+      if (!groundPath(ring)) return;
+      let y0 = 1e9, y1 = -1e9;
+      for (let i = a; i <= b; i += 2) { const q = proj(RIVER[i].x, RIVER[i].y, 0); if (q) { y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); } }
+      if (y0 > y1) { y0 = HORIZON; y1 = H; }
+      const wg = ctx.createLinearGradient(0, y0 - 40, 0, Math.max(y0 + 1, y1 + 60));
+      wg.addColorStop(0, "#BCCBF2"); wg.addColorStop(0.45, "#93A9E2"); wg.addColorStop(1, "#7188D0");
+      ctx.fillStyle = wg; ctx.fill();
+      ctx.save(); ctx.clip();
+      // gentle light streaks that drift down the river (still when Reduce Motion is on)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.32)"; ctx.lineCap = "round";
+      for (let i = a; i < b; i++) {
+        const p = RIVER[i], q = RIVER[i + 1];
+        if (Math.hypot(p.x - camX, p.y - camY) > 1500) continue;
+        for (let j = 0; j < 3; j++) {
+          const h = hash2(i * 3 + j, 777), u = ((h % 1000) / 1000), ph = reduceMotion ? 0.3 : (time * 0.1 + (h % 337) / 337) % 1, off = (u - 0.5) * p.w * 0.7;
+          const tx = q.x - p.x, ty = q.y - p.y, l = Math.hypot(tx, ty) || 1, nx = -ty / l, ny = tx / l;
+          const sx = p.x + tx * ph + nx * off, sy = p.y + ty * ph + ny * off;
+          groundLine([[sx, sy], [sx + tx / l * 46, sy + ty / l * 46]]); ctx.lineWidth = 1.6; ctx.stroke();
+        }
+      }
+      // the shallow crossings: paler water with a few ripples
+      CROSSINGS.forEach(c => {
+        if (c.kind !== "shallow") return;
+        const d = Math.hypot(c.x - camX, c.y - camY); if (d > 2000) return;
+        const hw = c.w / 2 + 60, ah = c.ah, rect = [[-ah, -hw], [ah, -hw], [ah, hw], [-ah, hw]].map(([u, v]) => [c.x + u * c.tx - v * c.ty, c.y + u * c.ty + v * c.tx]);
+        if (groundPath(rect)) { ctx.fillStyle = "rgba(226, 236, 250, 0.55)"; ctx.fill(); }
+        for (let k = 0; k < 9; k++) {
+          const u = (k % 3 - 1) * ah * 0.55, v = (Math.floor(k / 3) - 1) * c.w * 0.3, e = ellipsePts(c.x + u * c.tx - v * c.ty, c.y + u * c.ty + v * c.tx, 40, 9, Math.atan2(c.ty, c.tx), 16);
+          if (groundPath(e)) { ctx.strokeStyle = "rgba(255, 255, 255, 0.55)"; ctx.lineWidth = 1.2; ctx.stroke(); }
+        }
+      });
+      if (a === 0 || a === 1) { const st = RIVER[0]; softGround(st.x, st.y, 190, 130, 0, "255, 255, 255", 0.55, 5, 0.3); }   // foam where the waterfall lands
+      ctx.restore();
+      // the white edge, along both banks only (so a cut end never shows a line across the river)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)"; ctx.lineWidth = 1.6; ctx.lineCap = "butt";
+      groundLine(L); ctx.stroke(); groundLine(R); ctx.stroke();
+    });
+  }
+  // the river far away, as part of the faraway field (water, one color)
+  function riverFar(water, reach) {
+    riverRuns(FAR_FROM - 300, reach + 600, 150).forEach(([a, b]) => {
+      if (b - a < 1) return;
+      const [L, R] = riverSides(a, b, 0); water.push(L.concat(R.slice().reverse()));
     });
   }
 
@@ -7371,6 +7591,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     { const f = camF(HOUSE.x, HOUSE.y); if (f > -HOUSE.d) items.push({ f: Math.max(f, 30), house: true, d: () => drawHouse() }); }
     if (FLAGPOLE) { const f = camF(FLAGPOLE.x, FLAGPOLE.y); if (f > 40) items.push({ f, w: FLAGPOLE, d: () => drawFlagpole() }); }
     { const f = camF(MAILBOX.x, MAILBOX.y); if (f > 40) items.push({ f, w: MAILBOX, d: () => drawMailbox() }); }   // v44: the mailbox by the door
+    CROSSINGS.forEach(c => { if (c.kind !== "bridge") return; const f = camF(c.x, c.y); if (f > 40 && f < 3600) items.push({ f, w: c, d: () => drawBridge(c) }); });   // v54: the cottage bridges
     if (friend) {
       const p = proj(friend.x, friend.y, friend.z);
       if (inView(p, 80)) {
