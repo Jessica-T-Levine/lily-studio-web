@@ -80,8 +80,9 @@
       *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
     }
     @keyframes breathe { 0%,100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.05); } }
-    .site-footer { background: var(--navy-deep); border-top: 1px solid var(--gray-mid); padding: 40px 24px; text-align: center; }
-    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; list-style: none; flex-wrap: wrap; }
+    .site-footer { background: var(--navy-deep); border-top: 1px solid var(--gray-mid); padding: 28px 24px; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 6px 18px; margin-bottom: 12px; list-style: none; flex-wrap: wrap; }
+    .footer-links li { line-height: 1.3; }
     .footer-links a { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pink); transition: text-shadow 0.25s var(--ease); }
     .footer-links a:hover { text-shadow: 0 0 12px var(--pink-glow); }
     .footer-copy { font-family: var(--font-mono); font-size: 0.52rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-light); }
@@ -261,6 +262,8 @@
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.hero-stat-label,.search-count,.filter-tab,.card-cat,.card-badge,.card-buy,.bundle-label,.coming-tag,.card-coming,.table-hint,.cta-reassurance,.ticker-text,.fig-caption,.skill-card-fig,.app-card-fig,.hero-caption,.skill-badge,.story-label,.section-label,.app-status,.games-meta,.tst-fine,.tst-pill,.games-hint,.story-sig,.skill-link,.planner-btn{font-size:max(0.72rem,11.5px)!important}
 .nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.06em}
+.site-footer .footer-copy{letter-spacing:0.06em}
 .tcard-desc{font-size:0.82rem!important}
 .btn-primary,.btn-ghost,.app-cta,.cta-btn{font-size:max(0.8rem,12.5px)!important}
 .card-price,.skill-price{font-size:0.95rem!important}

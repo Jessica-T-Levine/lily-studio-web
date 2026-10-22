@@ -160,17 +160,18 @@
     .site-footer {
       background: var(--navy-deep);
       border-top: 1px solid var(--gray-mid);
-      padding: 40px 24px;
+      padding: 28px 24px;
       text-align: center;
     }
     .footer-links {
       display: flex;
       justify-content: center;
-      gap: 24px;
-      margin-bottom: 20px;
+      gap: 6px 18px;
+      margin-bottom: 12px;
       list-style: none;
       flex-wrap: wrap;
     }
+    .footer-links li { line-height: 1.3; }
     .footer-links a {
       font-family: var(--font-mono);
       font-size: 0.55rem; font-weight: 500;
@@ -300,6 +301,8 @@
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
+footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.06em}
+.site-footer .footer-copy{letter-spacing:0.06em}
 
     /* ── Legal pages: policy text on a cream "paper" card ── */
     .legal-hero{padding:84px 0 44px}
