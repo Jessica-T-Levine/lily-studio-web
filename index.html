@@ -727,7 +727,7 @@
     }
     .games-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
     .games-head .games-meta { margin: 14px 0 0; }
-    .games-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; align-items: stretch; }
+    .games-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px; align-items: stretch; }
     .game-tile { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .game-tile .games-art { width: 100%; max-width: 250px; }
     .game-tile:nth-child(2) .games-art { transform: rotate(2deg); }
@@ -771,6 +771,12 @@
     @media (prefers-reduced-motion: reduce) {
       .games-art.armed img { animation: none; }
       .game-play, .game-play-arrow { transition: none; }
+    }
+    @media (min-width: 761px) and (max-width: 899px) {
+      .games-row { gap: 28px; }
+    }
+    @media (min-width: 761px) and (max-width: 960px) {
+      .game-tile .game-play { min-width: 0; width: 100%; padding: 15px 14px; gap: 8px; font-size: 1.05rem; }
     }
     @media (max-width: 760px) {
       .games-feature { padding: 70px 24px; }
@@ -1217,7 +1223,7 @@
   .tcard.is-top .tcard-foot { color: #C8418F; }
   .table-hint { position: absolute; left: -60px; width: 357px; text-align: center; bottom: 18px; font-family: var(--font-mono); font-size: .5rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-warm); }
   @media (prefers-reduced-motion: reduce) { .tcard { transition: none; } .tcard.lift { animation: none; } }
-  @media (max-width: 1100px) { .table { margin-left: 0; } .table-hint { left: 0; } }
+  @media (max-width: 1100px) { .table { margin-left: 0; } .table-hint { left: 0; max-width: 100%; } }
     /* Menu fit (Sept 30): on iPad-portrait widths the words ran into the links */
     @media (min-width: 769px) and (max-width: 960px) {
       .site-header .nav-flower { width: 104px; }
