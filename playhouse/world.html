@@ -5462,7 +5462,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       });
       ctx.restore();
     });
-    pass(false); drawRiver(); pass(true);
+    pass(false); pass(true); drawRiver();   // v54: the river is drawn after the lakes, over their walls, so it flows straight in
   }
   // reeds and cattails along the banks, and the big stepping stones of a stone crossing (their own random stream, so nothing else in the world moves)
   function addRiverBits(ch, cx, cy) {
@@ -5573,15 +5573,35 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     if (a >= 0) runs.push([Math.max(0, a - 1), RIVER.length - 1]);
     return runs;
   }
+  // like groundPath, but adds another shape to the path being built
+  function groundPathAdd(pts) {
+    const cam = pts.map(([x, y]) => { const dx = x - camX, dy = y - camY; return [dx * camC + dy * camS, -dx * camS + dy * camC]; });
+    const out = [], N = 8;
+    for (let i = 0; i < cam.length; i++) {
+      const a = cam[i], b = cam[(i + 1) % cam.length], ain = a[0] >= N, bin = b[0] >= N;
+      if (ain) out.push(a);
+      if (ain !== bin) { const t = (N - a[0]) / (b[0] - a[0]); out.push([N, a[1] + (b[1] - a[1]) * t]); }
+    }
+    if (out.length < 3) return;
+    out.forEach(([f, side], i) => { const k = F / f, x = W / 2 + side * k, y = HORIZON + camH * k; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+    ctx.closePath();
+  }
   function drawRiver() {
     const runs = riverRuns(0, 2400, null); if (!runs.length) return;
+    // the river never paints over the middle of a lake (the lake keeps its pads and frogs); it does paint a little way in
+    // (14 units) so that it covers the lake's own white wall and sandy bank where it flows in
+    const lakesHere = MAP_LAKES.filter(L => Math.hypot(L.x - camX, L.y - camY) < 2400 + pondReach(L)).map(L => chunkAt(L.cx, L.cy).pond).filter(Boolean);
     runs.forEach(([a, b]) => {
       if (b - a < 1) return;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(-5, -5, W + 10, H + 10);
+      lakesHere.forEach(pd => groundPathAdd(pondPts(pd, -14, 64)));
+      ctx.clip("evenodd");
       const far = Math.min(...[a, b].map(i => Math.hypot(RIVER[i].x - camX, RIVER[i].y - camY)));
       // the soft, sandy bank, like a lake's
       [38, 24, 11].forEach(pad => { const [L, R] = riverSides(a, b, pad); if (groundPath(L.concat(R.slice().reverse()))) { ctx.fillStyle = "rgba(214, 236, 176, 0.32)"; ctx.fill(); } });
       const [L, R] = riverSides(a, b, 0), ring = L.concat(R.slice().reverse());
-      if (!groundPath(ring)) return;
+      if (!groundPath(ring)) { ctx.restore(); return; }
       let y0 = 1e9, y1 = -1e9;
       for (let i = a; i <= b; i += 2) { const q = proj(RIVER[i].x, RIVER[i].y, 0); if (q) { y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); } }
       if (y0 > y1) { y0 = HORIZON; y1 = H; }
@@ -5617,6 +5637,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       // the white edge, along both banks only (so a cut end never shows a line across the river)
       ctx.strokeStyle = "rgba(255, 255, 255, 0.55)"; ctx.lineWidth = 1.6; ctx.lineCap = "butt";
       groundLine(L); ctx.stroke(); groundLine(R); ctx.stroke();
+      ctx.restore();
     });
   }
   // the river far away, as part of the faraway field (water, one color)
