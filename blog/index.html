@@ -356,8 +356,18 @@ body{margin:0;padding:0}
 .crt-scroll::-webkit-scrollbar-track{background:#0a1a35;border-left:1px solid #1b2a4d}
 .crt-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#F6F4EE,#C9C6BC);border-radius:7px;border:2px solid #0a1a35}
 .crt-bezel{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);pointer-events:none;z-index:300;
- box-shadow:0 0 0 3px var(--plastic-dk),0 0 0 200vmax var(--plastic),inset 0 0 0 2px rgba(0,0,0,.5),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
+ box-shadow:0 0 0 3px #4a4943,0 0 0 200vmax var(--plastic),-3px -3px 5px 7px rgba(70,68,60,.38),4px 5px 5px 8px rgba(255,255,255,.85),inset 0 0 0 2px rgba(0,0,0,.55),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
 .crt-bezel::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+.crt-bezel::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(118deg,rgba(255,255,255,.09) 0,rgba(255,255,255,.03) 22%,transparent 22.4%),linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.045) 50%,rgba(255,255,255,0)) 0 -30%/100% 28% no-repeat;animation:crtroll 9s linear infinite;z-index:1}
+@keyframes crtroll{to{background-position:0 130%,0 130%}}
+@media(prefers-reduced-motion:reduce){.crt-bezel::before{animation:none}}
+.crt-screw{position:fixed;width:clamp(6px,.75vw,11px);height:clamp(6px,.75vw,11px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#BDBAAF 60%,#8F8D84);box-shadow:0 1px 1px rgba(0,0,0,.45);z-index:302;pointer-events:none;display:none}
+.crt-screw::after{content:"";position:absolute;left:12%;right:12%;top:46%;height:8%;background:#6f6d65;transform:rotate(var(--r,35deg))}
+@media(min-width:700px){.crt-screw{display:block}}
+.crt-screw.tl{top:calc(var(--bz)*.5);left:calc(var(--bz)*.5);transform:translate(-50%,-50%)}
+.crt-screw.tr{top:calc(var(--bz)*.5);right:calc(var(--bz)*.5);transform:translate(50%,-50%);--r:-20deg}
+.crt-screw.bl{bottom:calc(var(--chin)*.5);left:calc(var(--bz)*.5);transform:translate(-50%,50%);--r:70deg}
+.crt-screw.br{bottom:calc(var(--chin)*.5);right:calc(var(--bz)*.5);transform:translate(50%,50%);--r:10deg}
 /* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
 .crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
 .crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
@@ -375,6 +385,25 @@ body{margin:0;padding:0}
 .crt-key{pointer-events:auto;font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);padding:3px 12px 2px;background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:6px;box-shadow:0 3px 0 #8C8A81,0 5px 6px rgba(0,0,0,.3),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);cursor:pointer;margin-right:10px}
 .crt-key:hover{background:linear-gradient(#fff,#E6E3D9)}
 .crt-key:active{transform:translateY(2px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 4px rgba(0,0,0,.22)}
+.crt-left{display:flex;align-items:center;gap:12px}
+.crt-frog{width:clamp(22px,2.2vw,34px);height:auto;display:block;filter:drop-shadow(0 1px 0 rgba(255,255,255,.7))}
+.crt-eyes{transform-box:fill-box;transform-origin:center;animation:crtblinkeye 4.6s steps(1) infinite}
+@keyframes crtblinkeye{0%,92%,100%{transform:scaleY(1)}94%,97%{transform:scaleY(.12)}}
+.crt-plate b{font-weight:700;color:#4d4b44}
+.crt-sub{display:none}
+@media(min-width:1000px){.crt-sub{display:inline}}
+.crt-mid{display:none;align-items:center;gap:14px}
+@media(min-width:900px){.crt-mid{display:flex}}
+.crt-mid .crt-plate{display:none}
+@media(min-width:1150px){.crt-mid .crt-plate{display:inline}}
+.crt-floppy{position:relative;display:block;width:clamp(80px,9vw,150px);height:9px;background:#26252a;border-radius:5px;box-shadow:inset 0 2px 3px #000,0 1px 0 rgba(255,255,255,.85)}
+.crt-floppy::after{content:"";position:absolute;right:6px;top:2px;width:5px;height:5px;border-radius:50%;background:#F966BC;box-shadow:0 0 6px 1px rgba(249,102,188,.9);animation:crtdisk 6s steps(1) infinite}
+@keyframes crtdisk{0%,60%,100%{opacity:.15}62%,66%{opacity:1}68%,72%{opacity:.15}74%,80%{opacity:1}82%{opacity:.15}}
+@media(prefers-reduced-motion:reduce){.crt-eyes,.crt-floppy::after{animation:none}}
+.crt-vents{display:none;gap:4px;margin-right:6px}
+@media(min-width:1000px){.crt-vents{display:flex}}
+.crt-vents i{display:block;width:3px;height:clamp(14px,1.4vw,22px);background:#8d8b81;border-radius:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.8)}
+.crt-boot{font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;letter-spacing:.16em;text-transform:uppercase;color:#7FE3A8;margin:0 0 18px;text-shadow:0 0 8px rgba(127,227,168,.55)}
 .crt-key[hidden]{display:none}
 @media(max-width:699px){.crt-key{display:none}}
 .crt-chin{position:fixed;left:0;right:0;bottom:0;height:var(--chin);z-index:301;pointer-events:none;display:none;align-items:center;justify-content:space-between;padding:0 calc(var(--bz) * 2.2)}
@@ -473,7 +502,8 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
 <body>
   <script>document.documentElement.classList.add("crt-js")</script>
   <div class="crt-bezel" aria-hidden="true"></div>
-  <div class="crt-chin"><span class="crt-plate" aria-hidden="true">Lily Studio · Blog</span><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
+  <i class="crt-screw tl"></i><i class="crt-screw tr"></i><i class="crt-screw bl"></i><i class="crt-screw br"></i>
+  <div class="crt-chin"><span class="crt-left"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><span class="crt-mid" aria-hidden="true"><span class="crt-plate">Insert ideas</span><span class="crt-floppy"></span></span><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
 
 
   <div class="crt-screen" id="crt-screen">
@@ -534,6 +564,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   <div class="crt-scroll" id="crt-scroll">
 <section class="hero">
     <div class="container">
+      <p class="crt-boot">Lily-OS v1.0 · 640 bytes free · Ready.</p>
       <p class="hero-label">Blog</p>
       <h1>Notes from <em>the studio.</em><span class="crt-cursor" aria-hidden="true"></span></h1>
       <p class="hero-sub">Stories from the Playhouse, plain-word guides to Claude, and what it is like to build all of this from scratch.</p>
@@ -569,7 +600,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
           <span class="card-link">Read the post →</span>
         </a>
       </div>
-      <p class="blog-empty" id="blog-empty">No posts in this topic yet. Check back soon.</p>
+      <p class="blog-empty" id="blog-empty">ERROR 404: no posts in this topic yet. The disk is empty, but not for long.</p>
     </div>
   </section>
   <script>
