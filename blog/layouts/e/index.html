@@ -345,11 +345,11 @@
 .hero-label,.blog-chip,.blog-cat,.blog-date,.post-meta,.post-back{font-size:max(0.72rem,11.5px)!important}
 
 /* ── Blog v2: vintage computer screen ── */
-:root{--ring:clamp(14px,1.9vw,28px);--edge:clamp(8px,1.2vw,18px);--bz:clamp(20px,4.6vw,84px);--chin:clamp(20px,4.6vw,84px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
+:root{--neon:#F966BC;--neon-rgb:249,102,188;--panel:#091735;--screen:var(--navy-deep);--accent-led:#F966BC;--ring:clamp(14px,1.9vw,28px);--edge:clamp(8px,1.2vw,18px);--bz:clamp(20px,4.6vw,84px);--chin:clamp(20px,4.6vw,84px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
 @media(min-width:700px){:root{--chin:clamp(84px,8.4vw,150px)}}
 html,body{height:100%;overflow:hidden}
 body{margin:0;padding:0}
-.crt-screen{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);overflow:hidden;background:var(--navy-deep);z-index:1;isolation:isolate}
+.crt-screen{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);overflow:hidden;background:var(--screen);z-index:1;isolation:isolate}
 .crt-scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#C9C6BC #0a1a35}
 .crt-scroll::after{content:"";display:block;height:190px}
 .crt-scroll::-webkit-scrollbar{width:13px}
@@ -423,8 +423,9 @@ html.crt-fsmode{--ring:3px;--edge:3px;--bz:12px;--chin:max(var(--bz),46px)}
 html.crt-fsmode .crt-chin{justify-content:flex-end!important}
 .crt-slotrow{display:flex;align-items:center;gap:12px}
 .crt-pbtn{pointer-events:auto;cursor:pointer;border:0;padding:0;background:none}
-.crt-knob.crt-pbtn{background:radial-gradient(circle at 35% 30%,#fff,#C9C6BC 55%,#8F8D84)}
-.crt-led.crt-pbtn{background:#F966BC}
+.crt-knob.crt-pbtn{position:relative;background:radial-gradient(circle at 35% 30%,#fff,#C9C6BC 55%,#8F8D84)}
+.crt-knob.crt-pbtn::after{content:"";position:absolute;inset:30%;border-radius:50%;background:var(--kc,#F966BC);box-shadow:0 0 5px var(--kc,#F966BC)}
+.crt-led.crt-pbtn{background:var(--accent-led)}
 .crt-knob.crt-pbtn:active,.crt-frogbtn:active{transform:scale(.9)}
 .crt-pbtn:focus-visible{outline:2px solid #F966BC;outline-offset:3px;border-radius:50%}
 .crt-frogbtn{border-radius:6px}
@@ -437,18 +438,30 @@ html.crt-grey.crt-bri2 .crt-screen{filter:grayscale(1) brightness(1.22)}
 .dn-topline .crt-boot{margin:0}
 .blog-nav{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 26px}
 .blog-nav .post-back{margin:0}
-.blog-end{margin:54px 0 0;padding:26px 0 0;border-top:1px dashed rgba(249,102,188,.55);text-align:center}
+.blog-end{margin:54px 0 0;padding:26px 0 0;border-top:1px dashed rgba(var(--neon-rgb),.55);text-align:center}
 .blog-end-line{font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;letter-spacing:.16em;text-transform:uppercase;color:#7FE3A8;margin:0 0 18px}
 .blog-end-keys{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
 .blog-end .post-back{margin:0;cursor:pointer;font-size:max(0.72rem,11.5px)}
 button.post-back{font:inherit;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:max(0.72rem,11.5px)}
 .crt-msg{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,8,22,.55)}
 .crt-msg[hidden]{display:none}
-.crt-msg-win{width:min(440px,100%);border:2px solid #F966BC;border-radius:12px;background:#081533;box-shadow:0 0 22px rgba(249,102,188,.55),inset 0 0 30px rgba(0,0,0,.6);overflow:hidden;text-align:center}
-.crt-msg-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:linear-gradient(90deg,#8d2a67,#F966BC);font-family:var(--font-mono);font-size:max(0.72rem,11.5px);font-weight:700;letter-spacing:.14em;color:#1B2238}
+.crt-msg-win{width:min(440px,100%);border:2px solid var(--neon);border-radius:12px;background:#081533;box-shadow:0 0 22px rgba(var(--neon-rgb),.55),inset 0 0 30px rgba(0,0,0,.6);overflow:hidden;text-align:center}
+.crt-msg-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:linear-gradient(90deg,#8d2a67,var(--neon));font-family:var(--font-mono);font-size:max(0.72rem,11.5px);font-weight:700;letter-spacing:.14em;color:#1B2238}
 .crt-msg-bar i{display:block;width:34px;height:8px;background:repeating-linear-gradient(90deg,#1B2238 0 3px,transparent 3px 6px)}
-.crt-msg-win p{margin:22px 20px 18px;font-family:var(--font-mono);font-size:max(.95rem,13px);letter-spacing:.08em;text-transform:uppercase;color:#FF9AD5;text-shadow:0 0 8px rgba(249,102,188,.6)}
+.crt-msg-win p{margin:22px 20px 18px;font-family:var(--font-mono);font-size:max(.95rem,13px);letter-spacing:.08em;text-transform:uppercase;color:var(--pink);text-shadow:0 0 8px rgba(var(--neon-rgb),.6)}
 .crt-msg-win .crt-key{display:inline-block!important;margin:0 0 20px!important}
+
+/* Slot: smaller, key centered under the slit, eject beside it */
+.crt-mid.crt-slotwrap{position:relative;align-items:center;gap:8px}
+.crt-slotrow{display:block;position:static}
+.crt-slit{width:clamp(70px,7vw,112px);height:clamp(11px,1.1vw,15px)}
+.crt-eject{position:absolute;left:calc(100% + 10px);top:0;width:clamp(16px,1.6vw,22px);height:clamp(11px,1.1vw,15px)}
+.crt-slotbtn{padding:3px 10px 2px}
+.crt-scroll::after{height:142px!important}
+.blog-end{margin-top:40px}
+.blog-end-keys{gap:10px}
+.blog-end-return{margin-top:14px}
+.blog-end-return .post-back{font-size:max(.54rem,9px)!important;padding:6px 12px 5px!important}
 /* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
 .crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
 .crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
@@ -535,7 +548,7 @@ button.post-back{font:inherit;font-family:var(--font-mono);text-transform:upperc
 .crt-plate{font-family:var(--font-mono);letter-spacing:.22em;text-transform:uppercase;color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.7)}
 .crt-knobs{display:flex;align-items:center;gap:14px}
 .crt-knob{display:block;width:clamp(14px,1.6vw,24px);height:clamp(14px,1.6vw,24px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#C9C6BC 55%,#8F8D84);box-shadow:0 2px 3px rgba(0,0,0,.35),inset 0 -2px 3px rgba(0,0,0,.18)}
-.crt-led{display:block;width:clamp(9px,.9vw,13px);height:clamp(9px,.9vw,13px);border-radius:50%;background:#F966BC;box-shadow:0 0 8px 2px rgba(249,102,188,.8),0 0 0 2px var(--plastic-dk)}
+.crt-led{display:block;width:clamp(9px,.9vw,13px);height:clamp(9px,.9vw,13px);border-radius:50%;background:var(--accent-led);box-shadow:0 0 8px 2px var(--accent-led),0 0 0 2px var(--plastic-dk)}
 .crt-cursor{display:inline-block;width:.5em;height:.1em;background:var(--pink);margin-left:.12em;vertical-align:baseline;animation:crtblink 1.1s steps(1) infinite}
 @keyframes crtblink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.crt-cursor{animation:none}}
@@ -563,8 +576,8 @@ button.post-back{font:inherit;font-family:var(--font-mono);text-transform:upperc
 .lay-head h1{font-family:var(--font-display);font-size:clamp(1.9rem,3.6vw,2.8rem);color:var(--cream);margin:0 0 6px;font-weight:700}
 .lay-head h1 em{color:var(--pink);font-style:italic}
 .lay-note{font-family:var(--font-mono);color:#7FE3A8;letter-spacing:.06em;font-size:max(0.72rem,11.5px)!important;margin:0 0 26px;max-width:780px;line-height:1.5}
-.win{display:block;border:2px solid var(--cream);background:#10234A;box-shadow:7px 7px 0 #F966BC;border-radius:3px;position:relative;color:var(--cream)}
-a.win:hover{transform:translate(4px,4px);box-shadow:3px 3px 0 #F966BC}
+.win{display:block;border:2px solid var(--cream);background:#10234A;box-shadow:7px 7px 0 var(--neon);border-radius:3px;position:relative;color:var(--cream)}
+a.win:hover{transform:translate(4px,4px);box-shadow:3px 3px 0 var(--neon)}
 a.win{transition:transform .12s,box-shadow .12s}
 .win-body{padding:18px 20px 22px}
 .win h2,.win h3{font-family:var(--font-serif);color:var(--cream);margin:0 0 10px;line-height:1.25}
@@ -595,10 +608,10 @@ a.win{transition:transform .12s,box-shadow .12s}
 @media(max-width:700px){.dir-row{grid-template-columns:1fr 1fr}.dir-head{display:none}}
 /* C: log */
 .log{list-style:none;margin:0;padding:0 0 0 0;position:relative}
-.log::before{content:"";position:absolute;left:138px;top:6px;bottom:6px;border-left:3px dotted #F966BC}
+.log::before{content:"";position:absolute;left:138px;top:6px;bottom:6px;border-left:3px dotted var(--neon)}
 .log li{display:grid;grid-template-columns:120px 36px 1fr;align-items:start;margin:0 0 34px}
 .log-date{font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:#7FE3A8;font-size:max(0.8rem,11.5px)!important;text-align:right;padding-top:6px;line-height:1.5}
-.log-node{width:16px;height:16px;background:#F966BC;border:3px solid var(--cream);margin:8px 0 0 10px;box-shadow:0 0 10px rgba(249,102,188,.8);position:relative;z-index:1}
+.log-node{width:16px;height:16px;background:var(--neon);border:3px solid var(--cream);margin:8px 0 0 10px;box-shadow:0 0 10px rgba(var(--neon-rgb),.8);position:relative;z-index:1}
 @media(max-width:700px){.log::before{left:11px}.log li{grid-template-columns:30px 1fr}.log-date{grid-column:2;text-align:left;padding:0 0 6px}.log-node{grid-row:1/3;margin:2px 0 0 0}}
 /* D: desktop */
 .desk{border:2px solid var(--cream);border-radius:4px;padding:26px;background:#0b1a38 radial-gradient(rgba(251,246,230,.12) 1.2px,transparent 1.4px) 0 0/22px 22px;box-shadow:inset 0 0 40px rgba(0,0,0,.5)}
@@ -608,7 +621,7 @@ a.win{transition:transform .12s,box-shadow .12s}
 .desk-folder svg{width:64px;height:auto;display:block;filter:drop-shadow(3px 3px 0 rgba(0,0,0,.45))}
 .desk-files{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .desk-files a{display:flex;gap:12px;align-items:center;color:var(--cream);padding:8px;border:2px solid transparent}
-.desk-files a:hover,.desk-files a:focus-visible{border:2px dashed #F966BC;background:rgba(249,102,188,.14)}
+.desk-files a:hover,.desk-files a:focus-visible{border:2px dashed var(--neon);background:rgba(var(--neon-rgb),.14)}
 .desk-files svg{width:34px;flex:none}
 .desk-files span{font-family:var(--font-serif);line-height:1.3;font-size:1rem}
 .desk-ico{background:none;border:0;color:var(--cream);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:6px;font:inherit}
@@ -657,8 +670,8 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-foot{font-family:var(--font-mono);font-size:max(0.78rem,11.5px)!important;letter-spacing:.1em;text-transform:uppercase;color:#7FE3A8;padding:12px 18px;margin:0}
 .dn-side{display:grid;gap:26px}
 .dn-side ul{list-style:none;margin:0;padding:0}
-.dn-side button{width:100%;text-align:left;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;font-size:max(0.8rem,11.5px)!important;color:var(--cream);background:none;border:0;padding:8px 6px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
-.dn-side button:hover,.dn-side button[aria-pressed="true"]{background:var(--pink);color:#1B2238}
+.dn-side .win-body button{width:100%;text-align:left;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;font-size:max(0.8rem,11.5px)!important;color:var(--cream);background:none;border:0;padding:8px 6px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.dn-side .win-body button:hover,.dn-side .win-body button[aria-pressed="true"]{background:var(--pink);color:#1B2238}
 .dn-side .crt-key{margin:6px 0 0;display:inline-block;text-decoration:none}
 @media(max-width:900px){.dn{grid-template-columns:1fr}}
 @media(max-width:640px){.dn-row{grid-template-columns:1fr}}
@@ -672,34 +685,34 @@ a.win{transition:transform .12s,box-shadow .12s}
 .th-1 .win-body,.th-1 .dn-rows{margin:12px;border-radius:10px;background:#0d1d3f;box-shadow:inset 0 0 0 2px #3b3a35,inset 0 0 36px rgba(0,0,0,.65);overflow:hidden}
 .th-1 .dn-rows{padding:0}
 .th-1 .dn-row{border-bottom:1px dotted rgba(251,246,230,.28)}
-.th-1 .dn-row:hover{background:rgba(249,102,188,.22)}
+.th-1 .dn-row:hover{background:rgba(var(--neon-rgb),.22)}
 .th-1 .dn-row:hover h3,.th-1 .dn-row:hover p{color:inherit}
 .th-1 .dn-row:hover h3{color:var(--cream)}.th-1 .dn-row:hover p{color:var(--gray-light)}.th-1 .dn-row:hover .dn-meta{color:#7FE3A8}
 .th-1 .dn-foot{color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.85);padding:2px 18px 14px}
 .th-1 .post-art{border:0;border-radius:6px;box-shadow:0 0 0 3px #1b1b1d,0 0 0 5px #BDBAAF}
 .th-1 .dn-side ul{display:grid;gap:12px}
-.th-1 .dn-side button{font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);padding:10px 14px 9px;align-items:center}
-.th-1 .dn-side button:hover{background:linear-gradient(#fff,#E6E3D9);color:var(--ink)}
-.th-1 .dn-side button[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 5px rgba(0,0,0,.22);background:linear-gradient(#D3D0C5,#E2DFD5);color:var(--ink)}
-.th-1 .dn-side button[aria-pressed="true"]::before{content:"";width:8px;height:8px;border-radius:50%;background:#F966BC;box-shadow:0 0 7px 2px rgba(249,102,188,.85);margin-right:8px}
-.th-1 .dn-side button span:first-child{flex:1}
+.th-1 .dn-side .win-body button{font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);padding:10px 14px 9px;align-items:center}
+.th-1 .dn-side .win-body button:hover{background:linear-gradient(#fff,#E6E3D9);color:var(--ink)}
+.th-1 .dn-side .win-body button[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 5px rgba(0,0,0,.22);background:linear-gradient(#D3D0C5,#E2DFD5);color:var(--ink)}
+.th-1 .dn-side .win-body button[aria-pressed="true"]::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 7px 2px rgba(var(--neon-rgb),.85);margin-right:8px}
+.th-1 .dn-side .win-body button span:first-child{flex:1}
 /* Look 2: glowing phosphor outlines, pictures in pink monochrome */
-.th-2 .win{background:rgba(6,18,42,.55);border:1px solid #F966BC;border-radius:0;box-shadow:0 0 14px rgba(249,102,188,.4),inset 0 0 18px rgba(249,102,188,.12)}
-.th-2 a.win:hover,.th-2 .win:hover{box-shadow:0 0 22px rgba(249,102,188,.7),inset 0 0 22px rgba(249,102,188,.2)}
-.th-2 .pc-bar{background:none;border-bottom:1px solid rgba(249,102,188,.6);color:#F966BC;height:32px}
-.th-2 .pc-box{width:11px;height:11px;border:1px solid #F966BC;background:none}
-.th-2 .pc-name{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.85)}
-.th-2 .pc-grip{background:repeating-linear-gradient(#F966BC 0 1px,transparent 1px 4px);width:22px}
-.th-2 .post-art{border:1px solid #F966BC;filter:grayscale(1) contrast(1.2) brightness(1.15)}
-.th-2 .post-art::before{content:"";position:absolute;inset:0;background:#F966BC;mix-blend-mode:multiply;z-index:2;pointer-events:none}
+.th-2 .win{background:rgba(6,18,42,.55);border:1px solid var(--neon);border-radius:0;box-shadow:0 0 14px rgba(var(--neon-rgb),.4),inset 0 0 18px rgba(var(--neon-rgb),.12)}
+.th-2 a.win:hover,.th-2 .win:hover{box-shadow:0 0 22px rgba(var(--neon-rgb),.7),inset 0 0 22px rgba(var(--neon-rgb),.2)}
+.th-2 .pc-bar{background:none;border-bottom:1px solid rgba(var(--neon-rgb),.6);color:var(--neon);height:32px}
+.th-2 .pc-box{width:11px;height:11px;border:1px solid var(--neon);background:none}
+.th-2 .pc-name{color:var(--neon);text-shadow:0 0 8px rgba(var(--neon-rgb),.85)}
+.th-2 .pc-grip{background:repeating-linear-gradient(var(--neon) 0 1px,transparent 1px 4px);width:22px}
+.th-2 .post-art{border:1px solid var(--neon);filter:grayscale(1) contrast(1.2) brightness(1.15)}
+.th-2 .post-art::before{content:"";position:absolute;inset:0;background:var(--neon);mix-blend-mode:multiply;z-index:2;pointer-events:none}
 .th-2 .post-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);z-index:3}
-.th-2 .dn-row,.th-2 .dn-rows{border-color:rgba(249,102,188,.45)}
+.th-2 .dn-row,.th-2 .dn-rows{border-color:rgba(var(--neon-rgb),.45)}
 .th-2 .dn-row h3,.th-2 .win h3{text-shadow:0 0 10px rgba(251,246,230,.35)}
-.th-2 .dn-meta{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.7)}
-.th-2 .dn-foot{color:#F966BC}
-.th-2 .dn-side button::before{content:"[ ";color:#F966BC}.th-2 .dn-side button::after{content:" ]";color:#F966BC}
-.th-2 .dn-side button{justify-content:flex-start}.th-2 .dn-side button span:first-child{flex:1}
-.th-2 .dn-side button:hover,.th-2 .dn-side button[aria-pressed="true"]{background:rgba(249,102,188,.25);color:var(--cream);text-shadow:0 0 8px rgba(249,102,188,.8)}
+.th-2 .dn-meta{color:var(--neon);text-shadow:0 0 8px rgba(var(--neon-rgb),.7)}
+.th-2 .dn-foot{color:var(--neon)}
+.th-2 .dn-side .win-body button::before{content:"[ ";color:var(--neon)}.th-2 .dn-side .win-body button::after{content:" ]";color:var(--neon)}
+.th-2 .dn-side .win-body button{justify-content:flex-start}.th-2 .dn-side .win-body button span:first-child{flex:1}
+.th-2 .dn-side .win-body button:hover,.th-2 .dn-side .win-body button[aria-pressed="true"]{background:rgba(var(--neon-rgb),.25);color:var(--cream);text-shadow:0 0 8px rgba(var(--neon-rgb),.8)}
 /* Look 3: classic one-bit windows, cream with navy lines */
 .th-3 .win{background:#FBF6E6;color:#1B2238;border:2px solid #1B2238;border-radius:0;box-shadow:5px 5px 0 #000,0 0 0 1px rgba(251,246,230,.55)}
 .th-3 a.win:hover{box-shadow:2px 2px 0 #000,0 0 0 1px rgba(251,246,230,.55)}
@@ -717,30 +730,30 @@ a.win{transition:transform .12s,box-shadow .12s}
 .th-3 .dn-foot{color:#1B2238;border-top:2px solid #1B2238}
 .th-3 .post-art{border:2px solid #1B2238;position:relative}
 .th-3 .post-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(rgba(27,34,56,.35) 0 25%,transparent 0 50%) 0 0/4px 4px;opacity:.5}
-.th-3 .dn-side button{color:#1B2238}
-.th-3 .dn-side button:hover,.th-3 .dn-side button[aria-pressed="true"]{background:#1B2238;color:#FBF6E6}
+.th-3 .dn-side .win-body button{color:#1B2238}
+.th-3 .dn-side .win-body button:hover,.th-3 .dn-side .win-body button[aria-pressed="true"]{background:#1B2238;color:#FBF6E6}
 .th-3 .win-body p{color:#3a4468}
 /* Look 4: Look 1 shapes drawn with Look 2 glowing pink lines */
-.th-4 .win{background:rgba(6,18,42,.55);border:1px solid #F966BC;border-radius:14px;box-shadow:0 0 14px rgba(249,102,188,.45),inset 0 0 18px rgba(249,102,188,.12);color:var(--cream);overflow:hidden}
-.th-4 a.win:hover,.th-4 .win:hover{box-shadow:0 0 24px rgba(249,102,188,.75),inset 0 0 22px rgba(249,102,188,.22)}
-.th-4 .pc-bar{background:none;border-bottom:1px solid rgba(249,102,188,.6);color:#F966BC;height:32px;padding:0 16px}
-.th-4 .pc-box{width:11px;height:11px;border-radius:50%;border:1px solid #F966BC;background:none;box-shadow:0 0 6px rgba(249,102,188,.7)}
-.th-4 .pc-name{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.85)}
-.th-4 .pc-grip{width:26px;height:14px;background:repeating-linear-gradient(90deg,#F966BC 0 2px,transparent 2px 6px);border-radius:1px;box-shadow:0 0 6px rgba(249,102,188,.6)}
-.th-4 .win-body,.th-4 .dn-rows{margin:12px;border-radius:10px;background:#091735;border:1px solid rgba(249,102,188,.75);box-shadow:0 0 10px rgba(249,102,188,.3),inset 0 0 30px rgba(0,0,0,.6);overflow:hidden}
+.th-4 .win{background:rgba(6,18,42,.55);border:1px solid var(--neon);border-radius:14px;box-shadow:0 0 14px rgba(var(--neon-rgb),.45),inset 0 0 18px rgba(var(--neon-rgb),.12);color:var(--cream);overflow:hidden}
+.th-4 a.win:hover,.th-4 .win:hover{box-shadow:0 0 24px rgba(var(--neon-rgb),.75),inset 0 0 22px rgba(var(--neon-rgb),.22)}
+.th-4 .pc-bar{background:none;border-bottom:1px solid rgba(var(--neon-rgb),.6);color:var(--neon);height:32px;padding:0 16px}
+.th-4 .pc-box{width:11px;height:11px;border-radius:50%;border:1px solid var(--neon);background:none;box-shadow:0 0 6px rgba(var(--neon-rgb),.7)}
+.th-4 .pc-name{color:var(--neon);text-shadow:0 0 8px rgba(var(--neon-rgb),.85)}
+.th-4 .pc-grip{width:26px;height:14px;background:repeating-linear-gradient(90deg,var(--neon) 0 2px,transparent 2px 6px);border-radius:1px;box-shadow:0 0 6px rgba(var(--neon-rgb),.6)}
+.th-4 .win-body,.th-4 .dn-rows{margin:12px;border-radius:10px;background:var(--panel);border:1px solid rgba(var(--neon-rgb),.75);box-shadow:0 0 10px rgba(var(--neon-rgb),.3),inset 0 0 30px rgba(0,0,0,.6);overflow:hidden}
 .th-4 .dn-rows{padding:0}
-.th-4 .dn-row{border-bottom:1px dotted rgba(249,102,188,.5)}
-.th-4 .dn-row:hover{background:rgba(249,102,188,.2)}
-.th-4 .dn-row:hover h3{color:var(--cream)}.th-4 .dn-row:hover p{color:var(--gray-light)}.th-4 .dn-row:hover .dn-meta{color:#F966BC}
-.th-4 .dn-meta{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.7)}
-.th-4 .dn-foot{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.6);padding:2px 18px 14px}
-.th-4 .dn-row .post-art,.th-4 .post-art{border:1px solid #F966BC;border-radius:6px;box-shadow:0 0 0 3px #091735,0 0 0 4px rgba(249,102,188,.85),0 0 14px 3px rgba(249,102,188,.4)}
+.th-4 .dn-row{border-bottom:1px dotted rgba(var(--neon-rgb),.5)}
+.th-4 .dn-row:hover{background:rgba(var(--neon-rgb),.2)}
+.th-4 .dn-row:hover h3{color:var(--cream)}.th-4 .dn-row:hover p{color:var(--gray-light)}.th-4 .dn-row:hover .dn-meta{color:var(--neon)}
+.th-4 .dn-meta{color:var(--neon);text-shadow:0 0 8px rgba(var(--neon-rgb),.7)}
+.th-4 .dn-foot{color:var(--neon);text-shadow:0 0 8px rgba(var(--neon-rgb),.6);padding:2px 18px 14px}
+.th-4 .dn-row .post-art,.th-4 .post-art{border:1px solid var(--neon);border-radius:6px;box-shadow:0 0 0 3px var(--panel),0 0 0 4px rgba(var(--neon-rgb),.85),0 0 14px 3px rgba(var(--neon-rgb),.4)}
 .th-4 .dn-side ul{display:grid;gap:12px}
-.th-4 .dn-side button{font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);padding:10px 14px 9px;align-items:center}
-.th-4 .dn-side button:hover{background:linear-gradient(#fff,#E6E3D9);color:var(--ink)}
-.th-4 .dn-side button[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 5px rgba(0,0,0,.22);background:linear-gradient(#D3D0C5,#E2DFD5);color:var(--ink)}
-.th-4 .dn-side button[aria-pressed="true"]::before{content:"";width:8px;height:8px;border-radius:50%;background:#F966BC;box-shadow:0 0 7px 2px rgba(249,102,188,.85);margin-right:8px}
-.th-4 .dn-side button span:first-child{flex:1}
+.th-4 .dn-side .win-body button{font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);padding:10px 14px 9px;align-items:center}
+.th-4 .dn-side .win-body button:hover{background:linear-gradient(#fff,#E6E3D9);color:var(--ink)}
+.th-4 .dn-side .win-body button[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 5px rgba(0,0,0,.22);background:linear-gradient(#D3D0C5,#E2DFD5);color:var(--ink)}
+.th-4 .dn-side .win-body button[aria-pressed="true"]::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 7px 2px rgba(var(--neon-rgb),.85);margin-right:8px}
+.th-4 .dn-side .win-body button span:first-child{flex:1}
 .th-4 .win h3{text-shadow:0 0 10px rgba(251,246,230,.3)}
 /* search above the folders; the posts window drops down to line up with the folders */
 .dn2{display:grid;grid-template-columns:1fr 320px;gap:26px 34px;align-items:start}
@@ -749,13 +762,13 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn2 .dn-main{grid-column:1;grid-row:1/span 3}
 .dn2 .dn-rest{grid-column:2;grid-row:3;display:grid;gap:26px}
 .dn-search form{display:flex;align-items:center;gap:10px}
-.dn-prompt{font-family:var(--font-mono);color:#F966BC;font-size:max(0.9rem,11.5px)!important;flex:none}
+.dn-prompt{font-family:var(--font-mono);color:var(--neon);font-size:max(0.9rem,11.5px)!important;flex:none}
 .dn-search input[type="search"]{flex:1;min-width:0;width:100%;box-sizing:border-box;font-family:var(--font-mono);font-size:16px;color:var(--cream);background:transparent;border:0;outline:0;padding:6px 2px;-webkit-appearance:none;appearance:none}
 .dn-search input::placeholder{color:rgba(251,246,230,.5)}
 .dn-search input::-webkit-search-cancel-button{-webkit-appearance:none}
 .dn-search .win-body{padding:12px 16px}
-.dn-search .win-body:focus-within{box-shadow:0 0 16px rgba(249,102,188,.7),inset 0 0 30px rgba(0,0,0,.6)}
-.dn-empty{font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#F966BC;padding:26px 22px;margin:0;font-size:max(0.85rem,11.5px)!important;line-height:1.5}
+.dn-search .win-body:focus-within{box-shadow:0 0 16px rgba(var(--neon-rgb),.7),inset 0 0 30px rgba(0,0,0,.6)}
+.dn-empty{font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--neon);padding:26px 22px;margin:0;font-size:max(0.85rem,11.5px)!important;line-height:1.5}
 @media(max-width:900px){.dn2{grid-template-columns:1fr}.dn2 .dn-search{grid-column:1;grid-row:1}.dn2 .dn-folders{grid-column:1;grid-row:2}.dn2 .dn-main{grid-column:1;grid-row:3}.dn2 .dn-rest{grid-column:1;grid-row:4}}
 .dn-folders.dn-side{display:block}
 /* screen title */
@@ -765,12 +778,12 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-title .hero-sub{margin:0;max-width:640px;color:var(--gray-light);font-size:1.05rem;line-height:1.55}
 
 /* In-screen bars: the summoned header and footer are part of the screen, inset from the rounded border */
-.crt-screen .site-header{background:linear-gradient(#0A1A3C,#06122A)!important;border-bottom:1px solid #F966BC;box-shadow:0 0 18px rgba(249,102,188,.35),0 10px 24px rgba(0,0,0,.45);overflow:hidden;padding-inline:clamp(22px,3.4vw,46px)}
+.crt-screen .site-header{background:linear-gradient(#0A1A3C,#06122A)!important;border-bottom:1px solid var(--neon);box-shadow:0 0 18px rgba(var(--neon-rgb),.35),0 10px 24px rgba(0,0,0,.45);overflow:hidden;padding-inline:clamp(22px,3.4vw,46px)}
 .crt-screen .site-header .nav-inner{padding:0!important;min-height:0;height:64px;max-width:none}
 .crt-screen .site-header .nav-flower{width:48px!important;height:48px!important;overflow:hidden;flex:0 0 auto}
 .crt-screen .site-header .nav-flower img,.crt-screen .site-header .nav-flower svg{width:48px!important;height:48px!important;max-width:100%;object-fit:contain;position:static!important;transform:none!important;margin:0!important}
 .crt-screen .site-header .nav-wordmark{font-size:1.25rem!important}
-.crt-screen .site-footer{border-top:1px solid #F966BC!important;box-shadow:0 0 18px rgba(249,102,188,.35),0 -10px 24px rgba(0,0,0,.45);padding-inline:clamp(22px,3.4vw,46px);padding-bottom:clamp(14px,2vw,26px)}
+.crt-screen .site-footer{border-top:1px solid var(--neon)!important;box-shadow:0 0 18px rgba(var(--neon-rgb),.35),0 -10px 24px rgba(0,0,0,.45);padding-inline:clamp(22px,3.4vw,46px);padding-bottom:clamp(14px,2vw,26px)}
 
 /* Buttons inside the squares sit on the right; the idea key stands alone on the screen */
 .dn-rest .win-body{display:flex;flex-direction:column;align-items:stretch;gap:14px}
@@ -778,6 +791,16 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-rest .win-body .crt-key{align-self:flex-end;margin:0!important}
 .dn-idea-solo{display:flex;justify-content:flex-end;padding-top:6px}
 .dn-idea-solo .crt-idea-btn{margin:0!important}
+
+/* Window controls: circle turns neon off/on, grip collapses/expands */
+button.pc-box,button.pc-grip{appearance:none;-webkit-appearance:none;padding:0;cursor:pointer;position:relative;pointer-events:auto;flex:none}
+button.pc-grip{border:0}
+button.pc-box::before,button.pc-grip::before{content:"";position:absolute;inset:-12px}
+.th-4 .win.neon-off{--neon:#8b93a7;--neon-rgb:139,147,167}
+.th-4 .win.neon-off,.th-4 .win.neon-off .win-body,.th-4 .win.neon-off .dn-rows,.th-4 .win.neon-off .pc-bar,.th-4 .win.neon-off .pc-box,.th-4 .win.neon-off .pc-grip,.th-4 .win.neon-off .pc-name,.th-4 .win.neon-off .post-art{box-shadow:none!important;text-shadow:none!important}
+.win.collapsed>:not(.pc-bar){display:none!important}
+.win.collapsed .pc-bar{border-bottom:0}
+.dn2>.dn-search,.dn2>.dn-folders,.dn2>.dn-rest{align-self:start}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -851,13 +874,13 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   <script>document.documentElement.classList.add("crt-js")</script>
   <div class="crt-bezel" aria-hidden="true"></div>
   <i class="crt-screw tl"></i><i class="crt-screw tr"></i><i class="crt-screw bl"></i><i class="crt-screw br"></i>
-  <div class="crt-chin"><span class="crt-left"><button type="button" class="crt-pbtn crt-frogbtn" data-msg="RIBBIT." aria-label="Say hello to the frog"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg></button><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><span class="crt-knobs"><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><button type="button" class="crt-knob crt-pbtn" id="crt-bri" aria-label="Brightness knob"></button><button type="button" class="crt-knob crt-pbtn" data-msg="VOLUME: 0. NO SPEAKERS INSTALLED." aria-label="Volume knob"></button><button type="button" class="crt-led crt-pbtn" data-msg="POWER: ON. PLEASE DO NOT UNPLUG." aria-label="Power light"></button></span><span class="crt-mid crt-slotwrap"><span class="crt-slotrow"><span class="crt-slit" aria-hidden="true"></span><button type="button" class="crt-eject" id="crt-eject" aria-label="Eject the idea card"></button></span><button type="button" class="crt-key crt-slotbtn" data-open-card aria-label="Insert ideas: open a comment card to send Jessica an idea">Insert ideas</button></span><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button></div>
+  <div class="crt-chin"><span class="crt-left"><button type="button" class="crt-pbtn crt-frogbtn" data-msg="RIBBIT." aria-label="Say hello to the frog"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg></button><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><span class="crt-knobs"><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><button type="button" class="crt-knob crt-pbtn" id="crt-kn" aria-label="Neon color picker"></button><button type="button" class="crt-knob crt-pbtn" id="crt-ks" aria-label="Screen color picker"></button><button type="button" class="crt-led crt-pbtn" id="crt-ka" aria-label="Accent color picker"></button></span><span class="crt-mid crt-slotwrap"><span class="crt-slotrow"><span class="crt-slit" aria-hidden="true"></span><button type="button" class="crt-eject" id="crt-eject" aria-label="Eject the idea card"></button></span><button type="button" class="crt-key crt-slotbtn" data-open-card aria-label="Insert ideas: open a comment card to send Jessica an idea">Insert ideas</button></span><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button></div>
 
 
   <div class="crt-screen" id="crt-screen">
   <div class="crt-scroll" id="crt-scroll">
-<section class="lay-wrap"><nav class="lay-switch" aria-label="Layout examples"><span class="lay-lbl">Layout:</span><a href="/blog/layouts/a/">A · Front page</a><a href="/blog/layouts/b/">B · Directory</a><a href="/blog/layouts/c/">C · Log book</a><a href="/blog/layouts/d/">D · Desktop</a><a href="/blog/layouts/e/" aria-current="page">E · Newsstand</a><a href="/blog/layouts/f/">F · Directory newsstand</a><a href="/blog/layouts/">All</a></nav><div class="lay-head"><h1>Layout E: <em>Newsstand</em></h1></div><p class="lay-note">Readable rows with a sidebar: about you, topics, newsletter sign-up, and the ideas box.</p><div class="news"><div class="news-main"><a class="win news-row" href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_01.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Families &amp; Play</span><h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3><p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/what-is-a-claude-skill/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_02.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Claude &amp; AI</span><h3>What is a Claude skill, and why would you want one?</h3><p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/where-it-all-started/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_03.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Building the Studio</span><h3>Where it all started: a question and a new friend</h3><p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a></div><aside class="news-side"><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">ABOUT.TXT</span><i class="pc-grip"></i></span><div class="win-body"><p>Hi, I am Jessica. I build cozy games and Claude skills with my daughter Lily in mind, and I write down what I learn.</p></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TOPICS</span><i class="pc-grip"></i></span><div class="win-body"><ul><li><a href="/blog/#families-play"><span>Families &amp; Play</span><span>1</span></a></li><li><a href="/blog/#claude-ai"><span>Claude &amp; AI</span><span>1</span></a></li><li><a href="/blog/#building-the-studio"><span>Building the Studio</span><span>1</span></a></li></ul></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TUESDAY_TIPS</span><i class="pc-grip"></i></span><div class="win-body"><p>Tuesday Tips: one small, useful Claude tip in your inbox each week.</p><a class="crt-key" href="/skills.html#tuesday-tips">Sign up</a></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">IDEAS.BOX</span><i class="pc-grip"></i></span><div class="win-body"><p>Got an idea for a post?</p><button type="button" class="crt-key crt-idea-btn" data-open-card>Insert ideas</button></div></div></aside></div></section>
-  <nav class="blog-end" aria-label="Blog navigation"><p class="blog-end-line">— End of page · Lily-OS blog —</p><div class="blog-end-keys"><button type="button" class="post-back" data-blog-top>↑ Top</button><a href="/" class="post-back">↩ Return to thelilystudio.com</a></div></nav>
+<section class="lay-wrap"><nav class="lay-switch" aria-label="Layout examples"><span class="lay-lbl">Layout:</span><a href="/blog/layouts/a/">A · Front page</a><a href="/blog/layouts/b/">B · Directory</a><a href="/blog/layouts/c/">C · Log book</a><a href="/blog/layouts/d/">D · Desktop</a><a href="/blog/layouts/e/" aria-current="page">E · Newsstand</a><a href="/blog/layouts/f/">F · Directory newsstand</a><a href="/blog/layouts/">All</a></nav><div class="lay-head"><h1>Layout E: <em>Newsstand</em></h1></div><p class="lay-note">Readable rows with a sidebar: about you, topics, newsletter sign-up, and the ideas box.</p><div class="news"><div class="news-main"><a class="win news-row" href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">POST_01.TXT</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Families &amp; Play</span><h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3><p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/what-is-a-claude-skill/"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">POST_02.TXT</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Claude &amp; AI</span><h3>What is a Claude skill, and why would you want one?</h3><p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/where-it-all-started/"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">POST_03.TXT</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Building the Studio</span><h3>Where it all started: a question and a new friend</h3><p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a></div><aside class="news-side"><div class="win"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">ABOUT.TXT</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><p>Hi, I am Jessica. I build cozy games and Claude skills with my daughter Lily in mind, and I write down what I learn.</p></div></div><div class="win"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">TOPICS</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><ul><li><a href="/blog/#families-play"><span>Families &amp; Play</span><span>1</span></a></li><li><a href="/blog/#claude-ai"><span>Claude &amp; AI</span><span>1</span></a></li><li><a href="/blog/#building-the-studio"><span>Building the Studio</span><span>1</span></a></li></ul></div></div><div class="win"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">TUESDAY_TIPS</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><p>Tuesday Tips: one small, useful Claude tip in your inbox each week.</p><a class="crt-key" href="/skills.html#tuesday-tips">Sign up</a></div></div><div class="win"><span class="pc-bar"><button type="button" class="pc-box" aria-label="Turn the neon lines on or off for this window"></button><span class="pc-name">IDEAS.BOX</span><button type="button" class="pc-grip" aria-label="Collapse or expand this window"></button></span><div class="win-body"><p>Got an idea for a post?</p><button type="button" class="crt-key crt-idea-btn" data-open-card>Insert ideas</button></div></div></aside></div></section>
+  <nav class="blog-end" aria-label="Blog navigation"><p class="blog-end-line">— End of page · Lily-OS blog —</p><div class="blog-end-keys"><button type="button" class="post-back" data-blog-top>↑ Top</button></div><div class="blog-end-return"><a href="/" class="post-back">↩ Return to thelilystudio.com</a></div></nav>
   </div>
   
   <div class="crt-msg" id="crt-msg" role="alert" aria-live="assertive" hidden><div class="crt-msg-win"><div class="crt-msg-bar"><span id="crt-msg-title">ERROR.EXE</span><i></i></div><p id="crt-msg-text"></p><button type="button" class="crt-key" id="crt-msg-ok">OK</button></div></div>
@@ -923,8 +946,16 @@ function crtMsg(text,err){if(!msgEl)return;msgT.textContent=text;msgH.textConten
 if(msgOk)msgOk.addEventListener('click',function(){msgEl.hidden=true;});
 if(msgEl)msgEl.addEventListener('mousedown',function(e){if(e.target===msgEl)msgEl.hidden=true;});
 document.querySelectorAll('[data-msg]').forEach(function(b){b.addEventListener('click',function(){crtMsg(b.getAttribute('data-msg'),false);});});
-var bri=document.getElementById('crt-bri'),bl=0;
-if(bri)bri.addEventListener('click',function(){bl=(bl+1)%3;de.classList.toggle('crt-bri1',bl===1);de.classList.toggle('crt-bri2',bl===2);crtMsg('BRIGHTNESS: '+['NORMAL','LOW','HIGH'][bl],false);});
+var NEON=[['PINK','#F966BC','249,102,188'],['CYAN','#5EE7FF','94,231,255'],['MINT','#6BF2A8','107,242,168'],['AMBER','#FFC857','255,200,87'],['VIOLET','#B98BFF','185,139,255']],
+ SCR=[['NAVY','#06122A','#091735'],['BLACK','#050505','#0e0e0e'],['PLUM','#1a0b25','#25102f'],['FOREST','#04150c','#0a2317'],['TEAL','#041a1f','#082b32']],
+ ACC=[['PINK','#F966BC'],['MINT','#7FE3A8'],['SKY','#7DD3FC'],['GOLD','#FFD27A'],['CREAM','#FFF6E6']],pk=[0,0,0];
+function applyPick(){var n=NEON[pk[0]],c=SCR[pk[1]],a=ACC[pk[2]],st=de.style;st.setProperty('--neon',n[1]);st.setProperty('--neon-rgb',n[2]);st.setProperty('--screen',c[1]);st.setProperty('--panel',c[2]);st.setProperty('--pink',a[1]);st.setProperty('--accent-led',a[1]);
+ var k1=document.getElementById('crt-kn'),k2=document.getElementById('crt-ks');if(k1)k1.style.setProperty('--kc',n[1]);if(k2)k2.style.setProperty('--kc',c[1]===SCR[0][1]?'#2a3f7a':c[1]);
+ try{localStorage.setItem('lily-blog-colors',JSON.stringify(pk));}catch(e){}}
+try{var sv=JSON.parse(localStorage.getItem('lily-blog-colors')||'null');if(sv&&sv.length===3&&sv[0]<NEON.length&&sv[1]<SCR.length&&sv[2]<ACC.length)pk=sv;}catch(e){}
+applyPick();
+[['crt-kn',0,NEON,'NEON LINES'],['crt-ks',1,SCR,'SCREEN'],['crt-ka',2,ACC,'ACCENT']].forEach(function(d){var el=document.getElementById(d[0]);if(el)el.addEventListener('click',function(){pk[d[1]]=(pk[d[1]]+1)%d[2].length;applyPick();crtMsg(d[3]+': '+d[2][pk[d[1]]][0],false);});});
+document.addEventListener('click',function(e){var bx=e.target.closest&&e.target.closest('.pc-box');if(bx&&bx.tagName==='BUTTON'){var w=bx.closest('.win');if(w){w.classList.toggle('neon-off');}return;}var gp=e.target.closest&&e.target.closest('.pc-grip');if(gp&&gp.tagName==='BUTTON'){var w2=gp.closest('.win');if(w2){var c=w2.classList.toggle('collapsed');gp.setAttribute('aria-expanded',c?'false':'true');}}});
 document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-blog-top]');if(t){sc.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return;}
  var bk=e.target.closest&&e.target.closest('[data-blog-back]');if(bk){try{var u=new URL(document.referrer);if(u.origin===location.origin&&u.pathname.indexOf('/blog')===0&&history.length>1){e.preventDefault();history.back();}}catch(x){}}});
 var pop=document.getElementById('crt-pop'),form=document.getElementById('cc-form'),ta=document.getElementById('cc-idea'),nm=document.getElementById('cc-name'),em=document.getElementById('cc-email'),msg=document.getElementById('cc-msg'),back=null;
