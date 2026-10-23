@@ -345,8 +345,8 @@
 .hero-label,.blog-chip,.blog-cat,.blog-date,.post-meta,.post-back{font-size:max(0.72rem,11.5px)!important}
 
 /* ── Blog v2: vintage computer screen ── */
-:root{--bz:clamp(10px,1.5vw,28px);--chin:clamp(10px,1.5vw,28px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
-@media(min-width:700px){:root{--chin:clamp(38px,3.6vw,64px)}}
+:root{--bz:clamp(16px,3vw,56px);--chin:clamp(16px,3vw,56px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
+@media(min-width:700px){:root{--chin:clamp(56px,5.4vw,96px)}}
 html,body{height:100%;overflow:hidden}
 body{margin:0;padding:0}
 .crt-screen{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);overflow:hidden;background:var(--navy-deep);z-index:1;isolation:isolate}
@@ -356,7 +356,7 @@ body{margin:0;padding:0}
 .crt-scroll::-webkit-scrollbar-track{background:#0a1a35;border-left:1px solid #1b2a4d}
 .crt-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#F6F4EE,#C9C6BC);border-radius:7px;border:2px solid #0a1a35}
 .crt-bezel{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);pointer-events:none;z-index:300;
- box-shadow:0 0 0 3px #4a4943,0 0 0 200vmax var(--plastic),-3px -3px 5px 7px rgba(70,68,60,.38),4px 5px 5px 8px rgba(255,255,255,.85),inset 0 0 0 2px rgba(0,0,0,.55),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
+ box-shadow:0 0 0 4px #34332f,0 0 0 clamp(8px,1vw,14px) #F4F2EA,0 0 0 calc(clamp(8px,1vw,14px) + 3px) #8E8C82,0 0 0 200vmax var(--plastic),-3px -3px 5px 7px rgba(70,68,60,.38),4px 5px 5px 8px rgba(255,255,255,.85),inset 0 0 0 2px rgba(0,0,0,.55),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
 .crt-bezel::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
 .crt-bezel::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(118deg,rgba(255,255,255,.09) 0,rgba(255,255,255,.03) 22%,transparent 22.4%),linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.045) 50%,rgba(255,255,255,0)) 0 -30%/100% 28% no-repeat;animation:crtroll 9s linear infinite;z-index:1}
 @keyframes crtroll{to{background-position:0 130%,0 130%}}
@@ -368,6 +368,21 @@ body{margin:0;padding:0}
 .crt-screw.tr{top:calc(var(--bz)*.5);right:calc(var(--bz)*.5);transform:translate(50%,-50%);--r:-20deg}
 .crt-screw.bl{bottom:calc(var(--chin)*.5);left:calc(var(--bz)*.5);transform:translate(-50%,50%);--r:70deg}
 .crt-screw.br{bottom:calc(var(--chin)*.5);right:calc(var(--bz)*.5);transform:translate(50%,50%);--r:10deg}
+
+/* Chunky case: raised plastic edge around the whole viewport */
+body::after{content:"";position:fixed;inset:0;z-index:301;pointer-events:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.85),inset 0 0 0 clamp(6px,.9vw,12px) rgba(0,0,0,.16),inset 0 0 0 calc(clamp(6px,.9vw,12px) + 2px) rgba(255,255,255,.45),inset 0 0 40px rgba(0,0,0,.22)}
+.crt-chin,.crt-screw{z-index:303}
+/* Full screen: no header, no footer, only an exit key */
+html.crt-fsmode{--chin:max(var(--bz),48px)}
+html.crt-fsmode .crt-screen .site-header,html.crt-fsmode .crt-screen .site-footer{display:none!important}
+html.crt-fsmode .crt-chin{display:flex!important;justify-content:flex-end}
+html.crt-fsmode .crt-chin .crt-left,html.crt-fsmode .crt-chin .crt-vents,html.crt-fsmode .crt-chin .crt-knob,html.crt-fsmode .crt-chin .crt-led{display:none!important}
+
+/* Mode key: color or grey scale */
+.crt-mode{position:fixed;top:calc(var(--bz)*.5);right:calc(var(--bz)*1.6);transform:translateY(-50%);z-index:304;display:inline-block!important;padding:5px 12px 4px!important;margin:0!important;line-height:1.2;white-space:nowrap}
+.crt-key.crt-mode:active{transform:translateY(calc(-50% + 2px))}
+html.crt-grey .crt-screen,html.crt-grey .crt-frog,html.crt-grey .crt-led{filter:grayscale(1)}
+@media(max-width:699px){.crt-mode{right:calc(var(--bz)*1.6)}}
 /* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
 .crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
 .crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
@@ -682,6 +697,14 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-title h1{font-family:var(--font-serif);font-size:clamp(2.2rem,4.4vw,3.6rem);line-height:1.1;color:var(--cream);margin:0 0 10px;font-weight:700}
 .dn-title h1 em{color:var(--pink);font-style:italic}
 .dn-title .hero-sub{margin:0;max-width:640px;color:var(--gray-light);font-size:1.05rem;line-height:1.55}
+
+/* In-screen bars: the summoned header and footer are part of the screen, inset from the rounded border */
+.crt-screen .site-header{background:linear-gradient(#0A1A3C,#06122A)!important;border-bottom:1px solid #F966BC;box-shadow:0 0 18px rgba(249,102,188,.35),0 10px 24px rgba(0,0,0,.45);overflow:hidden;padding-inline:clamp(22px,3.4vw,46px)}
+.crt-screen .site-header .nav-inner{padding:0!important;min-height:0;height:64px;max-width:none}
+.crt-screen .site-header .nav-flower{width:48px!important;height:48px!important;overflow:hidden;flex:0 0 auto}
+.crt-screen .site-header .nav-flower img,.crt-screen .site-header .nav-flower svg{width:48px!important;height:48px!important;max-width:100%;object-fit:contain;position:static!important;transform:none!important;margin:0!important}
+.crt-screen .site-header .nav-wordmark{font-size:1.25rem!important}
+.crt-screen .site-footer{border-top:1px solid #F966BC!important;box-shadow:0 0 18px rgba(249,102,188,.35),0 -10px 24px rgba(0,0,0,.45);padding-inline:clamp(22px,3.4vw,46px);padding-bottom:clamp(14px,2vw,26px)}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -755,7 +778,8 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   <script>document.documentElement.classList.add("crt-js")</script>
   <div class="crt-bezel" aria-hidden="true"></div>
   <i class="crt-screw tl"></i><i class="crt-screw tr"></i><i class="crt-screw bl"></i><i class="crt-screw br"></i>
-  <div class="crt-chin"><span class="crt-left"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><button type="button" class="crt-mid crt-insert" data-open-card aria-label="Insert ideas: open a comment card to send Jessica an idea"><span class="crt-plate">Insert ideas</span><span class="crt-floppy"></span></button><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
+  <button type="button" class="crt-key crt-mode" id="crt-mode" aria-pressed="false" aria-label="Switch between color and grey scale">Grey scale</button>
+  <div class="crt-chin"><span class="crt-left"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
 
 
   <div class="crt-screen" id="crt-screen">
@@ -814,7 +838,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   </header>
 
   <div class="crt-scroll" id="crt-scroll">
-<section class="lay-wrap"><nav class="lay-switch" aria-label="Layout examples"><span class="lay-lbl">Layout:</span><a href="/blog/layouts/a/">A · Front page</a><a href="/blog/layouts/b/">B · Directory</a><a href="/blog/layouts/c/">C · Log book</a><a href="/blog/layouts/d/">D · Desktop</a><a href="/blog/layouts/e/" aria-current="page">E · Newsstand</a><a href="/blog/layouts/f/">F · Directory newsstand</a><a href="/blog/layouts/">All</a></nav><div class="lay-head"><h1>Layout E: <em>Newsstand</em></h1></div><p class="lay-note">Readable rows with a sidebar: about you, topics, newsletter sign-up, and the ideas box.</p><div class="news"><div class="news-main"><a class="win news-row" href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_01.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Families &amp; Play</span><h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3><p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/what-is-a-claude-skill/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_02.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Claude &amp; AI</span><h3>What is a Claude skill, and why would you want one?</h3><p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/where-it-all-started/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_03.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Building the Studio</span><h3>Where it all started: a question and a new friend</h3><p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a></div><aside class="news-side"><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">ABOUT.TXT</span><i class="pc-grip"></i></span><div class="win-body"><p>Hi, I am Jessica. I build cozy games and Claude skills with my daughter Lily in mind, and I write down what I learn.</p></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TOPICS</span><i class="pc-grip"></i></span><div class="win-body"><ul><li><a href="/blog/#families-play"><span>Families &amp; Play</span><span>1</span></a></li><li><a href="/blog/#claude-ai"><span>Claude &amp; AI</span><span>1</span></a></li><li><a href="/blog/#building-the-studio"><span>Building the Studio</span><span>1</span></a></li></ul></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TUESDAY_TIPS</span><i class="pc-grip"></i></span><div class="win-body"><p>Tuesday Tips: one small, useful Claude tip in your inbox each week.</p><a class="crt-key" href="/skills.html#tuesday-tips">Sign up</a></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">IDEAS.BOX</span><i class="pc-grip"></i></span><div class="win-body"><p>Got an idea for a post?</p><button type="button" class="crt-key" data-open-card>Insert ideas</button></div></div></aside></div></section>
+<section class="lay-wrap"><nav class="lay-switch" aria-label="Layout examples"><span class="lay-lbl">Layout:</span><a href="/blog/layouts/a/">A · Front page</a><a href="/blog/layouts/b/">B · Directory</a><a href="/blog/layouts/c/">C · Log book</a><a href="/blog/layouts/d/">D · Desktop</a><a href="/blog/layouts/e/" aria-current="page">E · Newsstand</a><a href="/blog/layouts/f/">F · Directory newsstand</a><a href="/blog/layouts/">All</a></nav><div class="lay-head"><h1>Layout E: <em>Newsstand</em></h1></div><p class="lay-note">Readable rows with a sidebar: about you, topics, newsletter sign-up, and the ideas box.</p><div class="news"><div class="news-main"><a class="win news-row" href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_01.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Families &amp; Play</span><h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3><p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/what-is-a-claude-skill/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_02.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Claude &amp; AI</span><h3>What is a Claude skill, and why would you want one?</h3><p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a><a class="win news-row" href="/blog/where-it-all-started/"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_03.TXT</span><i class="pc-grip"></i></span><div class="win-body"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><div><span class="blog-cat" style="border:1px dashed #F966BC;padding:3px 8px 2px">Building the Studio</span><h3>Where it all started: a question and a new friend</h3><p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p><span class="blog-date">October 22, 2026 · 1 min read</span></div></div></a></div><aside class="news-side"><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">ABOUT.TXT</span><i class="pc-grip"></i></span><div class="win-body"><p>Hi, I am Jessica. I build cozy games and Claude skills with my daughter Lily in mind, and I write down what I learn.</p></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TOPICS</span><i class="pc-grip"></i></span><div class="win-body"><ul><li><a href="/blog/#families-play"><span>Families &amp; Play</span><span>1</span></a></li><li><a href="/blog/#claude-ai"><span>Claude &amp; AI</span><span>1</span></a></li><li><a href="/blog/#building-the-studio"><span>Building the Studio</span><span>1</span></a></li></ul></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TUESDAY_TIPS</span><i class="pc-grip"></i></span><div class="win-body"><p>Tuesday Tips: one small, useful Claude tip in your inbox each week.</p><a class="crt-key" href="/skills.html#tuesday-tips">Sign up</a></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">IDEAS.BOX</span><i class="pc-grip"></i></span><div class="win-body"><p>Got an idea for a post?</p><button type="button" class="crt-key crt-idea-btn" data-open-card>Insert ideas</button></div></div></aside></div></section>
   </div>
   <footer class="site-footer">
     <ul class="footer-links">
@@ -832,9 +856,8 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
       <li><a href="mailto:support@thelilystudio.com">Contact</a></li>
     </ul>
     <p class="footer-copy">© 2026 The Lily Studio. All rights reserved.</p>
-  <div class="crt-idea-wrap"><button type="button" class="crt-key crt-idea-btn" data-open-card>Insert ideas</button></div>
   </footer>
-  <span class="crt-hot crt-hot-top" id="crt-hot-top"></span><span class="crt-hot crt-hot-bot" id="crt-hot-bot"></span><button type="button" class="crt-tab crt-tab-top" id="crt-tab-top" aria-label="Show the menu">&#9662; Menu</button><button type="button" class="crt-tab crt-tab-bot" id="crt-tab-bot" aria-label="Show the footer links">&#9652; More</button><div class="crt-pop" id="crt-pop" hidden>
+  <div class="crt-pop" id="crt-pop" hidden>
     <div class="cc-wrap"><form class="cc" id="cc-form" role="dialog" aria-modal="true" aria-labelledby="cc-title" novalidate>
       <div class="cc-holes" aria-hidden="true"></div>
       <div class="cc-head"><h2 class="cc-title" id="cc-title">Comment card</h2><span class="cc-no">Lily-1000 · Suggestion dept.</span></div>
@@ -856,32 +879,33 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
 <script>
 /* Vintage screen v3: the blog scrolls inside the frame. The menu and the footer stay hidden until you summon them. */
 (function(){
-var de=document.documentElement,sc=document.getElementById('crt-scroll'),hd=document.querySelector('.crt-screen .site-header'),ft=document.querySelector('.crt-screen .site-footer'),tt=document.getElementById('crt-tab-top'),tb=document.getElementById('crt-tab-bot'),ht=document.getElementById('crt-hot-top'),hb=document.getElementById('crt-hot-bot');
-if(!sc||!hd||!ft||!tt||!tb)return;
+var de=document.documentElement,sc=document.getElementById('crt-scroll'),hd=document.querySelector('.crt-screen .site-header'),ft=document.querySelector('.crt-screen .site-footer');
+if(!sc||!hd||!ft)return;
 var tH,tF;
 function busy(el){return el.matches(':hover')||el.contains(document.activeElement)||el.querySelector('.nav-links.open')||el.querySelector('[aria-expanded="true"]');}
-function setH(on){hd.classList.toggle('crt-open',on);tt.classList.toggle('is-gone',on);clearTimeout(tH);if(on){setF(false);tH=setTimeout(function(){if(busy(hd))setH(true);else setH(false);},3800);}}
-function setF(on){ft.classList.toggle('crt-open',on);tb.classList.toggle('is-gone',on);clearTimeout(tF);if(on){if(hd.classList.contains('crt-open')&&!busy(hd))setH(false);tF=setTimeout(function(){if(busy(ft))setF(true);else setF(false);},5000);}}
-function isH(){return hd.classList.contains('crt-open');}
-function isF(){return ft.classList.contains('crt-open');}
-['mouseenter','click'].forEach(function(ev){ht.addEventListener(ev,function(){setH(true);});hb.addEventListener(ev,function(){setF(true);});});
-['click','mouseenter'].forEach(function(ev){tt.addEventListener(ev,function(){setH(true);});tb.addEventListener(ev,function(){setF(true);});});
-hd.addEventListener('mousemove',function(){if(isH())setH(true);});
-ft.addEventListener('mousemove',function(){if(isF())setF(true);});
+function setH(on){if(de.classList.contains('crt-fsmode'))on=false;hd.classList.toggle('crt-open',on);clearTimeout(tH);if(on){setF(false);tH=setTimeout(function(){setH(busy(hd));},2600);}}
+function setF(on){if(de.classList.contains('crt-fsmode'))on=false;ft.classList.toggle('crt-open',on);clearTimeout(tF);if(on){if(hd.classList.contains('crt-open')&&!busy(hd))setH(false);tF=setTimeout(function(){setF(busy(ft));},3200);}}
+function atTop(){return sc.scrollTop<=1;}
+function atEnd(){return sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;}
 hd.addEventListener('focusin',function(){setH(true);});
 ft.addEventListener('focusin',function(){setF(true);});
-var last=0;
-sc.addEventListener('scroll',function(){var y=sc.scrollTop,d=y-last;last=y;
- if(d<-6){if(y>0||true)setH(true);}
- else if(d>6){if(isH()&&!busy(hd))setH(false);if(y+sc.clientHeight>=sc.scrollHeight-6)setF(true);}
- if(d<-6&&isF()&&!busy(ft))setF(false);},{passive:true});
-sc.addEventListener('wheel',function(e){var atEnd=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;if(e.deltaY>0&&atEnd)setF(true);if(e.deltaY<0&&sc.scrollTop<=0)setH(true);},{passive:true});
+/* Only summoned by pushing past the very top or very bottom. Never by hovering. */
+sc.addEventListener('wheel',function(e){if(e.deltaY<0&&atTop())setH(true);else if(e.deltaY>0&&atEnd())setF(true);else if(Math.abs(e.deltaY)>2){if(!busy(hd))setH(false);if(!busy(ft))setF(false);}},{passive:true});
+var ty=null;
+sc.addEventListener('touchstart',function(e){ty=e.touches[0].clientY;},{passive:true});
+sc.addEventListener('touchmove',function(e){if(ty===null)return;var d=e.touches[0].clientY-ty;if(d>34&&atTop()){setH(true);ty=null;}else if(d<-34&&atEnd()){setF(true);ty=null;}},{passive:true});
+sc.addEventListener('touchend',function(){ty=null;},{passive:true});
+document.addEventListener('keydown',function(e){var t=e.target;if(t&&/INPUT|TEXTAREA|SELECT/.test(t.tagName))return;if((e.key==='ArrowUp'||e.key==='PageUp'||e.key==='Home')&&atTop())setH(true);else if((e.key==='ArrowDown'||e.key==='PageDown'||e.key==='End')&&atEnd())setF(true);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){setH(false);setF(false);}});
+var md=document.getElementById('crt-mode');
+if(md){var setMode=function(g){de.classList.toggle('crt-grey',g);md.textContent=g?'Color':'Grey scale';md.setAttribute('aria-pressed',g?'true':'false');try{localStorage.setItem('lily-blog-mode',g?'grey':'color');}catch(e){}};
+ var saved=null;try{saved=localStorage.getItem('lily-blog-mode');}catch(e){}
+ setMode(saved==='grey');md.addEventListener('click',function(){setMode(!de.classList.contains('crt-grey'));});}
 var fs=document.getElementById('crt-fs'),req=de.requestFullscreen||de.webkitRequestFullscreen;
 if(fs&&req&&(document.fullscreenEnabled||document.webkitFullscreenEnabled)){
  fs.hidden=false;
  var cur=function(){return document.fullscreenElement||document.webkitFullscreenElement;};
- var lab=function(){fs.textContent=cur()?'Exit full screen':'Full screen';};
+ var lab=function(){var on=!!cur();fs.textContent=on?'Exit full screen':'Full screen';de.classList.toggle('crt-fsmode',on);if(on){setH(false);setF(false);}};
  fs.addEventListener('click',function(){if(cur()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{req.call(de);}});
  document.addEventListener('fullscreenchange',lab);document.addEventListener('webkitfullscreenchange',lab);
 }
