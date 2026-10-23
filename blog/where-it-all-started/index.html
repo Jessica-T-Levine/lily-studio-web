@@ -582,6 +582,64 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-side .crt-key{margin:6px 0 0;display:inline-block;text-decoration:none}
 @media(max-width:900px){.dn{grid-template-columns:1fr}}
 @media(max-width:640px){.dn-row{grid-template-columns:1fr}}
+/* Looks for the inside of the frame */
+/* Look 1: plastic panels with recessed screens */
+.th-1 .win{background:linear-gradient(#EEEBE1,#D5D2C7);border:1px solid #8C8A81;border-radius:14px;box-shadow:0 5px 0 #8C8A81,0 12px 20px rgba(0,0,0,.55),inset 0 2px 0 #fff;color:#1B2238;overflow:hidden}
+.th-1 .pc-bar{background:none;border-bottom:1px solid rgba(0,0,0,.18);color:#6E6C64;height:32px;padding:0 16px;box-shadow:0 1px 0 rgba(255,255,255,.8)}
+.th-1 .pc-box{width:11px;height:11px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#fff,#BDBAAF 60%,#8F8D84);box-shadow:0 1px 1px rgba(0,0,0,.45)}
+.th-1 .pc-name{color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.85)}
+.th-1 .pc-grip{width:26px;height:14px;background:repeating-linear-gradient(90deg,#8d8b81 0 3px,transparent 3px 7px);border-radius:2px}
+.th-1 .win-body,.th-1 .dn-rows{margin:12px;border-radius:10px;background:#0d1d3f;box-shadow:inset 0 0 0 2px #3b3a35,inset 0 0 36px rgba(0,0,0,.65);overflow:hidden}
+.th-1 .dn-rows{padding:0}
+.th-1 .dn-row{border-bottom:1px dotted rgba(251,246,230,.28)}
+.th-1 .dn-row:hover{background:rgba(249,102,188,.22)}
+.th-1 .dn-row:hover h3,.th-1 .dn-row:hover p{color:inherit}
+.th-1 .dn-row:hover h3{color:var(--cream)}.th-1 .dn-row:hover p{color:var(--gray-light)}.th-1 .dn-row:hover .dn-meta{color:#7FE3A8}
+.th-1 .dn-foot{color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.85);padding:2px 18px 14px}
+.th-1 .post-art{border:0;border-radius:6px;box-shadow:0 0 0 3px #1b1b1d,0 0 0 5px #BDBAAF}
+.th-1 .dn-side ul{display:grid;gap:12px}
+.th-1 .dn-side button{font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);padding:10px 14px 9px;align-items:center}
+.th-1 .dn-side button:hover{background:linear-gradient(#fff,#E6E3D9);color:var(--ink)}
+.th-1 .dn-side button[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 5px rgba(0,0,0,.22);background:linear-gradient(#D3D0C5,#E2DFD5);color:var(--ink)}
+.th-1 .dn-side button[aria-pressed="true"]::before{content:"";width:8px;height:8px;border-radius:50%;background:#F966BC;box-shadow:0 0 7px 2px rgba(249,102,188,.85);margin-right:8px}
+.th-1 .dn-side button span:first-child{flex:1}
+/* Look 2: glowing phosphor outlines, pictures in pink monochrome */
+.th-2 .win{background:rgba(6,18,42,.55);border:1px solid #F966BC;border-radius:0;box-shadow:0 0 14px rgba(249,102,188,.4),inset 0 0 18px rgba(249,102,188,.12)}
+.th-2 a.win:hover,.th-2 .win:hover{box-shadow:0 0 22px rgba(249,102,188,.7),inset 0 0 22px rgba(249,102,188,.2)}
+.th-2 .pc-bar{background:none;border-bottom:1px solid rgba(249,102,188,.6);color:#F966BC;height:32px}
+.th-2 .pc-box{width:11px;height:11px;border:1px solid #F966BC;background:none}
+.th-2 .pc-name{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.85)}
+.th-2 .pc-grip{background:repeating-linear-gradient(#F966BC 0 1px,transparent 1px 4px);width:22px}
+.th-2 .post-art{border:1px solid #F966BC;filter:grayscale(1) contrast(1.2) brightness(1.15)}
+.th-2 .post-art::before{content:"";position:absolute;inset:0;background:#F966BC;mix-blend-mode:multiply;z-index:2;pointer-events:none}
+.th-2 .post-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);z-index:3}
+.th-2 .dn-row,.th-2 .dn-rows{border-color:rgba(249,102,188,.45)}
+.th-2 .dn-row h3,.th-2 .win h3{text-shadow:0 0 10px rgba(251,246,230,.35)}
+.th-2 .dn-meta{color:#F966BC;text-shadow:0 0 8px rgba(249,102,188,.7)}
+.th-2 .dn-foot{color:#F966BC}
+.th-2 .dn-side button::before{content:"[ ";color:#F966BC}.th-2 .dn-side button::after{content:" ]";color:#F966BC}
+.th-2 .dn-side button{justify-content:flex-start}.th-2 .dn-side button span:first-child{flex:1}
+.th-2 .dn-side button:hover,.th-2 .dn-side button[aria-pressed="true"]{background:rgba(249,102,188,.25);color:var(--cream);text-shadow:0 0 8px rgba(249,102,188,.8)}
+/* Look 3: classic one-bit windows, cream with navy lines */
+.th-3 .win{background:#FBF6E6;color:#1B2238;border:2px solid #1B2238;border-radius:0;box-shadow:5px 5px 0 #000,0 0 0 1px rgba(251,246,230,.55)}
+.th-3 a.win:hover{box-shadow:2px 2px 0 #000,0 0 0 1px rgba(251,246,230,.55)}
+.th-3 .pc-bar{background:repeating-linear-gradient(#1B2238 0 1px,#FBF6E6 1px 4px);border-bottom:2px solid #1B2238;height:28px;padding:0 8px;color:#1B2238}
+.th-3 .pc-box{background:#FBF6E6;border:2px solid #1B2238;width:13px;height:13px}
+.th-3 .pc-name{background:#FBF6E6;padding:0 12px;flex:none;margin:0 auto;color:#1B2238}
+.th-3 .pc-grip{display:none}
+.th-3 .win h3,.th-3 .win h2{color:#1B2238}
+.th-3 .win p,.th-3 .dn-row p{color:#3a4468}
+.th-3 .dn-row{color:#1B2238;border-bottom:2px dotted #1B2238}
+.th-3 .dn-row h3{color:#1B2238}
+.th-3 .dn-meta{color:#8a2f63}
+.th-3 .dn-row:hover{background:#1B2238}
+.th-3 .dn-row:hover h3{color:#FBF6E6}.th-3 .dn-row:hover p{color:#d6d9e8}.th-3 .dn-row:hover .dn-meta{color:#F9A3D2}
+.th-3 .dn-foot{color:#1B2238;border-top:2px solid #1B2238}
+.th-3 .post-art{border:2px solid #1B2238;position:relative}
+.th-3 .post-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(rgba(27,34,56,.35) 0 25%,transparent 0 50%) 0 0/4px 4px;opacity:.5}
+.th-3 .dn-side button{color:#1B2238}
+.th-3 .dn-side button:hover,.th-3 .dn-side button[aria-pressed="true"]{background:#1B2238;color:#FBF6E6}
+.th-3 .win-body p{color:#3a4468}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
