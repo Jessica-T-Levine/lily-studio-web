@@ -552,6 +552,17 @@ a.win{transition:transform .12s,box-shadow .12s}
 .pick .pk{font-family:var(--font-mono);font-weight:700;color:#7FE3A8;letter-spacing:.12em;text-transform:uppercase;font-size:max(0.8rem,11.5px)!important}
 .win .card-link,.log .card-link{font-family:var(--font-mono);text-transform:uppercase;font-weight:600;letter-spacing:.1em;color:var(--ink);background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:7px;box-shadow:0 4px 0 #8C8A81,0 7px 9px rgba(0,0,0,.5),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);display:inline-block;margin-top:14px;padding:9px 15px 8px;font-size:max(0.72rem,11.5px)!important}
 .win a.crt-key,.news-side a.crt-key{text-decoration:none}
+/* F: directory + log book + newsstand rows */
+.combo .log::before{left:115px}
+.combo .log li{grid-template-columns:96px 36px 1fr;margin:0 0 30px}
+.combo .log-date{font-size:max(0.78rem,11.5px)!important}
+.combo-body{display:grid;grid-template-columns:230px 1fr;gap:22px;padding:18px}
+.combo-body .post-art{margin:0;height:100%;min-height:170px;border:2px solid var(--cream);position:relative}
+.combo .dir-foot{padding:0;margin:4px 0 0 132px}
+.combo .dir-side{position:sticky;top:12px}
+@media(max-width:900px){.combo .dir-side{position:static}}
+@media(max-width:700px){.combo .log::before{left:11px}.combo .log li{grid-template-columns:30px 1fr}.combo .dir-foot{margin-left:0}}
+@media(max-width:640px){.combo-body{grid-template-columns:1fr}}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
