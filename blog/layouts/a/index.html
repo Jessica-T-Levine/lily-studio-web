@@ -379,10 +379,10 @@ html.crt-fsmode .crt-chin{display:flex!important;justify-content:flex-end}
 html.crt-fsmode .crt-chin .crt-left,html.crt-fsmode .crt-chin .crt-vents,html.crt-fsmode .crt-chin .crt-knob,html.crt-fsmode .crt-chin .crt-led{display:none!important}
 
 /* Mode key: color or grey scale */
-.crt-mode{position:fixed;top:calc(var(--bz)*.5);right:calc(var(--bz)*1.6);transform:translateY(-50%);z-index:304;display:inline-block!important;padding:5px 12px 4px!important;margin:0!important;line-height:1.2;white-space:nowrap}
-.crt-key.crt-mode:active{transform:translateY(calc(-50% + 2px))}
+.crt-mode{position:fixed;top:calc(var(--bz) + 14px);right:calc(var(--bz) + 30px);z-index:30;display:inline-block!important;padding:5px 12px 4px!important;margin:0!important;line-height:1.2;white-space:nowrap}
+html.crt-hdr .crt-mode{opacity:0;pointer-events:none}
+@media(max-width:699px){.dn-title{padding-top:46px}}
 html.crt-grey .crt-screen,html.crt-grey .crt-frog,html.crt-grey .crt-led{filter:grayscale(1)}
-@media(max-width:699px){.crt-mode{right:calc(var(--bz)*1.6)}}
 /* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
 .crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
 .crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
@@ -705,6 +705,13 @@ a.win{transition:transform .12s,box-shadow .12s}
 .crt-screen .site-header .nav-flower img,.crt-screen .site-header .nav-flower svg{width:48px!important;height:48px!important;max-width:100%;object-fit:contain;position:static!important;transform:none!important;margin:0!important}
 .crt-screen .site-header .nav-wordmark{font-size:1.25rem!important}
 .crt-screen .site-footer{border-top:1px solid #F966BC!important;box-shadow:0 0 18px rgba(249,102,188,.35),0 -10px 24px rgba(0,0,0,.45);padding-inline:clamp(22px,3.4vw,46px);padding-bottom:clamp(14px,2vw,26px)}
+
+/* Buttons inside the squares sit on the right; the idea key stands alone on the screen */
+.dn-rest .win-body{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+.dn-rest .win-body p{margin:0}
+.dn-rest .win-body .crt-key{align-self:flex-end;margin:0!important}
+.dn-idea-solo{display:flex;justify-content:flex-end;padding-top:6px}
+.dn-idea-solo .crt-idea-btn{margin:0!important}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -900,7 +907,7 @@ var de=document.documentElement,sc=document.getElementById('crt-scroll'),hd=docu
 if(!sc||!hd||!ft)return;
 var tH,tF;
 function busy(el){return el.matches(':hover')||el.contains(document.activeElement)||el.querySelector('.nav-links.open')||el.querySelector('[aria-expanded="true"]');}
-function setH(on){if(de.classList.contains('crt-fsmode'))on=false;hd.classList.toggle('crt-open',on);clearTimeout(tH);if(on){setF(false);tH=setTimeout(function(){setH(busy(hd));},2600);}}
+function setH(on){if(de.classList.contains('crt-fsmode'))on=false;hd.classList.toggle('crt-open',on);de.classList.toggle('crt-hdr',on);clearTimeout(tH);if(on){setF(false);tH=setTimeout(function(){setH(busy(hd));},2600);}}
 function setF(on){if(de.classList.contains('crt-fsmode'))on=false;ft.classList.toggle('crt-open',on);clearTimeout(tF);if(on){if(hd.classList.contains('crt-open')&&!busy(hd))setH(false);tF=setTimeout(function(){setF(busy(ft));},3200);}}
 function atTop(){return sc.scrollTop<=1;}
 function atEnd(){return sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;}
