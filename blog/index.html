@@ -16,6 +16,8 @@
   <meta property="og:image" content="https://thelilystudio.com/og/lily-studio-share.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://thelilystudio.com/blog/">
+  <script>/* Big screens: grow the whole page together (like zooming in), so nothing is lost in empty side space. Only above 1400px wide. */
+(function(){var d=document.documentElement;function f(){var w=window.innerWidth;d.style.zoom=w>1400?Math.min(w/1400,1.8):'';}f();window.addEventListener('resize',f);})();</script>
   <!-- Fonts are hosted on our own site (faster, no third-party stop-and-wait). The two headline/body fonts load first. -->
   <link rel="preload" href="/fonts/playfair-display-latin-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/montserrat-latin-var.woff2" as="font" type="font/woff2" crossorigin>
@@ -301,7 +303,7 @@
   
 
 /* ── Blog v1 ── */
-.blog-container{max-width:1600px;padding:0 32px}
+.blog-container{max-width:1400px;padding:0 24px}
 @media(max-width:640px){.blog-container{padding:0 24px}}
 .blog-container .card-grid{gap:24px;grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.blog-container .card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
