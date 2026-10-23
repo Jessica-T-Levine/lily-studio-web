@@ -433,6 +433,21 @@ body{margin:0;padding:0}
 .cc-msg{font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;color:#7a1f55;margin:10px 0 0;min-height:1.2em;line-height:1.4}
 .cc-msg a{color:#7a1f55;text-decoration:underline}
 .cc-foot{margin:14px 22px 0;padding-top:8px;border-top:2px dotted #8C8A81;font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;letter-spacing:.06em;text-transform:uppercase;color:#5d5b52;text-align:center}
+/* Cards v6: each post is a little program window on the vintage screen */
+.post-card{padding:0!important;background:#10234A;border:2px solid var(--cream)!important;border-radius:3px!important;box-shadow:7px 7px 0 #F966BC;transition:transform .12s,box-shadow .12s}
+.post-card:hover{transform:translate(4px,4px)!important;box-shadow:3px 3px 0 #F966BC;border-color:var(--cream)!important}
+.post-card:active{transform:translate(7px,7px)!important;box-shadow:0 0 0 #F966BC}
+.post-card .card-glow{display:none}
+.pc-bar{display:flex;align-items:center;gap:10px;padding:0 10px;height:32px;background:#F966BC;border-bottom:2px solid var(--cream);color:#1B2238}
+.pc-box{display:block;width:14px;height:14px;background:#FBF6E6;border:2px solid #1B2238;flex:none}
+.pc-name{font-family:var(--font-mono);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:max(0.72rem,11.5px)!important;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-grip{display:block;width:26px;height:12px;flex:none;background:repeating-linear-gradient(#1B2238 0 2px,transparent 2px 4px)}
+.pc-body{padding:18px 20px 22px}
+.post-card .post-art{margin:0 0 16px;height:176px;border:2px solid var(--cream);position:relative}
+.post-card .post-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(rgba(0,0,0,.2) 0 25%,transparent 0 50%) 0 0/4px 4px;opacity:.28}
+.post-card .blog-cat{border:1px dashed #F966BC;padding:3px 8px 2px;margin-bottom:12px}
+.post-card .blog-cat::before{content:"▸ "}
+.post-card .blog-date{padding-top:12px;border-top:2px dotted rgba(251,246,230,.35)}
 .crt-key[hidden]{display:none}
 @media(max-width:699px){.crt-key{display:none}}
 .crt-chin{position:fixed;left:0;right:0;bottom:0;height:var(--chin);z-index:301;pointer-events:none;display:none;align-items:center;justify-content:space-between;padding:0 calc(var(--bz) * 2.2)}
@@ -618,19 +633,21 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
     <div class="card-grid">
         <a href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/" class="card post-card" data-cat="families-play">
           <div class="card-glow"></div>
-          <div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><span class="blog-cat">Families &amp; Play</span>
+          <span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_01.TXT</span><i class="pc-grip"></i></span>
+          <div class="pc-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><span class="blog-cat">Families &amp; Play</span>
           <h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3>
           <p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p>
           <span class="blog-date">October 22, 2026 · 1 min read</span>
-          <span class="card-link">Read the post →</span>
+          <span class="card-link">Read the post →</span></div>
         </a>
         <a href="/blog/what-is-a-claude-skill/" class="card post-card" data-cat="claude-ai">
           <div class="card-glow"></div>
-          <div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><span class="blog-cat">Claude &amp; AI</span>
+          <span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_02.TXT</span><i class="pc-grip"></i></span>
+          <div class="pc-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><span class="blog-cat">Claude &amp; AI</span>
           <h3>What is a Claude skill, and why would you want one?</h3>
           <p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p>
           <span class="blog-date">October 22, 2026 · 1 min read</span>
-          <span class="card-link">Read the post →</span>
+          <span class="card-link">Read the post →</span></div>
         </a>
     </div>
   </div></section>
