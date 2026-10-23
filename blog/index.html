@@ -308,6 +308,7 @@
 .blog-container .card-grid{gap:24px;grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.blog-container .card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.blog-container .card-grid{grid-template-columns:1fr}}
+@media(min-width:641px){.post-more .card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .blog-filter{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 32px}
 .blog-chip{font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-light);background:transparent;border:1px solid var(--gray-mid);border-radius:999px;padding:9px 16px;cursor:pointer;transition:all .25s var(--ease)}
 .blog-chip:hover{border-color:var(--pink);color:var(--cream)}
@@ -315,6 +316,15 @@
 .blog-cat{display:inline-block;font-family:var(--font-mono);font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--pink);margin-bottom:10px}
 .blog-date{font-family:var(--font-mono);color:var(--gray-light);letter-spacing:0.06em}
 .post-card h3{margin-bottom:10px}
+.post-art{margin:-28px -24px 20px;height:190px;overflow:hidden;display:flex;background:#1B2F57}
+.post-art img{flex:1 1 0;min-width:0;width:100%;height:100%;object-fit:cover}
+.post-art svg{width:100%;height:100%;display:block}
+.post-art-trio img{object-position:50% 55%}
+.post-card .card-glow{z-index:2}
+.post-hero-art{margin:30px 0 0;height:260px;border-radius:8px;overflow:hidden;display:flex;background:#1B2F57}
+.post-hero-art img{flex:1 1 0;min-width:0;width:100%;height:100%;object-fit:cover}
+.post-hero-art svg{width:100%;height:100%;display:block}
+@media(max-width:640px){.post-hero-art{height:190px}}
 .post-card .blog-date{display:block;margin-top:14px}
 .post-card .card-link{display:block;margin-top:12px}
 .post-hero{padding:88px 0 40px;border-bottom:none}
@@ -470,25 +480,25 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
     <div class="container blog-container">
       <div class="blog-filter" role="group" aria-label="Filter posts by topic"><button class="blog-chip" type="button" data-filter="all" aria-pressed="true">All</button><button class="blog-chip" type="button" data-filter="families-play" aria-pressed="false">Families &amp; Play</button><button class="blog-chip" type="button" data-filter="claude-ai" aria-pressed="false">Claude &amp; AI</button><button class="blog-chip" type="button" data-filter="building-the-studio" aria-pressed="false">Building the Studio</button></div>
       <div class="card-grid">
-        <a href="/blog/families-play/" class="card post-card" data-cat="families-play">
+        <a href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/" class="card post-card" data-cat="families-play">
           <div class="card-glow"></div>
-          <span class="blog-cat">Families &amp; Play</span>
+          <div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><span class="blog-cat">Families &amp; Play</span>
           <h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3>
           <p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p>
           <span class="blog-date">October 22, 2026 · 1 min read</span>
           <span class="card-link">Read the post →</span>
         </a>
-        <a href="/blog/claude-ai/" class="card post-card" data-cat="claude-ai">
+        <a href="/blog/what-is-a-claude-skill/" class="card post-card" data-cat="claude-ai">
           <div class="card-glow"></div>
-          <span class="blog-cat">Claude &amp; AI</span>
+          <div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><span class="blog-cat">Claude &amp; AI</span>
           <h3>What is a Claude skill, and why would you want one?</h3>
           <p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p>
           <span class="blog-date">October 22, 2026 · 1 min read</span>
           <span class="card-link">Read the post →</span>
         </a>
-        <a href="/blog/building-the-studio/" class="card post-card" data-cat="building-the-studio">
+        <a href="/blog/where-it-all-started/" class="card post-card" data-cat="building-the-studio">
           <div class="card-glow"></div>
-          <span class="blog-cat">Building the Studio</span>
+          <div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><span class="blog-cat">Building the Studio</span>
           <h3>Where it all started: a question and a new friend</h3>
           <p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p>
           <span class="blog-date">October 22, 2026 · 1 min read</span>
