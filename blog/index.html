@@ -301,9 +301,11 @@
   
 
 /* ── Blog v1 ── */
-.blog-container{max-width:1200px;padding:0 32px}
+.blog-container{max-width:1600px;padding:0 32px}
 @media(max-width:640px){.blog-container{padding:0 24px}}
-.blog-container .card-grid{gap:22px}
+.blog-container .card-grid{gap:24px;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.blog-container .card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.blog-container .card-grid{grid-template-columns:1fr}}
 .blog-filter{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 32px}
 .blog-chip{font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-light);background:transparent;border:1px solid var(--gray-mid);border-radius:999px;padding:9px 16px;cursor:pointer;transition:all .25s var(--ease)}
 .blog-chip:hover{border-color:var(--pink);color:var(--cream)}
