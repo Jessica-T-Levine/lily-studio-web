@@ -1226,6 +1226,8 @@
   .table-hint { position: absolute; left: -60px; width: 357px; text-align: center; bottom: 18px; font-family: var(--font-mono); font-size: .5rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-warm); }
   @media (prefers-reduced-motion: reduce) { .tcard { transition: none; } .tcard.lift { animation: none; } }
   @media (max-width: 1100px) { .table { margin-left: 0; } .table-hint { left: 0; max-width: 100%; } }
+  /* Wide screens (1200px and up): the card stack fills its half of the hero, so its right edge lines up with the menu's right edge. */
+  @media (min-width: 1200px) { .table { margin-left: 0; max-width: 420px; transform: scale(1.17); } .table-hint { left: 0; width: 491px; bottom: -34px; } }
     /* Menu fit (Sept 30): on iPad-portrait widths the words ran into the links */
     @media (min-width: 769px) and (max-width: 960px) {
       .site-header .nav-flower { width: 104px; }
