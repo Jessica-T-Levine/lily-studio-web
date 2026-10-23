@@ -345,7 +345,7 @@
 .hero-label,.blog-chip,.blog-cat,.blog-date,.post-meta,.post-back{font-size:max(0.72rem,11.5px)!important}
 
 /* ── Blog v2: vintage computer screen ── */
-:root{--bz:clamp(20px,4.6vw,84px);--chin:clamp(20px,4.6vw,84px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
+:root{--ring:clamp(14px,1.9vw,28px);--edge:clamp(8px,1.2vw,18px);--bz:clamp(20px,4.6vw,84px);--chin:clamp(20px,4.6vw,84px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
 @media(min-width:700px){:root{--chin:clamp(84px,8.4vw,150px)}}
 html,body{height:100%;overflow:hidden}
 body{margin:0;padding:0}
@@ -356,7 +356,7 @@ body{margin:0;padding:0}
 .crt-scroll::-webkit-scrollbar-track{background:#0a1a35;border-left:1px solid #1b2a4d}
 .crt-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#F6F4EE,#C9C6BC);border-radius:7px;border:2px solid #0a1a35}
 .crt-bezel{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);pointer-events:none;z-index:300;
- box-shadow:0 0 0 5px #2a2925,0 0 0 8px #5d5b54,0 0 0 clamp(14px,1.9vw,28px) #F7F5EE,0 0 0 calc(clamp(14px,1.9vw,28px) + 4px) #8A887E,0 0 0 calc(clamp(14px,1.9vw,28px) + 9px) #CFCCC1,0 0 0 calc(clamp(14px,1.9vw,28px) + 11px) #A29F94,0 0 0 200vmax var(--plastic),-3px -3px 5px 7px rgba(70,68,60,.38),4px 5px 5px 8px rgba(255,255,255,.85),inset 0 0 0 2px rgba(0,0,0,.55),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
+ box-shadow:0 0 0 5px #2a2925,0 0 0 8px #5d5b54,0 0 0 var(--ring) #F7F5EE,0 0 0 calc(var(--ring) + 4px) #8A887E,0 0 0 calc(var(--ring) + 9px) #CFCCC1,0 0 0 calc(var(--ring) + 11px) #A29F94,0 0 0 200vmax var(--plastic),-3px -3px 5px 7px rgba(70,68,60,.38),4px 5px 5px 8px rgba(255,255,255,.85),inset 0 0 0 2px rgba(0,0,0,.55),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
 .crt-bezel::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
 .crt-bezel::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(118deg,rgba(255,255,255,.09) 0,rgba(255,255,255,.03) 22%,transparent 22.4%),linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.045) 50%,rgba(255,255,255,0)) 0 -30%/100% 28% no-repeat;animation:crtroll 9s linear infinite;z-index:1}
 @keyframes crtroll{to{background-position:0 130%,0 130%}}
@@ -370,7 +370,7 @@ body{margin:0;padding:0}
 .crt-screw.br{bottom:calc(var(--chin)*.5);right:calc(var(--bz)*.5);transform:translate(50%,50%);--r:10deg}
 
 /* Chunky case: raised plastic edge around the whole viewport */
-body::after{content:"";position:fixed;inset:0;z-index:301;pointer-events:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.85),inset 0 0 0 clamp(8px,1.2vw,18px) rgba(0,0,0,.14),inset 0 0 0 calc(clamp(8px,1.2vw,18px) + 3px) rgba(255,255,255,.5),inset 0 0 0 calc(clamp(8px,1.2vw,18px) + 5px) rgba(0,0,0,.18),inset 0 0 40px rgba(0,0,0,.22)}
+body::after{content:"";position:fixed;inset:0;z-index:301;pointer-events:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.85),inset 0 0 0 var(--edge) rgba(0,0,0,.14),inset 0 0 0 calc(var(--edge) + 3px) rgba(255,255,255,.5),inset 0 0 0 calc(var(--edge) + 5px) rgba(0,0,0,.18),inset 0 0 40px rgba(0,0,0,.22)}
 .crt-chin,.crt-screw{z-index:303}
 /* Full screen: no header, no footer, only an exit key */
 html.crt-fsmode{--chin:max(var(--bz),48px)}
@@ -400,6 +400,20 @@ html.crt-disk-in .crt-slit{box-shadow:0 0 0 2px #8f8d83,0 0 0 3px #5d5b54,0 2px 
 @media(max-width:999px){.crt-chin .crt-left .crt-plate{display:none}}
 @media(min-width:700px){.dn-idea-solo,.crt-idea-wrap{display:none}}
 html.crt-fsmode .crt-chin .crt-mid{display:none!important}
+
+/* Phones: a slim plate so the blog feels the same everywhere */
+@media(max-width:699px){:root{--chin:70px}
+ html .crt-chin{display:flex;padding:0 calc(var(--bz) * 1.1);justify-content:space-between;gap:8px}
+ .crt-chin .crt-left,.crt-chin .crt-vents,.crt-chin .crt-knob,.crt-chin .crt-led{display:none!important}
+ .crt-chin .crt-knobs{order:-1;gap:0}
+ .crt-chin #crt-fs{display:inline-block}
+ .crt-chin #crt-fs[hidden]{display:none}
+ .crt-mid.crt-slotwrap{display:flex;margin-left:0;gap:8px}
+ .crt-slit{width:clamp(44px,13vw,70px)}
+ .crt-slotbtn,.crt-chin .crt-key{padding:3px 9px 2px}
+ html .crt-screw{display:block}}
+/* Reading mode: slim frame, only the exit key */
+html.crt-fsmode{--ring:3px;--edge:3px;--bz:12px;--chin:max(var(--bz),46px)}
 /* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
 .crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
 .crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
@@ -480,7 +494,7 @@ html.crt-fsmode .crt-chin .crt-mid{display:none!important}
 .post-card .blog-cat::before{content:"▸ "}
 .post-card .blog-date{padding-top:12px;border-top:2px dotted rgba(251,246,230,.35)}
 .crt-key[hidden]{display:none}
-@media(max-width:699px){.crt-key{display:none}}
+@media(max-width:699px){.crt-mode,.crt-idea-btn{display:inline-block}}
 .crt-chin{position:fixed;left:0;right:0;bottom:0;height:var(--chin);z-index:301;pointer-events:none;display:none;align-items:center;justify-content:space-between;padding:0 calc(var(--bz) * 2.2)}
 @media(min-width:700px){.crt-chin{display:flex}}
 .crt-plate{font-family:var(--font-mono);letter-spacing:.22em;text-transform:uppercase;color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.7)}
@@ -924,14 +938,17 @@ var mds=document.querySelectorAll('.crt-mode');
 if(mds.length){var setMode=function(g){de.classList.toggle('crt-grey',g);mds.forEach(function(m){m.textContent=g?'Color':'Grey scale';m.setAttribute('aria-pressed',g?'true':'false');});try{localStorage.setItem('lily-blog-mode',g?'grey':'color');}catch(e){}};
  var saved=null;try{saved=localStorage.getItem('lily-blog-mode');}catch(e){}
  setMode(saved==='grey');mds.forEach(function(m){m.addEventListener('click',function(){setMode(!de.classList.contains('crt-grey'));});});}
-var fs=document.getElementById('crt-fs'),req=de.requestFullscreen||de.webkitRequestFullscreen;
-if(fs&&req&&(document.fullscreenEnabled||document.webkitFullscreenEnabled)){
- fs.hidden=false;
- var cur=function(){return document.fullscreenElement||document.webkitFullscreenElement;};
- var lab=function(){var on=!!cur();fs.textContent=on?'Exit full screen':'Full screen';de.classList.toggle('crt-fsmode',on);if(on){setH(false);setF(false);}};
- fs.addEventListener('click',function(){if(cur()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{req.call(de);}});
- document.addEventListener('fullscreenchange',lab);document.addEventListener('webkitfullscreenchange',lab);
+var fs=document.getElementById('crt-fs'),req=de.requestFullscreen||de.webkitRequestFullscreen,api=false;
+var cur=function(){return document.fullscreenElement||document.webkitFullscreenElement;};
+var setFs=function(on){de.classList.toggle('crt-fsmode',on);if(fs)fs.textContent=on?'Exit full screen':'Full screen';if(on){setH(false);setF(false);}};
+if(fs){fs.hidden=false;
+ fs.addEventListener('click',function(){
+  if(de.classList.contains('crt-fsmode')){setFs(false);if(cur()){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(e){}}}
+  else{setFs(true);if(req&&(document.fullscreenEnabled||document.webkitFullscreenEnabled)){try{var r=req.call(de);if(r&&r.catch)r.catch(function(){});}catch(e){}}}});
+ var sync=function(){if(cur()){api=true;}else if(api){api=false;setFs(false);}};
+ document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);
 }
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&de.classList.contains('crt-fsmode')&&!cur()&&!(pop&&!pop.hidden))setFs(false);});
 var pop=document.getElementById('crt-pop'),form=document.getElementById('cc-form'),ta=document.getElementById('cc-idea'),nm=document.getElementById('cc-name'),em=document.getElementById('cc-email'),msg=document.getElementById('cc-msg'),back=null;
 function openCard(){if(!pop)return;de.classList.add('crt-disk-in');back=document.activeElement;pop.hidden=false;msg.textContent='';setTimeout(function(){ta.focus();},30);}
 function closeCard(){if(!pop||pop.hidden)return;de.classList.remove('crt-disk-in');pop.hidden=true;if(back&&back.focus)back.focus();}
