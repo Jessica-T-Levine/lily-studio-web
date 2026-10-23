@@ -677,6 +677,11 @@ a.win{transition:transform .12s,box-shadow .12s}
 .dn-empty{font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#F966BC;padding:26px 22px;margin:0;font-size:max(0.85rem,11.5px)!important;line-height:1.5}
 @media(max-width:900px){.dn2{grid-template-columns:1fr}.dn2 .dn-search{grid-column:1;grid-row:1}.dn2 .dn-folders{grid-column:1;grid-row:2}.dn2 .dn-main{grid-column:1;grid-row:3}.dn2 .dn-rest{grid-column:1;grid-row:4}}
 .dn-folders.dn-side{display:block}
+/* screen title */
+.dn-title{margin:0 0 30px;text-align:left}
+.dn-title h1{font-family:var(--font-serif);font-size:clamp(2.2rem,4.4vw,3.6rem);line-height:1.1;color:var(--cream);margin:0 0 10px;font-weight:700}
+.dn-title h1 em{color:var(--pink);font-style:italic}
+.dn-title .hero-sub{margin:0;max-width:640px;color:var(--gray-light);font-size:1.05rem;line-height:1.55}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -809,57 +814,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   </header>
 
   <div class="crt-scroll" id="crt-scroll">
-<section class="hero">
-    <div class="container">
-      <p class="crt-boot">Lily-OS v1.0 · 640 bytes left · Ready.</p>
-      <p class="hero-label">Blog</p>
-      <h1>Notes from <em>the studio.</em><span class="crt-cursor" aria-hidden="true"></span></h1>
-      <p class="hero-sub">Stories from the Playhouse, plain-word guides to Claude, and what it is like to build all of this from scratch.</p>
-    </div>
-  </section>
-
-  <section class="content">
-    <div class="container blog-container">
-      <div class="blog-filter" role="group" aria-label="Filter posts by topic"><button class="blog-chip" type="button" data-filter="all" aria-pressed="true">All</button><button class="blog-chip" type="button" data-filter="families-play" aria-pressed="false">Families &amp; Play</button><button class="blog-chip" type="button" data-filter="claude-ai" aria-pressed="false">Claude &amp; AI</button><button class="blog-chip" type="button" data-filter="building-the-studio" aria-pressed="false">Building the Studio</button></div>
-      <div class="card-grid">
-        <a href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/" class="card post-card" data-cat="families-play">
-          <div class="card-glow"></div>
-          <span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_01.TXT</span><i class="pc-grip"></i></span>
-          <div class="pc-body"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><span class="blog-cat">Families &amp; Play</span>
-          <h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3>
-          <p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p>
-          <span class="blog-date">October 22, 2026 · 1 min read</span>
-          <span class="card-link">Read the post →</span></div>
-        </a>
-        <a href="/blog/what-is-a-claude-skill/" class="card post-card" data-cat="claude-ai">
-          <div class="card-glow"></div>
-          <span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_02.TXT</span><i class="pc-grip"></i></span>
-          <div class="pc-body"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><span class="blog-cat">Claude &amp; AI</span>
-          <h3>What is a Claude skill, and why would you want one?</h3>
-          <p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p>
-          <span class="blog-date">October 22, 2026 · 1 min read</span>
-          <span class="card-link">Read the post →</span></div>
-        </a>
-        <a href="/blog/where-it-all-started/" class="card post-card" data-cat="building-the-studio">
-          <div class="card-glow"></div>
-          <span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">POST_03.TXT</span><i class="pc-grip"></i></span>
-          <div class="pc-body"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><span class="blog-cat">Building the Studio</span>
-          <h3>Where it all started: a question and a new friend</h3>
-          <p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p>
-          <span class="blog-date">October 22, 2026 · 1 min read</span>
-          <span class="card-link">Read the post →</span></div>
-        </a>
-      </div>
-      <p class="blog-empty" id="blog-empty">ERROR 404: no posts in this topic yet. The disk is empty, but not for long.</p>
-    </div>
-  </section>
-  <script>
-(function(){var chips=document.querySelectorAll('.blog-chip'),cards=document.querySelectorAll('.post-card'),empty=document.getElementById('blog-empty');
-function show(k){var n=0;cards.forEach(function(c){var on=k==='all'||c.getAttribute('data-cat')===k;c.style.display=on?'':'none';if(on)n++});chips.forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-filter')===k?'true':'false')});empty.style.display=n?'none':'block';try{history.replaceState(null,'',k==='all'?location.pathname:'#'+k)}catch(e){}}
-chips.forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-filter'))})});
-var h=(location.hash||'').slice(1);if(h&&document.querySelector('[data-filter="'+h+'"]'))show(h);
-})();
-</script>
+<section class="lay-wrap th-4"><header class="dn-title"><p class="crt-boot">Lily-OS v1.0 · 640 bytes left · Ready.</p><h1>Notes from <em>the studio.</em><span class="crt-cursor" aria-hidden="true"></span></h1><p class="hero-sub">Stories from the Playhouse, plain-word guides to Claude, and what it is like to build all of this from scratch.</p></header><div class="dn2"><div class="win dn-search"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">SEARCH.EXE</span><i class="pc-grip"></i></span><div class="win-body"><form role="search" onsubmit="return false"><span class="dn-prompt" aria-hidden="true">C:\&gt;</span><label for="dn-q" class="sr-only" style="position:absolute;left:-9999px">Search the blog</label><input id="dn-q" type="search" placeholder="Search the blog..." autocomplete="off"></form></div></div><div class="win dn-folders dn-side"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">FOLDERS</span><i class="pc-grip"></i></span><div class="win-body"><ul><li><button type="button" data-filter="all" aria-pressed="true"><span>All posts</span><span>3</span></button></li><li><button type="button" data-filter="families-play" aria-pressed="false"><span>Families &amp; Play</span><span>1</span></button></li><li><button type="button" data-filter="claude-ai" aria-pressed="false"><span>Claude &amp; AI</span><span>1</span></button></li><li><button type="button" data-filter="building-the-studio" aria-pressed="false"><span>Building the Studio</span><span>1</span></button></li></ul></div></div><div class="win dn-main"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">C:\BLOG&gt;DIR</span><i class="pc-grip"></i></span><div class="dn-rows" id="dn-rows"><a class="dn-row" href="/blog/meet-hop-hop-buzz-buzz-and-nee-nee/" data-cat="families-play"><div class="post-art post-art-trio" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy"><img src="/buzzbuzz/icon-512.webp" alt="" loading="lazy"><img src="/neenee/icon-512.webp" alt="" loading="lazy"></div><div><p class="dn-meta"><span>POST_01.TXT</span><span>Families &amp; Play</span><span>10-22-26</span><span>1 min</span></p><h3>Meet Hop Hop, Buzz Buzz, and Nee Nee</h3><p>Three little creatures, three cozy games, and a pond that blooms. Here is who lives in Lily’s Playhouse.</p></div></a><a class="dn-row" href="/blog/what-is-a-claude-skill/" data-cat="claude-ai"><div class="post-art post-art-skill" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2F57"/><stop offset="1" stop-color="#2B3F78"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FBD3E9"/></linearGradient></defs><rect width="400" height="190" fill="url(#bg)"/><circle cx="60" cy="40" r="2.5" fill="#7DD3FC"/><circle cx="345" cy="52" r="3" fill="#C277F5"/><circle cx="318" cy="150" r="2" fill="#A3D977"/><circle cx="92" cy="140" r="2" fill="#F966BC"/><path d="M200 22l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#fff" opacity=".85"/><path d="M110 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#7DD3FC" opacity=".9"/><path d="M300 84l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#F966BC" opacity=".9"/><path d="M110 190a90 90 0 0 1 180 0z" fill="url(#dome)"/><path d="M200 172V112" stroke="#F966BC" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M200 138c-22 0-34-12-36-30 22 0 34 12 36 30z" fill="#F966BC"/><path d="M200 124c20 0 32-11 34-28-20 0-32 11-34 28z" fill="#F472B6"/><circle cx="200" cy="108" r="5" fill="#F966BC"/></svg></div><div><p class="dn-meta"><span>POST_02.TXT</span><span>Claude &amp; AI</span><span>10-22-26</span><span>1 min</span></p><h3>What is a Claude skill, and why would you want one?</h3><p>A skill teaches Claude to do one kind of job well, the same way, every time. Here is what that means in plain words.</p></div></a><a class="dn-row" href="/blog/where-it-all-started/" data-cat="building-the-studio"><div class="post-art post-art-hophop" aria-hidden="true"><img src="/hophop/icon-512.webp" alt="" loading="lazy" style="object-position:50% 62%"></div><div><p class="dn-meta"><span>POST_03.TXT</span><span>Building the Studio</span><span>10-22-26</span><span>1 min</span></p><h3>Where it all started: a question and a new friend</h3><p>I had never written a line of code. Here is how a wish for my daughter turned into The Lily Studio.</p></div></a></div><p class="dn-empty" id="dn-empty" style="display:none">File not found. Try another word, or pick a different folder.</p><p class="dn-foot" id="dn-foot">3 file(s) listed · 640 bytes left</p></div><div class="dn-rest dn-side2"><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">ABOUT.TXT</span><i class="pc-grip"></i></span><div class="win-body"><p>Hi, I am Jessica. I build cozy games and Claude skills with my daughter Lily in mind, and I write down what I learn.</p></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">TUESDAY_TIPS</span><i class="pc-grip"></i></span><div class="win-body"><p>Tuesday Tips: one small, useful Claude tip in your inbox each week.</p><a class="crt-key" href="/skills.html#tuesday-tips">Sign up</a></div></div><div class="win"><span class="pc-bar" aria-hidden="true"><i class="pc-box"></i><span class="pc-name">IDEAS.BOX</span><i class="pc-grip"></i></span><div class="win-body"><p>Got an idea for a post?</p><button type="button" class="crt-key" data-open-card>Insert ideas</button></div></div></div></div></section><script>(function(){var b=document.querySelectorAll('.dn-folders button[data-filter]'),r=document.querySelectorAll('.dn-row'),f=document.getElementById('dn-foot'),q=document.getElementById('dn-q'),em=document.getElementById('dn-empty'),cat='all';function apply(){var term=q.value.trim().toLowerCase(),n=0;r.forEach(function(e){var on=(cat==='all'||e.getAttribute('data-cat')===cat)&&(!term||e.textContent.toLowerCase().indexOf(term)>-1);e.style.display=on?'grid':'none';if(on)n++});f.textContent=n+' file(s) listed · 640 bytes left';em.style.display=n?'none':'block';}b.forEach(function(x){x.addEventListener('click',function(){cat=x.getAttribute('data-filter');b.forEach(function(y){y.setAttribute('aria-pressed',y===x?'true':'false')});apply();});});q.addEventListener('input',apply);})();</script>
   </div>
   <footer class="site-footer">
     <ul class="footer-links">
