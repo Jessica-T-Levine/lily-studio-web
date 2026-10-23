@@ -348,12 +348,36 @@
 /* ── Blog v2: vintage computer screen ── */
 :root{--bz:clamp(10px,1.5vw,28px);--chin:clamp(10px,1.5vw,28px);--plastic:#DEDBD2;--plastic-dk:#9B998F;--ink:#1B2238}
 @media(min-width:700px){:root{--chin:clamp(38px,3.6vw,64px)}}
-body{padding:var(--bz) var(--bz) var(--chin)}
-.site-header{top:var(--bz)}
-html{scroll-padding-top:calc(var(--bz) + 110px)}
-.crt-screen{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);pointer-events:none;z-index:300;
+html,body{height:100%;overflow:hidden}
+body{margin:0;padding:0}
+.crt-screen{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);overflow:hidden;background:var(--navy-deep);z-index:1;isolation:isolate}
+.crt-scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#C9C6BC #0a1a35}
+.crt-scroll::after{content:"";display:block;height:190px}
+.crt-scroll::-webkit-scrollbar{width:13px}
+.crt-scroll::-webkit-scrollbar-track{background:#0a1a35;border-left:1px solid #1b2a4d}
+.crt-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#F6F4EE,#C9C6BC);border-radius:7px;border:2px solid #0a1a35}
+.crt-bezel{position:fixed;top:var(--bz);left:var(--bz);right:var(--bz);bottom:var(--chin);border-radius:clamp(12px,2.2vw,34px);pointer-events:none;z-index:300;
  box-shadow:0 0 0 3px var(--plastic-dk),0 0 0 200vmax var(--plastic),inset 0 0 0 2px rgba(0,0,0,.5),inset 0 0 70px rgba(0,0,0,.55),inset 0 0 160px rgba(249,102,188,.07)}
-.crt-screen::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+.crt-bezel::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+/* Menu and footer live off-screen until summoned: scroll up (menu), scroll to the end (footer), hover or tap the top or bottom edge, or press a tab */
+.crt-screen .site-header{position:absolute;top:0;left:0;right:0;z-index:20;transition:transform .35s ease}
+.crt-js .crt-screen .site-header{transform:translateY(calc(-100% - 280px))}
+.crt-js .crt-screen .site-header.crt-open{transform:none}
+.crt-screen .site-footer{position:absolute;left:0;right:0;bottom:0;z-index:20;max-height:75%;overflow:auto;background:rgba(6,18,42,.97);border-top:1px solid var(--gray-mid);transition:transform .35s ease}
+.crt-js .crt-screen .site-footer{transform:translateY(105%)}
+.crt-js .crt-screen .site-footer.crt-open{transform:none}
+.crt-hot{position:absolute;left:0;right:0;height:16px;z-index:15}
+.crt-hot-top{top:0}.crt-hot-bot{bottom:0}
+.crt-tab{position:absolute;left:50%;transform:translateX(-50%);z-index:16;font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding:5px 14px 4px;background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;cursor:pointer;transition:opacity .25s,background .15s;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.crt-tab-top{top:0;border-top:0;border-radius:0 0 10px 10px;box-shadow:0 3px 0 #8C8A81,0 5px 8px rgba(0,0,0,.5)}
+.crt-tab-bot{bottom:0;border-bottom:0;border-radius:10px 10px 0 0;box-shadow:0 -3px 0 #8C8A81,0 -5px 8px rgba(0,0,0,.5)}
+.crt-tab:hover{background:linear-gradient(#fff,#E6E3D9)}
+.crt-tab.is-gone{opacity:0;pointer-events:none}
+.crt-key{pointer-events:auto;font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);padding:3px 12px 2px;background:linear-gradient(#F6F4EE,#D9D6CB);border:1px solid #8C8A81;border-radius:6px;box-shadow:0 3px 0 #8C8A81,0 5px 6px rgba(0,0,0,.3),inset 0 1px 0 #fff;text-shadow:0 1px 0 rgba(255,255,255,.8);cursor:pointer;margin-right:10px}
+.crt-key:hover{background:linear-gradient(#fff,#E6E3D9)}
+.crt-key:active{transform:translateY(2px);box-shadow:0 1px 0 #8C8A81,inset 0 2px 4px rgba(0,0,0,.22)}
+.crt-key[hidden]{display:none}
+@media(max-width:699px){.crt-key{display:none}}
 .crt-chin{position:fixed;left:0;right:0;bottom:0;height:var(--chin);z-index:301;pointer-events:none;display:none;align-items:center;justify-content:space-between;padding:0 calc(var(--bz) * 2.2)}
 @media(min-width:700px){.crt-chin{display:flex}}
 .crt-plate{font-family:var(--font-mono);letter-spacing:.22em;text-transform:uppercase;color:#6E6C64;text-shadow:0 1px 0 rgba(255,255,255,.7)}
@@ -448,10 +472,12 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
 </style>
 </head>
 <body>
-  <div class="crt-screen" aria-hidden="true"></div>
-  <div class="crt-chin" aria-hidden="true"><span class="crt-plate">Lily Studio · Blog</span><span class="crt-knobs"><i class="crt-knob"></i><i class="crt-knob"></i><i class="crt-led"></i></span></div>
+  <script>document.documentElement.classList.add("crt-js")</script>
+  <div class="crt-bezel" aria-hidden="true"></div>
+  <div class="crt-chin"><span class="crt-plate" aria-hidden="true">Lily Studio · Blog</span><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
 
 
+  <div class="crt-screen" id="crt-screen">
   <header class="site-header">
     <nav class="nav-inner">
       <div class="nav-brand">
@@ -506,7 +532,8 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
     </nav>
   </header>
 
-  <section class="hero post-hero">
+  <div class="crt-scroll" id="crt-scroll">
+<section class="hero post-hero">
     <div class="post-wrap" style="text-align:left">
       <a href="/blog/" class="post-back">← All posts</a><br>
       <span class="blog-cat">Building the Studio</span>
@@ -550,7 +577,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
     </div>
   </div></section>
 
-
+  </div>
   <footer class="site-footer">
     <ul class="footer-links">
       <li><a href="/skills.html">Skills</a></li>
@@ -568,6 +595,42 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
     </ul>
     <p class="footer-copy">© 2026 The Lily Studio. All rights reserved.</p>
   </footer>
+  <span class="crt-hot crt-hot-top" id="crt-hot-top"></span><span class="crt-hot crt-hot-bot" id="crt-hot-bot"></span><button type="button" class="crt-tab crt-tab-top" id="crt-tab-top" aria-label="Show the menu">&#9662; Menu</button><button type="button" class="crt-tab crt-tab-bot" id="crt-tab-bot" aria-label="Show the footer links">&#9652; More</button>
+  </div>
+<script>
+/* Vintage screen v3: the blog scrolls inside the frame. The menu and the footer stay hidden until you summon them. */
+(function(){
+var de=document.documentElement,sc=document.getElementById('crt-scroll'),hd=document.querySelector('.crt-screen .site-header'),ft=document.querySelector('.crt-screen .site-footer'),tt=document.getElementById('crt-tab-top'),tb=document.getElementById('crt-tab-bot'),ht=document.getElementById('crt-hot-top'),hb=document.getElementById('crt-hot-bot');
+if(!sc||!hd||!ft||!tt||!tb)return;
+var tH,tF;
+function busy(el){return el.matches(':hover')||el.contains(document.activeElement)||el.querySelector('.nav-links.open')||el.querySelector('[aria-expanded="true"]');}
+function setH(on){hd.classList.toggle('crt-open',on);tt.classList.toggle('is-gone',on);clearTimeout(tH);if(on){setF(false);tH=setTimeout(function(){if(busy(hd))setH(true);else setH(false);},3800);}}
+function setF(on){ft.classList.toggle('crt-open',on);tb.classList.toggle('is-gone',on);clearTimeout(tF);if(on){if(hd.classList.contains('crt-open')&&!busy(hd))setH(false);tF=setTimeout(function(){if(busy(ft))setF(true);else setF(false);},5000);}}
+function isH(){return hd.classList.contains('crt-open');}
+function isF(){return ft.classList.contains('crt-open');}
+['mouseenter','click'].forEach(function(ev){ht.addEventListener(ev,function(){setH(true);});hb.addEventListener(ev,function(){setF(true);});});
+['click','mouseenter'].forEach(function(ev){tt.addEventListener(ev,function(){setH(true);});tb.addEventListener(ev,function(){setF(true);});});
+hd.addEventListener('mousemove',function(){if(isH())setH(true);});
+ft.addEventListener('mousemove',function(){if(isF())setF(true);});
+hd.addEventListener('focusin',function(){setH(true);});
+ft.addEventListener('focusin',function(){setF(true);});
+var last=0;
+sc.addEventListener('scroll',function(){var y=sc.scrollTop,d=y-last;last=y;
+ if(d<-6){if(y>0||true)setH(true);}
+ else if(d>6){if(isH()&&!busy(hd))setH(false);if(y+sc.clientHeight>=sc.scrollHeight-6)setF(true);}
+ if(d<-6&&isF()&&!busy(ft))setF(false);},{passive:true});
+sc.addEventListener('wheel',function(e){var atEnd=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-2;if(e.deltaY>0&&atEnd)setF(true);if(e.deltaY<0&&sc.scrollTop<=0)setH(true);},{passive:true});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){setH(false);setF(false);}});
+var fs=document.getElementById('crt-fs'),req=de.requestFullscreen||de.webkitRequestFullscreen;
+if(fs&&req&&(document.fullscreenEnabled||document.webkitFullscreenEnabled)){
+ fs.hidden=false;
+ var cur=function(){return document.fullscreenElement||document.webkitFullscreenElement;};
+ var lab=function(){fs.textContent=cur()?'Exit full screen':'Full screen';};
+ fs.addEventListener('click',function(){if(cur()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{req.call(de);}});
+ document.addEventListener('fullscreenchange',lab);document.addEventListener('webkitfullscreenchange',lab);
+}
+})();
+</script>
 
 <script>
   /* Menu bar (with the flower) slides away when you scroll down and comes back when you scroll up */
