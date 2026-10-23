@@ -405,6 +405,34 @@ body{margin:0;padding:0}
 @media(min-width:1000px){.crt-vents{display:flex}}
 .crt-vents i{display:block;width:3px;height:clamp(14px,1.4vw,22px);background:#8d8b81;border-radius:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.8)}
 .crt-boot{font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;letter-spacing:.16em;text-transform:uppercase;color:#7FE3A8;margin:0 0 18px;text-shadow:0 0 8px rgba(127,227,168,.55)}
+.crt-insert{pointer-events:auto;background:none;border:0;padding:6px 8px;cursor:pointer;font:inherit;border-radius:8px}
+.crt-insert:hover .crt-floppy::after,.crt-insert:focus-visible .crt-floppy::after{animation:none;opacity:1}
+.crt-insert:hover .crt-plate,.crt-insert:focus-visible .crt-plate{color:#2d2c27}
+.crt-insert:focus-visible{outline:2px solid #F966BC;outline-offset:2px}
+.crt-idea-wrap{text-align:center;padding:4px 0 18px}
+.crt-idea-btn{display:inline-block!important;margin:0!important}
+.crt-pop{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,8,20,.74);overflow:auto}
+.crt-pop[hidden]{display:none}
+.cc-wrap{width:min(540px,100%);margin:auto;filter:drop-shadow(0 18px 26px rgba(0,0,0,.65));animation:ccin .28s ease-out}
+@keyframes ccin{from{transform:translateY(24px) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.cc-wrap{animation:none}}
+.cc{position:relative;background:#FBF6E6;color:#1B2238;clip-path:polygon(38px 0,100% 0,100% 100%,0 100%,0 38px);padding:0 0 18px}
+.cc-holes{height:16px;background:repeating-linear-gradient(90deg,#1B2238 0 7px,transparent 7px 16px) 38px 4px/100% 8px no-repeat;opacity:.8}
+.cc-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 22px 8px 44px;border-bottom:3px double #F966BC}
+.cc-title{font-family:var(--font-mono);font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:max(0.9rem,12px)!important;margin:0;color:#1B2238}
+.cc-no{font-family:var(--font-mono);letter-spacing:.12em;text-transform:uppercase;font-size:max(0.72rem,11.5px)!important;color:#5d5b52}
+.cc-body{padding:14px 22px 0}
+.cc-intro{font-family:var(--font-display);font-size:.98rem;line-height:1.45;margin:0 0 12px;color:#2a3150}
+.cc label{display:block;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;font-size:max(0.72rem,11.5px)!important;color:#4d4b44;margin:10px 0 2px}
+.cc textarea,.cc input{width:100%;box-sizing:border-box;font-family:var(--font-mono);font-size:16px;color:#1B2238;background:transparent;border:0;border-bottom:1px dashed #8C8A81;border-radius:0;padding:4px 2px;outline:none}
+.cc textarea{height:112px;resize:none;line-height:28px;padding:0 2px;background:repeating-linear-gradient(transparent 0 27px,#9DB7DA 27px 28px);border-bottom:0}
+.cc textarea:focus,.cc input:focus{background-color:rgba(249,102,188,.09);border-bottom-color:#F966BC}
+.cc-actions{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.cc .crt-key{margin-right:0;display:inline-block;padding:9px 16px 8px}
+.cc .crt-key.cc-send{background:linear-gradient(#FFD1EA,#F9A3D2);border-color:#B8508F;box-shadow:0 4px 0 #B8508F,0 7px 8px rgba(0,0,0,.3),inset 0 1px 0 #fff}
+.cc-msg{font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;color:#7a1f55;margin:10px 0 0;min-height:1.2em;line-height:1.4}
+.cc-msg a{color:#7a1f55;text-decoration:underline}
+.cc-foot{margin:14px 22px 0;padding-top:8px;border-top:2px dotted #8C8A81;font-family:var(--font-mono);font-size:max(0.72rem,11.5px)!important;letter-spacing:.06em;text-transform:uppercase;color:#5d5b52;text-align:center}
 .crt-key[hidden]{display:none}
 @media(max-width:699px){.crt-key{display:none}}
 .crt-chin{position:fixed;left:0;right:0;bottom:0;height:var(--chin);z-index:301;pointer-events:none;display:none;align-items:center;justify-content:space-between;padding:0 calc(var(--bz) * 2.2)}
@@ -504,7 +532,7 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
   <script>document.documentElement.classList.add("crt-js")</script>
   <div class="crt-bezel" aria-hidden="true"></div>
   <i class="crt-screw tl"></i><i class="crt-screw tr"></i><i class="crt-screw bl"></i><i class="crt-screw br"></i>
-  <div class="crt-chin"><span class="crt-left"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><span class="crt-mid" aria-hidden="true"><span class="crt-plate">Insert ideas</span><span class="crt-floppy"></span></span><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
+  <div class="crt-chin"><span class="crt-left"><svg class="crt-frog" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="#5FBF6A"><rect x="2" y="0" width="4" height="2"/><rect x="10" y="0" width="4" height="2"/><rect x="1" y="2" width="14" height="2"/><rect x="0" y="4" width="16" height="4"/><rect x="1" y="8" width="3" height="2"/><rect x="12" y="8" width="3" height="2"/><rect x="0" y="10" width="4" height="1"/><rect x="12" y="10" width="4" height="1"/></g><g class="crt-eyes"><rect x="3" y="0" width="2" height="2" fill="#fff"/><rect x="11" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="1" width="1" height="1" fill="#1B2238"/><rect x="12" y="1" width="1" height="1" fill="#1B2238"/></g><g fill="#F966BC"><rect x="2" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/></g><rect x="6" y="5" width="4" height="1" fill="#2E7D3A"/></svg><span class="crt-plate" aria-hidden="true"><b>Lily-1000</b><span class="crt-sub"> · 4 KB of pure vibes</span></span></span><button type="button" class="crt-mid crt-insert" data-open-card aria-label="Insert ideas: open a comment card to send Jessica an idea"><span class="crt-plate">Insert ideas</span><span class="crt-floppy"></span></button><span class="crt-knobs"><button type="button" class="crt-key" id="crt-fs" hidden>Full screen</button><span class="crt-vents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="crt-knob" aria-hidden="true"></i><i class="crt-knob" aria-hidden="true"></i><i class="crt-led" aria-hidden="true"></i></span></div>
 
 
   <div class="crt-screen" id="crt-screen">
@@ -624,8 +652,26 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
       <li><a href="mailto:support@thelilystudio.com">Contact</a></li>
     </ul>
     <p class="footer-copy">© 2026 The Lily Studio. All rights reserved.</p>
+  <div class="crt-idea-wrap"><button type="button" class="crt-key crt-idea-btn" data-open-card>Insert ideas</button></div>
   </footer>
-  <span class="crt-hot crt-hot-top" id="crt-hot-top"></span><span class="crt-hot crt-hot-bot" id="crt-hot-bot"></span><button type="button" class="crt-tab crt-tab-top" id="crt-tab-top" aria-label="Show the menu">&#9662; Menu</button><button type="button" class="crt-tab crt-tab-bot" id="crt-tab-bot" aria-label="Show the footer links">&#9652; More</button>
+  <span class="crt-hot crt-hot-top" id="crt-hot-top"></span><span class="crt-hot crt-hot-bot" id="crt-hot-bot"></span><button type="button" class="crt-tab crt-tab-top" id="crt-tab-top" aria-label="Show the menu">&#9662; Menu</button><button type="button" class="crt-tab crt-tab-bot" id="crt-tab-bot" aria-label="Show the footer links">&#9652; More</button><div class="crt-pop" id="crt-pop" hidden>
+    <div class="cc-wrap"><form class="cc" id="cc-form" role="dialog" aria-modal="true" aria-labelledby="cc-title" novalidate>
+      <div class="cc-holes" aria-hidden="true"></div>
+      <div class="cc-head"><h2 class="cc-title" id="cc-title">Comment card</h2><span class="cc-no">Lily-1000 · Suggestion dept.</span></div>
+      <div class="cc-body">
+        <p class="cc-intro">Got an idea, a question, or a post you wish existed? Type it on the card and it comes straight to me.</p>
+        <label for="cc-idea">Your idea</label>
+        <textarea id="cc-idea" maxlength="1500" placeholder="Type here..."></textarea>
+        <label for="cc-name">Your name (optional)</label>
+        <input id="cc-name" type="text" maxlength="80" autocomplete="name">
+        <label for="cc-email">Your email (only if you want a reply)</label>
+        <input id="cc-email" type="email" maxlength="120" autocomplete="email">
+        <div class="cc-actions"><button type="submit" class="crt-key cc-send">Send card</button><button type="button" class="crt-key" id="cc-close">Close</button></div>
+        <p class="cc-msg" id="cc-msg" role="status" aria-live="polite"></p>
+      </div>
+      <p class="cc-foot">Please do not fold, spindle, or mutilate.</p>
+    </form></div>
+  </div>
   </div>
 <script>
 /* Vintage screen v3: the blog scrolls inside the frame. The menu and the footer stay hidden until you summon them. */
@@ -659,6 +705,19 @@ if(fs&&req&&(document.fullscreenEnabled||document.webkitFullscreenEnabled)){
  fs.addEventListener('click',function(){if(cur()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{req.call(de);}});
  document.addEventListener('fullscreenchange',lab);document.addEventListener('webkitfullscreenchange',lab);
 }
+var pop=document.getElementById('crt-pop'),form=document.getElementById('cc-form'),ta=document.getElementById('cc-idea'),nm=document.getElementById('cc-name'),em=document.getElementById('cc-email'),msg=document.getElementById('cc-msg'),back=null;
+function openCard(){if(!pop)return;back=document.activeElement;pop.hidden=false;msg.textContent='';setTimeout(function(){ta.focus();},30);}
+function closeCard(){if(!pop||pop.hidden)return;pop.hidden=true;if(back&&back.focus)back.focus();}
+document.querySelectorAll('[data-open-card]').forEach(function(b){b.addEventListener('click',openCard);});
+document.getElementById('cc-close').addEventListener('click',closeCard);
+pop.addEventListener('mousedown',function(e){if(e.target===pop)closeCard();});
+document.addEventListener('keydown',function(e){if(pop.hidden)return;if(e.key==='Escape'){closeCard();}else if(e.key==='Tab'){var f=[].slice.call(form.querySelectorAll('textarea,input,button')).filter(function(x){return !x.disabled;});var a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}},true);
+form.addEventListener('submit',function(e){e.preventDefault();var idea=ta.value.trim();if(!idea){msg.textContent='The card is blank. Type an idea first, even a tiny one counts.';ta.focus();return;}
+ var who=nm.value.trim(),mail=em.value.trim();
+ var body='Idea:\\n'+idea+'\\n\\n'+(who?'From: '+who+'\\n':'')+(mail?'Reply to: '+mail+'\\n':'')+'\\n(Sent from the comment card on the Lily Studio blog)';
+ var href='mailto:support@thelilystudio.com?subject='+encodeURIComponent('Comment card from the blog')+'&body='+encodeURIComponent(body);
+ msg.innerHTML='Card printed! Your email app should open with it ready to send. If nothing pops up, email <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a> instead.';
+ window.location.href=href;});
 })();
 </script>
 
