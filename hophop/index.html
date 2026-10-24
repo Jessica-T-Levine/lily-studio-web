@@ -768,7 +768,7 @@
   let WATER_Y = 404;               // water line (updated to fit the screen)
   const FROG_SCREEN_X = 110;       // where the camera keeps the frog
   const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  let ctx = canvas.getContext("2d");   // "let": at Halloween the things in front of Hop Hop are drawn on a second layer (see draw())
   const stage = document.getElementById("stage");
   const scoreEl = document.getElementById("score");
   const bestEl = document.getElementById("best");
@@ -1815,7 +1815,9 @@
     if (busy) return;
     const dir = Math.random() < 0.5 ? 1 : -1, y = rand(70, Math.max(120, WATER_Y - 190));
     if (catOn && nextCat <= 0) {   // the black cat witch: one slow pass across the sky
-      flyers.push({ kind: "cat", dir, x: dir > 0 ? -130 : W + 130, baseY: y, y, t: rand(0, 5), speed: rand(30, 36), size: 0.95 });
+      // a little under half of her passes are farther back: about half the size, slower, and lower in the sky, near the hills
+      const far = Math.random() < 0.45, cy = far ? rand(WATER_Y - 150, WATER_Y - 100) : y, cross = far ? rand(32, 40) : rand(20, 26);
+      flyers.push({ kind: "cat", dir, x: dir > 0 ? -130 : W + 130, baseY: cy, y: cy, t: rand(0, 5), speed: (W + 260) / cross, size: far ? rand(0.46, 0.58) : 0.95 });
       nextCat = rand(180, 300); nextHwBat = Math.max(nextHwBat, 20); nextHwGhost = Math.max(nextHwGhost, 30);
     } else if (nextHwGhost <= 0) {
       flyers.push({ kind: "ghost", dir, x: dir > 0 ? -40 : W + 40, baseY: y, y, t: rand(0, 5), speed: rand(16, 22), size: 1 });
@@ -1899,7 +1901,7 @@
     ctx.save();
     if (frogLights.clip) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
     ctx.setTransform(frogLights.m);
-    LHC.drawLights(ctx, "ours", frogLights.A);
+    LHC.drawLights(ctx, "ours", Object.assign({}, frogLights.A, { glow: 0.12 * hwGlow() }));   // a small halo: about 0.12 at night, 0 by day
     ctx.restore();
   }
 
@@ -2906,6 +2908,20 @@
     drawCritters();
     drawFrog();
     drawTongue();
+    if (frogLights) {
+      // Halloween, Hop Hop the firefly: two passes, so his glowing chest is part of him. Everything up to Hop Hop gets the
+      // tint of the hour, then his glow (bright at night), then everything in front of him is drawn on a second layer,
+      // tinted the same way and laid on top, so a friend, petals, a fish or the reeds in front of him cover his glow.
+      hourTint(ctx, false);
+      drawFrogLights();
+      const main = ctx, layer = frontLayer();
+      ctx = layer; ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.clearRect(0, 0, W, H);
+      try { drawFront(); hourTint(ctx, true); } finally { ctx = main; }
+      main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.drawImage(layer.canvas, 0, 0); main.restore();
+    } else { drawFront(); hourTint(ctx, false); }
+  }
+  // everything that is in front of Hop Hop
+  function drawFront() {
     pads.forEach(p => {
       if (p.bloom > 0 && p.x - camX > -80 && p.x - camX < W + 80) {
         drawFlowerFront(p.x - camX, WATER_Y + 2 + Math.sin(time * 1.6 + p.phase) * 1.4, flowerScale(p), p.color);
@@ -2914,11 +2930,20 @@
     drawPal();           // a visiting friend in the front of the pond (Halloween)
     drawFish("front");   // fish nearer to you than the pads go on top of the frog and the flowers
     drawParticles(); drawPopups(); drawHint(); drawReeds();
-    if (window.LilySky) {   // the soft tint of the hour over the whole scene (gold at sunset, blue at night)
-      const L = window.LilySky.light(skyHour);
-      ctx.fillStyle = `rgba(${Math.round(L[0])}, ${Math.round(L[1])}, ${Math.round(L[2])}, ${L[3].toFixed(3)})`; ctx.fillRect(0, 0, W, H);
-    }
-    drawFrogLights();   // Hop Hop the firefly's glow stays bright at night
+  }
+  // the soft tint of the hour over the whole scene (gold at sunset, blue at night); onTop: only over what is already drawn on this layer
+  function hourTint(c, onTop) {
+    if (!window.LilySky) return;
+    const L = window.LilySky.light(skyHour);
+    c.save(); if (onTop) c.globalCompositeOperation = "source-atop";
+    c.fillStyle = `rgba(${Math.round(L[0])}, ${Math.round(L[1])}, ${Math.round(L[2])}, ${L[3].toFixed(3)})`; c.fillRect(0, 0, W, H);
+    c.restore();
+  }
+  let frontCanvas = null;
+  function frontLayer() {
+    if (!frontCanvas) frontCanvas = document.createElement("canvas");
+    if (frontCanvas.width !== canvas.width || frontCanvas.height !== canvas.height) { frontCanvas.width = canvas.width; frontCanvas.height = canvas.height; }
+    return frontCanvas.getContext("2d");
   }
 
   // ---------- loop ----------
