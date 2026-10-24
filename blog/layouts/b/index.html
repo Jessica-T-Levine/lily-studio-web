@@ -907,6 +907,10 @@ button.pc-box::before,button.pc-grip::before{content:"";position:absolute;inset:
 .blog-end-return .post-back:active{transform:translateY(2px);box-shadow:0 0 8px rgba(127,227,168,.5),0 1px 0 #04101f!important}
 .blog-end-return .post-back:focus-visible{outline:2px solid #7FE3A8;outline-offset:3px}
 .dn-title h1 .crt-cursor{width:1em!important}
+/* Green mode: the terminal text and Return key use the exact same neon mint */
+html.crt-greenmode .crt-boot,html.crt-greenmode .blog-end-line{color:#6BF2A8;text-shadow:0 0 8px rgba(107,242,168,.55)}
+html.crt-greenmode .blog-end-return .post-back{color:#6BF2A8!important;border-color:#6BF2A8!important;box-shadow:0 0 10px rgba(107,242,168,.45),inset 0 0 8px rgba(107,242,168,.12),0 3px 0 #04101f!important;text-shadow:0 0 6px rgba(107,242,168,.6)}
+html.crt-greenmode .blog-end-return .post-back:focus-visible{outline-color:#6BF2A8}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -1056,14 +1060,14 @@ function crtProp(){var z=parseFloat(getComputedStyle(de).zoom)||1,w=(window.inne
 crtProp();function crtPropLater(){crtProp();requestAnimationFrame(crtProp);setTimeout(crtProp,120);}window.addEventListener('resize',crtPropLater);window.addEventListener('orientationchange',crtPropLater);window.addEventListener('load',crtPropLater);
 var rb=null,rbLast=0,pinkRgb='249,102,188';
 function setNeon(hex,rgb){var st=de.style;st.setProperty('--neon',hex);st.setProperty('--neon-rgb',rgb);st.setProperty('--pink',hex);st.setProperty('--keep',hex);st.setProperty('--keep-rgb',rgb);}
-function stopRb(){if(rb){cancelAnimationFrame(rb);rb=null;}}
+function stopRb(){if(rb){cancelAnimationFrame(rb);rb=null;}de.classList.remove('crt-greenmode');}
 function hsl(h){var s=.95,l=.74,a=s*Math.min(l,1-l),f=function(n){var k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,9-k,1));};return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];}
 function rbLoop(t){if(t-rbLast>60){rbLast=t;var c=hsl((t/45)%360);setNeon('rgb('+c.join(',')+')',c.join(','));if(kRain)kRain.style.setProperty('--fc','rgb('+c.join(',')+')');}rb=requestAnimationFrame(rbLoop);}
 function flash(el,col,cls){el.style.setProperty('--fc',col);el.classList.remove('flash','rbflash');void el.offsetWidth;el.classList.add(cls||'flash');clearTimeout(el._ft);el._ft=setTimeout(function(){el.classList.remove('flash','rbflash');},520);}
 function setOn(el,col,rbw){[kPink,kGreen,kRain].forEach(function(k){if(k){k.classList.remove('on','rb');k.setAttribute('aria-pressed','false');}});if(!el)return;el.style.setProperty('--fc',col);el.classList.add('on');if(rbw)el.classList.add('rb');el.setAttribute('aria-pressed','true');}
 var kRain=document.getElementById('crt-kn'),kGreen=document.getElementById('crt-ks'),kPink=document.getElementById('crt-ka');
 if(kPink)kPink.addEventListener('click',function(){stopRb();setNeon('#F966BC','249,102,188');setOn(kPink,'#F966BC');});
-if(kGreen)kGreen.addEventListener('click',function(){stopRb();setNeon('#6BF2A8','107,242,168');setOn(kGreen,'#6BF2A8');});
+if(kGreen)kGreen.addEventListener('click',function(){stopRb();setNeon('#6BF2A8','107,242,168');setOn(kGreen,'#6BF2A8');de.classList.add('crt-greenmode');});
 setOn(kPink,'#F966BC');
 if(kRain)kRain.addEventListener('click',function(){stopRb();if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){setNeon('#B98BFF','185,139,255');}else{rb=requestAnimationFrame(rbLoop);}setOn(kRain,'#B98BFF',true);});
 document.addEventListener('click',function(e){var rbn=e.target.closest&&e.target.closest('.react-btn');if(!rbn)return;var g=rbn.closest('.react'),key='lily-blog-react-'+(g.getAttribute('data-post')||'')+'-'+rbn.getAttribute('data-r'),n=0;try{n=parseInt(localStorage.getItem(key)||'0',10)||0;}catch(x){}n++;try{localStorage.setItem(key,String(n));}catch(x){}rbn.querySelector('.react-n').textContent=String(n);rbn.classList.remove('glow');void rbn.offsetWidth;rbn.classList.add('glow');clearTimeout(rbn._t);rbn._t=setTimeout(function(){rbn.classList.remove('glow');},520);});
