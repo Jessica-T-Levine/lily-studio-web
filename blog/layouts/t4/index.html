@@ -492,10 +492,12 @@ html.crt-prop:not(.crt-fsmode) .crt-chin .crt-eject{width:21.86px;height:15.03px
 html.crt-prop:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:84.94px}
 html.crt-prop:not(.crt-fsmode) .crt-chin #crt-fs:not([hidden]){display:inline-block!important}
 @media(max-width:699px){html .crt-chin .crt-mid.crt-slotwrap{gap:10.5px}}
+/* Strict frog rule: the frog (and Full screen on the right) always start 12px inside the corner screws, never past them */
+@media(max-width:699px){html{--frog-x:calc(var(--bz) * .5 + 6px + 12px)}}
 /* Phones: same frame layout as tablets, slightly taller plate so keys stay tappable */
 @media(max-width:699px){
 html.crt-js:not(.crt-fsmode){--chin:88px}
-html.crt-js:not(.crt-fsmode) .crt-chin{display:flex!important;justify-content:flex-start!important;align-items:center!important;box-sizing:border-box;padding:calc(var(--ring) + var(--edge) - 2px) max(14px,calc(var(--bz) * .95)) calc(var(--edge) + 4px)!important;gap:0}
+html.crt-js:not(.crt-fsmode) .crt-chin{display:flex!important;justify-content:flex-start!important;align-items:center!important;box-sizing:border-box;padding:calc(var(--ring) + var(--edge) - 2px) var(--frog-x) calc(var(--edge) + 4px)!important;gap:0}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-left{display:flex!important;align-items:center;gap:6px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-frog{width:22px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-left .crt-plate{display:inline!important;font-size:8px!important;letter-spacing:.14em}
@@ -511,7 +513,7 @@ html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs:not([hidden]){display:inline-bloc
 }
 @media(max-width:699px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-plate,html.crt-js:not(.crt-fsmode) .crt-chin .crt-key{white-space:nowrap}}
 @media(max-width:399px){
-html.crt-js:not(.crt-fsmode) .crt-chin{padding-left:21px!important;padding-right:19px!important}
+html.crt-js:not(.crt-fsmode) .crt-chin{padding-left:var(--frog-x)!important;padding-right:var(--frog-x)!important}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-frog{width:19px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-left{gap:4px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-left .crt-plate{font-size:7px!important;letter-spacing:.1em}
@@ -519,7 +521,12 @@ html.crt-js:not(.crt-fsmode) .crt-chin .crt-knobs{margin-left:8px;gap:5px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-knob{width:13px;height:13px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-slit{width:70px}
 html.crt-js:not(.crt-fsmode) .crt-chin .crt-slotbtn,html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{font-size:8px!important;padding:5px 5px 4px!important;letter-spacing:.06em}
-html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:16px}
+html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:12px}
+/* Phones: the eject knob sits beside the slot, so Full screen always leaves room for it */
+@media(max-width:699px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-mid.crt-slotwrap{margin-right:24px}html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:0!important}}
+@media(max-width:399px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-mid.crt-slotwrap{margin-right:22px}}
+@media(max-width:699px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-knobs{margin-right:10px}}
+@media(max-width:345px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-left .crt-plate{display:none!important}}
 }
 
 
@@ -876,6 +883,24 @@ button.pc-box::before,button.pc-grip::before{content:"";position:absolute;inset:
 .react-i{font-size:1.5rem;line-height:1}
 .react-n{font-size:max(.7rem,11px);letter-spacing:.08em;color:rgba(255,255,255,.8)}
 .react-btn.glow{box-shadow:0 0 16px 5px rgba(var(--neon-rgb),.9);transition:none}
+
+/* Post pages in the home page look */
+.post-l4 .post-title{margin-bottom:26px}
+.post-l4 .post-title .dn-topline{margin-bottom:18px}
+.post-l4 .blog-nav{display:flex;flex-wrap:wrap;gap:12px;margin:0}
+.post-l4 .blog-nav .post-back{margin:0}
+.post-l4 .post-win{display:block;margin:0 0 34px}
+.post-l4 .post-win>.win-body{padding:clamp(20px,3vw,40px)}
+.post-l4 .post-win .dn-meta{margin:0 0 12px}
+.post-l4 .post-h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(1.9rem,3.4vw,2.7rem);line-height:1.15;color:var(--cream);margin:0 0 24px;text-wrap:balance;max-width:24ch}
+.post-l4 .post-l4-art{height:clamp(170px,22vw,280px);margin:0 0 30px;display:flex;overflow:hidden}
+.post-l4 .post-l4-art img{flex:1 1 0;min-width:0;width:100%;height:100%;object-fit:cover}
+.post-l4 .post-l4-art svg{width:100%;height:100%;display:block}
+.post-l4 .post-body{padding:0;max-width:70ch}
+.post-l4 .post-body>:first-child{margin-top:0}
+.post-l4 .post-body a{color:var(--neon)}
+.post-l4 .post-more-win{display:block}
+@media(max-width:640px){.post-l4 .dn-row{grid-template-columns:1fr}.post-l4 .dn-row .post-art{min-height:140px}}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
