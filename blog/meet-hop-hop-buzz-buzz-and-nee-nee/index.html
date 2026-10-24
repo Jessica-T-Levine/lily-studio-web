@@ -912,6 +912,9 @@ button.pc-box::before,button.pc-grip::before{content:"";position:absolute;inset:
 html.crt-greenmode .crt-boot,html.crt-greenmode .blog-end-line{color:#6BF2A8;text-shadow:0 0 8px rgba(107,242,168,.55)}
 html.crt-greenmode .blog-end-return .post-back{color:#6BF2A8!important;border-color:#6BF2A8!important;box-shadow:0 0 10px rgba(107,242,168,.45),inset 0 0 8px rgba(107,242,168,.12),0 3px 0 #04101f!important;text-shadow:0 0 6px rgba(107,242,168,.6)}
 html.crt-greenmode .blog-end-return .post-back:focus-visible{outline-color:#6BF2A8}
+/* Tuesday Tips sign-up card */
+.tc .tc-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0}
+.tc .cc-head{border-bottom-color:#7FE3A8}
 /* ── Text-size floor: nothing smaller than ~11px, readable labels ── */
 .footer-copy,.pp-fine,.card-link,.section-label,.game-tag,.card-badge,.card-cat,.coming-tag,.tst-fine,.tst-pill{font-size:max(0.72rem,11.5px)!important}
 .pp-crumbs,.pp-crumbs a,.pp-crumbs span,.nav-links a,.nav a,footer a{font-size:max(0.76rem,12px)!important}
@@ -1021,6 +1024,22 @@ footer .footer-links a{font-size:max(0.72rem,11.5px)!important;letter-spacing:0.
       <p class="cc-foot">Please do not fold, spindle, or mutilate.</p>
     </form></div>
   </div>
+  <div class="crt-pop" id="crt-tips" hidden>
+    <div class="cc-wrap"><form class="cc tc" id="tc-form" action="https://app.kit.com/forms/9972716/subscriptions" method="post" role="dialog" aria-modal="true" aria-labelledby="tc-title" novalidate>
+      <div class="cc-holes" aria-hidden="true"></div>
+      <div class="cc-head"><h2 class="cc-title" id="tc-title">Tuesday Tips</h2><span class="cc-no">Lily-1000 · Mailing list</span></div>
+      <div class="cc-body">
+        <p class="cc-intro">One tiny Claude tip and one great skill, every Tuesday morning. Takes 60 seconds to read. Unsubscribe anytime.</p>
+        <label for="tc-email">Your email</label>
+        <input id="tc-email" type="email" name="email_address" maxlength="120" placeholder="you@example.com" autocomplete="email" required>
+        <input type="hidden" name="tags[]" value="24064865">
+        <input class="tc-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="cc-actions"><button type="submit" class="crt-key cc-send" id="tc-send">Send me the tips</button><button type="button" class="crt-key" id="tc-close">Close</button></div>
+        <p class="cc-msg" id="tc-msg" role="status" aria-live="polite"></p>
+      </div>
+      <p class="cc-foot">From The Lily Studio · No spam, ever · One click to unsubscribe</p>
+    </form></div>
+  </div>
   </div>
 <script>
 /* Vintage screen v3: the blog scrolls inside the frame. The menu and the footer stay hidden until you summon them. */
@@ -1104,6 +1123,22 @@ form.addEventListener('submit',function(e){e.preventDefault();var idea=ta.value.
  var href='mailto:support@thelilystudio.com?subject='+encodeURIComponent('Comment card from the blog')+'&body='+encodeURIComponent(body);
  msg.innerHTML='Card printed! Your email app should open with it ready to send. If nothing pops up, email <a href="mailto:support@thelilystudio.com">support@thelilystudio.com</a> instead.';
  window.location.href=href;});
+
+var tp=document.getElementById('crt-tips'),tf=document.getElementById('tc-form'),te=document.getElementById('tc-email'),tm=document.getElementById('tc-msg'),tsb=document.getElementById('tc-send'),tb=null;
+function openTips(e){if(!tp)return;if(e)e.preventDefault();tb=document.activeElement;tp.hidden=false;tm.textContent='';setTimeout(function(){te.focus();},30);}
+function closeTips(){if(!tp||tp.hidden)return;tp.hidden=true;if(tb&&tb.focus)tb.focus();}
+if(tp){document.querySelectorAll('[data-open-tips]').forEach(function(b){b.addEventListener('click',openTips);});
+document.getElementById('tc-close').addEventListener('click',closeTips);
+tp.addEventListener('mousedown',function(e){if(e.target===tp)closeTips();});
+document.addEventListener('keydown',function(e){if(tp.hidden)return;if(e.key==='Escape'){closeTips();}else if(e.key==='Tab'){var f=[].slice.call(tf.querySelectorAll('input:not([type=hidden]):not(.tc-hp),button')).filter(function(x){return !x.disabled;});var a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}},true);
+tf.addEventListener('submit',function(e){e.preventDefault();if(tf.website.value)return;
+ if(!te.value.trim()||!te.checkValidity()){tm.textContent='Please type a real email address, like you@example.com.';te.focus();return;}
+ /*TIPS-SEND*/var data=new FormData(tf);data.delete('website');tsb.disabled=true;tm.textContent='Adding you to the list…';
+ fetch(tf.action,{method:'POST',headers:{'Accept':'application/json'},body:data})
+ .then(function(res){return res.json().then(function(j){return {ok:res.ok,j:j};},function(){return {ok:res.ok,j:{}};});})
+ .then(function(r){if(r.ok&&r.j.status==='success'){tf.reset();tm.textContent='Almost done! Check your inbox and tap the button in our email to confirm. 💌';}else if(r.j.status==='quarantined'&&r.j.url){window.location.href=r.j.url;}else{throw new Error('Kit said no');}})
+ .catch(function(){tf.website.disabled=true;tf.submit();})
+ .then(function(){tsb.disabled=false;});/*/TIPS-SEND*/});}
 })();
 </script>
 
