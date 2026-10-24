@@ -465,7 +465,8 @@ button.post-back{font:inherit;font-family:var(--font-mono);text-transform:upperc
 .crt-slit{width:clamp(70px,7vw,112px);height:clamp(11px,1.1vw,15px)}
 .crt-eject{position:absolute;left:calc(100% + 10px);top:0;width:clamp(16px,1.6vw,22px);height:clamp(11px,1.1vw,15px)}
 .crt-slotbtn{padding:3px 10px 2px}
-@media(min-width:700px){html:not(.crt-fsmode) .crt-chin{box-sizing:border-box;padding-top:calc(var(--ring) + var(--edge) + 2px);padding-bottom:calc(var(--edge) * .9)}
+@media(min-width:700px){html:not(.crt-fsmode) .crt-chin{box-sizing:border-box;padding-top:calc(var(--ring) + var(--edge) - 4px);padding-bottom:calc(var(--edge) + 10px);padding-right:calc(var(--bz) * 1.37)!important}
+ html:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:calc(clamp(18px,2.4vw,44px) + var(--bz) * .83)}
  html:not(.crt-fsmode) .crt-mid.crt-slotwrap{gap:clamp(4px,.55vw,8px)}}
 .crt-scroll::after{height:142px!important}
 .blog-end{margin-top:40px}
