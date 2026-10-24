@@ -493,6 +493,36 @@ html.crt-prop:not(.crt-fsmode) .crt-chin .crt-eject{width:21.86px;height:15.03px
 html.crt-prop:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:84.94px}
 html.crt-prop:not(.crt-fsmode) .crt-chin #crt-fs:not([hidden]){display:inline-block!important}
 @media(max-width:699px){html .crt-chin .crt-mid.crt-slotwrap{gap:10.5px}}
+/* Phones: same frame layout as tablets, slightly taller plate so keys stay tappable */
+@media(max-width:699px){
+html.crt-js:not(.crt-fsmode){--chin:88px}
+html.crt-js:not(.crt-fsmode) .crt-chin{display:flex!important;justify-content:flex-start!important;align-items:center!important;box-sizing:border-box;padding:calc(var(--ring) + var(--edge) - 2px) max(14px,calc(var(--bz) * .95)) calc(var(--edge) + 4px)!important;gap:0}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-left{display:flex!important;align-items:center;gap:6px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-frog{width:22px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-left .crt-plate{display:inline!important;font-size:8px!important;letter-spacing:.14em}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-sub,html.crt-js:not(.crt-fsmode) .crt-chin .crt-vents{display:none!important}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-knobs{display:flex!important;align-items:center;margin-left:11px;gap:7px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-knob{display:block!important;width:15px;height:15px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-mid.crt-slotwrap{display:flex!important;flex-direction:column;align-items:center;margin-left:auto;gap:7px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-slit{width:80px;height:5px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-eject{width:15px;height:11px;left:calc(100% + 6px)}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-slotbtn,html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{font-size:8.5px!important;padding:5px 7px 4px!important;letter-spacing:.08em}
+html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:24px}
+html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs:not([hidden]){display:inline-block!important}
+}
+@media(max-width:699px){html.crt-js:not(.crt-fsmode) .crt-chin .crt-plate,html.crt-js:not(.crt-fsmode) .crt-chin .crt-key{white-space:nowrap}}
+@media(max-width:399px){
+html.crt-js:not(.crt-fsmode) .crt-chin{padding-left:21px!important;padding-right:19px!important}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-frog{width:19px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-left{gap:4px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-left .crt-plate{font-size:7px!important;letter-spacing:.1em}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-knobs{margin-left:8px;gap:5px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-knob{width:13px;height:13px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-slit{width:70px}
+html.crt-js:not(.crt-fsmode) .crt-chin .crt-slotbtn,html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{font-size:8px!important;padding:5px 5px 4px!important;letter-spacing:.06em}
+html.crt-js:not(.crt-fsmode) .crt-chin #crt-fs{margin-left:16px}
+}
+
 
 .crt-scroll::after{height:142px!important}
 .blog-end{margin-top:40px}
