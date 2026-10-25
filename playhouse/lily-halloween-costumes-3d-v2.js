@@ -326,13 +326,13 @@
   // ---------- Golden's little bee: big pink heart wings + an antennae headband ----------
   function beeWings(c, K, A, layer) {
     const isFront = layer === "front", flut = A.air ? (0.5 - 0.5 * Math.cos(A.t * 34)) * 0.5 : 0.1 + 0.1 * Math.sin(A.t * 5) + (A.wob || 0) * 0.08;
-    const at0 = onBody(K, [-0.75, 0, 0.5]).p;
-    [[1, 40, 11.5, [-0.25, 0.62, 0.74], 1, 0], [0.8, 31, 8.6, [-0.45, 0.85, 0.22], 0.6, 0.4]].forEach(([a, L, w, d, big, ph]) => {
+    const at0 = onBody(K, [-0.7, 0, 0.55]).p;
+    [[1, 46, 13, [-0.5, 0.84, 0.36], 1, 0], [0.8, 36, 10, [-0.62, 0.78, -0.04], 0.6, 0.4]].forEach(([a, L, w, d, big, ph]) => {
       [-1, 1].forEach(side => {
-        const at = add(at0, [0, side * 3, 0]);
+        const at = add(at0, [0, side * 5, 0]);
         let D = norm([d[0], side * d[1], d[2]]);
-        D = rot(D, norm([-1, 0, 0.12]), -side * (flut * 0.9 + ph * 0.0));
-        let Wd = norm(cross([1, 0, 0.15], D)); if (Wd[2] < 0) Wd = [-Wd[0], -Wd[1], -Wd[2]];
+        D = rot(D, norm([-1, 0, 0.1]), -side * flut * 0.8);
+        const Z = [0.35, 0, 1]; let Wd = norm(sub(Z, [D[0] * dot(D, Z), D[1] * dot(D, Z), D[2] * dot(D, Z)]));
         const mid = add(at, D, L * 0.55);
         if ((K.depth(mid) > K.dBody) === isFront) return;                    // behind him: drawn before him, in front: after
         const prof = u => w * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.62)), 0.7) * (1 - 0.16 * Math.exp(-Math.pow((u - 0.97) / 0.05, 2)));
@@ -356,13 +356,12 @@
   }
   function beeBand(c, K, A, layer) {
     if (layer !== "front") return;
-    const P = K.P, gap = P.gap || 1, sec = A.sec || 0, wob = A.wob || 0, bx = 3, yy = 9 * gap + 2.5;
-    const top = y => BODY_C[2] + 1.6 + K.tallUp + BODY_R[2] * (P.tall || 1) * Math.sqrt(Math.max(0.02, 1 - Math.pow((bx - BODY_C[0]) / BODY_R[0], 2) - Math.pow(y / (BODY_R[1] * (P.wide || 1)), 2))) - (P.drop || 0) * 0.3 + 0.8;
-    const pt = y => [bx, y, top(y)], sc = v => K.scr(v);
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, tl = P.tall || 1, Ry = BODY_R[1] * (P.wide || 1) + 1.8, z0 = 19 + K.tallUp + 1, Rz = 26 * tl - (P.drop || 0) * 0.5 + 1, bx = -1;
+    const pt = th => [bx, Ry * Math.sin(th), z0 + Rz * Math.cos(th)], sc = v => K.scr(v), TH = 1.38;
     c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
-    c.beginPath(); for (let i = 0; i <= 16; i++) { const q = sc(pt(-yy + 2 * yy * i / 16)); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke();
+    c.beginPath(); for (let i = 0; i <= 24; i++) { const q = sc(pt(-TH + 2 * TH * i / 24)); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke();
     [-1, 1].forEach((side, j) => {
-      const base = pt(side * yy), sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
+      const base = pt(side * 0.62), sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
       const tip = add(base, [1.5 + sw * 0.3, side * (8 + sw), up]), c1 = add(base, [0, side * 2, 9]), c2 = add(base, [1, side * 7, up - 5]);
       const a = sc(base), b = sc(c1), d = sc(c2), t = sc(tip);
       c.lineWidth = Math.max(0.9, 1.8 * K.S); c.beginPath(); c.moveTo(a.x, a.y); c.bezierCurveTo(b.x, b.y, d.x, d.y, t.x, t.y); c.stroke();
