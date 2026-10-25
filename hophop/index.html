@@ -2071,7 +2071,7 @@
     laterLight(() => drawPlaneLights(t));
   }
   function drawPlaneLights(t) {
-    const nt = hwGlow(), gr = 7 + 4 * nt, ga = 0.7 + 0.25 * nt;
+    const nt = hwGlow(), gr = 5 + 2 * nt, ga = 0.6 + 0.2 * nt;   // small, so the toy plane itself still shows
     [[-18.4, -0.3, "255, 90, 110", "#FF5A6E"], [14.4, -1.8, "110, 235, 150", "#6EEB96"]].forEach(([lx, ly, rgb, col]) => {
       const g = ctx.createRadialGradient(lx, ly, 0.3, lx, ly, gr); g.addColorStop(0, `rgba(${rgb}, ${ga})`); g.addColorStop(1, `rgba(${rgb}, 0)`);
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, gr, 0, Math.PI * 2); ctx.fill();
