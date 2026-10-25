@@ -404,12 +404,52 @@
     c.restore();
   }
 
+
+
+  // is a spot hidden behind her round body or one of her eye bumps, as seen from the camera?
+  function occluded(K, v, shBody, shBump) {
+    const cy = Math.cos(K.yaw), sy = Math.sin(K.yaw), cp = Math.cos(K.pitch), sp = Math.sin(K.pitch), fv = [cy * cp, -sy * cp, -sp], P = K.P, gap = P.gap || 1, brB = BUMP_R * (P.bump || 1), bzB = BUMP_C[2] + K.tallUp - (P.drop || 0);
+    const blob = (C, R, sh) => { const q = [0, 1, 2].map(i => (v[i] - C[i]) / R[i]), u = [0, 1, 2].map(i => -fv[i] / R[i]); const a = dot(u, u), b = dot(q, u), cc = dot(q, q) - sh; if (cc <= 0) return true; const disc = b * b - a * cc; return disc > 0 && b < 0; };
+    return blob([BODY_C[0], 0, BODY_C[2]], [BODY_R[0], BODY_R[1] * (P.wide || 1), BODY_R[2] * (P.tall || 1)], shBody) || [-1, 1].some(sd => blob([BUMP_C[0], sd * BUMP_C[1] * gap, bzB], [brB, brB, brB], shBump));
+  }
+
+  // ---------- Pink's party mask: soft purple patches that wrap each eye (the eye shows through), a bridge, gold sparkles and a bow ----------
+  const MASK_L = [204, 164, 244], MASK_D = [146, 104, 208];
+  function partyMask(c, K, A, layer) {
+    if (layer !== "front") return;
+    const P = K.P, gap = P.gap || 1, br = BUMP_R * (P.bump || 1), bz = BUMP_C[2] + K.tallUp - (P.drop || 0), sec = A.sec || 0, wob = A.wob || 0, hi = K.S > 2.2;
+    const shade = lit => rgb(mix(MASK_D, MASK_L, clamp(0.2 + lit * 0.9, 0, 1)));
+    const E0 = [0.8, 0.2, 0.12];                                                       // where each eye looks out of its bump
+    const sides = [-1, 1].map(sd => { const C = [BUMP_C[0], sd * BUMP_C[1] * gap, bz], e = norm([E0[0], sd * E0[1], E0[2]]);
+      let f1 = norm(cross(e, [0, 0, 1])), f2 = norm(cross(e, f1)); return { sd, C, e, f1, f2 }; });
+    sides.forEach(S => {
+      const rho = br + 0.8, a0 = 0.5, a1 = 1.2;                                        // a ring of mask around the eye: hole of 0.5 rad, out to 1.2 rad
+      const surf = (u, v) => { const a = a0 + (a1 - a0) * u, ph = -v * 2 * Math.PI, k = Math.sin(a) * rho, w = Math.cos(a) * rho;
+        return [0, 1, 2].map(i => S.C[i] + S.e[i] * w + (S.f1[i] * Math.cos(ph) + S.f2[i] * Math.sin(ph)) * k * (1 + 0.1 * Math.cos(ph * 2))); };
+      drawMesh(c, K, surf, hi ? 8 : 4, hi ? 48 : 28, shade, null);
+      // gold sparkle on the outer rim
+      const sp = surf(0.72, 0.18 + (S.sd > 0 ? 0 : 0.5)), q = K.scr(sp), face = -K.ndepth(norm(sub(sp, S.C)));
+      if (face > 0.05) { const r = 2.4 * K.S, tw = 0.8 + 0.2 * Math.sin(A.t * 3 + S.sd);
+        c.save(); c.fillStyle = "#FFE27A"; c.beginPath(); for (let i = 0; i < 8; i++) { const an = i / 8 * Math.PI * 2, rr = i % 2 ? r * 0.4 : r * tw; c.lineTo(q.x + Math.cos(an) * rr, q.y + Math.sin(an) * rr); } c.fill(); c.restore(); }
+    });
+    // the bridge between the two patches, lying on her forehead
+    const L = sides[0], R = sides[1], yA = L.C[1], yB = R.C[1];
+    const bridge = (u, v) => { const y = yA + (yB - yA) * u, zc = bz + br * 0.55, x = BUMP_C[0] + br * 0.62 + 1.2 * Math.cos((u - 0.5) * 3); return [x, y, zc - (v - 0.5) * 6.4]; };
+    drawMesh(c, K, (u, v) => bridge(u, v), 6, 2, shade, q => !occluded(K, q.pts[0], 0.9, 0.5));
+    // the soft bow on one side, wiggling a little
+    const bowAt = add(R.C, [0.2, R.sd * (br + 1.4), br * 0.5]), b = K.scr(bowAt), s0 = K.S, wig = Math.sin(A.t * 7) * 0.15 + sec * 0.35 + wob * 0.15, face = Math.abs(K.ndepth([0, 1, 0]));
+    if (occluded(K, bowAt, 0.9, 0.5)) return;
+    c.save(); c.translate(b.x, b.y); c.rotate(wig); c.fillStyle = "#C79BEA";
+    [-1, 1].forEach(dr => { c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(dr * 4 * s0, -7 * s0, dr * 10 * s0, -6 * s0, dr * 9 * s0, -1 * s0); c.bezierCurveTo(dr * 8 * s0, 3 * s0, dr * 3 * s0, 3 * s0, 0, 0); c.fill(); });
+    c.fillStyle = "#A578DA"; c.beginPath(); c.arc(0, 0, 2.2 * s0, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
   function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
     const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.7, 0, 0.55]).p, [-12, 0, 16]));
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll] };
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
