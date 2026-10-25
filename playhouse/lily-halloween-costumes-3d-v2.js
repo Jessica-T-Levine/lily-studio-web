@@ -362,7 +362,7 @@
     const blob = (v, C, R, sh) => { const q = [0, 1, 2].map(i => (v[i] - C[i]) / R[i]), u = [0, 1, 2].map(i => -fv[i] / R[i]);
       const a = dot(u, u), b = dot(q, u), cc = dot(q, q) - sh; if (cc <= 0) return true; const disc = b * b - a * cc; return disc > 0 && b < 0; };
     const BODY_BLOB = [[BODY_C[0], 0, BODY_C[2]], [BODY_R[0], BODY_R[1] * ((K.P.wide) || 1), BODY_R[2] * ((K.P.tall) || 1)]];
-    const hidden = v => blob(v, BODY_BLOB[0], BODY_BLOB[1], 0.94) || [-1, 1].some(sd => blob(v, [BUMP_C[0], sd * BUMP_C[1] * gapB, bzB], [brB, brB, brB], 0.9));   // her body and both eyes can hide it
+    const hidden = v => blob(v, BODY_BLOB[0], BODY_BLOB[1], 0.9) || [-1, 1].some(sd => blob(v, [BUMP_C[0], sd * BUMP_C[1] * gapB, bzB], [brB, brB, brB], 0.62));   // her body and both eyes can hide it
     const mine = v => hidden(v) !== isFront;
     const P = K.P, sec = A.sec || 0, wob = A.wob || 0, gap = P.gap || 1, bx = 4.5;
     const Ry0 = BODY_R[1] * (P.wide || 1), Rz0 = BODY_R[2] * (P.tall || 1), ex = Math.pow((bx - BODY_C[0]) / BODY_R[0], 2);
