@@ -1330,7 +1330,7 @@
     if (turtle) { const a = Math.min(turtle.x0, turtle.x1), b = Math.max(turtle.x0, turtle.x1), z = turtle.size; o.push({ l: a - 30 * z, r: b + 30 * z, t: turtle.y - 24 * z, b: turtle.y + 14 * z }); }
     hwPumpkins().forEach(m => { const top = WATER_Y + 62, bot = H - 36; if (bot <= top) return; const sc = lerp(0.42, 0.8, m.depth), by = top + m.depth * (bot - top); o.push({ l: m.x - 75 * sc, r: m.x + 75 * sc, t: by - 95 * sc, b: by + 16 }); });
     fish.forEach(f => { if (f.mv) o.push(Object.assign({ fishBox: true }, f.box)); });
-    palBoxes().forEach(b => o.push(b));   // a visiting friend, his pad and the air he hops through (like the pumpkins: never touched)
+    palBoxes().forEach(b => o.push({ l: b.l - 55, r: b.r + 55, t: b.t - 20, b: b.b + 15 }));   // a visiting friend, his pad and the air he hops through (like the pumpkins: never touched)
     critters.concat(flyers).forEach(c => o.push({ l: c.x + camX - 50, r: c.x + camX + 50, t: c.y - 50, b: c.y + 50 }));
     return o;
   }
@@ -1611,14 +1611,16 @@
     if (L.t >= 0.5) drawBug(L.bug); // the caught bug rides the tongue back
   }
   // ---------- rare storybook flyers far off in the distance: a flying pig, unicorn and bunny ----------
-  let flyers = [], nextFlyer = rand(25, 45), flyerCam = null;
+  // test: #unicorn on the end of the address sends the unicorn by within a couple of seconds
+  const UNICORN_FIRST = /[#&]unicorn/.test(location.hash);
+  let flyers = [], nextFlyer = UNICORN_FIRST ? 1.5 : rand(25, 45), flyerCam = null;
   const FLYER_KINDS = ["pig", "unicorn", "bunny"];
-  let lastFlyerKind = null;
+  let lastFlyerKind = null, unicornTest = UNICORN_FIRST;
   function updateFlyers(dt) {
     nextFlyer -= dt;
     if (nextFlyer <= 0 && flyers.length === 0) {
       const options = FLYER_KINDS.filter(k => k !== lastFlyerKind); // never the same one twice in a row
-      const kind = options[Math.floor(Math.random() * options.length)];
+      const kind = unicornTest ? (unicornTest = false, "unicorn") : options[Math.floor(Math.random() * options.length)];
       lastFlyerKind = kind;
       const dir = Math.random() < 0.5 ? 1 : -1;
       flyers.push({ kind, dir, x: dir > 0 ? -40 : W + 40, baseY: rand(70, Math.max(120, WATER_Y - 190)), y: 0, t: rand(0, 5),
@@ -1632,7 +1634,7 @@
       f.x += f.dir * f.speed * dt - shift;
       f.y = f.baseY + Math.sin(f.t * 1.1) * 10;
     });
-    flyers = flyers.filter(f => { const m = f.kind === "plane" ? 380 : f.kind === "cat" ? 180 : 60; return f.dir > 0 ? f.x < W + m : f.x > -m; });   // the cat's sparkle trail is long
+    flyers = flyers.filter(f => { const m = f.kind === "plane" ? (f.trick ? 120 : 380) : f.kind === "cat" ? 180 : 60; return f.dir > 0 ? f.x < W + m : f.x > -m; });   // the cat's sparkle trail is long
   }
   function drawWing(x, y, t, scaleW) {
     ctx.save(); ctx.translate(x, y);
@@ -1740,6 +1742,51 @@
     ctx.beginPath(); ctx.arc(10.5, -5.5, 1, 0, Math.PI * 2); ctx.fill();
     drawWing(-1, -5, t, 0.95);
   }
+  // At night the unicorn glows like Hop Hop's firefly chest: her body lit cream-white in the middle and soft yellow-green
+  // at the edges, a small soft light around her, gently pulsing, and a little trail of warm sparkles. Gone by day.
+  function unicornNight() { const u = clamp((hwGlow() - 0.3) / 0.4, 0, 1); return u * u * (3 - 2 * u); }
+  let uniLayer = null;
+  // Lights in the sky (the unicorn's glow, the plane's lights) are kept here while the sky is drawn, then drawn
+  // after the tint of the hour, so they stay bright at night, the same way Hop Hop's chest does.
+  let skyLights = [];
+  function laterLight(fn) { skyLights.push({ m: ctx.getTransform(), fn }); }
+  function drawSkyLights() {
+    const list = skyLights; skyLights = [];
+    list.forEach(L => { ctx.save(); ctx.setTransform(L.m); L.fn(); ctx.restore(); });
+  }
+  function unicornGlow(f, k) {
+    if (k <= 0.002) return;
+    laterLight(() => unicornGlowNow(f, k));
+  }
+  function unicornGlowNow(f, k) {
+    const pulse = reduceMotion ? 0.9 : 0.8 + 0.2 * Math.sin(f.t * 1.6), TAU = Math.PI * 2;
+    // the soft light around her: same colors and strength as Hop Hop's chest halo
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(0, -3, 4, 0, -3, 32);
+    g.addColorStop(0, `rgba(255,246,190,${0.24 * pulse * k})`); g.addColorStop(0.5, `rgba(240,255,170,${0.09 * pulse * k})`); g.addColorStop(1, "rgba(240,255,170,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -3, 32, 0, TAU); ctx.fill(); ctx.restore();
+    // her body lit like his glowing chest (on its own layer, so only her body takes the light)
+    const cv = ctx.canvas;
+    if (!uniLayer) uniLayer = document.createElement("canvas");
+    if (uniLayer.width !== cv.width || uniLayer.height !== cv.height) { uniLayer.width = cv.width; uniLayer.height = cv.height; }
+    const c2 = uniLayer.getContext("2d");
+    c2.setTransform(1, 0, 0, 1, 0, 0); c2.globalAlpha = 1; c2.globalCompositeOperation = "source-over"; c2.clearRect(0, 0, cv.width, cv.height);
+    c2.setTransform(ctx.getTransform());
+    const main = ctx; ctx = c2;
+    try { drawFlyingUnicorn(f.t); } finally { ctx = main; }
+    c2.globalCompositeOperation = "source-atop";
+    const lg = c2.createRadialGradient(0, -3, 1, 0, -3, 26);
+    lg.addColorStop(0, "#FFFFF0"); lg.addColorStop(0.55, "rgba(250,255,185,0.95)"); lg.addColorStop(1, "#E4F28A");
+    c2.globalAlpha = 0.8 * pulse; c2.fillStyle = lg; c2.fillRect(-60, -60, 120, 120); c2.globalAlpha = 1; c2.globalCompositeOperation = "source-over";
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= k; ctx.drawImage(uniLayer, 0, 0); ctx.restore();
+    // a little trail of warm sparkles behind her
+    for (let i = 0; i < 6; i++) {
+      const u = (f.t * 0.8 + i / 6) % 1, sx = -(26 + u * 70), sy = Math.sin(u * 6 + i) * 6, a = (1 - u) * 0.85 * k, r = (2.2 - u) + 0.6 / f.size;
+      ctx.fillStyle = `rgba(255,246,200,${a})`; ctx.beginPath();
+      for (let j = 0; j < 8; j++) { const an = j / 8 * TAU - Math.PI / 2, rr = j % 2 ? r * 0.38 : r; ctx.lineTo(sx + Math.cos(an) * rr, sy + Math.sin(an) * rr); }
+      ctx.closePath(); ctx.fill();
+    }
+  }
   function drawFlyingUnicorn(t) {
     // tail
     ["#FFB6C9", "#C9A7F0", "#9FD3F5"].forEach((c, i) => {
@@ -1782,7 +1829,7 @@
       else if (f.kind === "ghost") drawHwGhost(f.t);
       else if (f.kind === "plane") drawHwPlane(f);
       else if (f.kind === "cat") LHC.drawCatWitch(ctx, 0, 0, 1, f.t, { hat: LHC.catWitchHat({ date: hwDate(), night: isNight() }) });
-      else drawFlyingUnicorn(f.t);
+      else { drawFlyingUnicorn(f.t); unicornGlow(f, unicornNight()); }
       ctx.restore();
     });
   }
@@ -1812,11 +1859,15 @@
     if (HW_LEVEL <= 0) return;
     nextHwBat -= dt; nextHwGhost -= dt;
     const catOn = catFliesNow(); if (catOn) nextCat -= dt;
-    if (catOn) nextPlane -= dt;
+    if (catOn) { nextPlane -= dt; nextTrick -= dt; }
     const busy = flyers.some(f => f.kind === "bat" || f.kind === "ghost" || f.kind === "cat" || f.kind === "plane");
     if (busy) return;
     const dir = Math.random() < 0.5 ? 1 : -1, y = rand(70, Math.max(120, WATER_Y - 190));
-    if (catOn && nextPlane <= 0) {   // the toy airplane pulling a little banner
+    if (catOn && nextTrick <= 0) {   // far away, near the hills: a loop-the-loop with a puffy trail
+      const ty = rand(WATER_Y - 165, WATER_Y - 120);
+      flyers.push({ kind: "plane", trick: true, dir, x: dir > 0 ? -40 : W + 40, baseY: ty, y: ty, t: rand(0, 5), speed: (W + 160) / rand(30, 36), size: 0.5, msg: null, puffs: [] });
+      nextTrick = rand(1500, 2100); nextPlane = Math.max(nextPlane, 60); nextCat = Math.max(nextCat, 25); nextHwBat = Math.max(nextHwBat, 20); nextHwGhost = Math.max(nextHwGhost, 30);
+    } else if (catOn && nextPlane <= 0) {   // the toy airplane pulling a little banner
       const msg = PLANE_MSGS[planeMsg]; planeMsg = (planeMsg + 1) % PLANE_MSGS.length;
       flyers.push({ kind: "plane", dir, x: dir > 0 ? -60 : W + 60, baseY: y, y, t: rand(0, 5), speed: (W + 420) / rand(18, 22), size: 1, msg });
       nextPlane = rand(240, 360); nextCat = Math.max(nextCat, 25); nextHwBat = Math.max(nextHwBat, 20); nextHwGhost = Math.max(nextHwGhost, 30);
@@ -1856,12 +1907,16 @@
     }
     return list;
   }
-  function drawHwPumpkins() {
-    hwPumpkins().forEach(m => {
-      const top = WATER_Y + 62, bot = H - 36;
-      if (bot <= top) return;
-      const sc = lerp(0.42, 0.8, m.depth), by = top + m.depth * (bot - top) + Math.sin(time * 1.3 + m.ph) * 2.2;
-      const x = m.x - camX; if (x < -80 || x > W + 80) return;
+  // the floating pumpkins as items for the front of the pond (drawn far to near with a visiting friend, see frontWater)
+  function hwPumpkinItems() {
+    const top = WATER_Y + 62, bot = H - 36, list = [];
+    if (bot <= top) return list;
+    hwPumpkins().forEach(m => { const x = m.x - camX; if (x < -80 || x > W + 80) return; const by = top + m.depth * (bot - top) + Math.sin(time * 1.3 + m.ph) * 2.2; list.push({ y: by, draw: () => drawHwPumpkin(m, by) }); });
+    return list;
+  }
+  function drawHwPumpkin(m, by) {
+    {
+      const sc = lerp(0.42, 0.8, m.depth), x = m.x - camX;
       const fl = reduceMotion ? 1 : 1 + 0.07 * Math.sin(time * 7 + m.ph * 3) + 0.05 * Math.sin(time * 12.7 + m.ph);
       // shadow and soft ripple on the water, then the pumpkin and its candle glow
       ctx.fillStyle = "rgba(40, 40, 110, 0.22)"; ctx.beginPath(); ctx.ellipse(x, by + 2, 26 * sc, 6 * sc, 0, 0, Math.PI * 2); ctx.fill();
@@ -1871,7 +1926,7 @@
       const gy = by - 24 * sc * m.shape.h, gr = ctx.createRadialGradient(x, gy, 3, x, gy, 100 * sc * m.shape.w);
       gr.addColorStop(0, `rgba(255, 200, 90, ${0.38 * fl})`); gr.addColorStop(0.5, `rgba(255, 170, 70, ${0.14 * fl})`); gr.addColorStop(1, "rgba(255, 150, 60, 0)");
       ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, gy, 100 * sc * m.shape.w, 0, Math.PI * 2); ctx.fill();
-    });
+    }
   }
   function drawHwBat(t) {
     const g = ctx.createRadialGradient(0, -2, 4, 0, -2, 46); g.addColorStop(0, "rgba(200, 185, 255, 0.28)"); g.addColorStop(1, "rgba(200, 185, 255, 0)");
@@ -1894,7 +1949,34 @@
   // the toy airplane with a banner: every 4 to 6 minutes during Halloween week, one message at a time, in turn
   const PLANE_MSGS = [["I ", "\u2665", " CANDY"], ["Hey, Boo!"], ["Trick or Treat or Hug"]];
   let nextPlane = HW_PLANE_FIRST ? 2 : rand(70, 140), planeMsg = Math.floor(Math.random() * PLANE_MSGS.length);
-  function costumesNow() { return !!LHC && LHC.costumesOn({ date: hwDate(), night: isNight() }); }
+  // about twice an hour the plane flies far in the background (no banner) and does a loop-the-loop; #hwtrick shows it first
+  const HW_TRICK_FIRST = /[#&]hwtrick/.test(location.hash);
+  let nextTrick = HW_TRICK_FIRST ? 2 : rand(1500, 2100);
+  // how much costume shows, 0..1: all day on Halloween; the rest of the week they fade in as the sun goes down and out at sunrise
+  function costumeAmt() {
+    if (!LHC) return 0;
+    const d = hwDate();
+    if (LHC.costumesOn({ date: d, night: false })) return 1;
+    if (!LHC.costumesOn({ date: d, night: true })) return 0;
+    const u = clamp((hwGlow() - 0.35) / 0.3, 0, 1); return u * u * (3 - 2 * u);
+  }
+  function costumesNow() { return costumeAmt() > 0.002; }
+  // A costumed frog fades as ONE picture: drawn at full strength on its own layer, then laid down with the fade,
+  // so wings or a cape never show through a half-faded body. While fn runs, ctx is that layer.
+  let costumeCanvas = null;
+  function costumeOverlay(alpha, fn) {
+    if (alpha >= 0.999) { fn(ctx); return; }
+    if (alpha <= 0.002) return;
+    const cv = ctx.canvas;
+    if (!costumeCanvas) costumeCanvas = document.createElement("canvas");
+    if (costumeCanvas.width !== cv.width || costumeCanvas.height !== cv.height) { costumeCanvas.width = cv.width; costumeCanvas.height = cv.height; }
+    const c2 = costumeCanvas.getContext("2d");
+    c2.setTransform(1, 0, 0, 1, 0, 0); c2.globalAlpha = 1; c2.globalCompositeOperation = "source-over"; c2.clearRect(0, 0, cv.width, cv.height);
+    c2.setTransform(ctx.getTransform());
+    const main = ctx; ctx = c2;
+    try { fn(c2); } finally { ctx = main; }
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= alpha; ctx.drawImage(costumeCanvas, 0, 0); ctx.restore();
+  }
   function catFliesNow() { return !!LHC && LHC.catWitchFlies({ date: hwDate() }); }
   function hwGlow() { return window.LilySky && window.LilySky.nightness ? clamp(window.LilySky.nightness(skyHour), 0, 1) : 0; }
   function costumeAnim(t, air, vy, landedAgo) {
@@ -1910,7 +1992,7 @@
     if (!frogLights) return;
     ctx.save();
     if (frogLights.clip) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
-    ctx.setTransform(frogLights.m);
+    ctx.setTransform(frogLights.m); ctx.globalAlpha = frogLights.k;
     LHC.drawLights(ctx, "ours", Object.assign({}, frogLights.A, { glow: 0.12 * hwGlow() }));   // a small halo: about 0.12 at night, 0 by day
     ctx.restore();
   }
@@ -1922,6 +2004,7 @@
   const PLANE_FONT = '800 15px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif';
   function drawHwPlane(f) {
     const t = f.t, wave = reduceMotion ? 0 : 1;
+    if (!f.msg) { drawTrickPlane(f); return; }
     ctx.save();
     ctx.font = PLANE_FONT;
     const parts = f.msg, heartW = 14, gap = 3;
@@ -1964,6 +2047,12 @@
     ctx.restore();
     // the toy airplane
     ctx.save(); ctx.translate(0, Math.sin(t * 2.4) * 1.2 * wave); ctx.scale(1.3, 1.3);   // the plane a little bigger than the banner's letters
+    drawToyPlane(t);
+    ctx.restore();
+    ctx.restore();
+  }
+  // the plane itself, facing right, nose at about x = 22
+  function drawToyPlane(t) {
     ctx.fillStyle = "#E06A98"; ctx.beginPath(); ctx.moveTo(-18, -2); ctx.lineTo(-27, -15); ctx.lineTo(-20, -15); ctx.lineTo(-10, -3); ctx.closePath(); ctx.fill();   // tail fin
     ctx.fillStyle = "#E9B04E"; ctx.beginPath(); ctx.ellipse(-3, 4.5, 15, 3.6, 0, 0, Math.PI * 2); ctx.fill();          // lower wing (behind)
     const body = ctx.createLinearGradient(0, -8, 0, 8); body.addColorStop(0, "#FFB3CF"); body.addColorStop(1, "#F27BA8");
@@ -1977,8 +2066,44 @@
     ctx.fillStyle = "#FFD36E"; ctx.beginPath(); ctx.arc(20, 1.5, 2.6, 0, Math.PI * 2); ctx.fill();                    // nose
     const spin = reduceMotion ? 0.6 : Math.abs(Math.sin(t * 40));                                                     // spinning propeller blur
     ctx.fillStyle = "rgba(240, 235, 255, 0.55)"; ctx.beginPath(); ctx.ellipse(22, 1.5, 1.6, 9 * (0.35 + 0.65 * spin), 0, 0, Math.PI * 2); ctx.fill();
-    if ((t % 1.6) < 0.25) { ctx.fillStyle = "#FF6F9F"; ctx.beginPath(); ctx.arc(-25, -15, 1.4, 0, Math.PI * 2); ctx.fill(); }   // a tiny blinking tail light
-    ctx.restore();
+    // lights: a red and a green light on the wing tips, always on, and a white light on the tail that blinks
+    // (drawn after the tint of the hour, so they stay bright at night; the glow is a little bigger at night)
+    laterLight(() => drawPlaneLights(t));
+  }
+  function drawPlaneLights(t) {
+    const nt = hwGlow(), gr = 7 + 4 * nt, ga = 0.7 + 0.25 * nt;
+    [[-18.4, -0.3, "255, 90, 110", "#FF5A6E"], [14.4, -1.8, "110, 235, 150", "#6EEB96"]].forEach(([lx, ly, rgb, col]) => {
+      const g = ctx.createRadialGradient(lx, ly, 0.3, lx, ly, gr); g.addColorStop(0, `rgba(${rgb}, ${ga})`); g.addColorStop(1, `rgba(${rgb}, 0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, gr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(lx, ly, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.beginPath(); ctx.arc(lx - 0.4, ly - 0.5, 0.6, 0, Math.PI * 2); ctx.fill();
+    });
+    if ((t % 1.6) < 0.22) {
+      const g = ctx.createRadialGradient(-25, -15, 0.3, -25, -15, 6); g.addColorStop(0, "rgba(255, 255, 255, 0.85)"); g.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(-25, -15, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(-25, -15, 1.4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // far away: the plane (no banner) flies in, does one loop-the-loop in the middle of the sky, and flies on.
+  // Its little puffs of cloud stay where they were made and fade, so the loop shows for a moment.
+  const TRICK_R = 55, TRICK_DUR = 2.8;
+  function drawTrickPlane(f) {
+    const k = f.dir * f.size, sx = f.x;                       // screen position of the flyer (ctx is already moved there and flipped)
+    if (!reduceMotion && f.loopAt === undefined && (f.dir > 0 ? sx > W * 0.42 : sx < W * 0.58)) f.loopAt = f.t;
+    let ox = 0, oy = 0, rot = 0;
+    if (f.loopAt !== undefined && f.t - f.loopAt < TRICK_DUR) {
+      const u = (f.t - f.loopAt) / TRICK_DUR, a = (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2) * Math.PI * 2;   // ease in and out
+      ox = TRICK_R * Math.sin(a); oy = -TRICK_R * (1 - Math.cos(a)); rot = -a;
+    }
+    // a puff every so often, kept in screen space
+    const px = sx + ox * k, py = f.y + oy * f.size;
+    if (!f.lastPuff || f.t - f.lastPuff > 0.12) { f.lastPuff = f.t; f.puffs.push({ x: px - f.dir * 12 * f.size * Math.cos(rot), y: py - 12 * f.size * Math.sin(rot), born: f.t }); }
+    f.puffs = f.puffs.filter(q => f.t - q.born < 2.4);
+    ctx.save();
+    f.puffs.forEach(q => { const age = (f.t - q.born) / 2.4, lx = (q.x - sx) / k, ly = (q.y - f.y) / f.size;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * (1 - age)})`; ctx.beginPath(); ctx.arc(lx, ly, 3 + age * 5, 0, Math.PI * 2); ctx.fill(); });
+    ctx.translate(ox, oy); ctx.rotate(rot); ctx.scale(1.3, 1.3);
+    drawToyPlane(f.t);
     ctx.restore();
   }
 
@@ -2079,8 +2204,17 @@
     ctx.beginPath(); ctx.ellipse(x, y - 1, p.r * 0.92, ry * 0.8, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
     ctx.restore();
   }
+  // everything floating in the front of the pond (pumpkins, a friend and his pads), far to near, so nearer things cover farther ones
+  function frontWater() {
+    const list = hwPumpkinItems();
+    palPads.forEach(q => { if (!pal || q.p !== pal.pad || pal.jump) list.push({ y: q.p.y, draw: () => drawPalPad(q.p, q.a) }); });
+    if (pal) {
+      const P = pal, y = P.jump ? lerp(P.jump.from.y, P.jump.to.y, Math.min(P.jump.t, 1)) : P.pad.y;
+      list.push({ y, draw: () => { if (!P.jump) { const q = palPads.find(q => q.p === P.pad); if (q) drawPalPad(q.p, q.a); } drawPal(); } });
+    }
+    list.sort((a, b) => a.y - b.y).forEach(it => it.draw());
+  }
   function drawPal() {
-    palPads.forEach(q => drawPalPad(q.p, q.a));
     const P = pal; if (!P) return;
     let px, py, sc, air = false, vy = 0;
     if (P.jump) {
@@ -2092,8 +2226,9 @@
     const k = 1.38 * P.size * sc, pose = { jump: air, blink: (time + P.ph) % 3.9 < 0.12 };
     const face = P.jump ? (P.jump.to.x >= P.jump.from.x ? 1 : -1) : (frog.x >= px ? 1 : -1);   // faces where he hops, then toward Hop Hop
     ctx.save(); ctx.translate(x, py); ctx.scale(k * face, k);
-    if (costumesNow()) LHC.drawFrog(ctx, P.name, pose, costumeAnim(time + P.ph, air, vy, time - P.landedAt));
-    else window.LilyFrogFriends2D.draw(ctx, P.name, pose);
+    const k2 = costumeAmt();
+    if (k2 < 0.999) window.LilyFrogFriends2D.draw(ctx, P.name, pose);
+    costumeOverlay(k2, c2 => LHC.drawFrog(c2, P.name, pose, costumeAnim(time + P.ph, air, vy, time - P.landedAt)));
     ctx.restore();
   }
 
@@ -2845,11 +2980,16 @@
     }
     };
     frogLights = null;
-    if (costumesNow()) {   // Halloween: Hop Hop the firefly (wings and antennae around him; his glow comes after the night tint)
-      const real = window.LilyFrogFriends2D, A = hopAnim();
-      window.LilyFrogFriends2D = { palettes: real.palettes, draw: () => body() };
-      try { LHC.drawFrog(ctx, "ours", {}, Object.assign({}, A, { noLights: true })); } finally { window.LilyFrogFriends2D = real; }
-      frogLights = { m: ctx.getTransform(), A, clip: sinkOff > 0 };
+    const HK = costumeAmt();
+    if (HK > 0.002) {   // Halloween: Hop Hop the firefly (wings and antennae around him; his glow comes after the night tint)
+      if (HK < 0.999) body();   // while the costume fades in or out, the plain Hop Hop is under it
+      const A = hopAnim();
+      costumeOverlay(HK, () => {
+        const real = window.LilyFrogFriends2D;
+        window.LilyFrogFriends2D = { palettes: real.palettes, draw: () => body() };
+        try { LHC.drawFrog(ctx, "ours", {}, Object.assign({}, A, { noLights: true })); } finally { window.LilyFrogFriends2D = real; }
+      });
+      frogLights = { m: ctx.getTransform(), A, clip: sinkOff > 0, k: HK };
     } else body();
     ctx.restore();
 
@@ -2978,10 +3118,10 @@
   function draw() {
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     if (window.LilySky) skyHour = window.LilySky.hour();
+    skyLights = [];
     sky(); sun(); skyFront(); hills(); drawFireflies(); water(); drawRipples(); drawTurtle();
     pads.forEach(p => { if (p.x - camX > -80 && p.x - camX < W + 80) drawPad(p); });
     drawFish("back");
-    drawHwPumpkins();
     drawCritters();
     drawFrog();
     drawTongue();
@@ -2990,12 +3130,13 @@
       // tint of the hour, then his glow (bright at night), then everything in front of him is drawn on a second layer,
       // tinted the same way and laid on top, so a friend, petals, a fish or the reeds in front of him cover his glow.
       hourTint(ctx, false);
+      drawSkyLights();
       drawFrogLights();
       const main = ctx, layer = frontLayer();
       ctx = layer; ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.clearRect(0, 0, W, H);
       try { drawFront(); hourTint(ctx, true); } finally { ctx = main; }
       main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.drawImage(layer.canvas, 0, 0); main.restore();
-    } else { drawFront(); hourTint(ctx, false); }
+    } else { drawFront(); hourTint(ctx, false); drawSkyLights(); }
   }
   // everything that is in front of Hop Hop
   function drawFront() {
@@ -3004,7 +3145,7 @@
         drawFlowerFront(p.x - camX, WATER_Y + 2 + Math.sin(time * 1.6 + p.phase) * 1.4, flowerScale(p), p.color);
       }
     });
-    drawPal();           // a visiting friend in the front of the pond (Halloween)
+    frontWater();        // Halloween: the floating pumpkins and a visiting friend, far to near
     drawFish("front");   // fish nearer to you than the pads go on top of the frog and the flowers
     drawParticles(); drawPopups(); drawHint(); drawReeds();
   }
