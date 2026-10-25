@@ -341,7 +341,7 @@
         const P2 = pts.map(K.scr), b0 = K.scr(at), b1 = K.scr(add(at, D, L)), al = a;
         c.save(); c.beginPath(); P2.forEach((q, i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.closePath();
         const g = c.createLinearGradient(b0.x, b0.y, b1.x, b1.y);
-        g.addColorStop(0, `rgba(255,214,234,${0.55 * al})`); g.addColorStop(1, `rgba(255,232,244,${0.8 * al})`);
+        g.addColorStop(0, `rgba(255,214,234,${0.9 * al})`); g.addColorStop(1, `rgba(255,232,244,${0.93 * al})`);
         c.fillStyle = g; c.fill(); c.strokeStyle = `rgba(255,255,255,${0.95 * al})`; c.lineWidth = Math.max(0.7, 1.4 * K.S); c.lineJoin = "round"; c.stroke();
         if (big === 1) {
           const v0 = K.scr(add(at, D, 3)), vm = K.scr(add(add(at, D, L * 0.5), Wd, -w * 0.25)), v1 = K.scr(add(at, D, L * 0.82));
@@ -388,7 +388,12 @@
     c.restore();
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeWings, beeBand] };
+  function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
+    const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.7, 0, 0.55]).p, [-12, 0, 16]));
+    if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
+  }
+
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
