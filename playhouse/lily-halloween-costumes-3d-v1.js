@@ -1,5 +1,5 @@
 /*
-  Lily Studio · Halloween Costumes in 3D (for the Lily's Playhouse world) · version 1 · DRAFT for Jessica's review
+  Lily Studio · Halloween Costumes in 3D (for the Lily's Playhouse world) · version 1 · Hop Hop the firefly APPROVED by Jessica, Oct 25, 2026
   ---------------------------------------------------------------------------------------------------------------
   Hop Hop the firefly, made for the 3D Hop Hop in lily-creatures-v5.js (LilyCreatures.frog). Same look as the
   approved 2D firefly (lily-halloween-costumes-v1.js): thin antennae with glowing tips, sheer sparkly wings
@@ -197,5 +197,5 @@
     items.sort((a, b) => b.d - a.d).forEach(it => it.draw());   // far to near
   }
 
-  root.LilyHalloweenCostumes3D = Object.freeze({ version: "1-draft", firefly, glowPal });
+  root.LilyHalloweenCostumes3D = Object.freeze({ version: "1", firefly, glowPal });
 })(typeof window !== "undefined" ? window : globalThis);
