@@ -379,7 +379,7 @@
 <script src="lily-bee-home-v1.js"></script>
 <script src="lily-halloween-v2.js"></script>
 <script src="lily-halloween-costumes-v1.js"></script>
-<script src="lily-halloween-costumes-3d-v1.js"></script>
+<script src="lily-halloween-costumes-3d-v2.js"></script>
 <script src="lily-fish-2d-v6.js"></script>
 <script src="lily-fish-moves-v3.js"></script>
 <script>
@@ -6824,17 +6824,20 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       pal: F.pal || "ours", dance: dancing, armR: F.act === "wave" && !jumping ? clamp(Math.min(2.4 - F.actT, F.actT) * 3, 0, 1) * (0.75 + 0.25 * Math.sin(time * 10)) : 0, blink: F.blink < 0, lick: !!F.lick, shadow: hopPx <= 0.5
     };
     // Halloween week: Hop Hop the firefly (wings and antennae around him, his own tummy patch glowing)
-    const ca = F.hophop ? costumeAmt() : 0, fy = baseY - hopPx;
+    const friendDress = !F.hophop && C3 && C3.WHO && C3.WHO.indexOf(F.pal) >= 0;   // Hop Hop's friends who have a 3D costume
+    const ca = (F.hophop || friendDress) ? costumeAmt() : 0, fy = baseY - hopPx;
     let A = null;
     if (ca > 0.002) {
       if (F.wasAir && !jumping) F.landedAt = time; F.wasAir = jumping;
       const mo = LHC.hopMotion({ air: jumping, vy: 1 - 2 * u, landedAgo: time - (F.landedAt == null ? -9 : F.landedAt) });
       A = { t: reduceMotion ? 0 : time, air: jumping && !reduceMotion, sec: reduceMotion ? 0 : mo.sec, wob: reduceMotion ? 0 : mo.wob, glow: nightness() };
-      pose.glowDiff = true;
-      ctx.save(); ctx.globalAlpha = a * ca; C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "back"); ctx.restore();
+      if (friendDress) { ctx.save(); ctx.globalAlpha = a * ca; C3.dress(ctx, F.pal, x, fy, s, yaw, pitch, pose, A, "back"); ctx.restore(); }
+      else { pose.glowDiff = true;
+      ctx.save(); ctx.globalAlpha = a * ca; C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "back"); ctx.restore(); }
     }
     drawCachedFrog(F, x, fy, s, yaw, pitch, pose);
-    if (ca > 0.002) {
+    if (ca > 0.002 && friendDress) { ctx.save(); ctx.globalAlpha = a * ca; C3.dress(ctx, F.pal, x, fy, s, yaw, pitch, pose, A, "front"); ctx.restore(); }
+    else if (ca > 0.002) {
       ctx.save(); ctx.globalAlpha = a * ca; C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "front"); ctx.restore();
       // his glowing tummy patch and antenna tips, drawn right here (so anything in front of him still covers them),
       // a little stronger by the amount the night tint will dim them, so they stay bright after dark
