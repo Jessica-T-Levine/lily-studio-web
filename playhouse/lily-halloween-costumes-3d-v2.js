@@ -322,7 +322,57 @@
     c.fillStyle = pg; c.beginPath(); c.arc(tq.x, tq.y, pr, 0, Math.PI * 2); c.fill();
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat] };
+
+  // ---------- Golden's little bee: big pink heart wings + an antennae headband ----------
+  function beeWings(c, K, A, layer) {
+    const isFront = layer === "front", flut = A.air ? (0.5 - 0.5 * Math.cos(A.t * 34)) * 0.5 : 0.1 + 0.1 * Math.sin(A.t * 5) + (A.wob || 0) * 0.08;
+    const at0 = onBody(K, [-0.75, 0, 0.5]).p;
+    [[1, 40, 11.5, [-0.25, 0.62, 0.74], 1, 0], [0.8, 31, 8.6, [-0.45, 0.85, 0.22], 0.6, 0.4]].forEach(([a, L, w, d, big, ph]) => {
+      [-1, 1].forEach(side => {
+        const at = add(at0, [0, side * 3, 0]);
+        let D = norm([d[0], side * d[1], d[2]]);
+        D = rot(D, norm([-1, 0, 0.12]), -side * (flut * 0.9 + ph * 0.0));
+        let Wd = norm(cross([1, 0, 0.15], D)); if (Wd[2] < 0) Wd = [-Wd[0], -Wd[1], -Wd[2]];
+        const mid = add(at, D, L * 0.55);
+        if ((K.depth(mid) > K.dBody) === isFront) return;                    // behind him: drawn before him, in front: after
+        const prof = u => w * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.62)), 0.7) * (1 - 0.16 * Math.exp(-Math.pow((u - 0.97) / 0.05, 2)));
+        const pts = []; for (let i = 0; i <= 20; i++) { const u = i / 20; pts.push(add(add(at, D, L * u), Wd, prof(u))); }
+        for (let i = 20; i >= 0; i--) { const u = i / 20; pts.push(add(add(at, D, L * u), Wd, -prof(u))); }
+        const P2 = pts.map(K.scr), b0 = K.scr(at), b1 = K.scr(add(at, D, L)), al = a;
+        c.save(); c.beginPath(); P2.forEach((q, i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.closePath();
+        const g = c.createLinearGradient(b0.x, b0.y, b1.x, b1.y);
+        g.addColorStop(0, `rgba(255,214,234,${0.55 * al})`); g.addColorStop(1, `rgba(255,232,244,${0.8 * al})`);
+        c.fillStyle = g; c.fill(); c.strokeStyle = `rgba(255,255,255,${0.95 * al})`; c.lineWidth = Math.max(0.7, 1.4 * K.S); c.lineJoin = "round"; c.stroke();
+        if (big === 1) {
+          const v0 = K.scr(add(at, D, 3)), vm = K.scr(add(add(at, D, L * 0.5), Wd, -w * 0.25)), v1 = K.scr(add(at, D, L * 0.82));
+          c.strokeStyle = `rgba(230,150,190,${0.5 * al})`; c.lineWidth = Math.max(0.5, 0.9 * K.S);
+          c.beginPath(); c.moveTo(v0.x, v0.y); c.quadraticCurveTo(vm.x, vm.y, v1.x, v1.y); c.stroke();
+          const sp = K.scr(add(add(at, D, L * 0.72), Wd, w * 0.35)), faceOn = clamp(Math.abs(K.ndepth(norm(cross(D, Wd)))) * 2.5, 0, 1);
+          c.fillStyle = `rgba(255,255,255,${0.7 * faceOn})`; c.beginPath(); c.ellipse(sp.x, sp.y, 1.4 * K.S, 3 * K.S, -0.2, 0, Math.PI * 2); c.fill();
+        }
+        c.restore();
+      });
+    });
+  }
+  function beeBand(c, K, A, layer) {
+    if (layer !== "front") return;
+    const P = K.P, gap = P.gap || 1, sec = A.sec || 0, wob = A.wob || 0, bx = 3, yy = 9 * gap + 2.5;
+    const top = y => BODY_C[2] + 1.6 + K.tallUp + BODY_R[2] * (P.tall || 1) * Math.sqrt(Math.max(0.02, 1 - Math.pow((bx - BODY_C[0]) / BODY_R[0], 2) - Math.pow(y / (BODY_R[1] * (P.wide || 1)), 2))) - (P.drop || 0) * 0.3 + 0.8;
+    const pt = y => [bx, y, top(y)], sc = v => K.scr(v);
+    c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
+    c.beginPath(); for (let i = 0; i <= 16; i++) { const q = sc(pt(-yy + 2 * yy * i / 16)); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke();
+    [-1, 1].forEach((side, j) => {
+      const base = pt(side * yy), sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
+      const tip = add(base, [1.5 + sw * 0.3, side * (8 + sw), up]), c1 = add(base, [0, side * 2, 9]), c2 = add(base, [1, side * 7, up - 5]);
+      const a = sc(base), b = sc(c1), d = sc(c2), t = sc(tip);
+      c.lineWidth = Math.max(0.9, 1.8 * K.S); c.beginPath(); c.moveTo(a.x, a.y); c.bezierCurveTo(b.x, b.y, d.x, d.y, t.x, t.y); c.stroke();
+      c.fillStyle = "#5A4630"; c.beginPath(); c.arc(t.x, t.y, 3.4 * K.S, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#F6CD5A"; c.beginPath(); c.arc(t.x - 0.9 * K.S, t.y - 1 * K.S, 1.2 * K.S, 0, Math.PI * 2); c.fill();
+    });
+    c.restore();
+  }
+
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeWings, beeBand] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
