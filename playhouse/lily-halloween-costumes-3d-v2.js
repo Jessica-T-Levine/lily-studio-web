@@ -356,18 +356,28 @@
   }
   function beeBand(c, K, A, layer) {
     const isFront = layer === "front", mine = v => (K.depth(v) > K.dBody) !== isFront;     // each piece is drawn behind or in front of the head by where it really is
-    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, tl = P.tall || 1, Ry = BODY_R[1] * (P.wide || 1) + 0.6, z0 = 19 + K.tallUp + 1, Rz = 29 * tl - (P.drop || 0) * 0.5 + 1, bx = -2;
-    const pt = th => [bx, Ry * Math.sin(th), z0 + Rz * Math.cos(th)], sc = v => K.scr(v), TH = 1.5, N = 36;
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, gap = P.gap || 1, bx = 4.5;
+    const Ry0 = BODY_R[1] * (P.wide || 1), Rz0 = BODY_R[2] * (P.tall || 1), ex = Math.pow((bx - BODY_C[0]) / BODY_R[0], 2);
+    const bumpZ = BUMP_C[2] + K.tallUp - (P.drop || 0), br = BUMP_R * (P.bump || 1);
+    const sm = (a, b) => 0.5 * (a + b + Math.sqrt((a - b) * (a - b) + 12));                          // a soft "higher of the two"
+    // the band lies ON the head: over the top of the body and arching over the tops of both eyes, down the sides
+    const zAt = y => {
+      const body = BODY_C[2] + Rz0 * Math.sqrt(Math.max(0, 1 - ex - Math.pow(y / Ry0, 2))) + 1.4;
+      const arc = bumpZ + br + 3.2 - 23 * Math.pow(Math.abs(y) / Ry0, 2.1);                          // one smooth arch over the tops of both eyes
+      return sm(arc, body);
+    };
+    const SM = 0.965, N = 44, pt = s2 => { const y = Ry0 * 1.02 * s2; return [bx, y, zAt(y)]; }, sc = v => K.scr(v);
+    const TH = 1;
     c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
     let open = false;
     for (let i = 0; i <= N; i++) {
-      const v = pt(-TH + 2 * TH * i / N), ok = mine(v), q = sc(v);
+      const v = pt(-SM + 2 * SM * i / N), ok = mine(v), q = sc(v);
       if (ok) { if (!open) { c.beginPath(); c.moveTo(q.x, q.y); open = true; } else c.lineTo(q.x, q.y); }
       else if (open) { c.stroke(); open = false; }
     }
     if (open) c.stroke();
     [-1, 1].forEach((side, j) => {
-      const base = pt(side * 0.62); if (!mine(base)) return;
+      const base = pt(side * 0.5); if (!mine(base)) return;
       const sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
       const tip = add(base, [1.5 + sw * 0.3, side * (6 + sw), up]), c1 = add(base, [0, side * 1.5, 9]), c2 = add(base, [1, side * 5, up - 5]);
       const a = sc(base), b = sc(c1), d = sc(c2), t = sc(tip);
