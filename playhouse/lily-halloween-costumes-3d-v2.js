@@ -355,14 +355,21 @@
     });
   }
   function beeBand(c, K, A, layer) {
-    if (layer !== "front") return;
-    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, tl = P.tall || 1, Ry = BODY_R[1] * (P.wide || 1) + 1.8, z0 = 19 + K.tallUp + 1, Rz = 26 * tl - (P.drop || 0) * 0.5 + 1, bx = -1;
-    const pt = th => [bx, Ry * Math.sin(th), z0 + Rz * Math.cos(th)], sc = v => K.scr(v), TH = 1.38;
+    const isFront = layer === "front", mine = v => (K.depth(v) > K.dBody) !== isFront;     // each piece is drawn behind or in front of the head by where it really is
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, tl = P.tall || 1, Ry = BODY_R[1] * (P.wide || 1) + 0.6, z0 = 19 + K.tallUp + 1, Rz = 29 * tl - (P.drop || 0) * 0.5 + 1, bx = -2;
+    const pt = th => [bx, Ry * Math.sin(th), z0 + Rz * Math.cos(th)], sc = v => K.scr(v), TH = 1.5, N = 36;
     c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
-    c.beginPath(); for (let i = 0; i <= 24; i++) { const q = sc(pt(-TH + 2 * TH * i / 24)); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke();
+    let open = false;
+    for (let i = 0; i <= N; i++) {
+      const v = pt(-TH + 2 * TH * i / N), ok = mine(v), q = sc(v);
+      if (ok) { if (!open) { c.beginPath(); c.moveTo(q.x, q.y); open = true; } else c.lineTo(q.x, q.y); }
+      else if (open) { c.stroke(); open = false; }
+    }
+    if (open) c.stroke();
     [-1, 1].forEach((side, j) => {
-      const base = pt(side * 0.62), sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
-      const tip = add(base, [1.5 + sw * 0.3, side * (8 + sw), up]), c1 = add(base, [0, side * 2, 9]), c2 = add(base, [1, side * 7, up - 5]);
+      const base = pt(side * 0.62); if (!mine(base)) return;
+      const sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
+      const tip = add(base, [1.5 + sw * 0.3, side * (6 + sw), up]), c1 = add(base, [0, side * 1.5, 9]), c2 = add(base, [1, side * 5, up - 5]);
       const a = sc(base), b = sc(c1), d = sc(c2), t = sc(tip);
       c.lineWidth = Math.max(0.9, 1.8 * K.S); c.beginPath(); c.moveTo(a.x, a.y); c.bezierCurveTo(b.x, b.y, d.x, d.y, t.x, t.y); c.stroke();
       c.fillStyle = "#5A4630"; c.beginPath(); c.arc(t.x, t.y, 3.4 * K.S, 0, Math.PI * 2); c.fill();
