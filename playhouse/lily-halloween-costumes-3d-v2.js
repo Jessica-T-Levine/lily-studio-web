@@ -423,7 +423,7 @@
     const sides = [-1, 1].map(sd => { const C = [BUMP_C[0], sd * BUMP_C[1] * gap, bz], e = norm([E0[0], sd * E0[1], E0[2]]);
       let f1 = norm(cross(e, [0, 0, 1])), f2 = norm(cross(e, f1)); return { sd, C, e, f1, f2 }; });
     sides.forEach(S => {
-      const rho = br + 0.8, a0 = 0.5, a1 = 1.2;                                        // a ring of mask around the eye: hole of 0.5 rad, out to 1.2 rad
+      const rho = br + 0.8, a0 = 0.5, a1 = 1.55;                                        // a ring of mask around the eye: hole of 0.5 rad, out to 1.2 rad
       const surf = (u, v) => { const a = a0 + (a1 - a0) * u, ph = -v * 2 * Math.PI, k = Math.sin(a) * rho, w = Math.cos(a) * rho;
         return [0, 1, 2].map(i => S.C[i] + S.e[i] * w + (S.f1[i] * Math.cos(ph) + S.f2[i] * Math.sin(ph)) * k * (1 + 0.1 * Math.cos(ph * 2))); };
       drawMesh(c, K, surf, hi ? 8 : 4, hi ? 48 : 28, shade, null);
