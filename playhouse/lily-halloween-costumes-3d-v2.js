@@ -277,7 +277,51 @@
     c.strokeStyle = "#6E9A4B"; c.lineWidth = Math.max(0.7, 1.2 * K.S); c.beginPath(); c.moveTo(q[0].x, q[0].y); c.bezierCurveTo(q[1].x, q[1].y, q[2].x, q[2].y, q[3].x, q[3].y); c.stroke();
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap] };
+
+  // starry hat for Blue: too big (25%), it slips down over the top of one eye; the droopy tip and the pompom swing
+  const HAT_L = [156, 143, 224], HAT_D = [92, 84, 168], BRIM_D = [74, 68, 150], BRIM_L = [112, 104, 196];
+  function starHat(c, K, A, layer) {
+    if (layer !== "front") return;
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, hi = K.S > 2.2;
+    const eyeTop = BUMP_C[2] + K.tallUp - (P.drop || 0) + BUMP_R * (P.bump || 1);
+    const gap = P.gap || 1, big = 1.25;
+    const base = [-1.5, 2.2 * gap, eyeTop - 3.6 - sec * 2.2], R = 14.5 * big * Math.max(1, gap * 0.95);
+    const roll = 0.3 + sec * 0.05 + wob * 0.05, pit = -0.24 - sec * 0.04;           // slipped over one eye
+    const cr = Math.cos(roll), sr = Math.sin(roll), cp2 = Math.cos(pit), sp2 = Math.sin(pit);
+    const T = p => { const x = p[0], y = p[1] * cr - p[2] * sr, z = p[1] * sr + p[2] * cr; return [base[0] + x * cp2 + z * sp2, base[1] + y, base[2] - x * sp2 + z * cp2]; };   // in hat space (z up from the brim)
+    const sw = Math.sin(A.t * 2.4) * 2 + sec * 4 + wob * 2;                          // the droopy tip swings
+    const Hh = 36 * big * 0.82;
+    const C = u => [-13 * u * u - 2 * u, -2 * u + (7 + sw) * u * u, Hh * u - 26 * u * u * u * u];   // the cone leans back and the tip droops
+    const tipDir = [-5 - 4 * 1, 7 + sw * 0.6, -9];
+    const rr = u => R * Math.pow(Math.max(0, 1 - u), 0.85) + 0.9;
+    const Cd = u => { const a = C(u), b = C(Math.min(1, u + 0.01)), d = norm(sub(b, a)); return d; };
+    const frame = u => { const t = Cd(u); let e1 = cross(t, [0, 1, 0]); if (Math.hypot(e1[0], e1[1], e1[2]) < 0.05) e1 = cross(t, [1, 0, 0]); e1 = norm(e1); const e2 = norm(cross(t, e1)); return [e1, e2]; };
+    const cone = (u, v) => { const th = v * 2 * Math.PI, f = frame(u), r = rr(u), cc = C(u); return T([cc[0] + r * (Math.cos(th) * f[0][0] + Math.sin(th) * f[1][0]), cc[1] + r * (Math.cos(th) * f[0][1] + Math.sin(th) * f[1][1]), cc[2] + r * (Math.cos(th) * f[0][2] + Math.sin(th) * f[1][2])]); };
+    // the brim: a soft band around the bottom
+    drawMesh(c, K, (u, v) => { const th = v * 2 * Math.PI, rb = R * (1.16 - 0.06 * u); return T([Math.cos(th) * rb, Math.sin(th) * rb, -2.2 + u * 4.2]); }, 2, hi ? 72 : 44,
+      (lit, q) => rgb(mix(BRIM_D, BRIM_L, clamp(lit * 1.1 + 0.1, 0, 1))));
+    const hatShade = (lit) => rgb(mix(HAT_D, HAT_L, clamp(0.12 + lit * 0.95, 0, 1)));
+    drawMesh(c, K, cone, hi ? 22 : 12, hi ? 64 : 36, hatShade);
+    // the top of the brim (a soft ring where the cone starts)
+    drawMesh(c, K, (u, v) => { const th = v * 2 * Math.PI, r = R * (1.1 - 0.12 * u); return T([Math.cos(th) * r, Math.sin(th) * r, 2 + u * 0.4]); }, 2, hi ? 64 : 40, (lit) => rgb(mix(BRIM_D, BRIM_L, clamp(lit + 0.1, 0, 1))));
+    // little stars on the cone (only the ones that face you)
+    [[0.12, 0.05, 2.9], [0.3, 0.3, 2.3], [0.5, 0.62, 1.8], [0.24, 0.78, 2.1], [0.64, 0.15, 1.5], [0.4, 0.95, 1.7], [0.1, 0.45, 2]].forEach(([u, v, r0]) => {
+      const th = v * 2 * Math.PI, f = frame(u), cc = C(u), rad = rr(u), dir = [Math.cos(th) * f[0][0] + Math.sin(th) * f[1][0], Math.cos(th) * f[0][1] + Math.sin(th) * f[1][1], Math.cos(th) * f[0][2] + Math.sin(th) * f[1][2]];
+      const pos = T(add(cc, dir, rad + 0.2)), nrm = norm(add(dir, [0, 0, 0])), face = -K.ndepth(norm(T(add([0, 0, 0], dir, 1)).map((q, i) => q - base[i])));
+      if (face < 0.05) return;
+      const tw = 0.7 + 0.3 * Math.sin(A.t * 3 + u * 7 + v * 5), r = r0 * 1.5 * (0.9 + 0.1 * tw) * big * K.S, q0 = K.scr(pos), al = clamp(face * 2.2, 0, 1);
+      c.save(); c.globalAlpha *= al; c.fillStyle = "#FFE27A"; c.beginPath();
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2 + 0.2, rr2 = i % 2 ? r * 0.45 : r; const X = q0.x + Math.cos(a) * rr2 * (0.55 + 0.45 * face), Y = q0.y + Math.sin(a) * rr2; i ? c.lineTo(X, Y) : c.moveTo(X, Y); }
+      c.closePath(); c.fill(); c.restore();
+    });
+    // the pompom at the drooping tip
+    const tp = T(add(C(1), [0, 0, 0], 0)), tq = K.scr(add(tp, [0, 0, 0])), pr = 4.2 * big * K.S;
+    const pg = c.createRadialGradient(tq.x - pr * 0.3, tq.y - pr * 0.3, pr * 0.1, tq.x, tq.y, pr);
+    pg.addColorStop(0, "#FFFBE0"); pg.addColorStop(1, "#F2D98A");
+    c.fillStyle = pg; c.beginPath(); c.arc(tq.x, tq.y, pr, 0, Math.PI * 2); c.fill();
+  }
+
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
