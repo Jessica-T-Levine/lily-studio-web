@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Hop Hop Firefly 3D</title>
+<style>body{margin:0;background:#1b1830;font-family:sans-serif}canvas{display:block}</style></head><body>
+<canvas id="c" width="1200" height="640"></canvas>
+<script src="lily-creatures-v5.js"></script>
+<script src="lily-halloween-costumes-v1.js"></script>
+<script src="lily-halloween-costumes-3d-v1.js"></script>
+<script>
+const cv = document.getElementById("c"), ctx = cv.getContext("2d"), LC = window.LilyCreatures, C3 = window.LilyHalloweenCostumes3D;
+const MODE = (location.hash.match(/mode=(\w+)/) || [])[1] || "turn";
+function scene(x0, w, h, night, t, yaw, pitch, s, hopEvery) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, w, h); ctx.clip();
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  if (night) { g.addColorStop(0, "#1C2350"); g.addColorStop(1, "#3B3A72"); } else { g.addColorStop(0, "#A9D8F5"); g.addColorStop(1, "#E8F6E8"); }
+  ctx.fillStyle = g; ctx.fillRect(x0, 0, w, h);
+  const cx = x0 + w / 2, by = h * 0.74;
+  ctx.fillStyle = night ? "#3E6E6A" : "#7FC7B8"; ctx.fillRect(x0, h * 0.62, w, h * 0.38);   // pond
+  // lily pad
+  ctx.fillStyle = "#5FAE6E"; ctx.beginPath(); ctx.ellipse(cx, by + 4, 34 * s, 34 * s * Math.sin(pitch) + 6, 0, 0.25, Math.PI * 2 - 0.25 + 0.0); ctx.lineTo(cx, by + 4); ctx.fill();
+  // a hop now and then
+  let jump = 0, lift = 0, air = false, vy = 0, landedAgo = 9;
+  if (hopEvery) { const u = t % hopEvery, d = 0.55; if (u < d) { const q = u / d; jump = Math.sin(q * Math.PI); lift = 34 * 4 * q * (1 - q); air = true; vy = 1 - 2 * q; } else landedAgo = u - d; }
+  const m = window.LilyHalloweenCostumes.hopMotion({ air, vy, landedAgo });
+  const pose = { t, jump, pal: "ours", blink: (t % 3.4) < 0.12 }, A = { t, air, sec: m.sec, wob: m.wob, glow: night ? 1 : 0 };
+  const y = by - lift * s * 0.6;
+  C3.firefly(ctx, cx, y, s, yaw, pitch, pose, A, "back");
+  LC.frog.draw(ctx, cx, y, s, yaw, pitch, pose);
+  C3.firefly(ctx, cx, y, s, yaw, pitch, pose, A, "front");
+  if (night) { ctx.fillStyle = "rgba(18, 22, 70, 0.42)"; ctx.fillRect(x0, 0, w, h); }
+  C3.firefly(ctx, cx, y, s, yaw, pitch, pose, A, "lights");
+  ctx.restore();
+}
+function frame(t) {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (MODE === "turn") {
+    const yaw = Math.PI + t * (Math.PI * 2 / 12);   // one full turn every 12 s, starting facing you
+    scene(0, 600, 640, false, t, yaw, 0.32, 4.2, 3.2);
+    scene(600, 600, 640, true, t, yaw, 0.32, 4.2, 3.2);
+  } else {
+    // still sheet: front, three-quarter, side, back three-quarter, back (day row, night row)
+    const yaws = [Math.PI, Math.PI - 0.75, Math.PI / 2 + 0.05, 0.6, 0.02];
+    yaws.forEach((yw, i) => { scene(i * 240, 240, 320, false, 1.1 + i * 0.3, yw, 0.32, 2.3, 0); });
+    ctx.save(); ctx.translate(0, 320); yaws.forEach((yw, i) => { scene(i * 240, 240, 320, true, 1.1 + i * 0.3, yw, 0.32, 2.3, 0); }); ctx.restore();
+  }
+}
+let t0 = null; function loop(ts) { if (t0 === null) t0 = ts; frame((ts - t0) / 1000); requestAnimationFrame(loop); } requestAnimationFrame(loop);
+</script></body></html>
