@@ -1632,7 +1632,7 @@
       f.x += f.dir * f.speed * dt - shift;
       f.y = f.baseY + Math.sin(f.t * 1.1) * 10;
     });
-    flyers = flyers.filter(f => { const m = f.kind === "cat" ? 180 : 60; return f.dir > 0 ? f.x < W + m : f.x > -m; });   // the cat's sparkle trail is long
+    flyers = flyers.filter(f => { const m = f.kind === "plane" ? 380 : f.kind === "cat" ? 180 : 60; return f.dir > 0 ? f.x < W + m : f.x > -m; });   // the cat's sparkle trail is long
   }
   function drawWing(x, y, t, scaleW) {
     ctx.save(); ctx.translate(x, y);
@@ -1780,6 +1780,7 @@
       else if (f.kind === "bunny") drawFlyingBunny(f.t);
       else if (f.kind === "bat") drawHwBat(f.t);
       else if (f.kind === "ghost") drawHwGhost(f.t);
+      else if (f.kind === "plane") drawHwPlane(f);
       else if (f.kind === "cat") LHC.drawCatWitch(ctx, 0, 0, 1, f.t, { hat: LHC.catWitchHat({ date: hwDate(), night: isNight() }) });
       else drawFlyingUnicorn(f.t);
       ctx.restore();
@@ -1811,10 +1812,15 @@
     if (HW_LEVEL <= 0) return;
     nextHwBat -= dt; nextHwGhost -= dt;
     const catOn = catFliesNow(); if (catOn) nextCat -= dt;
-    const busy = flyers.some(f => f.kind === "bat" || f.kind === "ghost" || f.kind === "cat");
+    if (catOn) nextPlane -= dt;
+    const busy = flyers.some(f => f.kind === "bat" || f.kind === "ghost" || f.kind === "cat" || f.kind === "plane");
     if (busy) return;
     const dir = Math.random() < 0.5 ? 1 : -1, y = rand(70, Math.max(120, WATER_Y - 190));
-    if (catOn && nextCat <= 0) {   // the black cat witch: one slow pass across the sky
+    if (catOn && nextPlane <= 0) {   // the toy airplane pulling a little banner
+      const msg = PLANE_MSGS[planeMsg]; planeMsg = (planeMsg + 1) % PLANE_MSGS.length;
+      flyers.push({ kind: "plane", dir, x: dir > 0 ? -60 : W + 60, baseY: y, y, t: rand(0, 5), speed: (W + 420) / rand(18, 22), size: 1, msg });
+      nextPlane = rand(240, 360); nextCat = Math.max(nextCat, 25); nextHwBat = Math.max(nextHwBat, 20); nextHwGhost = Math.max(nextHwGhost, 30);
+    } else if (catOn && nextCat <= 0) {   // the black cat witch: one slow pass across the sky
       // a little under half of her passes are farther back: about half the size, slower, and lower in the sky, near the hills
       const far = Math.random() < 0.45, cy = far ? rand(WATER_Y - 150, WATER_Y - 100) : y, cross = far ? rand(32, 40) : rand(20, 26);
       flyers.push({ kind: "cat", dir, x: dir > 0 ? -130 : W + 130, baseY: cy, y: cy, t: rand(0, 5), speed: (W + 260) / cross, size: far ? rand(0.46, 0.58) : 0.95 });
@@ -1883,7 +1889,11 @@
   // The black cat witch flies across the sky every 3 to 5 minutes during the week (no hat by day, hat at night,
   // hat all day on Oct 31), never at the same time as the ghost or a bat.
   const LHC = (window.LilyHalloweenCostumes && window.LilyFrogFriends2D) ? window.LilyHalloweenCostumes : null;
-  let frogLandedAt = -9, frogLights = null, nextCat = HW_FAST ? 3 : rand(40, 90);
+  const HW_PLANE_FIRST = /[#&]hwplane/.test(location.hash);   // test: the banner plane comes first, within seconds
+  let frogLandedAt = -9, frogLights = null, nextCat = HW_PLANE_FIRST ? 60 : HW_FAST ? 3 : rand(40, 90);
+  // the toy airplane with a banner: every 4 to 6 minutes during Halloween week, one message at a time, in turn
+  const PLANE_MSGS = [["I ", "\u2665", " CANDY"], ["Hey, Boo!"], ["Trick or Treat or Hug"]];
+  let nextPlane = HW_PLANE_FIRST ? 2 : rand(70, 140), planeMsg = Math.floor(Math.random() * PLANE_MSGS.length);
   function costumesNow() { return !!LHC && LHC.costumesOn({ date: hwDate(), night: isNight() }); }
   function catFliesNow() { return !!LHC && LHC.catWitchFlies({ date: hwDate() }); }
   function hwGlow() { return window.LilySky && window.LilySky.nightness ? clamp(window.LilySky.nightness(skyHour), 0, 1) : 0; }
@@ -1902,6 +1912,73 @@
     if (frogLights.clip) { ctx.beginPath(); ctx.rect(0, 0, W, WATER_Y + 2); ctx.clip(); }
     ctx.setTransform(frogLights.m);
     LHC.drawLights(ctx, "ours", Object.assign({}, frogLights.A, { glow: 0.12 * hwGlow() }));   // a small halo: about 0.12 at night, 0 by day
+    ctx.restore();
+  }
+
+
+  // ---------- the toy airplane and its banner (Halloween week) ----------
+  // Drawn facing right; drawFlyers flips the whole thing when it flies left, so the banner's words are turned back
+  // the right way round here. The banner is soft cloth that ripples; the heart is drawn, not an emoji.
+  const PLANE_FONT = '800 15px Grandstander, "Chalkboard SE", "Comic Sans MS", sans-serif';
+  function drawHwPlane(f) {
+    const t = f.t, wave = reduceMotion ? 0 : 1;
+    ctx.save();
+    ctx.font = PLANE_FONT;
+    const parts = f.msg, heartW = 14, gap = 3;
+    const widths = parts.map(p => p === "♥" ? heartW : ctx.measureText(p).width);
+    const textW = widths.reduce((a, b) => a + b, 0), L = textW + 30, x0 = -64, x1 = x0 - L, H2 = 13;
+    const yAt = x => Math.sin(x * 0.07 + t * 5) * 2.2 * wave;          // the cloth ripples along its length
+    // the rope from the tail to the banner
+    ctx.strokeStyle = "#A0704A"; ctx.lineWidth = 1.2; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(-31, 4); ctx.quadraticCurveTo(-46, 8, x0, yAt(x0) - 6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-31, 4); ctx.quadraticCurveTo(-46, 10, x0, yAt(x0) + 6); ctx.stroke();
+    // the banner: cream cloth, pink edges, a swallowtail end
+    const N = 18, top = [], bot = [];
+    for (let i = 0; i <= N; i++) { const x = lerp(x0, x1, i / N), y = yAt(x); top.push([x, y - H2]); bot.push([x, y + H2]); }
+    const ex = x1 - 10, ey = yAt(x1);
+    ctx.beginPath(); ctx.moveTo(top[0][0], top[0][1]);
+    top.forEach(p => ctx.lineTo(p[0], p[1])); ctx.lineTo(ex, ey - H2 - 1); ctx.lineTo(x1 - 2, ey); ctx.lineTo(ex, ey + H2 + 1);
+    for (let i = N; i >= 0; i--) ctx.lineTo(bot[i][0], bot[i][1]);
+    ctx.closePath();
+    ctx.fillStyle = "#FFF6E6"; ctx.fill();
+    ctx.strokeStyle = "#FF8FB8"; ctx.lineWidth = 2.2; ctx.lineJoin = "round"; ctx.stroke();
+    ctx.fillStyle = "rgba(255, 143, 184, 0.18)";                        // a soft fold shadow every so often
+    for (let i = 1; i < N; i += 3) { const x = lerp(x0, x1, i / N); ctx.fillRect(x - 2, yAt(x) - H2 + 1.5, 4, H2 * 2 - 3); }
+    // the words, turned the right way round, riding the ripple letter by letter
+    ctx.save(); ctx.scale(f.dir, 1);
+    const sx = f.dir * ((x0 + x1) / 2) - textW / 2;   // start of the words in the unflipped space
+    let cx = sx;
+    ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    parts.forEach((p, i) => {
+      if (p === "♥") {
+        const hx = cx + heartW / 2, s2 = 5.2;
+        const wy = yAt(f.dir * hx);
+        ctx.fillStyle = "#FF5C93"; ctx.beginPath();
+        ctx.moveTo(hx, wy + s2 * 0.95); ctx.bezierCurveTo(hx - s2 * 1.3, wy + s2 * 0.1, hx - s2 * 1.05, wy - s2 * 0.95, hx, wy - s2 * 0.3);
+        ctx.bezierCurveTo(hx + s2 * 1.05, wy - s2 * 0.95, hx + s2 * 1.3, wy + s2 * 0.1, hx, wy + s2 * 0.95); ctx.fill();
+        cx += heartW;
+      } else {
+        for (const ch of p) { const w = ctx.measureText(ch).width; ctx.fillStyle = "#5A48A0"; ctx.fillText(ch, cx, yAt(f.dir * (cx + w / 2)) + 1); cx += w; }
+      }
+    });
+    ctx.restore();
+    // the toy airplane
+    ctx.save(); ctx.translate(0, Math.sin(t * 2.4) * 1.2 * wave); ctx.scale(1.3, 1.3);   // the plane a little bigger than the banner's letters
+    ctx.fillStyle = "#E06A98"; ctx.beginPath(); ctx.moveTo(-18, -2); ctx.lineTo(-27, -15); ctx.lineTo(-20, -15); ctx.lineTo(-10, -3); ctx.closePath(); ctx.fill();   // tail fin
+    ctx.fillStyle = "#E9B04E"; ctx.beginPath(); ctx.ellipse(-3, 4.5, 15, 3.6, 0, 0, Math.PI * 2); ctx.fill();          // lower wing (behind)
+    const body = ctx.createLinearGradient(0, -8, 0, 8); body.addColorStop(0, "#FFB3CF"); body.addColorStop(1, "#F27BA8");
+    ctx.fillStyle = body; ctx.beginPath(); ctx.moveTo(-24, 1); ctx.quadraticCurveTo(-20, -7, -4, -8); ctx.quadraticCurveTo(14, -8, 19, -2); ctx.quadraticCurveTo(21, 3, 18, 6); ctx.quadraticCurveTo(0, 9, -18, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#9FD3F5"; ctx.beginPath(); ctx.ellipse(5, -4, 4.2, 3, 0, 0, Math.PI * 2); ctx.fill();            // round window
+    ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.beginPath(); ctx.ellipse(4, -5, 1.4, 1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#FFD36E"; ctx.beginPath(); ctx.ellipse(-2, -1, 17, 3.4, -0.05, 0, Math.PI * 2); ctx.fill();       // top wing
+    ctx.fillStyle = "#FFE7A3"; ctx.beginPath(); ctx.ellipse(-2, -2, 14, 1.4, -0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#6B5A7A"; ctx.beginPath(); ctx.arc(2, 10, 2.4, 0, Math.PI * 2); ctx.arc(-9, 9.5, 2.1, 0, Math.PI * 2); ctx.fill();   // little wheels
+    ctx.strokeStyle = "#6B5A7A"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(2, 9); ctx.moveTo(-9, 5.5); ctx.lineTo(-9, 8.5); ctx.stroke();
+    ctx.fillStyle = "#FFD36E"; ctx.beginPath(); ctx.arc(20, 1.5, 2.6, 0, Math.PI * 2); ctx.fill();                    // nose
+    const spin = reduceMotion ? 0.6 : Math.abs(Math.sin(t * 40));                                                     // spinning propeller blur
+    ctx.fillStyle = "rgba(240, 235, 255, 0.55)"; ctx.beginPath(); ctx.ellipse(22, 1.5, 1.6, 9 * (0.35 + 0.65 * spin), 0, 0, Math.PI * 2); ctx.fill();
+    if ((t % 1.6) < 0.25) { ctx.fillStyle = "#FF6F9F"; ctx.beginPath(); ctx.arc(-25, -15, 1.4, 0, Math.PI * 2); ctx.fill(); }   // a tiny blinking tail light
+    ctx.restore();
     ctx.restore();
   }
 
