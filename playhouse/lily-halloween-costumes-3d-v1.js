@@ -130,29 +130,47 @@
     c.fillStyle = "#FFFBD6"; c.beginPath(); c.arc(e.x, e.y, 1.7 * K.S, 0, Math.PI * 2); c.fill();
   }
 
-  // ---------- his glowing chest: the chest circle lit cream-white, soft yellow-green at the edge ----------
-  function drawChest(c, K, A) {
-    const T = onBody(K, [1, 0, -0.34]), n = T.n, face = -K.ndepth(n);
-    const vis = clamp((face - 0.3) / 0.4, 0, 1); if (vis <= 0.01) return;
-    const pulse = 0.8 + 0.2 * Math.sin(A.t * 1.6), o = K.scr(add(T.p, n, 0.3));
-    // the chest circle follows his round front: rings of points ON his body, from the yellow-green edge in to the
-    // cream-white middle, so it curves around him like it's painted on (never a flat sticker)
-    const ring = k => { const pts = []; for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2; pts.push(K.scr(add(onBody(K, [1, 0.35 * k * Math.cos(a), -0.32 + 0.3 * k * Math.sin(a)]).p, n, 0.3))); } return pts; };
-    const fillRing = (pts, col) => { c.fillStyle = col; c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)); c.closePath(); c.fill(); };
-    c.save(); c.globalAlpha *= vis;
-    fillRing(ring(1.08), "rgba(228,242,138,0.35)");
-    fillRing(ring(1), "rgba(228,242,138,0.95)");
-    fillRing(ring(0.8), `rgba(244,252,170,${0.9 + 0.1 * pulse})`);
-    fillRing(ring(0.58), "rgba(250,255,190,0.95)");
-    fillRing(ring(0.36), "rgba(255,255,226,0.95)");
-    fillRing(ring(0.18), "#FFFFF0");
+  // ---------- his glowing chest: HIS OWN tummy patch lights up (exact same place, size and shape) ----------
+  // The 3D frog paints his pale tummy patch with the palette's three "belly" colors. We draw him a second time with
+  // glowing colors in that patch (cream-white in the middle, soft yellow-green at the edge) and keep only what
+  // changed, so the glow can only ever be exactly his tummy patch, from every angle and in every pose.
+  // Each glow color is a little brighter than his own tummy color in every channel, so by day:
+  // his normal picture + the change = exactly the glowing picture.
+  const GLOW_BELLY = [[234, 246, 172], [252, 255, 206], [255, 255, 244]].map(a => a.map(v => v / 255));
+  const glowPals = {};
+  function glowPal(name) {
+    const L = root.LilyCreatures && root.LilyCreatures.frog && root.LilyCreatures.frog.colors, base = L && L[name || "ours"];
+    if (!base) return null;
+    if (!glowPals[name]) glowPals[name] = Object.assign({}, base, { belly: GLOW_BELLY });
+    return glowPals[name];
+  }
+  let cvA = null, cvB = null;
+  function drawChest(c, K, A, x, y, s, yaw, pitch, pose) {
+    const LC = root.LilyCreatures, gp = glowPal(pose.pal || "ours"); if (!LC || !LC.frog || !gp) return;
+    let k = 1; try { const T = c.getTransform(); k = Math.hypot(T.a, T.b) || 1; } catch (_) {}
+    const S = K.S, Lw = 44 * S, Top = 70 * S, Bot = 12 * S;           // a box around him, in screen units
+    const w = Math.max(2, Math.ceil(2 * Lw * k)), h = Math.max(2, Math.ceil((Top + Bot) * k));
+    if (w > 4096 || h > 4096) return;
+    if (!cvA) { cvA = document.createElement("canvas"); cvB = document.createElement("canvas"); }
+    [cvA, cvB].forEach(cv => { if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } });
+    const a = cvA.getContext("2d"), b = cvB.getContext("2d");
+    [a, b].forEach(g => { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; g.fillStyle = "#000"; g.fillRect(0, 0, w, h); g.setTransform(k, 0, 0, k, 0, 0); });   // on black, so his soft outline cancels out exactly
+    const P0 = Object.assign({}, pose, { shadow: false });
+    LC.frog.draw(b, Lw, Top, s, yaw, pitch, P0);                               // him, as he is
+    LC.frog.draw(a, Lw, Top, s, yaw, pitch, Object.assign({}, P0, { pal: gp }));   // him, tummy glowing
+    a.setTransform(1, 0, 0, 1, 0, 0); a.globalCompositeOperation = "difference"; a.drawImage(cvB, 0, 0);   // keep only the change: his tummy patch
+    const pulse = 0.8 + 0.2 * Math.sin(A.t * 1.6);
+    c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha *= Math.min(1, 0.9 + 0.1 * pulse + 0.35 * A.glow);
+    c.drawImage(cvA, x - Lw, y - Top, w / k, h / k);
     c.restore();
     // the small soft light around it (bigger and brighter at night)
-    const k = 0.35 + 0.55 * A.glow, R = 30 * K.S;
+    const T = onBody(K, [1, 0, -0.62]), face = -K.ndepth(T.n), vis = clamp((face - 0.1) / 0.5, 0, 1);
+    if (vis <= 0.01) return;
+    const o = K.scr(T.p), kk = 0.35 + 0.55 * A.glow, R = 30 * S;
     c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha *= vis;
-    const h = c.createRadialGradient(o.x, o.y, 3 * K.S, o.x, o.y, R);
-    h.addColorStop(0, `rgba(255,246,190,${0.5 * pulse * k})`); h.addColorStop(0.5, `rgba(240,255,170,${0.18 * pulse * k})`); h.addColorStop(1, "rgba(240,255,170,0)");
-    c.fillStyle = h; c.beginPath(); c.arc(o.x, o.y, R, 0, Math.PI * 2); c.fill();
+    const g = c.createRadialGradient(o.x, o.y, 3 * S, o.x, o.y, R);
+    g.addColorStop(0, `rgba(255,246,190,${0.5 * pulse * kk})`); g.addColorStop(0.5, `rgba(240,255,170,${0.18 * pulse * kk})`); g.addColorStop(1, "rgba(240,255,170,0)");
+    c.fillStyle = g; c.beginPath(); c.arc(o.x, o.y, R, 0, Math.PI * 2); c.fill();
     c.restore();
   }
 
@@ -160,7 +178,7 @@
     pose = pose || {};
     const A = Object.assign({ t: 0, air: false, sec: 0, wob: 0, glow: 0 }, anim || {});
     const K = camera(x, y, s, yaw, pitch, pose);
-    if (layer === "lights") { drawChest(c, K, A); antennaeOf(K, A).forEach(N => drawTip(c, K, N, A)); return; }
+    if (layer === "lights") { drawChest(c, K, A, x, y, s, yaw, pitch, pose); antennaeOf(K, A).forEach(N => drawTip(c, K, N, A)); return; }
     const front = layer === "front";
     // which parts are behind him: farther from you than the middle of his body (for the wings) or his head (antennae)
     const dBody = K.depth(onBody(K, [0, 0, 0.2]).p), dHead = K.depth([6, 0, 36 + K.tallUp]);
