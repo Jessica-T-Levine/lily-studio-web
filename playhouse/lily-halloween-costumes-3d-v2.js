@@ -212,7 +212,7 @@
     return { rx: BODY_R[0] * k, ry: BODY_R[1] * (P.wide || 1) * k, zc };
   }
   // a shaded mesh: surf(u, v) -> point in frog space, u 0..1 (up) and v 0..1 (around). Drawn far to near, only the faces that face you.
-  function drawMesh(c, K, surf, nu, nv, shade, pick) {
+  function drawMesh(c, K, surf, nu, nv, shade, pick, inner) {
     const grid = [];
     for (let i = 0; i <= nu; i++) { const row = []; for (let j = 0; j <= nv; j++) row.push(surf(i / nu, (j % nv) / nv)); grid.push(row); }
     const quads = [];
@@ -225,10 +225,10 @@
     quads.sort((p, q) => q.dep - p.dep);
     const sy = Math.sin(K.yaw), cy = Math.cos(K.yaw), sp = Math.sin(K.pitch), cp = Math.cos(K.pitch);
     quads.forEach(q => {
-      const face = -K.ndepth(q.n); if (face < -0.02) return;
+      const face = -K.ndepth(q.n); if (face < -0.02 && !inner) return;
       const nx = q.n[0] * sy + q.n[1] * cy, ny = -(q.n[2] * cp) - (q.n[0] * cy - q.n[1] * sy) * sp;
       const lit = clamp(nx * -0.35 + ny * -0.6 + face * 0.72, 0, 1);
-      const col = shade(lit, q, face); const P = q.pts.map(K.scr);
+      const col = face < -0.02 ? inner : shade(lit, q, face); const P = q.pts.map(K.scr);
       c.fillStyle = col; c.strokeStyle = col; c.lineWidth = Math.max(0.5, 0.6 * K.S); c.lineJoin = "round";
       c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)); c.closePath(); c.fill(); c.stroke();
     });
@@ -288,10 +288,10 @@
     const eyeTop = BUMP_C[2] + K.tallUp - (P.drop || 0) + BUMP_R * (P.bump || 1), dz = eyeTop - 45.8;       // 0 for Hop Hop's own shape
     const sw = Math.sin(A.t * 2.4) * 2.2 + sec * 4 + wob * 2.5;                                               // the hanging end swings
     const roll = 0.3 + sec * 0.05 + wob * 0.05;                                                              // one side lower: over one eye
-    const O = [-1.5, 0.6, 37.5 + dz];                                                                        // the middle of the cuff
+    const O = [-1.5, 0.6, 32.5 + dz];                                                                        // the middle of the cuff
     const cr = Math.cos(roll), sr = Math.sin(roll);
-    const T = p => [p[0], p[1], p[2] + (p[0] - O[0]) * (0.36 + sec * 0.03) - (p[1] - O[1]) * (0.26 + roll * 0.3 - 0.3)];   // tipped: the front rides up over her eyes, the back drops down her head, and the left side sits lower
-    const B = [[-1.5, 0.6, 37.5 + dz], [-9, 1.5, 68 + dz], [-37 - sw * 0.8, 5 + sw, 66 + dz - sec * 2], [-29 - sw, 7 + sw * 1.2, 27 + dz - sec * 3]];   // soft cone path: up, over, and hanging down the back
+    const T = p => [p[0], p[1], p[2] + (p[0] - O[0]) * (0.3 + sec * 0.03) - (p[1] - O[1]) * (0.26 + roll * 0.3 - 0.3)];   // tipped: the front rides up over her eyes, the back drops down her head, and the left side sits lower
+    const B = [[-1.5, 0.6, 32.5 + dz], [-9, 1.5, 64 + dz], [-37 - sw * 0.8, 5 + sw, 62 + dz - sec * 2], [-29 - sw, 7 + sw * 1.2, 22 + dz - sec * 3]];   // soft cone path: up, over, and hanging down the back
     const bz = (u, k) => { const m = 1 - u, w = [m * m * m, 3 * m * m * u, 3 * m * u * u, u * u * u]; return [0, 1, 2].map(i => w[0] * B[0][i] + w[1] * B[1][i] + w[2] * B[2][i] + w[3] * B[3][i]); };
     const C = u => bz(u);
     const Cd = u => norm(sub(bz(Math.min(1, u + 0.01)), bz(Math.max(0, u - 0.01))));
@@ -300,9 +300,9 @@
     const tube = (u0, u1, grow) => (u, v) => { const uu = u0 + (u1 - u0) * u, th = v * 2 * Math.PI, f = frame(uu), r = rr(uu) + grow, cc = C(uu);
       return T([cc[0] + r * (Math.cos(th) * f[0][0] + Math.sin(th) * f[1][0]), cc[1] + r * (Math.cos(th) * f[0][1] + Math.sin(th) * f[1][1]), cc[2] + r * (Math.cos(th) * f[0][2] + Math.sin(th) * f[1][2])]); };
     const hatShade = (lit) => rgb(mix(HAT_D, HAT_L, clamp(0.1 + lit * 0.95, 0, 1)));
-    drawMesh(c, K, tube(0.04, 1, 0), hi ? 30 : 16, hi ? 64 : 36, hatShade, pickQ);
+    drawMesh(c, K, tube(0.04, 1, 0), hi ? 30 : 16, hi ? 64 : 36, hatShade, pickQ, rgb([58, 52, 122]));
     // the folded cuff that hugs her head
-    drawMesh(c, K, tube(0, 0.085, 1.6), 3, hi ? 64 : 36, (lit) => rgb(mix(CUFF_D, CUFF_L, clamp(0.15 + lit, 0, 1))), pickQ);
+    drawMesh(c, K, tube(0, 0.085, 1.6), 3, hi ? 64 : 36, (lit) => rgb(mix(CUFF_D, CUFF_L, clamp(0.15 + lit, 0, 1))), pickQ, rgb([52, 46, 108]));
     // gold stars on the soft cone (only the ones that face you)
     [[0.2, 0.05, 2.9], [0.34, 0.32, 2.4], [0.52, 0.62, 1.9], [0.3, 0.8, 2.2], [0.64, 0.15, 1.6], [0.42, 0.96, 1.8], [0.16, 0.45, 2.1]].forEach(([u, v, r0]) => {
       const th = v * 2 * Math.PI, f = frame(u), cc = C(u), rad = rr(u), dir = [Math.cos(th) * f[0][0] + Math.sin(th) * f[1][0], Math.cos(th) * f[0][1] + Math.sin(th) * f[1][1], Math.cos(th) * f[0][2] + Math.sin(th) * f[1][2]];
