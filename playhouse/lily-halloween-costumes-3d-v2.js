@@ -363,7 +363,7 @@
     // the band lies ON the head: over the top of the body and arching over the tops of both eyes, down the sides
     const zAt = y => {
       const body = BODY_C[2] + Rz0 * Math.sqrt(Math.max(0, 1 - ex - Math.pow(y / Ry0, 2))) + 1.4;
-      const arc = bumpZ + br + 3.2 - 23 * Math.pow(Math.abs(y) / Ry0, 2.1);                          // one smooth arch over the tops of both eyes
+      const zt = bumpZ + br + 8.5, zb = BODY_C[2] + 3 + K.tallUp * 0.4, arc = zb + (zt - zb) * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y) / (Ry0 * 1.02), 3.4)), 0.5);                          // one smooth arch over the tops of both eyes
       return sm(arc, body);
     };
     const SM = 0.965, N = 44, pt = s2 => { const y = Ry0 * 1.02 * s2; return [bx, y, zAt(y)]; }, sc = v => K.scr(v);
