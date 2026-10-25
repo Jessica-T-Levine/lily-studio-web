@@ -15,6 +15,10 @@
     // ...the world's night tint...
     C3.firefly(ctx, x, y, s, yaw, pitch, pose, anim, "lights");  // his glowing chest and antenna tips (stay bright)
 
+  If you keep a saved picture of him (like the Playhouse does), draw the glowing chest from that picture instead:
+  draw him once more with pal: LilyHalloweenCostumes3D.glowPal("ours") on black, take the "difference" with your saved
+  picture on black, and add that with "lighter"; then call firefly(..., "tips") for his antenna tips and the soft halo.
+
   x, y, s, yaw, pitch, pose = exactly what you pass to LilyCreatures.frog.draw (pose.jump, pose.squash, pose.roll, pose.pal).
   anim = { t: seconds, air: true while hopping, sec: -1..1, wob: -1..1, glow: 0 by day .. 1 at night }
          (sec and wob: use LilyHalloweenCostumes.hopMotion from the 2D library, or leave them 0).
@@ -163,7 +167,11 @@
     c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha *= Math.min(1, 0.9 + 0.1 * pulse + 0.35 * A.glow);
     c.drawImage(cvA, x - Lw, y - Top, w / k, h / k);
     c.restore();
-    // the small soft light around it (bigger and brighter at night)
+    chestHalo(c, K, A);
+  }
+  // the small soft light around his chest (bigger and brighter at night)
+  function chestHalo(c, K, A) {
+    const S = K.S, pulse = 0.8 + 0.2 * Math.sin(A.t * 1.6);
     const T = onBody(K, [1, 0, -0.62]), face = -K.ndepth(T.n), vis = clamp((face - 0.1) / 0.5, 0, 1);
     if (vis <= 0.01) return;
     const o = K.scr(T.p), kk = 0.35 + 0.55 * A.glow, R = 30 * S;
@@ -178,6 +186,7 @@
     pose = pose || {};
     const A = Object.assign({ t: 0, air: false, sec: 0, wob: 0, glow: 0 }, anim || {});
     const K = camera(x, y, s, yaw, pitch, pose);
+    if (layer === "tips") { chestHalo(c, K, A); antennaeOf(K, A).forEach(N => drawTip(c, K, N, A)); return; }   // when the chest glow comes from your own saved picture
     if (layer === "lights") { drawChest(c, K, A, x, y, s, yaw, pitch, pose); antennaeOf(K, A).forEach(N => drawTip(c, K, N, A)); return; }
     const front = layer === "front";
     // which parts are behind him: farther from you than the middle of his body (for the wings) or his head (antennae)
@@ -188,5 +197,5 @@
     items.sort((a, b) => b.d - a.d).forEach(it => it.draw());   // far to near
   }
 
-  root.LilyHalloweenCostumes3D = Object.freeze({ version: "1-draft", firefly });
+  root.LilyHalloweenCostumes3D = Object.freeze({ version: "1-draft", firefly, glowPal });
 })(typeof window !== "undefined" ? window : globalThis);

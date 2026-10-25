@@ -378,6 +378,8 @@
 <script src="lily-flag-design.js"></script>
 <script src="lily-bee-home-v1.js"></script>
 <script src="lily-halloween-v2.js"></script>
+<script src="lily-halloween-costumes-v1.js"></script>
+<script src="lily-halloween-costumes-3d-v1.js"></script>
 <script src="lily-fish-2d-v6.js"></script>
 <script src="lily-fish-moves-v3.js"></script>
 <script>
@@ -412,6 +414,21 @@
     return 0;
   }
   const HW_LEVEL = halloweenLevel();
+  // ---------- Halloween week costumes (Oct 25 to 31): Hop Hop the firefly, in 3D ----------
+  // The rules come from the costume library: in Halloween week the costumes come out at night (they fade in as the
+  // sky gets dark and out again at sunrise); on Oct 31 all day and all night. Test a day with #hwd2026-10-27.
+  const LHC = window.LilyHalloweenCostumes || null, C3 = window.LilyHalloweenCostumes3D || null;
+  let HW_DATE = null;
+  try { const m = /[#&]hwd(\d{4})-(\d\d)-(\d\d)/.exec(location.hash); if (m) HW_DATE = { y: +m[1], mo: +m[2] - 1, d: +m[3] }; } catch (_) {}
+  function hwDate() { const n = new Date(); return HW_DATE ? new Date(HW_DATE.y, HW_DATE.mo, HW_DATE.d, n.getHours(), n.getMinutes()) : n; }
+  function costumeAmt() {
+    if (!LHC || !C3) return 0;
+    const d = hwDate();
+    if (LHC.costumesOn({ date: d, night: false })) return 1;
+    if (!LHC.costumesOn({ date: d, night: true })) return 0;
+    const u = clamp((nightness() - 0.35) / 0.3, 0, 1); return u * u * (3 - 2 * u);
+  }
+
   // x, y, th (how early in October it shows up), shape (0 round, 1 squat, 2 tall, 3 little), face (2 classic, 3 happy, 4 wink), size
   const WELCOME_PUMPKINS = [[10, 280, 0.01, 0, 4, 1.1], [600, 250, 0.08, 3, 3, 1.15]];
   const FROG = (LC && LC.frog) || window.HopHop3D || null;   // Hop Hop: the approved 3D master design from creature library v3 (Sept 29, 2026)
@@ -6802,10 +6819,34 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       }
     };
     if (tongueBehind) drawTongue();
-    drawCachedFrog(F, x, baseY - hopPx, s, yaw, pitch, {
+    const pose = {
       t: dancing ? danceT : 0, jump: jumping ? Math.sin(u * Math.PI) : 0, squash: F.squash, happy: F.wiggle > 0 || F.gulp > 0 || dancing || F.act === "wave" ? 1 : 0,
       pal: F.pal || "ours", dance: dancing, armR: F.act === "wave" && !jumping ? clamp(Math.min(2.4 - F.actT, F.actT) * 3, 0, 1) * (0.75 + 0.25 * Math.sin(time * 10)) : 0, blink: F.blink < 0, lick: !!F.lick, shadow: hopPx <= 0.5
-    });
+    };
+    // Halloween week: Hop Hop the firefly (wings and antennae around him, his own tummy patch glowing)
+    const ca = F.hophop ? costumeAmt() : 0, fy = baseY - hopPx;
+    let A = null;
+    if (ca > 0.002) {
+      if (F.wasAir && !jumping) F.landedAt = time; F.wasAir = jumping;
+      const mo = LHC.hopMotion({ air: jumping, vy: 1 - 2 * u, landedAgo: time - (F.landedAt == null ? -9 : F.landedAt) });
+      A = { t: reduceMotion ? 0 : time, air: jumping && !reduceMotion, sec: reduceMotion ? 0 : mo.sec, wob: reduceMotion ? 0 : mo.wob, glow: nightness() };
+      pose.glowDiff = true;
+      ctx.save(); ctx.globalAlpha = a * ca; C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "back"); ctx.restore();
+    }
+    drawCachedFrog(F, x, fy, s, yaw, pitch, pose);
+    if (ca > 0.002) {
+      ctx.save(); ctx.globalAlpha = a * ca; C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "front"); ctx.restore();
+      // his glowing tummy patch and antenna tips, drawn right here (so anything in front of him still covers them),
+      // a little stronger by the amount the night tint will dim them, so they stay bright after dark
+      const place = F.picPlace, boost = 1 / (1 - clamp(lightNow()[3], 0, 0.6));
+      const glowNow = k => {
+        ctx.save(); ctx.globalAlpha = a * ca * k;
+        if (F.glowOK && place) { ctx.globalCompositeOperation = "lighter"; ctx.drawImage(F.glowPic, place[0], place[1], place[2], place[3]); ctx.globalCompositeOperation = "source-over"; }
+        C3.firefly(ctx, x, fy, s, yaw, pitch, pose, A, "tips");
+        ctx.restore();
+      };
+      glowNow(1); if (boost > 1.02) glowNow(boost - 1);
+    }
     if (!tongueBehind) drawTongue();
     ctx.restore();
     residentHits.push({ id: "frog", kind: "frog", ref: F, x, y: baseY - hopPx - 22 * s, r: Math.max(20, 26 * s), top: baseY - hopPx - 50 * s, f: p.f });
@@ -6821,7 +6862,7 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
     const w = Math.max(2, Math.ceil(2 * L * sk)), h = Math.max(2, Math.ceil((TOP + BOT) * sk));
     const moving = pose.dance || pose.jump > 0 || pose.squash > 0.01 || pose.armR > 0;   // v21: a wave is moving too
     const big = s * k >= 2.5, turnSteps = s * k < 1.2 ? 10 : big ? 24 : 16;   // little faraway frogs don't need every tiny turn
-    const key = moving ? null : [step, Math.round(yaw * turnSteps), Math.round(pitch * 45), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0, pose.pal || ""].join(",");
+    const key = moving ? null : [step, Math.round(yaw * turnSteps), Math.round(pitch * 45), pose.happy, pose.blink ? 1 : 0, pose.lick ? 1 : 0, pose.shadow ? 1 : 0, pose.pal || "", pose.glowDiff ? 1 : 0].join(",");
     if (!F.pic) { F.pic = document.createElement("canvas"); F.picCtx = F.pic.getContext("2d"); F.picKey = ""; }
     if (frogRedrawT !== time) { frogRedrawT = time; frogRedraws = 0; }
     // v24: only a few refreshes each frame (a big frog that's dancing or hopping always gets his), and a little
@@ -6837,9 +6878,24 @@ const tgReach = (f, base) => (base + 6 * (f.size - 4)) * BM.R;   // a little rin
       c2.setTransform(k, 0, 0, k, 0, 0);
       FROG.draw(c2, L * sB, TOP * sB, sB, yaw, pitch, pose);
       F.picKey = key || ""; F.picS = sB;
+      F.glowOK = false;
+      if (pose.glowDiff && C3) {
+        // Halloween: his glowing tummy = the same picture with glowing tummy colors, minus this one (on black, so only
+        // his tummy patch is left: exactly its place, size and shape). It is added after the night tint.
+        if (!F.glowPic) { F.glowPic = document.createElement("canvas"); F.glowTmp = document.createElement("canvas"); }
+        [F.glowPic, F.glowTmp].forEach(cv => { if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } });
+        const g = F.glowPic.getContext("2d"), t2 = F.glowTmp.getContext("2d");
+        [g, t2].forEach(q => { q.setTransform(1, 0, 0, 1, 0, 0); q.globalCompositeOperation = "source-over"; q.globalAlpha = 1; q.fillStyle = "#000"; q.fillRect(0, 0, w, h); });
+        t2.drawImage(F.pic, 0, 0);
+        g.setTransform(k, 0, 0, k, 0, 0);
+        FROG.draw(g, L * sB, TOP * sB, sB, yaw, pitch, Object.assign({}, pose, { pal: C3.glowPal(pose.pal || "ours") }));
+        g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "difference"; g.drawImage(F.glowTmp, 0, 0); g.globalCompositeOperation = "source-over";
+        F.glowOK = true;
+      }
     }
     const f = s / (F.picS || s);   // the picture scaled to his size right now
-    ctx.drawImage(F.pic, x - L * s, y - TOP * s, F.pic.width / k * f, F.pic.height / k * f);
+    F.picPlace = [x - L * s, y - TOP * s, F.pic.width / k * f, F.pic.height / k * f];
+    ctx.drawImage(F.pic, F.picPlace[0], F.picPlace[1], F.picPlace[2], F.picPlace[3]);
   }
   // ---------- v47 (heat fix): bunnies and the hive are saved as pictures and reused, like Hop Hop's pond friends ----------
   // The 3D bunny and the 3D hive each need a WebGL drawing that is then copied onto the screen. Doing that for every
