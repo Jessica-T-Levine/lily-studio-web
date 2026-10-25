@@ -358,9 +358,11 @@
     const isFront = layer === "front";
     // is this spot really hidden behind her head, as seen from here? (a straight look from the camera to the spot, through her round body)
     const cy = Math.cos(K.yaw), sy = Math.sin(K.yaw), cp = Math.cos(K.pitch), sp = Math.sin(K.pitch), fv = [cy * cp, -sy * cp, -sp];
-    const R3 = [BODY_R[0], BODY_R[1] * ((K.P.wide) || 1), BODY_R[2] * ((K.P.tall) || 1)], C3 = [BODY_C[0], 0, BODY_C[2]];
-    const hidden = v => { const q = [0, 1, 2].map(i => (v[i] - C3[i]) / R3[i]), u = [0, 1, 2].map(i => -fv[i] / R3[i]);
-      const a = dot(u, u), b = dot(q, u), cc = dot(q, q) - 0.94; if (cc <= 0) return true; const disc = b * b - a * cc; return disc > 0 && b < 0; };
+    const gapB = K.P.gap || 1, brB = BUMP_R * (K.P.bump || 1), bzB = BUMP_C[2] + K.tallUp - (K.P.drop || 0);
+    const blob = (v, C, R, sh) => { const q = [0, 1, 2].map(i => (v[i] - C[i]) / R[i]), u = [0, 1, 2].map(i => -fv[i] / R[i]);
+      const a = dot(u, u), b = dot(q, u), cc = dot(q, q) - sh; if (cc <= 0) return true; const disc = b * b - a * cc; return disc > 0 && b < 0; };
+    const BODY_BLOB = [[BODY_C[0], 0, BODY_C[2]], [BODY_R[0], BODY_R[1] * ((K.P.wide) || 1), BODY_R[2] * ((K.P.tall) || 1)]];
+    const hidden = v => blob(v, BODY_BLOB[0], BODY_BLOB[1], 0.94) || [-1, 1].some(sd => blob(v, [BUMP_C[0], sd * BUMP_C[1] * gapB, bzB], [brB, brB, brB], 0.9));   // her body and both eyes can hide it
     const mine = v => hidden(v) !== isFront;
     const P = K.P, sec = A.sec || 0, wob = A.wob || 0, gap = P.gap || 1, bx = 4.5;
     const Ry0 = BODY_R[1] * (P.wide || 1), Rz0 = BODY_R[2] * (P.tall || 1), ex = Math.pow((bx - BODY_C[0]) / BODY_R[0], 2);
@@ -372,18 +374,26 @@
       const zt = bumpZ + br + 8.5, zb = BODY_C[2] + 3 + K.tallUp * 0.4, arc = zb + (zt - zb) * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y) / (Ry0 * 1.02), 3.4)), 0.5);                          // one smooth arch over the tops of both eyes
       return sm(arc, body);
     };
-    const SM = 0.965, N = 44, pt = s2 => { const y = Ry0 * 1.02 * s2; return [bx, y, zAt(y)]; }, sc = v => K.scr(v);
-    const TH = 1;
+    const Yw = Ry0 * 0.86, N = 40, sc = v => K.scr(v);
+    const sideY = z => Ry0 * Math.sqrt(Math.max(0.02, 1 - ex - Math.pow((z - BODY_C[2]) / Rz0, 2))) + 0.9;           // the surface of her head at height z
+    const zEnd = BODY_C[2] + 17 + K.tallUp * 0.9;                                                                       // where the straight sides stop
+    const arch = y => { const zt = bumpZ + br + 8.5, f = Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y) / Yw, 3.2)), 0.5); return sm(zEnd + (zt - zEnd) * f, BODY_C[2] + Rz0 * Math.sqrt(Math.max(0, 1 - ex - Math.pow(y / Ry0, 2))) + 1.4); };
+    const tipZ = zEnd - 5.5, tipY = sideY(tipZ), pts = [];
+    const curl = k => { const t = k / 5, e = t * t * (3 - 2 * t); return [zEnd - 5.5 * t, Yw + (tipY - Yw) * e]; };          // a gentle curve inward so the tip touches her head
+    for (let k = 5; k >= 1; k--) { const [z, y] = curl(k); pts.push([bx, -y, z]); }
+    for (let i = 0; i <= N; i++) { const y = -Yw + 2 * Yw * i / N; pts.push([bx, y, arch(y)]); }
+    for (let k = 1; k <= 5; k++) { const [z, y] = curl(k); pts.push([bx, y, z]); }
+    const pt = s2 => { const y = Yw * s2; return [bx, y, arch(y)]; };
     c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
     let open = false;
-    for (let i = 0; i <= N; i++) {
-      const v = pt(-SM + 2 * SM * i / N), ok = mine(v), q = sc(v);
+    for (let i = 0; i < pts.length; i++) {
+      const v = pts[i], ok = mine(v), q = sc(v);
       if (ok) { if (!open) { c.beginPath(); c.moveTo(q.x, q.y); open = true; } else c.lineTo(q.x, q.y); }
       else if (open) { c.stroke(); open = false; }
     }
     if (open) c.stroke();
     [-1, 1].forEach((side, j) => {
-      const base = pt(side * 0.5); if (!mine(base)) return;
+      const base = pt(side * 0.55); if (!mine(base)) return;
       const sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
       const tip = add(base, [1.5 + sw * 0.3, side * (6 + sw), up]), c1 = add(base, [0, side * 1.5, 9]), c2 = add(base, [1, side * 5, up - 5]);
       const a = sc(base), b = sc(c1), d = sc(c2), t = sc(tip);
