@@ -355,7 +355,13 @@
     });
   }
   function beeBand(c, K, A, layer) {
-    const isFront = layer === "front", mine = v => (K.depth(v) > K.dBody) !== isFront;     // each piece is drawn behind or in front of the head by where it really is
+    const isFront = layer === "front";
+    // is this spot really hidden behind her head, as seen from here? (a straight look from the camera to the spot, through her round body)
+    const cy = Math.cos(K.yaw), sy = Math.sin(K.yaw), cp = Math.cos(K.pitch), sp = Math.sin(K.pitch), fv = [cy * cp, -sy * cp, -sp];
+    const R3 = [BODY_R[0], BODY_R[1] * ((K.P.wide) || 1), BODY_R[2] * ((K.P.tall) || 1)], C3 = [BODY_C[0], 0, BODY_C[2]];
+    const hidden = v => { const q = [0, 1, 2].map(i => (v[i] - C3[i]) / R3[i]), u = [0, 1, 2].map(i => -fv[i] / R3[i]);
+      const a = dot(u, u), b = dot(q, u), cc = dot(q, q) - 0.94; if (cc <= 0) return true; const disc = b * b - a * cc; return disc > 0 && b < 0; };
+    const mine = v => hidden(v) !== isFront;
     const P = K.P, sec = A.sec || 0, wob = A.wob || 0, gap = P.gap || 1, bx = 4.5;
     const Ry0 = BODY_R[1] * (P.wide || 1), Rz0 = BODY_R[2] * (P.tall || 1), ex = Math.pow((bx - BODY_C[0]) / BODY_R[0], 2);
     const bumpZ = BUMP_C[2] + K.tallUp - (P.drop || 0), br = BUMP_R * (P.bump || 1);
