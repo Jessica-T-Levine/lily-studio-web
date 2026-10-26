@@ -475,12 +475,41 @@
     c.fill(); c.restore();
   }
 
+
+  // ---------- Lavender's moon cape: a short cozy cape from her shoulders down her back, with a scalloped hem and a little moon pin ----------
+  const CAPE_L = [150, 128, 222], CAPE_D = [104, 84, 186], CAPE_IN = [84, 66, 158];
+  function moonCape(c, K, A, layer) {
+    const isFront = layer === "front", P = K.P, sec = A.sec || 0, wob = A.wob || 0, hi = K.S > 2.2;
+    const Rb = [BODY_R[0], BODY_R[1] * (P.wide || 1), BODY_R[2] * (P.tall || 1)], zc = BODY_C[2];
+    const zTop = zc + Rb[2] * 0.72, zBot = 4 + Math.max(0, sec) * 7 + (A.air ? 2 : 0);
+    const flap = Math.max(0, sec) * 5 + (A.air ? 2.5 : 0), sx = Math.sin(A.t * 2.2) * 1.4 + wob * 1.5;
+    const ph0 = 1.15, ph1 = 2 * Math.PI - 1.15;
+    const surf = (u, v) => {
+      const ph = ph0 + (ph1 - ph0) * v, back = Math.max(0, -Math.cos(ph));                      // 1 at her back, 0 at her sides
+      const scal = Math.sin(v * 2 * Math.PI * 5) * 1.3 * u * u, wave = Math.sin(A.t * 3 + v * 9) * 0.9 * u;
+      const z = zTop + (zBot - zTop) * u + scal + wave * 0.5 + (1 - back) * u * 3;                // a little shorter at the sides
+      const zz = Math.max(z, zc), q = clamp((zz - zc) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q);
+      const off = 1.3 + u * u * (2.5 + flap * back) + (1 - u) * 0.4;
+      return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph) - sx * u * back * 0.3, (Rb[1] * k + off) * Math.sin(ph) + sx * u * 0.4, z];
+    };
+    const shade = (lit, q) => rgb(mix(CAPE_D, CAPE_L, clamp(0.15 + lit * 0.9 - q.u * 0.12, 0, 1)));
+    drawMesh(c, K, surf, hi ? 18 : 10, hi ? 60 : 34, shade, q => { const m = q.pts.reduce((a, b) => add(a, b, 0.25), [0, 0, 0]); return occluded(K, m, 0.97, 0.85) !== isFront; }, rgb(CAPE_IN));   // what her body hides is drawn before her
+    // the collar edge and the moon pin on her left shoulder
+    if (!isFront) return;
+    const pinAt = (() => { const ph = ph0 + 0.05, q = clamp((zTop - zc) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q); return [BODY_C[0] + (Rb[0] * k + 2) * Math.cos(ph), (Rb[1] * k + 2) * Math.sin(ph), zTop - 1]; })();
+    if (occluded(K, pinAt, 0.9, 0.85)) return;
+    const pq = K.scr(pinAt), r = 3.2 * K.S, tw = 0.85 + 0.15 * Math.sin(A.t * 2);
+    c.save(); c.fillStyle = "#FFE27A"; c.beginPath(); c.arc(pq.x, pq.y, r, 0, Math.PI * 2); c.fill();
+    c.fillStyle = rgb(CAPE_D); c.beginPath(); c.arc(pq.x + r * 0.45, pq.y - r * 0.3, r * 0.82, 0, Math.PI * 2); c.fill();
+    c.fillStyle = `rgba(255,255,255,${0.7 * tw})`; c.beginPath(); c.arc(pq.x - r * 0.45, pq.y + r * 0.1, r * 0.22, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
   function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
     const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.7, 0, 0.55]).p, [-12, 0, 16]));
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow] };
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
