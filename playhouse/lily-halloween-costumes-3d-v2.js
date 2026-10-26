@@ -432,6 +432,13 @@
       if (face > 0.05) { const r = 2.4 * K.S, tw = 0.8 + 0.2 * Math.sin(A.t * 3 + S.sd);
         c.save(); c.fillStyle = "#FFE27A"; c.beginPath(); for (let i = 0; i < 8; i++) { const an = i / 8 * Math.PI * 2, rr = i % 2 ? r * 0.4 : r * tw; c.lineTo(q.x + Math.cos(an) * rr, q.y + Math.sin(an) * rr); } c.fill(); c.restore(); }
     });
+    // the soft bridge that joins the two eye patches over her forehead (one piece of mask, curved like the patches)
+    const inner = S => { const lat = norm(sub([0, -S.sd, 0.1], S.e.map(x => x * dot([0, -S.sd, 0.1], S.e)))), an = 0.95; return add(S.C, norm(add(S.e.map(x => x * Math.cos(an)), lat, Math.sin(an))), br + 0.9); };
+    const pL = inner(sides[0]), pR = inner(sides[1]), mid = [(pL[0] + pR[0]) / 2 + 1.6, 0, (pL[2] + pR[2]) / 2 + 0.6];
+    const bz2 = u => { const m = 1 - u; return [0, 1, 2].map(i => m * m * pL[i] + 2 * m * u * mid[i] + u * u * pR[i]); };
+    const bridge3 = (u, v) => { const p0 = bz2(u), t = norm(sub(bz2(Math.min(1, u + 0.02)), bz2(Math.max(0, u - 0.02)))), upv = norm(cross([1, 0, 0.25], t)), w = 5.6 * (0.62 + 0.38 * Math.abs(2 * u - 1));
+      return add(p0, upv, (v - 0.5) * w); };
+    if (-K.ndepth([1, 0, 0]) > -0.15) drawMesh(c, K, bridge3, hi ? 14 : 8, 3, shade, q => !occluded(K, q.pts[0], 0.9, 0.0));
     // the strap: the mask ties on like a real costume mask, round the back of her head, with the bow at the back
     const Rb = [BODY_R[0], BODY_R[1] * (P.wide || 1), BODY_R[2] * (P.tall || 1)], zs = 30.5 + K.tallUp * 0.5;
     const ring = (ph, z, off) => { const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q); return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph), (Rb[1] * k + off) * Math.sin(ph), z]; };
@@ -445,9 +452,9 @@
       const k = e * e * (3 - 2 * e), st = startAt(t < 0.5 ? -1 : 1);
       return [st[0] + (onRing[0] - st[0]) * k, st[1] + (onRing[1] - st[1]) * k, st[2] + dz + (onRing[2] - dz - st[2]) * k];
     };
-    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => q.dep < K.dBody + 1.5 && -K.ndepth(q.n) > 0.1 && !occluded(K, q.pts[0], 0.0, 0.85));
+    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => ![0, 1, 2, 3].some(i => occluded(K, q.pts[i], 0.97, 0.85)));
     // the bow tied at the back of her head, wiggling a little
-    const bowAt = ring(Math.PI, zs + 0.5, 1.6), b = K.scr(bowAt), s0 = K.S, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
+    const bowAt = ring(Math.PI, zs + 0.5, 1.6), b = K.scr(bowAt), s0 = K.S * 2, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
     if (-K.ndepth([-1, 0, 0]) < -0.3 || occluded(K, bowAt, 0.0, 0.85)) return;      // seen from behind or the side, never from the front
     const fc = clamp(Math.abs(K.ndepth([1, 0, 0])) * 1.6 + 0.35, 0.35, 1);          // seen edge-on from the side it gets narrower
     c.save(); c.translate(b.x, b.y); c.rotate(wig); c.fillStyle = "#C79BEA";
