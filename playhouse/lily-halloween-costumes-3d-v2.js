@@ -453,14 +453,26 @@
       return [st[0] + (onRing[0] - st[0]) * k, st[1] + (onRing[1] - st[1]) * k, st[2] + dz + (onRing[2] - dz - st[2]) * k];
     };
     drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => { const nearEye = q.u < 0.2 || q.u > 0.8; return ![0, 1, 2, 3].some(i => occluded(K, q.pts[i], 0.97, nearEye ? 0.5 : 0.85)); });      // where it leaves the eye patch it lies on the eye itself, so the eye must not hide it
-    // the bow tied at the back of her head, wiggling a little
-    const bowAt = ring(Math.PI, zs + 0.5, 1.6), b = K.scr(bowAt), s0 = K.S * 2, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
-    if (-K.ndepth([-1, 0, 0]) < -0.3 || occluded(K, bowAt, 0.0, 0.85)) return;      // seen from behind or the side, never from the front
-    const fc = clamp(Math.abs(K.ndepth([1, 0, 0])) * 1.6 + 0.35, 0.35, 1);          // seen edge-on from the side it gets narrower
-    c.save(); c.translate(b.x, b.y); c.rotate(wig); c.fillStyle = "#C79BEA";
-    [-1, 1].forEach(dr => { c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(dr * 4 * s0 * fc, -7 * s0, dr * 11 * s0 * fc, -6 * s0, dr * 10 * s0 * fc, -1 * s0); c.bezierCurveTo(dr * 9 * s0 * fc, 3 * s0, dr * 3 * s0 * fc, 3 * s0, 0, 0); c.fill(); });
-    c.fillStyle = "#B08AE0"; [-1, 1].forEach(dr => { c.beginPath(); c.moveTo(0, 1 * s0); c.quadraticCurveTo(dr * 3 * s0, 7 * s0, dr * 5 * s0, 11 * s0); c.lineTo(dr * 1.5 * s0, 10 * s0); c.quadraticCurveTo(dr * 0.5 * s0, 6 * s0, 0, 1 * s0); c.fill(); });
-    c.fillStyle = "#A578DA"; c.beginPath(); c.arc(0, 0, 2.2 * s0, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
+  // Pink's bow: a real flat bow fixed to the back of her head. From behind you see it whole, from the side you see it edge-on,
+  // and from the front it is behind her head (drawn before her, so only what sticks out past her head shows).
+  function pinkBow(c, K, A, layer) {
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0;
+    const Rb = [BODY_R[0], BODY_R[1] * (P.wide || 1), BODY_R[2] * (P.tall || 1)], zs = 30.5 + K.tallUp * 0.5, z = zs + 0.5;
+    const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q), at = [BODY_C[0] - (Rb[0] * k + 2.2), 0, z];
+    const facing = -K.ndepth([-1, 0, 0]);                  // > 0 when her back is turned to you
+    if ((facing > -0.05) !== (layer === "front")) return;
+    const wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12, cw = Math.cos(wig), sw = Math.sin(wig), u = 2;
+    const L = (lx, ly) => { const x = lx * cw - ly * sw, y = lx * sw + ly * cw; return K.scr([at[0] - 0.15 * Math.abs(x) * u, at[1] + x * u, at[2] - y * u]); };   // the loops bend a little forward round her head
+    const path = pts => { c.beginPath(); const p0 = L(...pts[0]); c.moveTo(p0.x, p0.y); for (let i = 1; i < pts.length; i += 3) { const a = L(...pts[i]), b = L(...pts[i + 1]), d = L(...pts[i + 2]); c.bezierCurveTo(a.x, a.y, b.x, b.y, d.x, d.y); } c.closePath(); c.fill(); };
+    c.save(); c.fillStyle = "#C79BEA";
+    [-1, 1].forEach(dr => path([[0, 0], [dr * 4, -7], [dr * 11, -6], [dr * 10, -1], [dr * 9, 3], [dr * 3, 3], [0, 0]]));
+    c.fillStyle = "#B08AE0";
+    [-1, 1].forEach(dr => path([[0, 1], [dr * 2, 4], [dr * 4, 8], [dr * 5, 11], [dr * 3.5, 10.7], [dr * 2.5, 10.3], [dr * 1.5, 10], [dr * 1, 7], [dr * 0.5, 4], [0, 1]]));
+    c.fillStyle = "#A578DA"; c.beginPath();
+    for (let i = 0; i <= 24; i++) { const an = i / 24 * Math.PI * 2, p = L(Math.cos(an) * 2.2, Math.sin(an) * 2.2); i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y); }
+    c.fill(); c.restore();
   }
 
   function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
@@ -468,7 +480,7 @@
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask] };
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
