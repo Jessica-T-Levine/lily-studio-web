@@ -444,7 +444,7 @@
     const ring = (ph, z, off) => { const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q); return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph), (Rb[1] * k + off) * Math.sin(ph), z]; };
     // the strap leaves each eye patch at the outer back side of the eye, slides down onto the round of her head and runs round the back
     const ph0 = 1.62;
-    const startAt = sd => { const S = sides[sd > 0 ? 1 : 0], lat = norm(sub([0, sd, -0.15], S.e.map(x => x * dot([0, sd, -0.15], S.e)))), an = 1.02, f = norm(add(S.e.map(x => x * Math.cos(an)), lat, Math.sin(an))); return add(S.C, f, br + 0.9); };
+    const startAt = sd => { const S = sides[sd > 0 ? 1 : 0], lat = norm(sub([0, sd, -0.15], S.e.map(x => x * dot([0, sd, -0.15], S.e)))), an = 0.92, f = norm(add(S.e.map(x => x * Math.cos(an)), lat, Math.sin(an))); return add(S.C, f, br + 0.9); };
     const strapPt = (t, dz) => {                                           // t 0..1 from her left eye round the back to her right eye
       const ph = -(ph0 + (2 * Math.PI - 2 * ph0) * t) , onRing = ring(ph, zs + dz, 1.1);
       const e = t < 0.5 ? t / 0.16 : (1 - t) / 0.16;
@@ -452,7 +452,7 @@
       const k = e * e * (3 - 2 * e), st = startAt(t < 0.5 ? -1 : 1);
       return [st[0] + (onRing[0] - st[0]) * k, st[1] + (onRing[1] - st[1]) * k, st[2] + dz + (onRing[2] - dz - st[2]) * k];
     };
-    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => ![0, 1, 2, 3].some(i => occluded(K, q.pts[i], 0.97, 0.85)));
+    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => { const nearEye = q.u < 0.2 || q.u > 0.8; return ![0, 1, 2, 3].some(i => occluded(K, q.pts[i], 0.97, nearEye ? 0.5 : 0.85)); });      // where it leaves the eye patch it lies on the eye itself, so the eye must not hide it
     // the bow tied at the back of her head, wiggling a little
     const bowAt = ring(Math.PI, zs + 0.5, 1.6), b = K.scr(bowAt), s0 = K.S * 2, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
     if (-K.ndepth([-1, 0, 0]) < -0.3 || occluded(K, bowAt, 0.0, 0.85)) return;      // seen from behind or the side, never from the front
