@@ -578,7 +578,49 @@
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape], lime: [batAll], ember: [cowboyHat] };
+  // ---------- Hunter's friendly ghost: a soft white sheet over his body, the eyes peek out of two holes, a painted smile and pink cheeks, feet out ----------
+  const SHEET_L = [252, 250, 255], SHEET_D = [176, 168, 214], SHEET_IN = [150, 142, 190];
+  function ghostSheet(c, K, A, layer) {
+    if (layer !== "front") return;
+    const P = K.P, hi = K.S > 2.2, gap = P.gap || 1, br = BUMP_R * (P.bump || 1), bz = BUMP_C[2] + K.tallUp - (P.drop || 0), sec = Math.max(0, A.sec || 0);
+    const zc = 20.6 + K.tallUp, rz = BODY_R[2] * (P.tall || 1), zt = zc + rz * 0.999, zb = 5.6 + sec * 2.5 + (A.air ? 1.5 : 0);
+    const NV = hi ? 180 : 56, sm = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+    const pt = (u0, th, wob) => {
+      const u = Math.sin(u0 * Math.PI / 2), z = zb + (zt - zb) * u, b = bodyAt(K, z), skirt = sm((0.62 - u) / 0.62), fl = 1 + 0.3 * skirt * skirt;
+      const hem = Math.pow(1 - u, 2.2);
+      const dz = wob ? (1.9 * Math.sin(th * 7) + 0.9 * Math.sin(A.t * 3 + th * 3)) * hem * 1.8 : 0;
+      const off = (1.9 + skirt * 3.2 + sec * 1.2 * skirt) * Math.min(1, b.rx / 6), rx = Math.max(b.rx + off, 20 * skirt * fl * 0.62), ry = Math.max(b.ry + off, 21.5 * (P.wide || 1) * skirt * fl * 0.62);
+      return [2 + Math.cos(th) * rx, Math.sin(th) * ry, z + dz];
+    };
+    const surf = (u, v) => pt(u, v * 2 * Math.PI, true);
+    const bumps = [-1, 1].map(sd => [BUMP_C[0], sd * BUMP_C[1] * gap, bz]);
+    const pick = q => {
+      const m = q.pts.reduce((a, b) => add(a, b, 0.25), [0, 0, 0]);
+      for (const bc of bumps) if (Math.hypot(m[0] - bc[0], m[1] - bc[1], m[2] - bc[2]) < br * 1.08) return false;
+      return !occluded(K, m, -1e9, 0.96);
+    };
+    const shade = (lit, q) => rgb(mix(SHEET_D, SHEET_L, clamp(0.28 + lit * 0.85 - 0.1 * (1 - q.u), 0, 1)));
+    drawMesh(c, K, surf, hi ? 72 : 22, NV, shade, pick, rgb(SHEET_IN));
+    // painted smile and cheeks, on the front of the sheet
+    const faceAt = (z, th) => { const u = clamp((z - zb) / (zt - zb), 0, 1), q = pt(Math.asin(u) * 2 / Math.PI, th, false); return q; };
+    const nrm = th => norm([Math.cos(th) / 20, Math.sin(th) / 21, 0.0001]);
+    const vis = th => -K.ndepth(nrm(th));
+    const zs = zc - rz * 0.05;
+    if (vis(0) > 0.08) {
+      const ink = "rgba(70,52,120,0.92)", N = 14, pts = [];
+      for (let i = 0; i <= N; i++) { const t = -1 + 2 * i / N, th = t * 0.34; pts.push({ p: K.scr(faceAt(zs - 3.2 * (1 - t * t) + 1, th)), f: vis(th) }); }
+      c.save(); c.strokeStyle = ink; c.lineWidth = Math.max(1, 1.7 * K.S); c.lineCap = "round"; c.lineJoin = "round";
+      c.beginPath(); let on = false; pts.forEach(o => { if (o.f > 0.04) { on ? c.lineTo(o.p.x, o.p.y) : c.moveTo(o.p.x, o.p.y); on = true; } else on = false; }); c.stroke();
+      [-1, 1].forEach(sd => {
+        const th = sd * 0.62, f = vis(th); if (f < 0.1) return;
+        const cp = K.scr(faceAt(zs + 1.4, th)), r = 3.4 * K.S;
+        c.fillStyle = "rgba(255,138,160,0.62)"; c.beginPath(); c.ellipse(cp.x, cp.y, r * Math.max(0.35, f), r * 0.78, 0, 0, Math.PI * 2); c.fill();
+      });
+      c.restore();
+    }
+  }
+
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape], lime: [batAll], ember: [cowboyHat], hunter: [ghostSheet] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
