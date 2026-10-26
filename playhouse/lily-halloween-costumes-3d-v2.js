@@ -547,11 +547,11 @@
     if (layer !== "front") return;
     const P = K.P, sec = A.sec || 0, wob = A.wob || 0, hi = K.S > 2.2, gap = P.gap || 1;
     const br = BUMP_R * (P.bump || 1), eyeTop = BUMP_C[2] + K.tallUp - (P.drop || 0) + br, k = br / 9.5 * 1.12;
-    const H = [BUMP_C[0] - 2.5, 0, eyeTop - 1.6 * k - Math.max(0, -sec) * 0 + Math.max(0, sec) * 0];
+    const H = [BUMP_C[0] - 3, 0, eyeTop - 4.2 * k];                                            // pulled down ON her head: the crown goes round the tops of her eyes
     const bob = -sec * 1.6 * k, roll = -0.06 + sec * 0.07 + wob * 0.06, tilt = -0.1;              // it bounces a little and rocks when she lands
     const cr = Math.cos(roll), sr = Math.sin(roll), ct = Math.cos(tilt), st = Math.sin(tilt);
     const W = ([x, y, z]) => { let y1 = y * cr - z * sr, z1 = y * sr + z * cr; let x2 = x * ct + z1 * st, z2 = -x * st + z1 * ct; return [H[0] + x2, H[1] + y1, H[2] + z2 + bob]; };
-    const cx = 9.6 * k, cy = Math.max(11 * k, BUMP_C[1] * gap * 0.9 + 3), ax = 18 * k, ay = Math.max(25 * k, cy + 13 * k), hgt = 16.5 * k;
+    const eyeOutY = BUMP_C[1] * gap + Math.sqrt(Math.max(0, br * br - 9)) + 1.2, cx = Math.max(9.6 * k, br + 3.2), cy = Math.max(11 * k, eyeOutY), ax = 18 * k, ay = Math.max(25 * k, cy + 13 * k), hgt = 16.5 * k;
     const brim = (u, v) => { const th = -v * 2 * Math.PI, rx = cx + (ax - cx) * u, ry = cy + (ay - cy) * u, sn = Math.abs(Math.sin(th));
       return W([Math.cos(th) * rx, Math.sin(th) * ry, (u * u * Math.pow(sn, 3) * 7.5 - u * u * Math.pow(Math.cos(th), 2) * 1.2) * k]); };
     const crown = (u, v) => { const th = v * 2 * Math.PI, y0 = Math.sin(th), x0 = Math.cos(th);
