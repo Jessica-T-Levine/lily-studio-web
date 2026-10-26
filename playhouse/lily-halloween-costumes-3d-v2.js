@@ -434,12 +434,14 @@
     });
     // the strap: the mask ties on like a real costume mask, round the back of her head, with the bow at the back
     const Rb = [BODY_R[0], BODY_R[1] * (P.wide || 1), BODY_R[2] * (P.tall || 1)], zs = 33.5 + K.tallUp * 0.5;
-    const ring = (ph, z) => { const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q) + 0.07; return [BODY_C[0] + (Rb[0] * k + 0.9) * Math.cos(ph), (Rb[1] * k + 0.9) * Math.sin(ph), z]; };
-    const strap = (u, v) => ring(0.85 + (2 * Math.PI - 1.7) * u, zs + (0.5 - v) * 5.2);
-    drawMesh(c, K, strap, hi ? 64 : 34, 2, shade, q => !occluded(K, q.pts[0], 0.86, 0.5));
+    const ring = (ph, z, off) => { const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q) + 0.07; return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph), (Rb[1] * k + off) * Math.sin(ph), z]; };
+    // it starts right at the back edge of each eye patch (a little higher), then settles down onto the round of her head and runs all the way round
+    const lift = ph => 3.4 * Math.max(0, 1 - Math.max(0, ph - 0.85) / 0.9);
+    const strap = (u, v) => { const ph = 0.85 + (2 * Math.PI - 1.7) * u; return ring(ph, zs + lift(ph) + (0.5 - v) * 5.2, 1.5); };
+    drawMesh(c, K, strap, hi ? 72 : 40, 2, shade, q => !occluded(K, q.pts[0], 0.62, 0.3));
     // the bow tied at the back of her head, wiggling a little
-    const bowAt = ring(Math.PI, zs + 0.5), b = K.scr(bowAt), s0 = K.S, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
-    if (occluded(K, bowAt, 0.8, 0.5)) return;
+    const bowAt = ring(Math.PI, zs + 0.5, 1.5), b = K.scr(bowAt), s0 = K.S, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
+    if (K.depth(bowAt) - K.dBody > 3 || occluded(K, bowAt, 0.6, 0.3)) return;
     const fc = clamp(Math.abs(K.ndepth([1, 0, 0])) * 1.6 + 0.35, 0.35, 1);          // seen edge-on from the side it gets narrower
     c.save(); c.translate(b.x, b.y); c.rotate(wig); c.fillStyle = "#C79BEA";
     [-1, 1].forEach(dr => { c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(dr * 4 * s0 * fc, -7 * s0, dr * 11 * s0 * fc, -6 * s0, dr * 10 * s0 * fc, -1 * s0); c.bezierCurveTo(dr * 9 * s0 * fc, 3 * s0, dr * 3 * s0 * fc, 3 * s0, 0, 0); c.fill(); });
