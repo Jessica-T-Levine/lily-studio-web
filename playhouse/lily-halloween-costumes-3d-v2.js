@@ -540,12 +540,45 @@
     if (bandD > wingD) { beeBand(c, K, A, layer, "bat"); batWings(c, K, A, layer); } else { batWings(c, K, A, layer); beeBand(c, K, A, layer, "bat"); }
   }
 
+
+  // ---------- Ember's little cowboy hat: soft brown felt, a pinched crown, a brim that curls up at both sides, a band with a tiny gold star ----------
+  const FELT_D = [128, 82, 46], FELT_L = [186, 130, 80], BRIM_D = [116, 74, 42], BRIM_L = [166, 112, 64], BRIM_U = [104, 66, 38], BAND = [94, 59, 34];
+  function cowboyHat(c, K, A, layer) {
+    if (layer !== "front") return;
+    const P = K.P, sec = A.sec || 0, wob = A.wob || 0, hi = K.S > 2.2, gap = P.gap || 1;
+    const br = BUMP_R * (P.bump || 1), eyeTop = BUMP_C[2] + K.tallUp - (P.drop || 0) + br, k = br / 9.5 * 1.12;
+    const H = [BUMP_C[0] - 2.5, 0, eyeTop - 1.6 * k - Math.max(0, -sec) * 0 + Math.max(0, sec) * 0];
+    const bob = -sec * 1.6 * k, roll = -0.06 + sec * 0.07 + wob * 0.06, tilt = -0.1;              // it bounces a little and rocks when she lands
+    const cr = Math.cos(roll), sr = Math.sin(roll), ct = Math.cos(tilt), st = Math.sin(tilt);
+    const W = ([x, y, z]) => { let y1 = y * cr - z * sr, z1 = y * sr + z * cr; let x2 = x * ct + z1 * st, z2 = -x * st + z1 * ct; return [H[0] + x2, H[1] + y1, H[2] + z2 + bob]; };
+    const cx = 9.6 * k, cy = Math.max(11 * k, BUMP_C[1] * gap * 0.9 + 3), ax = 18 * k, ay = Math.max(25 * k, cy + 13 * k), hgt = 16.5 * k;
+    const brim = (u, v) => { const th = -v * 2 * Math.PI, rx = cx + (ax - cx) * u, ry = cy + (ay - cy) * u, sn = Math.abs(Math.sin(th));
+      return W([Math.cos(th) * rx, Math.sin(th) * ry, (u * u * Math.pow(sn, 3) * 7.5 - u * u * Math.pow(Math.cos(th), 2) * 1.2) * k]); };
+    const crown = (u, v) => { const th = v * 2 * Math.PI, y0 = Math.sin(th), x0 = Math.cos(th);
+      if (u <= 0.78) { const t = u / 0.78, b = 1 - 0.14 * t * t; return W([x0 * cx * b, y0 * cy * b, hgt * t]); }
+      const t = (u - 0.78) / 0.22, b = 0.86 * Math.cos(t * Math.PI / 2), yy = y0 * cy * b, pinch = 3.6 * k * Math.exp(-Math.pow(yy / (cy * 0.42), 2)) * Math.sin(t * Math.PI / 2);
+      return W([x0 * cx * b, yy, hgt + 2.2 * k * Math.sin(t * Math.PI / 2) - pinch]); };
+    const band = (u, v) => { const th = v * 2 * Math.PI; return W([Math.cos(th) * (cx + 0.25), Math.sin(th) * (cy + 0.25), (0.6 + 2.9 * u) * k]); };
+    const felt = (L0, L1) => lit => rgb(mix(L0, L1, clamp(0.15 + lit * 0.9, 0, 1)));
+    const ctr = W([0, 0, hgt * 0.4]), behindCrown = q => q.dep > K.depth(ctr);
+    // the brim behind the crown, then the crown and its band, then the brim in front
+    drawMesh(c, K, brim, hi ? 6 : 4, hi ? 72 : 40, felt(BRIM_D, BRIM_L), behindCrown, rgb(BRIM_U));
+    drawMesh(c, K, crown, hi ? 22 : 12, hi ? 56 : 32, felt(FELT_D, FELT_L), null);
+    drawMesh(c, K, band, 2, hi ? 56 : 32, () => rgb(BAND), null);
+    const face = -K.ndepth(norm([Math.cos(-0.35), Math.sin(-0.35), 0]));
+    if (face > 0.08) {                                                                    // the tiny gold star on the band
+      const sp = K.scr(W([Math.cos(-0.35) * (cx + 0.5), Math.sin(-0.35) * (cy + 0.5), 2 * k])), r = 2.4 * k * K.S;
+      c.save(); c.fillStyle = "#FFD55A"; c.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2, rr = i % 2 ? r * 0.45 : r; c.lineTo(sp.x + Math.cos(a) * rr * (0.4 + 0.6 * face), sp.y + Math.sin(a) * rr); } c.fill(); c.restore();
+    }
+    drawMesh(c, K, brim, hi ? 6 : 4, hi ? 72 : 40, felt(BRIM_D, BRIM_L), q => !behindCrown(q), rgb(BRIM_U));
+  }
+
   function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
     const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.7, 0, 0.55]).p, [-12, 0, 16]));
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape], lime: [batAll] };
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape], lime: [batAll], ember: [cowboyHat] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
