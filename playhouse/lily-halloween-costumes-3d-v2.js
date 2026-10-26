@@ -484,16 +484,17 @@
     const zTop = zc + Rb[2] * 0.72, zBot = 4 + Math.max(0, sec) * 7 + (A.air ? 2 : 0);
     const flap = Math.max(0, sec) * 5 + (A.air ? 2.5 : 0), sx = Math.sin(A.t * 2.2) * 1.4 + wob * 1.5;
     const ph0 = 1.15, ph1 = 2 * Math.PI - 1.15;
-    const surf = (u, v) => {
-      const ph = ph0 + (ph1 - ph0) * v, back = Math.max(0, -Math.cos(ph));                      // 1 at her back, 0 at her sides
+    const NV = hi ? 60 : 34;
+    const surf = (u, v0) => {
+      const v = Math.min(1, v0 * NV / (NV - 1)), a0 = 1.0 + 0.4 * u, ph = a0 + (2 * Math.PI - 2 * a0) * v, back = Math.max(0, -Math.cos(ph));                      // 1 at her back, 0 at her sides
       const scal = Math.sin(v * 2 * Math.PI * 5) * 1.3 * u * u, wave = Math.sin(A.t * 3 + v * 9) * 0.9 * u;
       const z = zTop + (zBot - zTop) * u + scal + wave * 0.5 + (1 - back) * u * 3;                // a little shorter at the sides
       const zz = Math.max(z, zc), q = clamp((zz - zc) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q);
-      const off = 1.3 + u * u * (2.5 + flap * back) + (1 - u) * 0.4;
+      const off = 0.9 + u * 1.6 + u * u * (2.5 + flap * back);
       return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph) - sx * u * back * 0.3, (Rb[1] * k + off) * Math.sin(ph) + sx * u * 0.4, z];
     };
     const shade = (lit, q) => rgb(mix(CAPE_D, CAPE_L, clamp(0.15 + lit * 0.9 - q.u * 0.12, 0, 1)));
-    drawMesh(c, K, surf, hi ? 18 : 10, hi ? 60 : 34, shade, q => { const m = q.pts.reduce((a, b) => add(a, b, 0.25), [0, 0, 0]); return occluded(K, m, 0.97, 0.85) !== isFront; }, rgb(CAPE_IN));   // what her body hides is drawn before her
+    drawMesh(c, K, surf, hi ? 18 : 10, NV, shade, q => { if (q.v > 1 - 1 / NV) return false; const m = q.pts.reduce((a, b) => add(a, b, 0.25), [0, 0, 0]), far = K.ndepth(norm([m[0] - BODY_C[0], m[1], 0])) > 0; return far !== isFront; }, rgb(CAPE_IN));   // the half of the cape on her far side is drawn before her, the near half after   // what her body hides is drawn before her
     // the collar edge and the moon pin on her left shoulder
     if (!isFront) return;
     const pinAt = (() => { const ph = ph0 + 0.05, q = clamp((zTop - zc) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q); return [BODY_C[0] + (Rb[0] * k + 2) * Math.cos(ph), (Rb[1] * k + 2) * Math.sin(ph), zTop - 1]; })();
