@@ -354,7 +354,8 @@
       });
     });
   }
-  function beeBand(c, K, A, layer) {
+  function beeBand(c, K, A, layer, kind) {
+    const bat = kind === "bat", INK = bat ? "#6E5FA0" : "#5A4630";
     const isFront = layer === "front";
     // is this spot really hidden behind her head, as seen from here? (a straight look from the camera to the spot, through her round body)
     const cy = Math.cos(K.yaw), sy = Math.sin(K.yaw), cp = Math.cos(K.pitch), sp = Math.sin(K.pitch), fv = [cy * cp, -sy * cp, -sp];
@@ -384,14 +385,21 @@
     for (let i = 0; i <= N; i++) { const y = -Yw + 2 * Yw * i / N; pts.push([bx, y, arch(y)]); }
     for (let k = 1; k <= 5; k++) { const [z, y] = curl(k); pts.push([bx, y, z]); }
     const pt = s2 => { const y = Yw * s2; return [bx, y, arch(y)]; };
-    c.save(); c.strokeStyle = "#5A4630"; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
-    let open = false;
-    for (let i = 0; i < pts.length; i++) {
-      const v = pts[i], ok = mine(v), q = sc(v);
-      if (ok) { if (!open) { c.beginPath(); c.moveTo(q.x, q.y); open = true; } else c.lineTo(q.x, q.y); }
-      else if (open) { c.stroke(); open = false; }
+    c.save(); c.strokeStyle = INK; c.lineCap = "round"; c.lineJoin = "round"; c.lineWidth = Math.max(1, 2.6 * K.S);
+    // draw the runs of the band that are on this side of her head (tiny leftover crumbs of 1-3 points are skipped)
+    const runs = []; let run = [];
+    pts.forEach(v => { if (mine(v)) run.push(sc(v)); else { if (run.length) runs.push(run); run = []; } }); if (run.length) runs.push(run);
+    runs.forEach(r => { if (r.length < 4) return; c.beginPath(); r.forEach((q, i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.stroke(); });
+    if (bat) {                                                       // two pointy bat ears standing on the band, pink inside
+      [-1, 1].forEach((side, j) => {
+        const base = pt(side * 0.45); if (!mine(base)) return;
+        const tipOff = [0.6, side * (2.2 + wob * 1.4), 13.5 - sec * 2.2], w = 4.6;
+        const ear = (f, wf) => { const b1 = add(base, [0, -side * 0, 0], 1), l = sc(add(base, [0, -w * wf, 0])), r = sc(add(base, [0, w * wf, 0])), t = sc(add(base, tipOff, f));
+          c.beginPath(); c.moveTo(l.x, l.y); c.lineTo(t.x, t.y); c.lineTo(r.x, r.y); c.closePath(); c.fill(); };
+        c.fillStyle = "#7A6BAC"; ear(1, 1); c.fillStyle = "#F4B3CF"; const lift = add(base, [0.3, 0, 1]); ear(0.72, 0.5);
+      });
+      c.restore(); return;
     }
-    if (open) c.stroke();
     [-1, 1].forEach((side, j) => {
       const base = pt(side * 0.55); if (!mine(base)) return;
       const sw = Math.sin(A.t * 5 + j * 2) * 1.2 + wob * side * 1.6, up = 21 - sec * 3;
@@ -505,12 +513,38 @@
     c.fillStyle = `rgba(255,255,255,${0.7 * tw})`; c.beginPath(); c.arc(pq.x - r * 0.45, pq.y + r * 0.1, r * 0.22, 0, Math.PI * 2); c.fill(); c.restore();
   }
 
+
+  // ---------- Treetop's little bat: soft scalloped bat wings on her back and a headband with pointy bat ears ----------
+  const BAT_PATH = (() => { const P = [[0, -4]], seg = [[14, -24, 36, -18], [33, -9, 37, 0], [29, -3, 26, 6], [19, 0, 13, 9], [8, 2, 0, 8]];
+    let x0 = 0, y0 = -4; seg.forEach(([cx, cy, x, y]) => { for (let i = 1; i <= 8; i++) { const t = i / 8, m = 1 - t; P.push([m * m * x0 + 2 * m * t * cx + t * t * x, m * m * y0 + 2 * m * t * cy + t * t * y]); } x0 = x; y0 = y; }); return P; })();
+  function batWings(c, K, A, layer) {
+    const isFront = layer === "front", fa = A.air ? Math.sin(A.t * 13) * 0.45 : Math.sin(A.t * 2.2) * 0.1 + (A.wob || 0) * 0.08;
+    const at0 = onBody(K, [-0.72, 0, 0.5]).p, k = 1.2;
+    [-1, 1].forEach(side => {
+      const at = add(at0, [0, side * 4, 0]);
+      let D = norm([-0.42, side * 0.88, 0.2]); D = rot(D, norm([-1, 0, 0.1]), -side * fa);
+      const Z = [0.25, 0, 1]; const Wd = norm(sub(Z, D.map(x => x * dot(D, Z))));
+      const P3 = ([x, y]) => add(add(at, D, x * k), Wd, -y * k), mid = P3([18, -4]);
+      if ((K.depth(mid) > K.dBody) === isFront) return;
+      const pts = BAT_PATH.map(p => K.scr(P3(p))), g0 = K.scr(at), g1 = K.scr(P3([36, 0]));
+      c.save(); const g = c.createLinearGradient(g0.x, g0.y, g1.x, g1.y); g.addColorStop(0, "#8A7BB8"); g.addColorStop(1, "#6E5FA0");
+      c.fillStyle = g; c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)); c.closePath(); c.fill();
+      c.strokeStyle = "rgba(255,255,255,0.35)"; c.lineWidth = Math.max(0.6, 1 * K.S); c.lineCap = "round";
+      [[14, -15, 32, -16], [12, -12, 26, 4], [9, -8, 13, 8]].forEach(([a, b, x, y]) => { const s0 = K.scr(P3([4, -2])), q = K.scr(P3([a, b])), e = K.scr(P3([x, y])); c.beginPath(); c.moveTo(s0.x, s0.y); c.quadraticCurveTo(q.x, q.y, e.x, e.y); c.stroke(); });
+      c.restore();
+    });
+  }
+  function batAll(c, K, A, layer) {
+    const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.72, 0, 0.5]).p, [-10, 0, 6]));
+    if (bandD > wingD) { beeBand(c, K, A, layer, "bat"); batWings(c, K, A, layer); } else { batWings(c, K, A, layer); beeBand(c, K, A, layer, "bat"); }
+  }
+
   function beeAll(c, K, A, layer) {                      // from behind the wings are nearer to you than the headband, so they go on top of it
     const bandD = K.depth([4.5, 0, 46 + K.tallUp]), wingD = K.depth(add(onBody(K, [-0.7, 0, 0.55]).p, [-12, 0, 16]));
     if (bandD > wingD) { beeBand(c, K, A, layer); beeWings(c, K, A, layer); } else { beeWings(c, K, A, layer); beeBand(c, K, A, layer); }
   }
 
-  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape] };
+  const WHO3 = { mint: [pumpkinSuit, pumpkinCap], blue: [starHat], golden: [beeAll], pink: [partyMask, pinkBow], lavender: [moonCape], lime: [batAll] };
   function dress(c, name, x, y, s, yaw, pitch, pose, anim, layer) {
     const list = WHO3[name]; if (!list) return false;
     pose = Object.assign({}, pose || {}, { pal: pose && pose.pal || name });
