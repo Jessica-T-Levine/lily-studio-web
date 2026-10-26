@@ -423,8 +423,8 @@
     const sides = [-1, 1].map(sd => { const C = [BUMP_C[0], sd * BUMP_C[1] * gap, bz], e = norm([E0[0], sd * E0[1], E0[2]]);
       let f1 = norm(cross(e, [0, 0, 1])), f2 = norm(cross(e, f1)); return { sd, C, e, f1, f2 }; });
     sides.forEach(S => {
-      const rho = br + 0.8, a0 = 0.5, a1 = 1.55;                                        // a ring of mask around the eye: hole of 0.5 rad, out to 1.2 rad
-      const surf = (u, v) => { const a = a0 + (a1 - a0) * u, ph = -v * 2 * Math.PI, k = Math.sin(a) * rho, w = Math.cos(a) * rho;
+      const rho = br + 0.8, a0 = 0.5, a1 = 1.15;                                        // a ring of mask around the eye: hole of 0.5 rad, out to 1.2 rad
+      const surf = (u, v) => { const ph0 = -v * 2 * Math.PI, upc = Math.max(0, Math.cos(ph0) * S.f1[2] + Math.sin(ph0) * S.f2[2]), a = a0 + (a1 - 0.42 * upc - a0) * u, ph = ph0, k = Math.sin(a) * rho, w = Math.cos(a) * rho;
         return [0, 1, 2].map(i => S.C[i] + S.e[i] * w + (S.f1[i] * Math.cos(ph) + S.f2[i] * Math.sin(ph)) * k * (1 + 0.1 * Math.cos(ph * 2))); };
       drawMesh(c, K, surf, hi ? 8 : 4, hi ? 48 : 28, shade, null);
       // gold sparkle on the outer rim
@@ -437,7 +437,7 @@
     const ring = (ph, z, off) => { const q = clamp((z - BODY_C[2]) / Rb[2], -0.98, 0.98), k = Math.sqrt(1 - q * q); return [BODY_C[0] + (Rb[0] * k + off) * Math.cos(ph), (Rb[1] * k + off) * Math.sin(ph), z]; };
     // the strap leaves each eye patch at the outer back side of the eye, slides down onto the round of her head and runs round the back
     const ph0 = 1.62;
-    const startAt = sd => { const C = sides[sd > 0 ? 1 : 0].C, f = norm([-0.42, sd * 0.9, -0.12]); return add(C, f, br + 0.9); };
+    const startAt = sd => { const S = sides[sd > 0 ? 1 : 0], lat = norm(sub([0, sd, -0.15], S.e.map(x => x * dot([0, sd, -0.15], S.e)))), an = 1.02, f = norm(add(S.e.map(x => x * Math.cos(an)), lat, Math.sin(an))); return add(S.C, f, br + 0.9); };
     const strapPt = (t, dz) => {                                           // t 0..1 from her left eye round the back to her right eye
       const ph = -(ph0 + (2 * Math.PI - 2 * ph0) * t) , onRing = ring(ph, zs + dz, 1.1);
       const e = t < 0.5 ? t / 0.16 : (1 - t) / 0.16;
@@ -445,10 +445,10 @@
       const k = e * e * (3 - 2 * e), st = startAt(t < 0.5 ? -1 : 1);
       return [st[0] + (onRing[0] - st[0]) * k, st[1] + (onRing[1] - st[1]) * k, st[2] + dz + (onRing[2] - dz - st[2]) * k];
     };
-    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 4.8), hi ? 80 : 44, 2, shade, q => q.dep < K.dBody + 1.5 && -K.ndepth(q.n) > 0.1 && !occluded(K, q.pts[0], 0.0, 0.85));
+    drawMesh(c, K, (u, v) => strapPt(u, (v - 0.5) * 9.6), hi ? 80 : 44, 3, shade, q => q.dep < K.dBody + 1.5 && -K.ndepth(q.n) > 0.1 && !occluded(K, q.pts[0], 0.0, 0.85));
     // the bow tied at the back of her head, wiggling a little
     const bowAt = ring(Math.PI, zs + 0.5, 1.6), b = K.scr(bowAt), s0 = K.S, wig = Math.sin(A.t * 7) * 0.12 + sec * 0.3 + wob * 0.12;
-    if (K.depth(bowAt) - K.dBody > 2 || occluded(K, bowAt, 0.8, 0.85)) return;
+    if (-K.ndepth([-1, 0, 0]) < -0.3 || occluded(K, bowAt, 0.0, 0.85)) return;      // seen from behind or the side, never from the front
     const fc = clamp(Math.abs(K.ndepth([1, 0, 0])) * 1.6 + 0.35, 0.35, 1);          // seen edge-on from the side it gets narrower
     c.save(); c.translate(b.x, b.y); c.rotate(wig); c.fillStyle = "#C79BEA";
     [-1, 1].forEach(dr => { c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(dr * 4 * s0 * fc, -7 * s0, dr * 11 * s0 * fc, -6 * s0, dr * 10 * s0 * fc, -1 * s0); c.bezierCurveTo(dr * 9 * s0 * fc, 3 * s0, dr * 3 * s0 * fc, 3 * s0, 0, 0); c.fill(); });
