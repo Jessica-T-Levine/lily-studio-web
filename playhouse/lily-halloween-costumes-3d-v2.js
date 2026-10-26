@@ -375,7 +375,8 @@
       const zt = bumpZ + br + 8.5, zb = BODY_C[2] + 3 + K.tallUp * 0.4, arc = zb + (zt - zb) * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y) / (Ry0 * 1.02), 3.4)), 0.5);                          // one smooth arch over the tops of both eyes
       return sm(arc, body);
     };
-    const Yw = Ry0 * 0.86, N = 40, sc = v => K.scr(v);
+    const eyeOut = BUMP_C[1] * gap + Math.sqrt(Math.max(0, br * br - Math.pow(BUMP_C[0] - bx, 2)));                 // how far out her eyes reach at the band
+    const Yw = Math.max(Ry0 * 0.86, eyeOut + 1.6), N = 40, sc = v => K.scr(v);                                        // the band always clears her eyes (Treetop's eyes are wide apart)
     const sideY = z => Ry0 * Math.sqrt(Math.max(0.02, 1 - ex - Math.pow((z - BODY_C[2]) / Rz0, 2))) + 0.9;           // the surface of her head at height z
     const zEnd = BODY_C[2] + 17 + K.tallUp * 0.9;                                                                       // where the straight sides stop
     const arch = y => { const zt = bumpZ + br + 8.5, f = Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y) / Yw, 3.2)), 0.5); return sm(zEnd + (zt - zEnd) * f, BODY_C[2] + Rz0 * Math.sqrt(Math.max(0, 1 - ex - Math.pow(y / Ry0, 2))) + 1.4); };
