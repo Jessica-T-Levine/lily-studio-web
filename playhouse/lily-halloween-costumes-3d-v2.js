@@ -584,7 +584,7 @@
     if (layer !== "front") return;
     const P = K.P, hi = K.S > 2.2, gap = P.gap || 1, br = BUMP_R * (P.bump || 1), bz = BUMP_C[2] + K.tallUp - (P.drop || 0), sec = Math.max(0, A.sec || 0);
     const zc = 20.6 + K.tallUp, rz = BODY_R[2] * (P.tall || 1), zt = zc + rz * 0.999, zb = 5.6 + sec * 2.5 + (A.air ? 1.5 : 0);
-    const NV = hi ? 180 : 56, sm = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+    const NV = hi ? 120 : 48, sm = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
     const pt = (u0, th, wob) => {
       const u = Math.sin(u0 * Math.PI / 2), z = zb + (zt - zb) * u, b = bodyAt(K, z), skirt = sm((0.62 - u) / 0.62), fl = 1 + 0.3 * skirt * skirt;
       const hem = Math.pow(1 - u, 2.2);
@@ -600,7 +600,7 @@
       return !occluded(K, m, -1e9, 0.96);
     };
     const shade = (lit, q) => rgb(mix(SHEET_D, SHEET_L, clamp(0.28 + lit * 0.85 - 0.1 * (1 - q.u), 0, 1)));
-    drawMesh(c, K, surf, hi ? 72 : 22, NV, shade, pick, rgb(SHEET_IN));
+    drawMesh(c, K, surf, hi ? 44 : 20, NV, shade, pick, rgb(SHEET_IN));
     // painted smile and cheeks, on the front of the sheet
     const faceAt = (z, th) => { const u = clamp((z - zb) / (zt - zb), 0, 1), q = pt(Math.asin(u) * 2 / Math.PI, th, false); return q; };
     const nrm = th => norm([Math.cos(th) / 20, Math.sin(th) / 21, 0.0001]);
